@@ -1,0 +1,148 @@
+.tripinvitation-title {
+  font-weight: 800;
+}
+
+.tripinvitation-invitation-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 1000px;
+  border: 3px solid rgba(62, 62, 62, 0.54);
+  border-radius: 50px;
+  background-color: white;
+  font-size: 1.5rem;
+  z-index: 1;
+  box-sizing: border-box;
+  margin-top: 150px;
+}
+
+.tripinvitation-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.875rem;
+}
+
+.tripinvitation-head > p {
+  display: flex;
+  align-items: center;
+}
+
+.tripinvitation-bg-image {
+  background-image: url(../../../header-background-city.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  height: 30vh;
+  min-height: 200px;
+  width: 100%;
+}
+
+.tripinvitation-trip-infos {
+  text-align: center;
+  line-height: 1.3;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  width: 55%;
+  max-width: 650px;
+  min-height: 160px;
+  border-radius: 40px;
+  margin-top: -100px;
+  position: relative;
+  z-index: 10;
+  background-color: white;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  padding: 1rem;
+}
+
+.tripinvitation-trip-infos-title {
+  font-family: var(--title-font);
+}
+
+.tripinvitation-form-inputs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.tripinvitation-email-form,
+.tripinvitation-message-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 200%;
+  max-width: 518px;
+}
+
+.tripinvitation-email-form > input {
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 10px;
+  height: 50px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  padding: 0.5rem;
+}
+
+.tripinvitation-message-form > textarea {
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 10px;
+  height: 80px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  padding: 0.5rem;
+}
+
+.tripinvitation-btn-send-invitation,
+.tripinvitation-btn-cancel-invitation {
+  width: 200px;
+  height: 50px;
+  border-radius: 10px;
+  font-family: var(--body-text);
+  font-size: 16px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.tripinvitation-btn-send-invitation {
+  background-color: var(--primary-button);
+  color: var(--white);
+  font-weight: 600;
+  text-shadow: 1px 1px 2px black;
+}
+
+.tripinvitation-btn-cancel-invitation {
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  margin-bottom: 10px;
+}
+
+.tripinvitation-btn-send-invitation:hover,
+.tripinvitation-btn-cancel-invitation:hover {
+  opacity: 60%;
+}
+
+@media (max-width: 768px) {
+  .tripinvitation-navbar-list {
+    font-size: 1.1rem;
+  }
+
+  .tripinvitation-trip-infos {
+    margin-top: -50px;
+    border-radius: 20px;
+    width: 40vw;
+  }
+
+  .tripinvitation-btn-navbar {
+    width: 120px;
+    font-size: 0.9rem;
+  }
+
+  .tripinvitation-email-form,
+  .tripinvitation-message-form {
+    width: 150%;
+  }
+}
+
+@media (min-width: 1480px) {
+  .tripinvitation-invitation-form {
+    margin-top: 10px;
+  }
+}

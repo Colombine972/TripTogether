@@ -1,0 +1,74 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap");
+
+:root {
+  --black: #0d1117;
+  --white: #f8f9fb;
+  --grey: #999999;
+  --background: #f2f2f2;
+  --primary-button: #1b5e1d;
+  --status: #fbecc3;
+  --button-hover: #247c28;
+  --brown: #ae9079;
+  --light-brown: #f9eded;
+  --light-green: #c6d6c6;
+  --grey-text: #555;
+
+  --button-radius: 10px;
+  --title-font: "Playfair Display", serif;
+  --body-text: "Source Sans 3", sans-serif;
+  --font-size-XL: 48px;
+  --font-size-L: 36px;
+  --font-size-M: 24px;
+  --font-size-S: 22px;
+  --font-size-XS: 16px;
+
+  --space-XL: 40px;
+  --space-L: 24px;
+  --space-M: 16px;
+  --space-S: 8px;
+  --space-XS: 4px;
+}
+
+main {
+  background-color: var(--background);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--brown);
+  background-color: var(--light-brown);
+  border-left: 4px solid var(--brown);
+  margin: 2rem 0;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.loading-text {
+  display: flex;
+  background-color: #f5f5f5;
+  color: #444;
+  padding: 1rem;
+  border-radius: 6px;
+  margin: 1.5rem 0;
+}
+.loading-text::after {
+  content: "";
+  animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+  0% {
+    content: "";
+  }
+  33% {
+    content: ".";
+  }
+  66% {
+    content: "..";
+  }
+  100% {
+    content: "...";
+  }
+}

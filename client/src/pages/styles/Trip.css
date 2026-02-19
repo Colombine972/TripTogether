@@ -1,0 +1,30 @@
+.trip-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.trip-trip-infos {
+  display: flex;
+  justify-content: center;
+  margin-top: -100px;
+  z-index: 50;
+  position: relative;
+}
+
+.trip-tripinfocard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: auto;
+  padding: 1.5rem 0.2rem;
+  border: 1px solid var(--grey);
+  border-radius: 20px;
+  background-color: white;
+  font-size: 1.5rem;
+  box-sizing: border-box;
+}
+
+.trip-navbar {
+  height: 50px;
+}

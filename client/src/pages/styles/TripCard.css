@@ -1,0 +1,49 @@
+.tripcard-component {
+  text-align: center;
+  width: 32vw;
+  height: 20vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--body-text);
+  font-size: var(--font-size-M);
+}
+
+.tripcard-title {
+  font-size: var(--font-size-L);
+}
+
+.tripcard-dates {
+  font-size: 18px;
+}
+
+.tripcard-invitation-btn {
+  border-radius: 10px;
+  width: 80px;
+  height: 30px;
+  color: white;
+  background-color: var(--primary-button);
+  cursor: pointer;
+  width: 8vw;
+  height: 5.5vh;
+  font-weight: 500;
+  font-family: var(--body-text);
+  font-size: var(--font-size-M);
+  padding: 0.6rem 1.25rem;
+  border-radius: 0.5rem;
+  line-height: 1;
+}
+
+.tripcard-invitation-btn:hover {
+  opacity: 70%;
+  transition: opacity .1s ease-out;
+  cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .tripcard-component {
+    width: 30vw; /* On peut reprendre le vw ici si tu aimes ce look sur PC */
+    height: 25vh;
+  }
+}

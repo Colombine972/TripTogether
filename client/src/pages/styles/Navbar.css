@@ -1,0 +1,224 @@
+li {
+  list-style: none;
+}
+.navbar {
+  width: 100%;
+  background: var(--background);
+  border-bottom: 1px solid #e8e8e8;
+  z-index: 5000;
+}
+
+.navbar-container {
+  width: 100%;
+  height: 20vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 2rem;
+}
+
+.navbar-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: -2rem;
+  gap: 0.75rem;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  margin-right: 4rem;
+  margin-top: -2rem;
+  gap: 1rem;
+}
+
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  margin-left: 8.5rem;
+  margin-top: -2rem;
+}
+
+.navbar-logo {
+  width: 5rem;
+  height: 5rem;
+}
+
+.website-name {
+  font-weight: 800;
+  font-family: var(--body-text);
+  font-size: var(--font-size-M);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.navbar-page-title {
+  margin: 0;
+  font-weight: 500;
+  font-family: var(--body-text);
+  font-size: var(--font-size-S);
+  color: #8b8b8b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar-cta {
+  background: #2f5d2f;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  width: 15vw;
+  height: 5.5vh;
+  font-weight: 500;
+  font-family: var(--body-text);
+  font-size: var(--font-size-M);
+  padding: 0.6rem 1.25rem;
+  border-radius: 0.5rem;
+  line-height: 1;
+}
+
+.navbar-cta:after {
+  visibility: hidden;
+}
+
+.navbar-cta:hover {
+  filter: brightness(0.95);
+}
+
+.navbar-profile {
+  position: relative;
+  height: auto;
+}
+
+.navbar-profile-Button {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  border: none;
+  background-color: rgba(153, 153, 153, 0.35);
+  cursor: pointer;
+  display: grid;
+  padding: 0;
+  place-items: center;
+  overflow: hidden;
+  transition: transform 220ms ease, border-radius 220ms ease;
+}
+
+.user-icone {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  display: block;
+}
+
+.navbar-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 10rem;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  z-index: 50000;
+}
+
+.navbar-menu.is-open {
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar-profile:has(.navbar-menu.is-open) .navbar-profile-Button {
+  transform: scale(1.2);
+  border-radius: 1rem;
+}
+
+.navbar-username {
+  font-weight: 600;
+  font-family: var(--body-text);
+  font-size: var(--font-size-S);
+  padding: 0.5rem;
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 0.5rem;
+}
+
+.navbar-menu-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar-menu-link {
+  display: block;
+  font-weight: 200;
+  font-family: var(--body-text);
+  font-size: var(--font-size-S);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  color: #111;
+}
+
+.navbar-menu-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar-menu-links button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 200;
+  font-family: var(--body-text);
+  font-size: var(--font-size-S);
+  color: #111;
+  border-top: 1px solid #e8e8e8;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.navbar-menu-link:hover,
+.navbar-menu-links button:hover {
+  background: #f3f3f3;
+}
+/* ================= AUTH LINKS ================= */
+
+.navbar-auth-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.navbar-auth-link {
+  text-decoration: none;
+  font-family: var(--body-text);
+  font-weight: 600;
+  font-size: 1rem;
+  color: #111;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.navbar-auth-link:hover {
+  color: #2f5d2f; /* Ta couleur verte */
+}
+
+.navbar-auth-register {
+  background-color: #2f5d2f; /* Ta couleur verte */
+  color: white !important;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  transition: opacity 0.2s;
+}
+
+.navbar-auth-register:hover {
+  opacity: 0.9;
+}

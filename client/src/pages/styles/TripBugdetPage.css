@@ -1,0 +1,202 @@
+.expenses-header {
+  display: flex;
+  justify-content: space-between; /* 👈 pousse à gauche et droite */
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.add-expense-btn {
+  background-color: var(--primary-button);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.add-expense-btn:hover {
+  opacity: 70%;
+  transition: opacity .1s ease-out;
+  cursor: pointer;
+}
+
+.category-block {
+  margin-bottom: 2rem;
+}
+
+.category-title {
+  font-size: var(--font-size-M);
+  margin-bottom: 1rem;
+  color: #444;
+}
+
+.expense-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.392);
+}
+
+.expense-description {
+  font-size: 1.3rem;
+  padding-bottom: 10px;
+}
+
+.expense-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.expense-left {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.expense-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.expense-paid {
+  font-size: var(--font-size-M);
+  color: #666;
+}
+
+.expense-right {
+  text-align: right;
+  margin-left: auto;
+}
+
+.expense-right strong {
+  display: block;
+  font-size: 1.3rem;
+}
+
+.expense-right span {
+  font-size: 1rem;
+  color: #777;
+}
+
+.expense-divider {
+  height: 1px;
+  background: grey;
+  margin: 1rem 0;
+}
+
+.expense-debt {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.debt-positive {
+  color: #16a34a;
+  background: #f0fdf4;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.debt-negative {
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.debt-negative p {
+  font-size: 1.3rem;
+}
+
+.debt-positive p {
+  font-size: 1.3rem;
+}
+
+.debt-positive div {
+  font-size: 1rem;
+  padding-top: 2px;
+}
+
+/*.delete-expense-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  margin-left: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.delete-expense-btn:hover {
+  transform: scale(1.2);
+}*/
+
+.delete-expense-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 12rem;
+}
+
+.trash-icon {
+  width: 20px;
+  height: 20px;
+  color: #c0392b; /* rouge doux */
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.delete-expense-btn:hover .trash-icon {
+  transform: scale(1.15);
+  opacity: 0.8;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+}
+
+.modal {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4);
+}
+
+.modal h4 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modal p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

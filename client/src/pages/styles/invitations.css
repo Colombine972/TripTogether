@@ -1,0 +1,9 @@
+.page-membre {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 2rem;
+}
+
+#member-list {
+  margin-top: 60px;
+}

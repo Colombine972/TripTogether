@@ -1,0 +1,37 @@
+.trip-budget-page {
+  padding: 1.5rem;
+}
+
+.budget-summary {
+  margin: 40px 0 40px 0;
+  display: flex;
+  gap: 1rem;
+}
+
+.budget-card {
+  background: white;
+  border-radius: 10px;
+  padding: 0.9rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  width: 600px;
+}
+
+.card-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.budget-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.positive h3 {
+  color: #1e7e34;
+}
+
+.negative h3 {
+  color: #c82333;
+}
