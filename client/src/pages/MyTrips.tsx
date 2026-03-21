@@ -53,7 +53,7 @@ export default function MyTrips() {
     }
   };
 
-  // 🔥 NOUVEAU : gestion image expirée
+  // gestion image expirée
   const handleImageError = async (tripId: number, city: string) => {
     try {
       const response = await fetch(
@@ -63,7 +63,7 @@ export default function MyTrips() {
       const data = await response.json();
 
       if (data.imageUrl) {
-        // 🔁 Mise à jour du state (UI immédiate)
+        //  Mise à jour du state 
         setTrips((prev) =>
           prev.map((trip) =>
             trip.id === tripId
@@ -72,7 +72,7 @@ export default function MyTrips() {
           )
         );
 
-        // 💾 Optionnel : update en BDD
+        // update en BDD
         await fetch(
           `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/image`,
           {
@@ -89,7 +89,7 @@ export default function MyTrips() {
     }
   };
 
-  // 🔥 FETCH DES VOYAGES
+  //  FETCH DES VOYAGES
   useEffect(() => {
     const token = localStorage.getItem("token") || auth?.token;
 
@@ -117,7 +117,7 @@ export default function MyTrips() {
       .catch((err) => console.error("Error fetching trips:", err));
   }, [activeTab, auth?.token, navigate]);
 
-  // 🔥 FORMAT DATE
+  //  FORMAT DATE
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
@@ -185,7 +185,7 @@ export default function MyTrips() {
                   className="tripcard-image"
                   style={{ position: "relative" }}
                 >
-                  {/* 🔥 IMG AVEC AUTO-RÉPARATION */}
+                  {/* IMG AVEC AUTO-RÉPARATION */}
                   <img
                     src={trip.image_url || "/images/default-city.jpg"}
                     alt={trip.title}

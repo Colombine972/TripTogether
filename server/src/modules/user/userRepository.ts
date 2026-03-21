@@ -8,12 +8,14 @@ type User = {
   lastname: string;
   email: string;
   password: string;
+  avatar_url?: string;
 };
 
 type UpdateUser = {
   firstname : string;
   lastname : string;
   email : string;
+  avatar_url?: string;
 };
 
 class UserRepository {
@@ -61,8 +63,8 @@ class UserRepository {
 
   async update(id: number, user: UpdateUser) {
   const [result] = await databaseClient.query<Result>(
-    "UPDATE user SET firstname = ?, lastname = ?, email = ? WHERE id = ?",
-    [user.firstname, user.lastname, user.email, id]
+    "UPDATE user SET firstname = ?, lastname = ?, email = ?, avatar_url = ? WHERE id = ?",
+    [user.firstname, user.lastname, user.email, user.avatar_url ?? null, id]
   );
 
   return result;

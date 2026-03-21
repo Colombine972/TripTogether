@@ -46,9 +46,14 @@ const add: RequestHandler = async (req, res, next) => {
 
 const updateMe: RequestHandler = async (req, res) => {
   try {
-    const userId = Number(req.auth.sub)
+    if (!req.auth) {
+      res.status(401).json({ error: "Non autorisé" });
+      return;
+    }
 
-    const { firstname, lastname, email } = req.body;
+    const userId = Number(req.auth.sub);
+
+    const { firstname, lastname, email, avatar_url } = req.body;
 
     if (!firstname || !lastname || !email) {
       res.status(400).json({ error: "Champs manquants" });
@@ -59,10 +64,18 @@ const updateMe: RequestHandler = async (req, res) => {
       firstname,
       lastname,
       email,
+      avatar_url,
     });
 
-    res.json({ message: "Utilisateur mis à jour" });
+    res.json({
+      id: userId,
+      firstname,
+      lastname,
+      email,
+      avatar_url,
+    });
   } catch (error) {
+    console.error("Erreur updateMe:", error);
     res.status(500).json({ error: "Erreur serveur" });
   }
 };

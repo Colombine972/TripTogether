@@ -74,7 +74,7 @@ export default function Navbar() {
                 onClick={toggleMenu}
               >
                 <img
-                  src="/images/utilisateur.png"
+                  src={auth?.user?.avatar_url ? auth.user.avatar_url :"/images/utilisateur.png" }
                   className="user-icone"
                   alt=""
                 />
