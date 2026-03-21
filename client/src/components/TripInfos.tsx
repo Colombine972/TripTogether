@@ -4,14 +4,20 @@ import type { TheTrip } from "../types/tripType";
 import Modal from "./Modal";
 import "../pages/styles/TripInfos.css";
 import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 type TripInfosProps = {
   trip: TheTrip | null;
 };
 
 function TripInfos({ trip }: TripInfosProps) {
+  const { auth } = useAuth();
+
   if (!trip) return null;
   const tripId = trip.id;
+
+  const isOrganizer = auth?.user?.id === trip.user_id;
+
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const openInviteModal = () => {
     setIsInviteModalOpen(true);
@@ -22,18 +28,18 @@ function TripInfos({ trip }: TripInfosProps) {
   };
   return (
     <>
-      <header
+      {/*<header
         className="trip-header"
         style={{
           backgroundImage: `url("/images/martinique.webp")`,
         }}
-      />
-      {/* <header
+      />*/}
+      <header
         className="trip-header"
         style={{
           backgroundImage: `url(${trip.image_url || "/images/default-city.jpg"})`,
         }}
-      /> */}
+      />
       <section className="trip-trip-infos">
         <article className="trip-tripinfocard">
           {trip && (
@@ -44,8 +50,8 @@ function TripInfos({ trip }: TripInfosProps) {
               startAt={trip.start_at}
               endAt={trip.end_at}
               participants={trip.participants}
-              role={trip.role}
-              onInvite={openInviteModal}
+              role={isOrganizer ? "organizer" : "participant"}
+              onInvite={isOrganizer ? openInviteModal : undefined}
             />
           )}
         </article>

@@ -33,12 +33,14 @@ function TripCard({
     }).format(date);
   };
 
+  console.log("ROLE:", role);
+
   return (
     <>
       <article className="tripcard-component">
         <h2 className="tripcard-title">{title}</h2>
 
-        {onInvite && (
+        {new Date() < new Date(startAt) && role === "organizer" && onInvite && (
           <button
             type="button"
             className="tripcard-invitation-btn"
@@ -55,7 +57,6 @@ function TripCard({
           {formatDate(startAt)} - {formatDate(endAt)}
         </p>
         <p className="tripcard-participants">{participants} participant(s)</p>
-        <p className="tripcard-role">{role}</p>
       </article>
     </>
   );

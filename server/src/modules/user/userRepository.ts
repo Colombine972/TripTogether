@@ -10,6 +10,12 @@ type User = {
   password: string;
 };
 
+type UpdateUser = {
+  firstname : string;
+  lastname : string;
+  email : string;
+};
+
 class UserRepository {
   async create(user: Omit<User, "id">) {
     const [result] = await databaseClient.query<Result>(
@@ -52,6 +58,15 @@ class UserRepository {
 
     return rows[0] as User;
   }
+
+  async update(id: number, user: UpdateUser) {
+  const [result] = await databaseClient.query<Result>(
+    "UPDATE user SET firstname = ?, lastname = ?, email = ? WHERE id = ?",
+    [user.firstname, user.lastname, user.email, id]
+  );
+
+  return result;
+}
 }
 
 export default new UserRepository();

@@ -218,24 +218,85 @@
   }
 }
 
+
+
+/* ================= MOBILE FIRST OVERRIDE ================= */
 @media (max-width: 480px) {
+
   .home {
+    max-width: 420px;
+    margin: 0 auto;
     padding: 0 16px;
   }
 
+  /* HERO */
   .hero-section {
-    padding: 40px 0 30px;
+    padding: 30px 0 20px;
   }
 
   .hero-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+    font-weight: 500;
   }
 
   .hero-subtitle {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
+    font-weight: 700;
   }
 
   .hero-description {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    margin-bottom: 30px;
   }
+
+  /* CTA */
+  .hero-cta {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-cta {
+    width: 100%;
+    min-width: unset; /* 🔥 IMPORTANT */
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  /* IMAGE */
+  .image-container {
+    border-radius: 12px;
+  }
+
+  .trips-badge {
+    top: 10px;
+    right: 10px;
+    padding: 6px 12px;
+  }
+
+  /* FEATURES */
+  .features {
+    flex-direction: column; /* 🔥 empilement */
+    gap: 16px;
+  }
+
+  .feature-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .feature-card-title {
+    font-size: 1rem;
+  }
+
+  .feature-card-description {
+    font-size: 0.8rem;
+  }
+
+  /* TITRE SECTION */
+  .features-title {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+
+
 }

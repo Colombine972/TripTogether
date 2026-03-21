@@ -19,23 +19,29 @@ interface TheTrip {
 export default function MyTrips() {
   const { auth } = useAuth();
   const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState<
     "futur" | "current" | "past" | "all"
   >("all");
 
   const [trips, setTrips] = useState<TheTrip[]>([]);
+
+  // 🔥 SUPPRESSION VOYAGE
   const handleDeleteTrip = async (e: React.MouseEvent, tripId: number) => {
-    e.preventDefault(); // Empêche le clic sur le lien vers le voyage
+    e.preventDefault();
     if (!window.confirm("Voulez-vous vraiment supprimer ce voyage ?")) return;
+
     try {
       const token = localStorage.getItem("token") || auth?.token;
+
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/trips/${tripId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
-        },
+        }
       );
+
       if (response.ok) {
         setTrips((prev) => prev.filter((t) => t.id !== tripId));
         toast.success("Voyage supprimé");
@@ -46,11 +52,51 @@ export default function MyTrips() {
       toast.error("Erreur réseau");
     }
   };
+
+  // 🔥 NOUVEAU : gestion image expirée
+  const handleImageError = async (tripId: number, city: string) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/image?city=${city}`
+      );
+
+      const data = await response.json();
+
+      if (data.imageUrl) {
+        // 🔁 Mise à jour du state (UI immédiate)
+        setTrips((prev) =>
+          prev.map((trip) =>
+            trip.id === tripId
+              ? { ...trip, image_url: data.imageUrl }
+              : trip
+          )
+        );
+
+        // 💾 Optionnel : update en BDD
+        await fetch(
+          `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/image`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ image_url: data.imageUrl }),
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Erreur lors du refresh image:", error);
+    }
+  };
+
+  // 🔥 FETCH DES VOYAGES
   useEffect(() => {
     const token = localStorage.getItem("token") || auth?.token;
+
     if (!token) {
       toast.error("Vous devez être connecté pour voir vos voyages");
       navigate("/login");
+      return;
     }
 
     fetch(
@@ -61,7 +107,7 @@ export default function MyTrips() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      },
+      }
     )
       .then((res) => {
         if (!res.ok) throw new Error("Erreur lors de la récupération");
@@ -71,6 +117,7 @@ export default function MyTrips() {
       .catch((err) => console.error("Error fetching trips:", err));
   }, [activeTab, auth?.token, navigate]);
 
+  // 🔥 FORMAT DATE
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
@@ -138,12 +185,20 @@ export default function MyTrips() {
                   className="tripcard-image"
                   style={{ position: "relative" }}
                 >
+                  {/* 🔥 IMG AVEC AUTO-RÉPARATION */}
                   <img
                     src={trip.image_url || "/images/default-city.jpg"}
                     alt={trip.title}
                     className="trip-bg-img"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null; // évite boucle infinie
+                      e.currentTarget.src = "/images/default-city.jpg"; // fallback
+                      handleImageError(trip.id, trip.city); // régénération
+                    }}
                   />
+
                   <h2>{trip.title}</h2>
+
                   <button
                     type="button"
                     className="delete-trip-btn"
@@ -165,6 +220,7 @@ export default function MyTrips() {
                     </svg>
                   </button>
                 </div>
+
                 <div>
                   <div className="trip-info">
                     <p>

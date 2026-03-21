@@ -25,6 +25,7 @@ export default function CreateTrip() {
   const [country, setCountry] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [endOfTrip, setEndOfTrip] = useState({ end_at: "" });
+  const [startDate, setStartDate] = useState("");
 
   const inputRef = useRef<HTMLDivElement>(null);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -106,6 +107,11 @@ export default function CreateTrip() {
     initAutocomplete();
   }, [isLoaded]);
 
+  const capitalize = (text: string) => {
+    if (!text) return text;
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  };
+
   const submitCreateTrip = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -161,12 +167,12 @@ export default function CreateTrip() {
     }
 
     const newTrip = {
-      title: titleRef.current.value,
-      description: descriptionRef.current.value,
+      title: capitalize(titleRef.current.value),
+      description: capitalize(descriptionRef.current.value),
       start_at: startAtRef.current.value,
       end_at: endOfTrip.end_at,
-      city: currentCity,
-      country: currentCountry,
+      city: capitalize(currentCity),
+      country: capitalize(currentCountry),
       image_url: imageUrl,
     };
 
@@ -252,6 +258,8 @@ export default function CreateTrip() {
               type="date"
               id="start-date"
               ref={startAtRef}
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
               min={todayString}
               required
               className={!endOfTrip.end_at ? "date-empty" : ""}
@@ -265,7 +273,7 @@ export default function CreateTrip() {
               id="end-date"
               value={endOfTrip.end_at}
               onChange={(e) => setEndOfTrip({ end_at: e.target.value })}
-              min={todayString}
+              min={startDate || todayString}
               required
               className={!endOfTrip.end_at ? "date-empty" : ""}
             />

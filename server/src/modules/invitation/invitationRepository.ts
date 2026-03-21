@@ -131,6 +131,19 @@ class invitationRepository {
 
     return result.affectedRows === 1;
   }
+
+  async updateUserId(userId: number, email: string): Promise<boolean> {
+    const [result] = await databaseClient.query<Result>(
+      `
+      UPDATE invitation i 
+      SET user_id = ?
+      WHERE email = ? 
+      AND status = 'pending'
+      `,
+      [userId, email],
+    );
+    return result.affectedRows > 0;
+  }
 }
 
 export default new invitationRepository();

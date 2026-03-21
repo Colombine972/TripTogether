@@ -9,3 +9,12 @@ declare global {
     }
   }
 }
+
+import "express";
+import type { UserType } from "../userType";
+
+declare module "express-serve-static-core" {
+  interface Request {
+    user: Pick<UserType, "id" | "email">;
+  }
+}

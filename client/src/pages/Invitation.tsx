@@ -57,8 +57,15 @@ function Invitation() {
         }
 
         if (response.status === 404) {
+          navigate("/", {
+            state: {
+              toast: {
+                type: "error",
+                message: "Veuillez vous connecter pour accéder à l'invitation",
+              },
+            },
+          });
           toast.error(invitation.message);
-          navigate("/");
         }
 
         if (response.status === 409) {

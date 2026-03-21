@@ -11,3 +11,4 @@ function ParticipantsCard() {
 }
 
 export default ParticipantsCard;
+

@@ -222,3 +222,94 @@ li {
 .navbar-auth-register:hover {
   opacity: 0.9;
 }
+
+/* ================= MOBILE NAVBAR ================= */
+@media (max-width: 480px) {
+
+  .navbar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    padding: 10px 16px;
+    background: white;
+  }
+
+  /* ===== LEFT ===== */
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .navbar-logo {
+    margin-top: 20px;
+    width: 70px;
+  }
+
+  /* 🔥 ON CACHE "MES VOYAGES" */
+  .navbar-center {
+    display: none;
+  }
+
+  /* ===== CENTER CUSTOM ===== */
+  .navbar-left {
+    grid-column: 1;
+  }
+
+  .navbar-right {
+    grid-column: 3;
+    display: flex;
+    align-items: center;
+    justify-self: end;
+    gap: 8px;
+  }
+
+  /* 🔥 ON CRÉE UN CENTRE VISUEL */
+  .navbar::after {
+    content: "";
+  }
+
+  /* ===== CONTENU CENTRAL ===== */
+  .website-name {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .navbar-cta {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 38px;
+
+    max-width: 70%;
+  width: fit-content;
+  text-align: center;
+
+    background-color: #2d7738;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  /* ===== AVATAR ===== */
+  .user-icone {
+    width: 36px;
+    height: 36px;
+    
+  }
+
+  /* 🔥 AJOUT HAUTEUR POUR ÉVITER CHEVAUCHEMENT */
+  .navbar {
+    height: 80px;
+    position: relative;
+  }
+
+}
