@@ -4,11 +4,11 @@
 
 .account-card {
   background: white;
-  border-radius: 12px;
-  padding: 20px;
-  max-width: 500px;
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 450px;
   margin-top: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .form-group {
@@ -24,16 +24,69 @@
 }
 
 .edit-btn {
-  margin-top: 10px;
-  background :#2d7738;
+  background: #2d7738;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.edit-btn:hover {
+  background: #25642f;
 }
 
 .save-btn {
-  background: #2ecc71;
+  background: #2d7738;
   color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
 .cancel-btn {
   background: #e74c3c;
   color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.account-info h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.account-info p {
+  margin: 5px 0 15px;
+  color: #666;
+}
+
+/* 🔥 LAYOUT */
+.account-display {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+/* 🔥 AVATAR */
+.account-avatar img {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #f2f2f2;
+}
+
+.account-card h2 {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  font-size : 26px;
 }

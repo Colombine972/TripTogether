@@ -30,7 +30,7 @@ export default function Account() {
     setIsEditing(false);
   };
 
-  // SAVE 
+  // SAVE
   const handleSave = async () => {
     try {
       if (!auth) return;
@@ -103,19 +103,20 @@ export default function Account() {
       <div className="account-card">
         <h2>Informations personnelles</h2>
 
-        {/* AVATAR */}
-        <div className="avatar-container">
-          <img
-            src={preview || user.avatar_url || "/images/default-avatar.png"}
-            alt="avatar"
-            className="avatar"
-          />
-        </div>
-
         {isEditing ? (
           <>
             {/* IMAGE INPUT */}
             <div className="form-group">
+              {/* AVATAR */}
+              <div className="avatar-container">
+                <img
+                  src={
+                    preview || user.avatar_url || "/images/default-avatar.png"
+                  }
+                  alt="avatar"
+                  className="avatar"
+                />
+              </div>
               <label htmlFor="avatar">Photo de profil</label>
               <input
                 id="avatar"
@@ -168,16 +169,25 @@ export default function Account() {
             </div>
           </>
         ) : (
-          <>
-            <p>
-              {user.firstname} {user.lastname}
-            </p>
-            <p>{user.email}</p>
+          <div className="account-display">
+            <div className="account-avatar">
+              <img
+                src={preview || user.avatar_url || "/images/default-avatar.png"}
+                alt="avatar"
+              />
+            </div>
 
-            <button type="button" onClick={handleEdit} className="edit-btn">
-              Modifier
-            </button>
-          </>
+            <div className="account-info">
+              <h3>
+                {user.firstname} {user.lastname}
+              </h3>
+              <p>{user.email}</p>
+
+              <button type="button" onClick={handleEdit} className="edit-btn">
+                Modifier
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

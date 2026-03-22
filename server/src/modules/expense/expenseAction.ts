@@ -1,5 +1,5 @@
 import type { RequestHandler } from "express";
-import budgetRepository from "../budget/budgetRepository";
+import expenseRepository from "./expenseRepository";
 import expenseShareRepository from "../expenseShare/expenseShareRepository";
 import expenseShareService from "../expenseShare/expenseShareService";
 import tripRepository from "../trip/tripRepository";
@@ -13,7 +13,7 @@ const read: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const budget = await budgetRepository.findExpenseByTrip(tripId);
+    const budget = await expenseRepository.findExpenseByTrip(tripId);
     res.status(200).json(budget);
   } catch (err) {
     next(err);
@@ -44,7 +44,7 @@ const add: RequestHandler = async (req, res, next) => {
     }
 
     // 1- Crée la dépense
-    const expenseId = await budgetRepository.create(
+    const expenseId = await expenseRepository.create(
       tripId,
       title,
       numericAmount,
@@ -79,7 +79,7 @@ const add: RequestHandler = async (req, res, next) => {
 
 const browse: RequestHandler = async (_req, res, next) => {
   try {
-    const budgets = await budgetRepository.readAll();
+    const budgets = await expenseRepository.readAll();
     res.json(budgets);
   } catch (err) {
     next(err);
@@ -90,7 +90,7 @@ const getExpensesByTrip: RequestHandler = async (req, res, next) => {
   try {
     const tripId = Number(req.params.id);
 
-    const expenses = await budgetRepository.findByTrip(tripId);
+    const expenses = await expenseRepository.findByTrip(tripId);
 
     res.json(expenses);
   } catch (error) {
@@ -109,8 +109,8 @@ const getSummary: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const total = await budgetRepository.sumTotalByTrip(tripId);
-    const paid = await budgetRepository.sumPaidByUser(tripId, userId);
+    const total = await expenseRepository.sumTotalByTrip(tripId);
+    const paid = await expenseRepository.sumPaidByUser(tripId, userId);
     const owed = await expenseShareRepository.sumSharesByUser(tripId, userId);
 
     res.json({
@@ -132,7 +132,7 @@ const remove: RequestHandler = async (req, res, next) => {
       return res.status(400).json({ error: "ID invalide" });
     }
 
-    await budgetRepository.delete(expenseId);
+    await expenseRepository.delete(expenseId);
 
     res.sendStatus(204);
   } catch (err) {
