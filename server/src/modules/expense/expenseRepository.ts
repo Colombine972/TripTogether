@@ -19,7 +19,7 @@ type Expense = {
   shares?: ExpenseShare[];
 };
 
-class BudgetRepository {
+class ExpenseRepository {
   async findExpenseByTrip(tripId: number) {
     const [rows] = await databaseClient.query<Rows>(
       "SELECT * FROM expense where  trip_id = ?",
@@ -114,4 +114,4 @@ ORDER BY e.id DESC
   }
 }
 
-export default new BudgetRepository();
+export default new ExpenseRepository();
