@@ -1,11 +1,16 @@
 import "../pages/styles/AddExpenseForm.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 type Member = {
   id: number;
   firstname?: string;
   email?: string;
+};
+
+type Category = {
+  id: number;
+  name: string;
 };
 
 type AddExpenseFormProps = {
@@ -16,10 +21,29 @@ type AddExpenseFormProps = {
 
 function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
   const { auth } = useAuth();
+
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [paidBy, setPaidBy] = useState("");
+
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/categories`,
+        );
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error("Erreur récupération catégories", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,11 +115,12 @@ function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
         required
       >
         <option value="">Choisir une catégorie</option>
-        <option value="1">Transport</option>
-        <option value="2">Nourriture</option>
-        <option value="3">Logement</option>
-        <option value="4">Autre</option>
-        <option value="5">Activité</option>
+
+        {categories.map((cat) => (
+          <option key={cat.id} value={cat.id}>
+            {cat.name}
+          </option>
+        ))}
       </select>
 
       <select
@@ -104,6 +129,7 @@ function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
         required
       >
         <option value="">Payé par</option>
+
         {members.map((member) => (
           <option key={member.id} value={member.id}>
             {member.firstname || member.email}
