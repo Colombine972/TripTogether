@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import "../pages/styles/Navbar.css";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -7,6 +7,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [openNavBar, setOpenNavBar] = useState(false);
   const { auth, logout } = useAuth();
+  const location = useLocation();
 
   function navigateToCreateTrip() {
     navigate("/create-trip");
@@ -32,6 +33,13 @@ export default function Navbar() {
     closeMenu();
   };
 
+  const getTitle = () => {
+  if (location.pathname === "/account") return "Mon compte";
+  if (location.pathname === "/my-trips") return "Mes voyages";
+
+  return "";
+};
+
   return (
     <nav className="navbar navbar-container">
       <div className="navbar-left">
@@ -44,9 +52,9 @@ export default function Navbar() {
       </div>
 
       <div className="navbar-center">
-        <Link className="navbar-page-title" to="/my-trips" onClick={closeMenu}>
-          Mes voyages
-        </Link>
+        <p className="navbar-page-title">
+          {getTitle()}
+        </p>
       </div>
 
       <div className="navbar-right">

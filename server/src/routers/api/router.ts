@@ -4,7 +4,7 @@ import expenseRouter from "../expense/router";
 import invitationRouter from "../invitation/router";
 import tripRouter from "../trip/router";
 import userRouter from "../user/router";
-import expenseCategoryRouter from "../expenseCategory/router"
+import expenseCategoryRouter from "../expenseCategory/router";
 
 const router = express.Router();
 

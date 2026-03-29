@@ -5,6 +5,7 @@ import cors from "cors";
 import express from "express";
 import apiRouter from "./routers/api/router";
 
+
 const app = express();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
