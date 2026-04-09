@@ -31,6 +31,15 @@
   margin-right: 8px;
 }
 
+.footer-center {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  font-size: 16px;
+  color: #666;
+}
+
 .footer-right {
   font-size: 14px;
   color: #666;

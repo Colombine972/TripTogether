@@ -19,6 +19,12 @@ function Footer() {
           </div>
         </Link>
 
+        <div className="footer-center">
+          <Link to="/privacy">Politique de confidentialité</Link>
+          <Link to="/legal">Mentions légales</Link>
+          <Link to="/terms">CGU</Link>
+        </div>
+
         <div className="footer-right">
           &copy; {year} TripTogether.{" "}
           <span className="footer-heart">Fait avec ❤️ pour les voyageurs.</span>

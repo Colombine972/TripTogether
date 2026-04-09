@@ -1,11 +1,14 @@
 import { createBrowserRouter } from "react-router";
 import App from "./App";
 import Account from "./components/Account";
+import CGU from "./pages/CGU";
+import Confidentialite from "./pages/Confidentialite";
 import CreateTrip from "./pages/CreateTrip";
 import Home from "./pages/Home";
 import Invitation from "./pages/Invitation";
 import Invitations from "./pages/Invitations";
 import Login from "./pages/Login";
+import MentionsLegales from "./pages/MentionsLegales";
 import MyTrips from "./pages/MyTrips";
 import Register from "./pages/Register";
 import Steps from "./pages/Steps";
@@ -32,6 +35,18 @@ export const router = createBrowserRouter([
       {
         path: "register",
         element: <Register />,
+      },
+      {
+        path: "privacy",
+        element: <Confidentialite />,
+      },
+      {
+        path: "legal",
+        element: <MentionsLegales />,
+      },
+      {
+        path: "terms",
+        element: <CGU />,
       },
       {
         path: "my-trips",
