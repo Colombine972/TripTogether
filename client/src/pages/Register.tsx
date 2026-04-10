@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { ChangeEventHandler, FormEventHandler } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import "./styles/Auth.css";
 
 function Register() {
@@ -10,6 +10,7 @@ function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   const handlePasswordChange: ChangeEventHandler<HTMLInputElement> = (
     event,
@@ -125,11 +126,26 @@ function Register() {
               <span className="validation-icon">✅</span>
             )}
           </div>
+          <div className="checkbox-group">
+  <label className="checkbox-label" htmlFor="privacy">
+    <input
+      type="checkbox"
+      id="privacy"
+      required
+      checked={privacyAccepted}
+      onChange={(e) => setPrivacyAccepted(e.target.checked)}
+    />
+    <span>
+      J’ai lu et j’accepte la{" "}
+      <Link to="/privacy">politique de confidentialité</Link>
+    </span>
+  </label>
+</div>
 
           <button
             type="submit"
             className="submit-btn"
-            disabled={password !== confirmPassword || password.length < 8}
+            disabled={password !== confirmPassword || password.length < 8 || !privacyAccepted}
           >
             Créer mon compte
           </button>
