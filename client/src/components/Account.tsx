@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import PreferencesCard from "./PreferencesCard";
+import SecurityCard from "./SecurityCard";
 import "../pages/styles/Account.css";
 import type { UserType } from "../types/userType";
 
@@ -17,14 +18,7 @@ export default function Account() {
   const [preview, setPreview] = useState("");
 
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
 
   const handleSave = async () => {
     try {
@@ -79,43 +73,40 @@ export default function Account() {
     reader.readAsDataURL(file);
   };
 
-  const handleChangePassword = async () => {
+  const handleDownloadData = async () => {
     try {
-      if (passwordData.newPassword !== passwordData.confirmPassword) {
-        alert("Les mots de passe ne correspondent pas");
-        return;
-      }
-
-      const token = localStorage.getItem("token");
-
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/users/change-password`,
+        `${import.meta.env.VITE_API_URL}/api/users/me/export`,
         {
-          method: "PUT",
+          method: "GET",
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${auth?.token}`,
           },
-          body: JSON.stringify(passwordData),
         },
       );
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error("Impossible de télécharger vos données.");
+      }
 
-      if (!response.ok) throw new Error(data.error);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
 
-      alert("Mot de passe modifié avec succès");
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `triptogether-my-data-${new Date().toISOString().split("T")[0]}.json`;
 
-      setShowPasswordModal(false);
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(error);
+      alert("Une erreur est survenue lors du téléchargement des données.");
     }
   };
+
 
   return (
     <div className="account-page">
@@ -136,7 +127,8 @@ export default function Account() {
                 {user.firstname} {user.lastname}
               </h3>
               <p>{user.email}</p>
-
+            
+            <div className="account-user-actions">
               <button
                 type="button"
                 className="edit-btn"
@@ -144,35 +136,32 @@ export default function Account() {
               >
                 Modifier
               </button>
+              <button
+                type="button"
+                className="edit-btn"
+                onClick={handleDownloadData}
+              >
+                Télécharger mes données
+              </button>
+            </div>
             </div>
           </div>
         </div>
 
         <div className="account-card security-card">
           <h2>Sécurité</h2>
-
-          <div className="security-content">
-            <button
-              type="button"
-              className="security-btn"
-              onClick={() => setShowPasswordModal(true)}
-            >
-              Changer le mot de passe
-            </button>
-
-            <button
-              type="button"
-              className="logout-btn"
-              onClick={() => setShowLogoutModal(true)}
-            >
-              Se déconnecter
-            </button>
+          <SecurityCard />
           </div>
-        </div>
+         
 
         <div className="account-card preference-card">
           <h2>Mes Préférences</h2>
-          <PreferencesCard />
+          
+        </div>
+
+        <div className="account-card delete-account-card">
+          <h2>Suppression du compte</h2>
+          
         </div>
       </div>
 
@@ -236,107 +225,7 @@ export default function Account() {
         </div>
       )}
 
-      {showPasswordModal && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <h4>Changer le mot de passe</h4>
-
-            <div className="form-group">
-              <label htmlFor="currentPassword">Mot de passe actuel</label>
-              <input
-                id="currentPassword"
-                type="password"
-                value={passwordData.currentPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    currentPassword: e.target.value,
-                  })
-                }
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="newPassword">Nouveau mot de passe</label>
-              <input
-                id="newPassword"
-                type="password"
-                value={passwordData.newPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    newPassword: e.target.value,
-                  })
-                }
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirmer le mot de passe</label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={passwordData.confirmPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    confirmPassword: e.target.value,
-                  })
-                }
-              />
-            </div>
-
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="btn-role"
-                onClick={() => setShowPasswordModal(false)}
-              >
-                Annuler
-              </button>
-
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={handleChangePassword}
-              >
-                Enregistrer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showLogoutModal && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <h4>Se déconnecter</h4>
-            <p>Voulez-vous vraiment vous déconnecter ?</p>
-
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="btn-role"
-                onClick={() => setShowLogoutModal(false)}
-              >
-                Annuler
-              </button>
-
-              <button
-                type="button"
-                className="btn-danger"
-                onClick={() => {
-                  localStorage.removeItem("token");
-                  setAuth(null);
-                  window.location.href = "/login";
-                }}
-              >
-                Confirmer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

@@ -48,6 +48,13 @@
   background: #25642f;
 }
 
+.account-user-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 25px;
+  flex-wrap: wrap;
+}
+
 .save-btn {
   background: #2d7738;
   color: white;
@@ -79,6 +86,7 @@
   color: #666;
 }
 
+
 /* 🔥 LAYOUT */
 .account-display {
   display: flex;
@@ -102,6 +110,18 @@
   font-size : 26px;
 }
 
+
+
+.preference-card {
+  min-width: 280px;
+  max-width: 450px;
+}
+
+
+
+
+/* SECURITE */
+
 .security-card {
   min-width: 280px;
   max-width: 350px;
@@ -118,7 +138,7 @@
   background: #2d7738;
   color: white;
   border: none;
-  padding: 0.7rem;
+  padding: 0.7rem 4rem;
   border-radius: 0.5rem;
   cursor: pointer;
 }
@@ -127,7 +147,31 @@
   background: #e74c3c;
   color: white;
   border: none;
-  padding: 0.7rem;
+  padding: 0.7rem 4rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.security-btn:hover {
+  background: #25642f;
+}
+
+.logout-btn:hover {
+  background: #ac2b1d;
+}
+
+/* SUPPRESSION COMPTE */
+
+.delete-account-card {
+  min-width: 280px;
+  max-width: 350px;
+}
+
+.delete-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.7rem 4rem;
   border-radius: 0.5rem;
   cursor: pointer;
 }

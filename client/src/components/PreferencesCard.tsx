@@ -74,8 +74,6 @@ function PreferencesCard() {
 
   return (
     <section className="preferences-card">
-      <h2 className="preferences-title">Préférences</h2>
-
       <div className="preferences-list">
         <div className="preference-item">
           <div className="preference-left">
