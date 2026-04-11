@@ -22,7 +22,8 @@ function StepCard({
   const { auth, logout } = useAuth();
   const token = auth?.token;
 
-  const stepImage = step.image_url || "/images/default-city.jpg";
+  const stepImage = step.photo_reference || "/images/default-city.jpg";
+
   const thumbsUpLogo = (
     <img src="/logos/green-thumb.png" className="green-thumb" alt="Oui" />
   );
@@ -155,7 +156,6 @@ function StepCard({
         src={stepImage}
         alt={`Vue de ${step.city}`}
         className="step-bg-img"
-        referrerPolicy="no-referrer"
         style={{
           minHeight: "180px",
           display: "block",

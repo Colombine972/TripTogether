@@ -9,7 +9,7 @@ interface TheTrip {
   id: number;
   title: string;
   description: string;
-  image_url: string;
+  photo_reference?: string | null;
   start_at: string;
   city: string;
   country: string;
@@ -26,6 +26,8 @@ export default function MyTrips() {
 
   const [trips, setTrips] = useState<TheTrip[]>([]);
 
+ 
+
   // 🔥 SUPPRESSION VOYAGE
   const handleDeleteTrip = async (e: React.MouseEvent, tripId: number) => {
     e.preventDefault();
@@ -39,7 +41,7 @@ export default function MyTrips() {
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.ok) {
@@ -53,42 +55,7 @@ export default function MyTrips() {
     }
   };
 
-  // gestion image expirée
-  const handleImageError = async (tripId: number, city: string) => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/image?city=${city}`
-      );
-
-      const data = await response.json();
-
-      if (data.imageUrl) {
-        //  Mise à jour du state 
-        setTrips((prev) =>
-          prev.map((trip) =>
-            trip.id === tripId
-              ? { ...trip, image_url: data.imageUrl }
-              : trip
-          )
-        );
-
-        // update en BDD
-        await fetch(
-          `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/image`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ image_url: data.imageUrl }),
-          }
-        );
-      }
-    } catch (error) {
-      console.error("Erreur lors du refresh image:", error);
-    }
-  };
-
+  
   //  FETCH DES VOYAGES
   useEffect(() => {
     const token = localStorage.getItem("token") || auth?.token;
@@ -107,7 +74,7 @@ export default function MyTrips() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     )
       .then((res) => {
         if (!res.ok) throw new Error("Erreur lors de la récupération");
@@ -187,13 +154,12 @@ export default function MyTrips() {
                 >
                   {/* IMG AVEC AUTO-RÉPARATION */}
                   <img
-                    src={trip.image_url || "/images/default-city.jpg"}
+                    src={trip.photo_reference || "/images/default-city.jpg"}
                     alt={trip.title}
                     className="trip-bg-img"
                     onError={(e) => {
                       e.currentTarget.onerror = null; // évite boucle infinie
                       e.currentTarget.src = "/images/default-city.jpg"; // fallback
-                      handleImageError(trip.id, trip.city); // régénération
                     }}
                   />
 

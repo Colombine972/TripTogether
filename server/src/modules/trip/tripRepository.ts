@@ -5,7 +5,7 @@ import type { Trip } from "../../types/tripType";
 class TripRepository {
   async create(trip: Omit<Trip, "id">) {
     const [result] = await databaseClient.query<Result>(
-      "INSERT INTO trip (title, description, city, country, start_at, end_at, user_id, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO trip (title, description, city, country, start_at, end_at, user_id, photo_reference) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       [
         trip.title,
         trip.description,
@@ -14,14 +14,14 @@ class TripRepository {
         trip.start_at,
         trip.end_at,
         trip.user_id,
-        trip.image_url,
+        trip.photo_reference ?? null,
       ],
     );
     const newTripId = result.insertId;
 
     await databaseClient.query<Result>(
-      "INSERT INTO step (city, country, trip_id, user_id, image_url, is_initial) VALUES (?, ?, ?, ?, ?, ?)",
-      [trip.city, trip.country, newTripId, trip.user_id, trip.image_url, true],
+      "INSERT INTO step (city, country, trip_id, user_id, photo_reference, is_initial) VALUES (?, ?, ?, ?, ?, ?)",
+      [trip.city, trip.country, newTripId, trip.user_id, trip.photo_reference ?? null, true],
     );
 
     return newTripId;
@@ -29,7 +29,7 @@ class TripRepository {
 
   async readTripInfo(id: number): Promise<Trip | null> {
     const [rows] = await databaseClient.query<Rows>(
-      `SELECT t.id, t.title, t.description, t.start_at, t.end_at, t.city, t.country, t.image_url, COUNT(i.id) AS participants 
+      `SELECT t.id, t.title, t.description, t.start_at, t.end_at, t.city, t.country, t.photo_reference, COUNT(i.id) AS participants 
       FROM trip t 
       LEFT JOIN invitation i ON i.trip_id = t.id AND i.status = "accepted" 
       WHERE t.id = ? 
@@ -86,7 +86,7 @@ class TripRepository {
   async update(trip: Trip) {
     const [result] = await databaseClient.query<Result>(
       `UPDATE trip 
-       SET title = ?, description = ?, city = ?, country = ?, start_at = ?, end_at = ?, image_url = ? 
+       SET title = ?, description = ?, city = ?, country = ?, start_at = ?, end_at = ?, photo_reference = ? 
        WHERE id = ?`,
       [
         trip.title,
@@ -95,7 +95,7 @@ class TripRepository {
         trip.country,
         trip.start_at,
         trip.end_at,
-        trip.image_url,
+        trip.photo_reference,
         trip.id,
       ],
     );
@@ -141,7 +141,7 @@ class TripRepository {
         t.country, 
         t.start_at, 
         t.end_at, 
-        t.image_url,
+        t.photo_reference,
         u.firstname AS creator_firstname,
         u.lastname AS creator_lastname
       FROM trip t

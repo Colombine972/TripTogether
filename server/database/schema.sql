@@ -17,7 +17,7 @@ CREATE TABLE trip (
   start_at DATE,
   end_at DATE,
   user_id INT NOT NULL,
-  image_url TEXT,
+  photo_reference TEXT,
   CONSTRAINT fk_trip_user
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
@@ -29,7 +29,7 @@ CREATE TABLE step (
   trip_id INT NOT NULL,
   user_id INT NOT NULL,
   is_initial BOOLEAN DEFAULT false,
-  image_url TEXT,
+  photo_reference TEXT,
   CONSTRAINT fk_step_trip
     FOREIGN KEY (trip_id) REFERENCES trip(id)
     ON DELETE CASCADE,

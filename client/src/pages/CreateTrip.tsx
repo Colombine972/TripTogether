@@ -23,7 +23,7 @@ export default function CreateTrip() {
 
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [photoReference, setPhotoReference] = useState("");
   const [endOfTrip, setEndOfTrip] = useState({ end_at: "" });
   const [startDate, setStartDate] = useState("");
 
@@ -71,27 +71,29 @@ export default function CreateTrip() {
         inputRef.current!.appendChild(autocomplete);
 
         autocomplete.addEventListener(
-          "gmp-places-select",
+          "gmp-select",
           // biome-ignore lint/suspicious/noExplicitAny: Google Maps event type
           async (event: any) => {
-            const place = event.place;
-            if (!place) return;
+            const placePrediction = event.placePrediction;
+            if (!placePrediction) return;
+
+            const place = placePrediction.toPlace();
 
             await place.fetchFields({
-              fields: ["address_components", "name", "photos"],
+              fields: ["addressComponents", "displayName", "photos"],
             });
 
-            const cityName = place.name || "";
+            const cityName = place.displayName || "";
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-            const countryComp = place.address_components?.find((comp: any) =>
+            const countryComp = place.addressComponents?.find((comp: any) =>
               comp.types.includes("country"),
             );
-            const countryName = countryComp?.long_name;
-            const photoUrl = place.photos?.[0]?.getUrl({ maxWidth: 600 }) || "";
+            const countryName = countryComp?.longText;
+            const photoUrl = place.photos?.[0]?.getURI({ maxHeight: 400 }) || "";
 
             setCity(cityName);
             if (countryName) setCountry(countryName);
-            setImageUrl(photoUrl);
+            setPhotoReference(photoUrl);
           },
         );
 
@@ -173,7 +175,7 @@ export default function CreateTrip() {
       end_at: endOfTrip.end_at,
       city: capitalize(currentCity),
       country: capitalize(currentCountry),
-      image_url: imageUrl,
+      photo_reference: photoReference,
     };
 
     console.log("Données du voyage à envoyer:", newTrip);

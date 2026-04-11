@@ -100,7 +100,7 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const { title, description, city, country, start_at, end_at, image_url } =
+    const { title, description, city, country, start_at, end_at, photo_reference } =
       req.body;
 
     if (!title || !description || !city || !country || !start_at || !end_at) {
@@ -126,10 +126,6 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    let finalImageUrl = image_url;
-    if (!finalImageUrl) {
-      finalImageUrl = await googlePlacesService.getCityImage(city, country);
-    }
 
     const newTrip: Trip = {
       title,
@@ -139,7 +135,7 @@ const add: RequestHandler = async (req, res, next) => {
       start_at,
       end_at,
       user_id: Number(authReq.auth.sub),
-      image_url: finalImageUrl || "/images/default-city.jpg",
+      photo_reference: photo_reference || null,
     };
 
     const insertId = await tripRepository.create(newTrip);
@@ -147,7 +143,7 @@ const add: RequestHandler = async (req, res, next) => {
     res.status(201).json({
       insertId,
       message: "Voyage créé avec succès",
-      image_url: newTrip.image_url,
+      photo_reference: newTrip.photo_reference,
     });
   } catch (err) {
     next(err);

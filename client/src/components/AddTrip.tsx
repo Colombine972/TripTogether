@@ -12,7 +12,7 @@ interface AddStepProps {
 export default function AddStep({ onStepAdded }: AddStepProps) {
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [photoReference, setPhotoReference] = useState("");
   const inputRef = useRef<HTMLDivElement>(null);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const placeAutocompleteRef = useRef<any>(null);
@@ -47,26 +47,28 @@ export default function AddStep({ onStepAdded }: AddStepProps) {
         // biome-ignore lint/style/noNonNullAssertion: <explanation>
         inputRef.current!.appendChild(autocomplete);
 
-        autocomplete.addEventListener("gmp-places-select", async (e: Event) => {
+        autocomplete.addEventListener("gmp-select", async (e: Event) => {
           // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-          const place = (e as any).place;
-          if (!place) return;
+          const placePrediction = (e as any).placePrediction;
+          if (!placePrediction) return;
+
+          const place = placePrediction.toPlace();
 
           await place.fetchFields({
-            fields: ["address_components", "name", "photos"],
+            fields: ["addressComponents", "displayName", "photos"],
           });
 
-          const cityName = place.name || "";
+          const cityName = place.displayName || "";
           // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-          const countryComp = place.address_components?.find((comp: any) =>
+          const countryComp = place.addressComponents?.find((comp: any) =>
             comp.types.includes("country"),
           );
-          const countryName = countryComp?.long_name;
-          const photoUrl = place.photos?.[0]?.getUrl({ maxWidth: 400 }) || "";
+          const countryName = countryComp?.longText;
+          const photoUrl = place.photos?.[0]?.getURI({ maxHeight: 400 }) || "";
 
           setCity(cityName);
           if (countryName) setCountry(countryName);
-          setImageUrl(photoUrl);
+          setPhotoReference(photoUrl);
         });
 
         autocomplete.addEventListener("change", () => {
@@ -124,7 +126,7 @@ export default function AddStep({ onStepAdded }: AddStepProps) {
             city: currentCity,
             country: currentCountry, // Utiliser currentCountry au lieu de country
             user_id,
-            image_url: imageUrl,
+            photo_reference: photoReference,
           }),
         },
       );
@@ -135,7 +137,7 @@ export default function AddStep({ onStepAdded }: AddStepProps) {
 
       setCity("");
       setCountry("");
-      setImageUrl("");
+      setPhotoReference("");
 
       if (placeAutocompleteRef.current) {
         placeAutocompleteRef.current.value = "";

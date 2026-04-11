@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import PreferencesCard from "./PreferencesCard";
 import "../pages/styles/Account.css";
 import type { UserType } from "../types/userType";
 
@@ -40,7 +41,7 @@ export default function Account() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(user),
-        }
+        },
       );
 
       const data = await response.json();
@@ -96,7 +97,7 @@ export default function Account() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(passwordData),
-        }
+        },
       );
 
       const data = await response.json();
@@ -118,7 +119,6 @@ export default function Account() {
 
   return (
     <div className="account-page">
-
       <div className="account-cards">
         <div className="account-card">
           <h2>Informations personnelles</h2>
@@ -137,7 +137,8 @@ export default function Account() {
               </h3>
               <p>{user.email}</p>
 
-              <button type="button"
+              <button
+                type="button"
                 className="edit-btn"
                 onClick={() => setShowProfileModal(true)}
               >
@@ -151,20 +152,27 @@ export default function Account() {
           <h2>Sécurité</h2>
 
           <div className="security-content">
-            <button type="button"
+            <button
+              type="button"
               className="security-btn"
               onClick={() => setShowPasswordModal(true)}
             >
               Changer le mot de passe
             </button>
 
-            <button type="button"
+            <button
+              type="button"
               className="logout-btn"
               onClick={() => setShowLogoutModal(true)}
             >
               Se déconnecter
             </button>
           </div>
+        </div>
+
+        <div className="account-card preference-card">
+          <h2>Mes Préférences</h2>
+          <PreferencesCard />
         </div>
       </div>
 
@@ -194,9 +202,7 @@ export default function Account() {
               <input
                 id="lastname"
                 value={user.lastname}
-                onChange={(e) =>
-                  setUser({ ...user, lastname: e.target.value })
-                }
+                onChange={(e) => setUser({ ...user, lastname: e.target.value })}
               />
             </div>
 
@@ -205,21 +211,24 @@ export default function Account() {
               <input
                 id="email"
                 value={user.email}
-                onChange={(e) =>
-                  setUser({ ...user, email: e.target.value })
-                }
+                onChange={(e) => setUser({ ...user, email: e.target.value })}
               />
             </div>
 
             <div className="modal-actions">
-              <button type="button"
+              <button
+                type="button"
                 className="btn-role"
                 onClick={() => setShowProfileModal(false)}
               >
                 Annuler
               </button>
 
-              <button type="button" className="btn-primary" onClick={handleSave}>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={handleSave}
+              >
                 Sauvegarder
               </button>
             </div>
@@ -263,9 +272,7 @@ export default function Account() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirmPassword">
-                Confirmer le mot de passe
-              </label>
+              <label htmlFor="confirmPassword">Confirmer le mot de passe</label>
               <input
                 id="confirmPassword"
                 type="password"
@@ -280,14 +287,19 @@ export default function Account() {
             </div>
 
             <div className="modal-actions">
-              <button type="button"
+              <button
+                type="button"
                 className="btn-role"
                 onClick={() => setShowPasswordModal(false)}
               >
                 Annuler
               </button>
 
-              <button type="button" className="btn-primary" onClick={handleChangePassword}>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={handleChangePassword}
+              >
                 Enregistrer
               </button>
             </div>
@@ -302,14 +314,16 @@ export default function Account() {
             <p>Voulez-vous vraiment vous déconnecter ?</p>
 
             <div className="modal-actions">
-              <button type="button"
+              <button
+                type="button"
                 className="btn-role"
                 onClick={() => setShowLogoutModal(false)}
               >
                 Annuler
               </button>
 
-              <button type="button"
+              <button
+                type="button"
                 className="btn-danger"
                 onClick={() => {
                   localStorage.removeItem("token");

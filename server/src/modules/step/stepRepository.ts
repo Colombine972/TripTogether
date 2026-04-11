@@ -6,7 +6,7 @@ import type { VoteWithUser } from "../../types/voteType";
 class stepRepository {
   async selectByTrip(tripId: number): Promise<Step[]> {
     const [rows] = await databaseClient.query<Rows>(
-      `SELECT id, city, country, trip_id
+      `SELECT id, city, country, trip_id, photo_reference
        FROM step
        WHERE trip_id = ?
        ORDER BY id ASC`,
@@ -20,9 +20,10 @@ class stepRepository {
     trip_id: number;
     city: string;
     country: string;
+    photo_reference: string | null;
   } | null> {
     const [rows] = await databaseClient.query<Rows>(
-      "SELECT id, trip_id, city, country FROM step WHERE id = ?",
+      "SELECT id, trip_id, city, country, photo_reference FROM step WHERE id = ?",
       [stepId],
     );
     return rows.length > 0
@@ -31,6 +32,7 @@ class stepRepository {
           trip_id: number;
           city: string;
           country: string;
+          photo_reference: string | null;
         })
       : null;
   }
@@ -104,7 +106,7 @@ class stepRepository {
         s.trip_id AS trip_id,
         u.firstname AS creator_name,
         s.is_initial AS is_initial,
-        s.image_url AS image_url,
+        s.photo_reference AS photo_reference,
         (
           SELECT COUNT(*) 
           FROM (
@@ -141,8 +143,8 @@ class stepRepository {
 
   async createStepCity(step: Omit<Step, "id">) {
     const [result] = await databaseClient.query<Result>(
-      "INSERT INTO step (city, country, trip_id, image_url, user_id) VALUES (?, ?, ?, ?, ?)",
-      [step.city, step.country, step.trip_id, step.image_url, step.user_id],
+      "INSERT INTO step (city, country, trip_id, photo_reference, user_id) VALUES (?, ?, ?, ?, ?)",
+      [step.city, step.country, step.trip_id, step.photo_reference ?? null, step.user_id],
     );
     return result.insertId;
   }
