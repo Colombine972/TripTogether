@@ -83,12 +83,12 @@ const updateMe: RequestHandler = async (req, res) => {
 
 const exportMyData: RequestHandler = async (req, res, next) => {
   try {
-    const userId = req.user?.id;
-
-    if (!userId) {
+    if (!req.auth) {
       res.status(401).json({ message: "Utilisateur non authentifié." });
       return;
     }
+
+    const userId = Number(req.auth.sub);
 
     const exportData = await userService.exportUserData(userId);
 
