@@ -11,5 +11,6 @@ router.get("/my-trips", verifyToken, tripActions.browseTheTrip);
 router.get("/", userActions.browse);
 router.get("/:id", userActions.read);
 router.put("/me", verifyToken, userActions.updateMe);
+router.get("/me/export", verifyToken, userActions.exportMyData);
 
 export default router;
