@@ -80,4 +80,28 @@ const updateMe: RequestHandler = async (req, res) => {
   }
 };
 
-export default { browse, read, add, updateMe };
+const exportMyData: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({ message: "Utilisateur non authentifié." });
+      return;
+    }
+
+    const exportData = await userService.exportUserData(userId);
+
+    const fileName = `triptogether-my-data-${
+      new Date().toISOString().split("T")[0]
+    }.json`;
+
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+
+    res.status(200).send(JSON.stringify(exportData, null, 2));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { browse, read, add, updateMe, exportMyData };
