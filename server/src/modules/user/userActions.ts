@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import type { UserType } from "../../types/userType";
 import userRepository from "./userRepository";
 import invitationRepository from "../invitation/invitationRepository";
+import userService from "./userService";
 
 const browse: RequestHandler = async (_req, res, next) => {
   try {
