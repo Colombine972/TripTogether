@@ -4,6 +4,7 @@ import PreferencesCard from "./PreferencesCard";
 import SecurityCard from "./SecurityCard";
 import "../pages/styles/Account.css";
 import type { UserType } from "../types/userType";
+import DeleteAccountCard from "./DeleteAccountCard";
 
 export default function Account() {
   const { auth, setAuth } = useAuth();
@@ -15,10 +16,17 @@ export default function Account() {
     avatar_url: auth?.user?.avatar_url || "",
   });
 
+  const [editedUser, setEditedUser] = useState<Partial<UserType>>({});
+
   const [preview, setPreview] = useState("");
 
   const [showProfileModal, setShowProfileModal] = useState(false);
 
+  const handleOpenProfileModal = () => {
+    setEditedUser({ ...user });
+    setPreview(user.avatar_url || "");
+    setShowProfileModal(true);
+  };
 
   const handleSave = async () => {
     try {
@@ -34,13 +42,17 @@ export default function Account() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(user),
+          body: JSON.stringify(editedUser),
         },
       );
 
       const data = await response.json();
 
       if (!response.ok) throw new Error(data.error);
+
+      const updatedUser = { ...user, ...data };
+
+      setUser(updatedUser);
 
       setAuth({
         token: auth.token,
@@ -64,7 +76,7 @@ export default function Account() {
       const base64 = reader.result as string;
       setPreview(base64);
 
-      setUser((prev) => ({
+      setEditedUser((prev) => ({
         ...prev,
         avatar_url: base64,
       }));
@@ -107,7 +119,6 @@ export default function Account() {
     }
   };
 
-
   return (
     <div className="account-page">
       <div className="account-cards">
@@ -127,23 +138,23 @@ export default function Account() {
                 {user.firstname} {user.lastname}
               </h3>
               <p>{user.email}</p>
-            
-            <div className="account-user-actions">
-              <button
-                type="button"
-                className="edit-btn"
-                onClick={() => setShowProfileModal(true)}
-              >
-                Modifier
-              </button>
-              <button
-                type="button"
-                className="edit-btn"
-                onClick={handleDownloadData}
-              >
-                Télécharger mes données
-              </button>
-            </div>
+
+              <div className="account-user-actions">
+                <button
+                  type="button"
+                  className="edit-btn"
+                  onClick={handleOpenProfileModal}
+                >
+                  Modifier
+                </button>
+                <button
+                  type="button"
+                  className="edit-btn"
+                  onClick={handleDownloadData}
+                >
+                  Télécharger mes données
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -151,17 +162,15 @@ export default function Account() {
         <div className="account-card security-card">
           <h2>Sécurité</h2>
           <SecurityCard />
-          </div>
-         
+        </div>
 
         <div className="account-card preference-card">
           <h2>Mes Préférences</h2>
-          
         </div>
 
         <div className="account-card delete-account-card">
           <h2>Suppression du compte</h2>
-          
+          <DeleteAccountCard />
         </div>
       </div>
 
@@ -179,9 +188,9 @@ export default function Account() {
               <label htmlFor="firstname">Prénom</label>
               <input
                 id="firstname"
-                value={user.firstname}
+                value={editedUser.firstname || ""}
                 onChange={(e) =>
-                  setUser({ ...user, firstname: e.target.value })
+                  setEditedUser({ ...editedUser, firstname: e.target.value })
                 }
               />
             </div>
@@ -190,8 +199,10 @@ export default function Account() {
               <label htmlFor="lastname">Nom</label>
               <input
                 id="lastname"
-                value={user.lastname}
-                onChange={(e) => setUser({ ...user, lastname: e.target.value })}
+                value={editedUser.lastname || ""}
+                onChange={(e) =>
+                  setEditedUser({ ...editedUser, lastname: e.target.value })
+                }
               />
             </div>
 
@@ -199,8 +210,10 @@ export default function Account() {
               <label htmlFor="email">Email</label>
               <input
                 id="email"
-                value={user.email}
-                onChange={(e) => setUser({ ...user, email: e.target.value })}
+                value={editedUser.email || ""}
+                onChange={(e) =>
+                  setEditedUser({ ...editedUser, email: e.target.value })
+                }
               />
             </div>
 
@@ -224,8 +237,6 @@ export default function Account() {
           </div>
         </div>
       )}
-
-      
     </div>
   );
 }

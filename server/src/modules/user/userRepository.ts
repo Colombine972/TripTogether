@@ -26,6 +26,13 @@ type UserExportData = {
   avatar_url?: string | null;
 };
 
+type DeleteMyAccountData = {
+  userId: number;
+  currentEmail: string;
+  anonymizedEmail: string;
+  anonymizedPassword: string;
+};
+
 type UserPreference = {
   email_notifications: boolean;
   theme: string;
@@ -218,6 +225,67 @@ class UserRepository {
     );
 
     return rows;
+  }
+
+    async deleteMyAccount(data: DeleteMyAccountData) {
+    const { userId, currentEmail, anonymizedEmail, anonymizedPassword } = data;
+
+    const connection = await databaseClient.getConnection();
+
+    try {
+      await connection.beginTransaction();
+
+      /**
+       * Suppression des invitations associées au compte.
+       * Ici, on supprime :
+       * - les invitations liées à user_id
+       * - les invitations envoyées à l'email actuel de l'utilisateur
+       */
+      await connection.query<Result>(
+        `
+          DELETE FROM invitation
+          WHERE user_id = ?
+             OR email = ?
+        `,
+        [userId, currentEmail],
+      );
+
+      /**
+       * Anonymisation du compte utilisateur.
+       * On conserve la ligne en base pour ne pas casser :
+       * - trip.user_id
+       * - expense.paid_by
+       * - expense_share.user_id
+       *
+       * Mais on supprime les données personnelles.
+       */
+      await connection.query<Result>(
+        `
+          UPDATE user
+          SET
+            firstname = ?,
+            lastname = ?,
+            email = ?,
+            password = ?,
+            avatar_url = NULL
+          WHERE id = ?
+        `,
+        [
+          "utilisateur",
+          "supprimé",
+          anonymizedEmail,
+          anonymizedPassword,
+          userId,
+        ],
+      );
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 }
 

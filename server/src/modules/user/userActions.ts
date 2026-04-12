@@ -105,4 +105,25 @@ const exportMyData: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { browse, read, add, updateMe, exportMyData };
+const deleteMyAccount: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.auth) {
+      res.status(401).json({ error: "Non autorisé" });
+      return;
+    }
+
+    const userId = Number(req.auth.sub);
+
+    await userService.deleteMyAccount(userId);
+
+    res.status(200).json({
+      message:
+        "Votre compte a été supprimé définitivement. Vos données personnelles ont été supprimées et les données nécessaires ont été conservées de manière anonymisée.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export default { browse, read, add, updateMe, exportMyData, deleteMyAccount };

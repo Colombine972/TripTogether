@@ -1,3 +1,5 @@
+import argon2 from "argon2";
+import crypto from "node:crypto";
 import userRepository from "./userRepository";
 
 const exportUserData = async (userId: number) => {
@@ -35,6 +37,26 @@ const exportUserData = async (userId: number) => {
   };
 };
 
+const deleteMyAccount = async (userId: number) => {
+  const user = await userRepository.read(userId);
+
+  if (!user) {
+    throw new Error("Utilisateur introuvable.");
+  }
+
+  const anonymizedEmail = `deleted_${userId}_${Date.now()}@deleted.local`;
+  const randomPassword = crypto.randomUUID();
+  const anonymizedPassword = await argon2.hash(randomPassword);
+
+  await userRepository.deleteMyAccount({
+    userId,
+    currentEmail: user.email,
+    anonymizedEmail,
+    anonymizedPassword,
+  });
+};
+
 export default {
   exportUserData,
+  deleteMyAccount,
 };

@@ -42,6 +42,9 @@
   border: none;
   cursor: pointer;
   transition: 0.2s;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .edit-btn:hover {
@@ -53,11 +56,8 @@
   flex-direction: column;
   gap: 1rem;
   margin-top: 1rem;
-
+  align-items: stretch;
 }
-
-
-
 
 .save-btn {
   background: #2d7738;
@@ -79,23 +79,32 @@
   transition: 0.2s;
 }
 
+.account-info {
+  flex: 1;
+  min-width: 0;
+}
+
 .account-info h3 {
   margin: 0;
   font-size: 22px;
   font-weight: 600;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .account-info p {
   margin: 5px 0 15px;
   color: #666;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
-
 
 /* 🔥 LAYOUT */
 .account-display {
   display: flex;
   align-items: center;
   gap: 30px;
+  flex-wrap: wrap;
 }
 
 /* 🔥 AVATAR */
@@ -111,18 +120,13 @@
   border-bottom: 1px solid #eee;
   padding-bottom: 10px;
   margin-bottom: 20px;
-  font-size : 26px;
+  font-size: 26px;
 }
-
-
 
 .preference-card {
   min-width: 280px;
   max-width: 450px;
 }
-
-
-
 
 /* SECURITE */
 
@@ -164,11 +168,26 @@
   background: #ac2b1d;
 }
 
+
+
 /* SUPPRESSION COMPTE */
 
 .delete-account-card {
   min-width: 280px;
   max-width: 350px;
+}
+
+.delete-account-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.delete-account-warning {
+  color: #666666;
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .delete-btn {
@@ -178,4 +197,89 @@
   padding: 0.7rem 4rem;
   border-radius: 0.5rem;
   cursor: pointer;
+  margin-top: 1.5rem;
+}
+
+.delete-btn:hover {
+  background: #ac2b1d;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 80px; /* adapte à ta navbar */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 20, 40, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto;
+  margin-top: 10rem;
+  padding: 1.5rem 1rem 2rem;
+  box-sizing: border-box;
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 700px;
+  max-width: 100%;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  box-sizing: border-box;
+}
+
+.delete-account-modal {
+  width: 100%;
+  max-width: 680px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+.delete-account-warning-text {
+  margin: 0 0 1rem;
+  line-height: 1.2;
+  color: #444;
+}
+
+.delete-account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.delete-account-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.delete-account-subtitle {
+  margin: 0;
+  font-weight: 800;
+}
+
+.delete-account-block ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.delete-account-block li {
+  margin-bottom: 0.35rem;
+  line-height: 1;
+}
+
+
+.delete-account-note {
+  margin: 0;
+  line-height: 1.5;
+  color: #444;
+}
+
+.form-error {
+  margin-top: 0.5rem;
+  color: #b42318;
+  font-size: 0.95rem;
 }
