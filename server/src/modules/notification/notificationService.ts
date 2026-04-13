@@ -1,7 +1,12 @@
 import preferencesRepository from "../preferences/preferencesRepository";
-import userRepository from "../user/userRepository";
 import tripRepository from "../trip/tripRepository";
 import sendEmail from "../../utils/sendEmail";
+
+type TripMember = {
+  id: number;
+  firstname: string;
+  email: string;
+};
 
 const notifyTripMembers = async (
   tripId: number,
@@ -9,7 +14,9 @@ const notifyTripMembers = async (
   subject: string,
   text: string,
 ) => {
-  const members = await tripRepository.readMembersByTripId(tripId);
+  const members = (await tripRepository.findMembersByTrip(
+    tripId,
+  )) as TripMember[];
 
   for (const member of members) {
     if (member.id === actorUserId) {
@@ -22,13 +29,11 @@ const notifyTripMembers = async (
       continue;
     }
 
-    const user = await userRepository.read(member.id);
-
-    if (!user?.email) {
+    if (!member.email) {
       continue;
     }
 
-    await sendEmail(user.email, subject, text);
+    await sendEmail(member.email, subject, text);
   }
 };
 
