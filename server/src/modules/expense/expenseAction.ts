@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import expenseRepository from "./expenseRepository";
 import expenseShareRepository from "../expenseShare/expenseShareRepository";
 import expenseShareService from "../expenseShare/expenseShareService";
+import notificationService from "../notification/notificationService";
 import tripRepository from "../trip/tripRepository";
 
 const read: RequestHandler = async (req, res, next) => {
@@ -66,6 +67,13 @@ const add: RequestHandler = async (req, res, next) => {
       expenseId,
       numericAmount,
       participantIds,
+    );
+
+    await notificationService.notifyExpenseAdded(
+      tripId,
+      Number(paid_by),
+      title,
+      numericAmount,
     );
 
     res.status(201).json({

@@ -8,11 +8,11 @@ type TripMember = {
   email: string;
 };
 
-const notifyTripMembers = async (
+const notifyExpenseAdded = async (
   tripId: number,
   actorUserId: number,
-  subject: string,
-  text: string,
+  expenseTitle: string,
+  amount: number,
 ) => {
   const members = (await tripRepository.findMembersByTrip(
     tripId,
@@ -23,20 +23,34 @@ const notifyTripMembers = async (
       continue;
     }
 
+    if (!member.email) {
+      continue;
+    }
+
     const preferences = await preferencesRepository.readByUserId(member.id);
 
     if (!preferences?.email_trip_notifications) {
       continue;
     }
 
-    if (!member.email) {
-      continue;
-    }
+    await sendEmail(
+      member.email,
+      "Nouvelle dépense sur votre voyage TripTogether",
+      `Bonjour ${member.firstname},
 
-    await sendEmail(member.email, subject, text);
+Une nouvelle dépense a été ajoutée sur un voyage auquel vous participez.
+
+Dépense : ${expenseTitle}
+Montant : ${amount.toFixed(2)} €
+
+Connectez-vous à TripTogether pour consulter les détails.
+
+À bientôt,
+TripTogether`,
+    );
   }
 };
 
 export default {
-  notifyTripMembers,
+  notifyExpenseAdded,
 };
