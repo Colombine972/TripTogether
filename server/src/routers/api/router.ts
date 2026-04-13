@@ -6,6 +6,7 @@ import tripRouter from "../trip/router";
 import userRouter from "../user/router";
 import expenseCategoryRouter from "../expenseCategory/router";
 import preferencesRouter from "../preferences/router";
+import notificationRouter from "../notification/Router";
 
 const router = express.Router();
 
@@ -21,5 +22,6 @@ router.use("/expenses", expenseRouter);
 
 router.use("/categories", expenseCategoryRouter);
 
+router.use("/notification", notificationRouter);
 
 export default router;
