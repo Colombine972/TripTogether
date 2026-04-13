@@ -168,7 +168,37 @@
   background: #ac2b1d;
 }
 
+/* PREFERENCES */
 
+.preference-text {
+  display: flex;
+  flex-direction: column;
+  color: #666666;
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.preference-item {
+  display: flex;
+  align-items: center; /* aligne en haut */
+  gap: 12px;
+  cursor: pointer;
+}
+
+.preference-item input[type="checkbox"] {
+  margin-top: 4px; 
+  transform: scale(1.4);
+}
+
+.preference-title {
+  font-weight: 1000;
+}
+
+.preference-text p {
+  margin: 4px 0 0;
+  color: #555;
+}
 
 /* SUPPRESSION COMPTE */
 
@@ -270,7 +300,6 @@
   margin-bottom: 0.35rem;
   line-height: 1;
 }
-
 
 .delete-account-note {
   margin: 0;

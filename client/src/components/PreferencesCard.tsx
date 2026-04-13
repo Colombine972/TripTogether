@@ -1,141 +1,116 @@
 import { useEffect, useState } from "react";
-import { Bell, ChevronRight, Euro, Moon, Sun } from "lucide-react";
-import "../pages/styles/PreferencesCard.css";
+import { toast } from "react-toastify";
+import { useAuth } from "../contexts/AuthContext";
+import "../pages/styles/Account.css";
 
-type Currency = "EUR" | "USD" | "GBP";
+type PreferencesType = {
+  email_trip_notifications: boolean;
+};
 
-interface Preferences {
-  theme: "light" | "dark";
-  currency: Currency;
-  notifications: boolean;
-}
+export default function PreferencesCard() {
+  const { auth } = useAuth();
 
-function PreferencesCard() {
-  const [preferences, setPreferences] = useState<Preferences>({
-    theme: "light",
-    currency: "EUR",
-    notifications: true,
+  const [preferences, setPreferences] = useState<PreferencesType>({
+    email_trip_notifications: true,
   });
 
-  useEffect(() => {
-    const savedPreferences = localStorage.getItem("userPreferences");
+  const [loading, setLoading] = useState(true);
 
-    if (savedPreferences) {
+  useEffect(() => {
+    const fetchPreferences = async () => {
       try {
-        setPreferences(JSON.parse(savedPreferences));
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/users/preferences`,
+          {
+            headers: {
+              Authorization: `Bearer ${auth?.token}`,
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Erreur récupération préférences");
+        }
+
+        const data = await response.json();
+
+        setPreferences({
+          email_trip_notifications: Boolean(data.email_trip_notifications),
+        });
       } catch (error) {
-        console.error("Erreur lors de la lecture des préférences :", error);
+        console.error(error);
+        toast.error("Erreur lors du chargement des préférences.");
+      } finally {
+        setLoading(false);
       }
+    };
+
+    if (auth?.token) {
+      fetchPreferences();
     }
-  }, []);
+  }, [auth?.token]);
 
-  useEffect(() => {
-    localStorage.setItem("userPreferences", JSON.stringify(preferences));
-    document.body.setAttribute("data-theme", preferences.theme);
-  }, [preferences]);
+  const handleToggle = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const checked = event.target.checked;
 
-  const toggleTheme = () => {
-    setPreferences((prev) => ({
-      ...prev,
-      theme: prev.theme === "light" ? "dark" : "light",
-    }));
-  };
+    setPreferences({
+      email_trip_notifications: checked,
+    });
 
-  const toggleNotifications = () => {
-    setPreferences((prev) => ({
-      ...prev,
-      notifications: !prev.notifications,
-    }));
-  };
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/preferences`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth?.token}`,
+          },
+          body: JSON.stringify({
+            email_trip_notifications: checked,
+          }),
+        },
+      );
 
-  const handleCurrencyChange = () => {
-    const currencies: Currency[] = ["EUR", "USD", "GBP"];
-    const currentIndex = currencies.indexOf(preferences.currency);
-    const nextCurrency = currencies[(currentIndex + 1) % currencies.length];
+      if (!response.ok) {
+        throw new Error("Erreur mise à jour");
+      }
 
-    setPreferences((prev) => ({
-      ...prev,
-      currency: nextCurrency,
-    }));
-  };
+      toast.success("Préférences enregistrées.");
+    } catch (error) {
+      console.error(error);
 
-  const getCurrencyLabel = (currency: Currency) => {
-    switch (currency) {
-      case "EUR":
-        return "Euro (€)";
-      case "USD":
-        return "Dollar ($)";
-      case "GBP":
-        return "Livre sterling (£)";
-      default:
-        return "Euro (€)";
+      setPreferences({
+        email_trip_notifications: !checked,
+      });
+
+      toast.error("Erreur lors de la mise à jour des préférences.");
     }
   };
 
   return (
-    <section className="preferences-card">
-      <div className="preferences-list">
-        <div className="preference-item">
-          <div className="preference-left">
-            <div className="icon-wrapper theme-icon">
-              {preferences.theme === "light" ? <Sun size={22} /> : <Moon size={22} />}
-            </div>
-            <span className="preference-text">
-              <strong>Thème :</strong>{" "}
-              {preferences.theme === "light" ? "Clair" : "Sombre"}
-            </span>
+    <div>
+      {loading ? (
+        <p>Chargement...</p>
+      ) : (
+        <label className="preference-item">
+          <input
+            type="checkbox"
+            checked={preferences.email_trip_notifications}
+            onChange={handleToggle}
+          />
+
+          <div className="preference-text">
+            <p className="preference-title">Notifications du voyage</p>
+            <p>
+              Recevoir un email lors d’une activité sur un voyage auquel je
+              participe
+            </p>
           </div>
-
-          <button
-            type="button"
-            className={`toggle-switch ${preferences.theme === "dark" ? "active" : ""}`}
-            onClick={toggleTheme}
-            aria-label="Changer le thème"
-          >
-            <span className="toggle-thumb" />
-          </button>
-        </div>
-
-        <button
-          type="button"
-          className="preference-item preference-button"
-          onClick={handleCurrencyChange}
-        >
-          <div className="preference-left">
-            <div className="icon-wrapper currency-icon">
-              <Euro size={22} />
-            </div>
-            <span className="preference-text">
-              <strong>Devise :</strong> {getCurrencyLabel(preferences.currency)}
-            </span>
-          </div>
-
-          <ChevronRight size={22} className="chevron-icon" />
-        </button>
-
-        <div className="preference-item">
-          <div className="preference-left">
-            <div className="icon-wrapper notification-icon">
-              <Bell size={22} />
-            </div>
-            <span className="preference-text">
-              <strong>Notifications :</strong>{" "}
-              {preferences.notifications ? "Activées" : "Désactivées"}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            className={`toggle-switch ${preferences.notifications ? "active" : ""}`}
-            onClick={toggleNotifications}
-            aria-label="Activer ou désactiver les notifications"
-          >
-            <span className="toggle-thumb" />
-          </button>
-        </div>
-      </div>
-    </section>
+        </label>
+      )}
+    </div>
   );
 }
-
-export default PreferencesCard;

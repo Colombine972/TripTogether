@@ -166,6 +166,7 @@ export default function Account() {
 
         <div className="account-card preference-card">
           <h2>Mes Préférences</h2>
+          <PreferencesCard />
         </div>
 
         <div className="account-card delete-account-card">
