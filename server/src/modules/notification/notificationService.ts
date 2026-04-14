@@ -16,6 +16,7 @@ const notifyExpenseAdded = async (
   expenseTitle: string,
   amount: number,
 ) => {
+  
   const trip = await tripRepository.read(tripId);
 
   if (!trip) {
@@ -28,7 +29,7 @@ const notifyExpenseAdded = async (
     ? `${payer.firstname} ${payer.lastname}`
     : "Un participant";
 
-  const tripLink = `${process.env.CLIENT_URL}/trips/${tripId}`;
+  const tripLink = `${process.env.CLIENT_URL}/trip/${tripId}`;
 
   const members = (await tripRepository.findMembersByTrip(
     tripId,

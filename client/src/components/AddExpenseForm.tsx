@@ -1,5 +1,5 @@
 import "../pages/styles/AddExpenseForm.css";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 type Member = {
@@ -19,7 +19,11 @@ type AddExpenseFormProps = {
   onSuccess: () => void;
 };
 
-function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
+function AddExpenseForm({
+  tripId,
+  members,
+  onSuccess,
+}: AddExpenseFormProps) {
   const { auth } = useAuth();
 
   const [title, setTitle] = useState("");
@@ -28,6 +32,7 @@ function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
   const [paidBy, setPaidBy] = useState("");
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -35,18 +40,34 @@ function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/categories`,
         );
+
+        if (!response.ok) {
+          throw new Error("Erreur lors du chargement des catégories");
+        }
+
         const data = await response.json();
         setCategories(data);
       } catch (error) {
-        console.error("Erreur récupération catégories", error);
+        console.error("Erreur récupération catégories :", error);
       }
     };
 
     fetchCategories();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const resetForm = () => {
+    setTitle("");
+    setAmount("");
+    setCategoryId("");
+    setPaidBy("");
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
 
     if (!auth?.token) {
       console.error("Utilisateur non authentifié");
@@ -57,6 +78,15 @@ function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
       console.error("Champs manquants");
       return;
     }
+
+    const numericAmount = Number(amount);
+
+    if (Number.isNaN(numericAmount) || numericAmount <= 0) {
+      console.error("Montant invalide");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       const response = await fetch(
@@ -69,8 +99,8 @@ function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
           },
           body: JSON.stringify({
             tripId,
-            title,
-            amount: Number(amount),
+            title: title.trim(),
+            amount: numericAmount,
             paid_by: Number(paidBy),
             category_id: Number(categoryId),
           }),
@@ -79,13 +109,16 @@ function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log("Erreur backend:", errorData);
+        console.error("Erreur backend :", errorData);
         throw new Error(errorData.message || "Erreur création dépense");
       }
 
+      resetForm();
       onSuccess();
     } catch (error) {
-      console.error(error);
+      console.error("Erreur ajout dépense :", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -97,7 +130,8 @@ function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
         type="text"
         placeholder="Titre"
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={(event) => setTitle(event.target.value)}
+        disabled={isSubmitting}
         required
       />
 
@@ -105,27 +139,32 @@ function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
         type="number"
         placeholder="Montant"
         value={amount}
-        onChange={(e) => setAmount(e.target.value)}
+        onChange={(event) => setAmount(event.target.value)}
+        min="0.01"
+        step="0.01"
+        disabled={isSubmitting}
         required
       />
 
       <select
         value={categoryId}
-        onChange={(e) => setCategoryId(e.target.value)}
+        onChange={(event) => setCategoryId(event.target.value)}
+        disabled={isSubmitting}
         required
       >
         <option value="">Choisir une catégorie</option>
 
-        {categories.map((cat) => (
-          <option key={cat.id} value={cat.id}>
-            {cat.name}
+        {categories.map((category) => (
+          <option key={category.id} value={category.id}>
+            {category.name}
           </option>
         ))}
       </select>
 
       <select
         value={paidBy}
-        onChange={(e) => setPaidBy(e.target.value)}
+        onChange={(event) => setPaidBy(event.target.value)}
+        disabled={isSubmitting}
         required
       >
         <option value="">Payé par</option>
@@ -137,7 +176,14 @@ function AddExpenseForm({ tripId, members, onSuccess }: AddExpenseFormProps) {
         ))}
       </select>
 
-      <button type="submit">Enregistrer</button>
+      <button
+        type="submit"
+        disabled={
+          isSubmitting || !title || !amount || !categoryId || !paidBy
+        }
+      >
+        {isSubmitting ? "Enregistrement en cours..." : "Enregistrer"}
+      </button>
     </form>
   );
 }
