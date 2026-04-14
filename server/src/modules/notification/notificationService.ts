@@ -14,6 +14,12 @@ const notifyExpenseAdded = async (
   expenseTitle: string,
   amount: number,
 ) => {
+  const trip = await tripRepository.read(tripId);
+
+  if (!trip) {
+    return;
+  }
+
   const members = (await tripRepository.findMembersByTrip(
     tripId,
   )) as TripMember[];
@@ -33,21 +39,25 @@ const notifyExpenseAdded = async (
       continue;
     }
 
-    await sendEmail(
-      member.email,
-      "Nouvelle dépense sur votre voyage TripTogether",
-      `Bonjour ${member.firstname},
+    try {
+      await sendEmail(
+        member.email,
+        `Nouvelle dépense sur "${trip.title}"`,
+        `Bonjour ${member.firstname},
 
-Une nouvelle dépense a été ajoutée sur un voyage auquel vous participez.
+Une nouvelle dépense a été ajoutée au voyage "${trip.title}".
 
 Dépense : ${expenseTitle}
 Montant : ${amount.toFixed(2)} €
 
 Connectez-vous à TripTogether pour consulter les détails.
 
-À bientôt,
+À bientôt ✈️
 TripTogether`,
-    );
+      );
+    } catch (error) {
+      console.error(`Erreur envoi email à ${member.email}`, error);
+    }
   }
 };
 
