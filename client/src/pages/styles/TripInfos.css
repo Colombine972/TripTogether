@@ -71,3 +71,22 @@
   color: #111827;
   font-weight: 600;
 }
+
+
+.btn-invite {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.btn-invite:hover {
+  background-color: #4338ca;
+}
+
+.btn-edit {
+  background-color: #e5e7eb;
+  color: #111827;
+}
+
+.btn-edit:hover {
+  background-color: #d1d5db;
+}

@@ -13,6 +13,7 @@ type TripInfosProps = {
 function TripInfos({ trip }: TripInfosProps) {
   const { auth } = useAuth();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   if (!trip) return null;
 
@@ -25,6 +26,10 @@ function TripInfos({ trip }: TripInfosProps) {
 
   const closeInviteModal = () => {
     setIsInviteModalOpen(false);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
   };
 
   const headerImage = trip.photo_reference || "/images/default-city.jpg";
@@ -48,8 +53,27 @@ function TripInfos({ trip }: TripInfosProps) {
             endAt={trip.end_at}
             participants={trip.participants}
             role={isOrganizer ? "organizer" : "participant"}
-            onInvite={isOrganizer ? openInviteModal : undefined}
           />
+
+          {isOrganizer && (
+            <div className="trip-actions">
+              <button
+                type="button"
+                className="btn-invite"
+                onClick={openInviteModal}
+              >
+                Inviter
+              </button>
+
+              <button
+                type="button"
+                className="btn-edit"
+                onClick={() => setIsEditModalOpen(true)}
+              >
+                Modifier
+              </button>
+            </div>
+          )}
         </article>
       </section>
 
@@ -64,6 +88,13 @@ function TripInfos({ trip }: TripInfosProps) {
           participants={trip.participants}
           onClose={closeInviteModal}
         />
+      </Modal>
+
+      <Modal isOpen={isEditModalOpen} onClose={closeEditModal}>
+        <div style={{ padding: "1rem" }}>
+          <h2>Modifier le voyage</h2>
+          <p>Le formulaire de modification viendra ici.</p>
+        </div>
       </Modal>
     </>
   );
