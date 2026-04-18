@@ -131,10 +131,10 @@ function TripInvitation({
         <article className="tripinvitation-bg-image" />
 
         <article className="tripinvitation-trip-infos">
-          <h2>{title}</h2>
           <p className="tripcard-location">
             {city}, {country}
           </p>
+          <h2>{title}</h2>
           <p className="tripcard-dates">
             {formatDate(startAt)} - {formatDate(endAt)}
           </p>

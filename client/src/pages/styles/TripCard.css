@@ -1,49 +1,59 @@
-.tripcard-component {
-  text-align: center;
-  width: 32vw;
-  height: 20vh;
+.tripcard-overlay-card {
+  color: white;
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+}
+
+.tripcard-overlay-title {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.1;
+  font-weight: 700;
+  max-width: 20ch;
+  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.tripcard-overlay-location {
+  margin: 0;
+  font-size: clamp(1.1rem, 2vw, 1.45rem);
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+}
+
+.tripcard-overlay-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.tripcard-pill {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  font-family: var(--body-text);
-  font-size: var(--font-size-M);
-}
-
-.tripcard-title {
-  font-size: var(--font-size-L);
-}
-
-.tripcard-dates {
-  font-size: 18px;
-}
-
-.tripcard-invitation-btn {
-  border-radius: 10px;
-  width: 80px;
-  height: 30px;
+  gap: 0.45rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   color: white;
-  background-color: var(--primary-button);
-  cursor: pointer;
-  width: 8vw;
-  height: 5.5vh;
+  font-size: 0.98rem;
   font-weight: 500;
-  font-family: var(--body-text);
-  font-size: var(--font-size-M);
-  padding: 0.6rem 1.25rem;
-  border-radius: 0.5rem;
-  line-height: 1;
 }
 
-.tripcard-invitation-btn:hover {
-  opacity: 70%;
-  transition: opacity .1s ease-out;
-  cursor: pointer;
-}
+@media (max-width: 768px) {
+  .tripcard-overlay-title {
+    max-width: 100%;
+  }
 
-@media (min-width: 768px) {
-  .tripcard-component {
-    width: 30vw; /* On peut reprendre le vw ici si tu aimes ce look sur PC */
-    height: 25vh;
+  .tripcard-overlay-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tripcard-pill {
+    width: fit-content;
   }
 }

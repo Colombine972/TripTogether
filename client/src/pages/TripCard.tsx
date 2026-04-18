@@ -8,7 +8,6 @@ type TripCardProps = {
   endAt: string;
   participants: number | undefined;
   role?: "organizer" | "participant";
-  onInvite?: () => void;
 };
 
 function TripCard({
@@ -18,8 +17,6 @@ function TripCard({
   startAt,
   endAt,
   participants,
-  role,
-  onInvite,
 }: TripCardProps) {
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
@@ -33,32 +30,20 @@ function TripCard({
     }).format(date);
   };
 
-  console.log("ROLE:", role);
-
   return (
-    <>
-      <article className="tripcard-component">
-        <h2 className="tripcard-title">{title}</h2>
+    <article className="tripcard-overlay-card">
+      <p className="tripcard-overlay-location">
+        {city}, {country}
+      </p>
+      <h2 className="tripcard-overlay-title">{title}</h2>
 
-        {new Date() < new Date(startAt) && role === "organizer" && onInvite && (
-          <button
-            type="button"
-            className="tripcard-invitation-btn"
-            onClick={onInvite}
-          >
-            Inviter
-          </button>
-        )}
-
-        <p className="tripcard-location">
-          {city}, {country}
-        </p>
-        <p className="tripcard-dates">
-          {formatDate(startAt)} - {formatDate(endAt)}
-        </p>
-        <p className="tripcard-participants">{participants} participant(s)</p>
-      </article>
-    </>
+      <div className="tripcard-overlay-meta">
+        <span className="tripcard-pill">
+          🗓️ {formatDate(startAt)} - {formatDate(endAt)}
+        </span>
+        <span className="tripcard-pill">👥 {participants} participant(s)</span>
+      </div>
+    </article>
   );
 }
 

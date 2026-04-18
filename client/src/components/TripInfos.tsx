@@ -1,10 +1,10 @@
-import TripCard from "../pages/TripCard";
 import TripInvitation from "../pages/TripInvitation";
 import type { TheTrip } from "../types/tripType";
 import Modal from "./Modal";
 import "../pages/styles/TripInfos.css";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import TripCard from "../pages/TripCard";
 
 type TripInfosProps = {
   trip: TheTrip | null;
@@ -19,6 +19,7 @@ function TripInfos({ trip }: TripInfosProps) {
 
   const tripId = trip.id;
   const isOrganizer = auth?.user?.id === trip.user_id;
+  const headerImage = trip.photo_reference || "/images/default-city.jpg";
 
   const openInviteModal = () => {
     setIsInviteModalOpen(true);
@@ -32,34 +33,20 @@ function TripInfos({ trip }: TripInfosProps) {
     setIsEditModalOpen(false);
   };
 
-  const headerImage = trip.photo_reference || "/images/default-city.jpg";
-
   return (
     <>
-      <header
-        className="trip-header"
-        style={{
-          backgroundImage: `url(${headerImage})`,
-        }}
-      />
-
-      <section className="trip-trip-infos">
-        <article className="trip-tripinfocard">
-          <TripCard
-            title={trip.title}
-            city={trip.city}
-            country={trip.country}
-            startAt={trip.start_at}
-            endAt={trip.end_at}
-            participants={trip.participants}
-            role={isOrganizer ? "organizer" : "participant"}
-          />
-
+      <section className="trip-hero-wrapper">
+        <div
+          className="trip-hero-card"
+          style={{
+            backgroundImage: `url(${headerImage})`,
+          }}
+        >
           {isOrganizer && (
-            <div className="trip-actions">
+            <div className="trip-hero-actions">
               <button
                 type="button"
-                className="btn-invite"
+                className="trip-hero-btn trip-hero-btn-primary"
                 onClick={openInviteModal}
               >
                 Inviter
@@ -67,21 +54,33 @@ function TripInfos({ trip }: TripInfosProps) {
 
               <button
                 type="button"
-                className="btn-edit"
+                className="trip-hero-btn trip-hero-btn-secondary"
                 onClick={() => setIsEditModalOpen(true)}
               >
                 Modifier
               </button>
             </div>
           )}
-        </article>
+
+          <div className="trip-hero-overlay">
+            <TripCard
+              title={trip.title}
+              city={trip.city}
+              country={trip.country}
+              startAt={trip.start_at}
+              endAt={trip.end_at}
+              participants={trip.participants}
+              role={isOrganizer ? "organizer" : "participant"}
+            />
+          </div>
+        </div>
       </section>
 
       <Modal isOpen={isInviteModalOpen} onClose={closeInviteModal}>
         <TripInvitation
           tripId={tripId}
-          title={trip.title}
           city={trip.city}
+          title={trip.title}
           country={trip.country}
           startAt={trip.start_at}
           endAt={trip.end_at}

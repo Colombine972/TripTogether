@@ -1,92 +1,76 @@
-/* TripInfos.css */
-.trip-header {
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  height: 400px;
+.trip-hero-wrapper {
   display: flex;
-  align-items: center;
   justify-content: center;
-  color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
-  position: relative;
+  padding: 2rem 1rem 0;
 }
 
-.trip-header::before {
+.trip-hero-card {
+  position: relative;
+  width: min(92vw, 720px);
+  min-height: 540px;
+  border-radius: 32px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+}
+
+.trip-hero-card::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: linear-gradient(
+    to bottom,
+    rgba(15, 23, 42, 0.08) 0%,
+    rgba(15, 23, 42, 0.15) 40%,
+    rgba(15, 23, 42, 0.82) 100%
+  );
 }
 
-#trip-infos {
-  width: 100%;
-  margin: -60px auto 24px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  padding: 24px;
-  max-width: 800px;
-  position: relative;
+.trip-hero-actions {
+  position: absolute;
+  top: 22px;
+  right: 22px;
   z-index: 2;
-  min-height: auto;
-}
-
-/* Remove the placeholder pseudo-element */
-#trip-infos::after {
-  content: none;
-}
-
-.date-main-container {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
+  gap: 12px;
 }
 
-.date-container {
-  display: flex;
-  gap: 32px;
-  justify-content: center;
-  width: 100%;
-}
-
-.info-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.info-label {
-  font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.info-value {
-  font-size: 1.125rem;
-  color: #111827;
+.trip-hero-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.9rem 1.3rem;
+  font-size: 0.98rem;
   font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-
-.btn-invite {
-  background-color: #4f46e5;
-  color: white;
+.trip-hero-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
 }
 
-.btn-invite:hover {
-  background-color: #4338ca;
-}
-
-.btn-edit {
-  background-color: #e5e7eb;
+.trip-hero-btn-primary {
+  background: rgba(255, 255, 255, 0.92);
   color: #111827;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
 }
 
-.btn-edit:hover {
-  background-color: #d1d5db;
+.trip-hero-btn-secondary {
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.trip-hero-overlay {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  padding: 2rem;
 }
