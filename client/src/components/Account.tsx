@@ -1,3 +1,4 @@
+import { Download } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
@@ -63,7 +64,7 @@ export default function Account() {
       setShowProfileModal(false);
       setPreview("");
 
-      toast.success("Profil mis à jour");
+      toast.success("Profil mis à jour ✅");
     } catch (error) {
       console.error(error);
       toast.error("Impossible de mettre à jour le profil")
@@ -153,9 +154,10 @@ export default function Account() {
                 </button>
                 <button
                   type="button"
-                  className="edit-btn"
+                  className="edit-btn-save"
                   onClick={handleDownloadData}
                 >
+                  <Download size={18} />
                   Télécharger mes données
                 </button>
               </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import "../pages/styles/Account.css";
+import { toast } from "react-toastify";
 
 
 export default function Account() {
@@ -49,8 +50,10 @@ export default function Account() {
         newPassword: "",
         confirmPassword: "",
       });
+      toast.success("Mot de passe modifié 🔐")
     } catch (error) {
       console.error(error);
+      toast.error("Impossible de modifier le mot de passe")
     }
   };
 
