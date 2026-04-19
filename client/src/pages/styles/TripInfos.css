@@ -1,38 +1,107 @@
-.trip-hero-wrapper {
+.trip-stage {
+  position: relative;
+  min-height: 78vh;
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 2rem 1rem 0;
+  padding: 3.5rem 1rem 4rem;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, #f8f6f2 0%, #fcfbff 45%, #f4f8ff 100%);
+}
+
+/* halos doux */
+.trip-stage-glow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(90px);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.trip-stage-glow-left {
+  width: 260px;
+  height: 260px;
+  top: 10%;
+  left: 6%;
+  background: rgba(255, 182, 122, 0.28);
+}
+
+.trip-stage-glow-right {
+  width: 300px;
+  height: 300px;
+  bottom: 8%;
+  right: 8%;
+  background: rgba(132, 174, 255, 0.22);
+}
+
+/* grille très légère */
+.trip-stage-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(17, 24, 39, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 39, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
+  pointer-events: none;
+}
+
+/* ligne éditoriale */
+.trip-stage-line {
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(31, 41, 55, 0.08),
+    transparent
+  );
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.trip-stage-center {
+  position: relative;
+  z-index: 2;
 }
 
 .trip-hero-card {
   position: relative;
   width: min(92vw, 720px);
-  min-height: 540px;
-  border-radius: 32px;
+  min-height: 560px;
+  border-radius: 34px;
   overflow: hidden;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  box-shadow:
+    0 30px 70px rgba(17, 24, 39, 0.16),
+    0 10px 24px rgba(17, 24, 39, 0.08);
 }
 
 .trip-hero-card::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(15, 23, 42, 0.08) 0%,
-    rgba(15, 23, 42, 0.15) 40%,
-    rgba(15, 23, 42, 0.82) 100%
-  );
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(15, 23, 42, 0.03) 0%,
+      rgba(15, 23, 42, 0.08) 30%,
+      rgba(15, 23, 42, 0.82) 100%
+    );
+  z-index: 1;
 }
 
 .trip-hero-actions {
   position: absolute;
   top: 22px;
   right: 22px;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   gap: 12px;
 }
@@ -40,23 +109,22 @@
 .trip-hero-btn {
   border: none;
   border-radius: 999px;
-  padding: 0.9rem 1.3rem;
+  padding: 0.95rem 1.35rem;
   font-size: 0.98rem;
   font-weight: 600;
   cursor: pointer;
   transition:
     transform 0.2s ease,
-    opacity 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
 .trip-hero-btn:hover {
   transform: translateY(-1px);
-  opacity: 0.95;
 }
 
 .trip-hero-btn-primary {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   color: #111827;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
 }
@@ -64,13 +132,47 @@
 .trip-hero-btn-secondary {
   background: rgba(255, 255, 255, 0.18);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .trip-hero-overlay {
   position: absolute;
   inset: auto 0 0 0;
   z-index: 2;
-  padding: 2rem;
+  padding: 2.2rem;
+}
+
+@media (max-width: 768px) {
+  .trip-stage {
+    min-height: auto;
+    padding: 1.5rem 0.75rem 2.5rem;
+  }
+
+  .trip-stage-grid,
+  .trip-stage-line {
+    display: none;
+  }
+
+  .trip-hero-card {
+    width: 100%;
+    min-height: 480px;
+    border-radius: 24px;
+  }
+
+  .trip-hero-actions {
+    top: 16px;
+    right: 16px;
+    gap: 10px;
+  }
+
+  .trip-hero-btn {
+    padding: 0.8rem 1rem;
+    font-size: 0.92rem;
+  }
+
+  .trip-hero-overlay {
+    padding: 1.35rem;
+  }
 }

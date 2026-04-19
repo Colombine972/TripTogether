@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { toast } from "react-toastify";
 import PreferencesCard from "./PreferencesCard";
 import SecurityCard from "./SecurityCard";
 import "../pages/styles/Account.css";
@@ -61,8 +62,11 @@ export default function Account() {
 
       setShowProfileModal(false);
       setPreview("");
+
+      toast.success("Profil mis à jour");
     } catch (error) {
       console.error(error);
+      toast.error("Impossible de mettre à jour le profil")
     }
   };
 
