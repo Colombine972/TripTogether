@@ -147,7 +147,14 @@ export default function Account() {
               <button
                 type="button"
                 className="btn-role"
-                onClick={() => setShowPasswordModal(false)}
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPasswordData({
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmPassword: "",
+                  });
+                }}
               >
                 Annuler
               </button>
