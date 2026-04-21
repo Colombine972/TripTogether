@@ -67,7 +67,7 @@ export default function Account() {
       toast.success("Profil mis à jour ✅");
     } catch (error) {
       console.error(error);
-      toast.error("Impossible de mettre à jour le profil")
+      toast.error("Impossible de mettre à jour le profil");
     }
   };
 
