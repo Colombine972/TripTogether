@@ -125,38 +125,36 @@ const deleteMyAccount: RequestHandler = async (req, res, next) => {
   }
 };
 
-const changePassword = async (req: Request, res: Response) => {
+const changePassword: RequestHandler = async (req, res) => {
   try {
-    const authReq = req as RequestWithAuth;
-    const userId = Number(authReq.auth?.sub);
-
-    const { currentPassword, newPassword } = req.body;
-
-    if (!userId) {
-      return res.status(401).json({ error: "Utilisateur non authentifié" });
+    if (!req.auth) {
+      res.status(401).json({ error: "Utilisateur non authentifié" });
+      return;
     }
 
+    const userId = Number(req.auth.sub);
+    const { currentPassword, newPassword } = req.body;
+
     if (!currentPassword || !newPassword) {
-      return res
+      res
         .status(400)
         .json({ error: "Tous les champs sont obligatoires" });
+      return;
     }
 
     await userService.changePassword(userId, currentPassword, newPassword);
 
-    return res
-      .status(200)
-      .json({ message: "Mot de passe modifié avec succès" });
+    res.status(200).json({ message: "Mot de passe modifié avec succès" });
   } catch (error) {
-    console.error(error);
+    console.error("Erreur changePassword :", error);
 
     if (error instanceof Error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
 
-    return res.status(500).json({ error: "Erreur serveur" });
+    res.status(500).json({ error: "Erreur serveur" });
   }
 };
-
 
 export default { browse, read, add, updateMe, exportMyData, deleteMyAccount, changePassword };
