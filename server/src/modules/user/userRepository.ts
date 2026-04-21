@@ -90,6 +90,32 @@ class UserRepository {
     return result;
   }
 
+   async readPasswordById(id: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      `
+        SELECT id, password
+        FROM user
+        WHERE id = ?
+      `,
+      [id],
+    );
+
+    return (rows[0] as Pick<User, "id" | "password">) ?? null;
+  }
+
+  async updatePassword(id: number, hashedPassword: string) {
+    const [result] = await databaseClient.query<Result>(
+      `
+        UPDATE user
+        SET password = ?
+        WHERE id = ?
+      `,
+      [hashedPassword, id],
+    );
+
+    return result;
+  }
+
   async readExportProfile(id: number) {
     const [rows] = await databaseClient.query<Rows>(
       `

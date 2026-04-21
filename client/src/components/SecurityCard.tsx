@@ -3,7 +3,6 @@ import { useAuth } from "../contexts/AuthContext";
 import "../pages/styles/Account.css";
 import { toast } from "react-toastify";
 
-
 export default function Account() {
   const { setAuth } = useAuth();
 
@@ -16,15 +15,29 @@ export default function Account() {
     confirmPassword: "",
   });
 
-
   const handleChangePassword = async () => {
     try {
+      if (
+        !passwordData.currentPassword ||
+        !passwordData.newPassword ||
+        !passwordData.confirmPassword
+      ) {
+        toast.error("Tous les champs sont obligatoires");
+        return;
+      }
+
       if (passwordData.newPassword !== passwordData.confirmPassword) {
-        alert("Les mots de passe ne correspondent pas");
+        toast.error("Les mots de passe ne correspondent pas");
         return;
       }
 
       const token = localStorage.getItem("token");
+      console.log("TOKEN :", token);
+
+      if (!token) {
+        toast.error("Utilisateur non authentifié");
+        return;
+      }
 
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/users/change-password`,
@@ -34,15 +47,18 @@ export default function Account() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(passwordData),
+          body: JSON.stringify({
+            currentPassword: passwordData.currentPassword,
+            newPassword: passwordData.newPassword,
+          }),
         },
       );
 
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data.error);
-
-      alert("Mot de passe modifié avec succès");
+      if (!response.ok) {
+        throw new Error(data.error || "Erreur serveur");
+      }
 
       setShowPasswordModal(false);
       setPasswordData({
@@ -50,35 +66,32 @@ export default function Account() {
         newPassword: "",
         confirmPassword: "",
       });
-      toast.success("Mot de passe modifié 🔐")
+      toast.success("Mot de passe modifié 🔐");
     } catch (error) {
       console.error(error);
-      toast.error("Impossible de modifier le mot de passe")
+      toast.error("Impossible de modifier le mot de passe");
     }
   };
 
   return (
+    <div className="account-cards">
+      <div className="security-content">
+        <button
+          type="button"
+          className="security-btn"
+          onClick={() => setShowPasswordModal(true)}
+        >
+          Changer le mot de passe
+        </button>
 
-      <div className="account-cards">
-
-          <div className="security-content">
-            <button
-              type="button"
-              className="security-btn"
-              onClick={() => setShowPasswordModal(true)}
-            >
-              Changer le mot de passe
-            </button>
-
-            <button
-              type="button"
-              className="logout-btn"
-              onClick={() => setShowLogoutModal(true)}
-            >
-              Se déconnecter
-            </button>
-          </div>
-
+        <button
+          type="button"
+          className="logout-btn"
+          onClick={() => setShowLogoutModal(true)}
+        >
+          Se déconnecter
+        </button>
+      </div>
 
       {showPasswordModal && (
         <div className="modal-backdrop">

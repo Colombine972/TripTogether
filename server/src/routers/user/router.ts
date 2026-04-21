@@ -13,5 +13,6 @@ router.get("/:id", userActions.read);
 router.put("/me", verifyToken, userActions.updateMe);
 router.get("/me/export", verifyToken, userActions.exportMyData);
 router.delete("/me", verifyToken, userActions.deleteMyAccount);
+router.put("/change-password", verifyToken, userActions.changePassword);
 
 export default router;

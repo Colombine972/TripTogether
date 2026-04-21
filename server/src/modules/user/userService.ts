@@ -56,7 +56,30 @@ const deleteMyAccount = async (userId: number) => {
   });
 };
 
+const changePassword = async (
+  userId: number,
+  currentPassword: string,
+  newPassword: string,
+) => {
+  const user = await userRepository.readPasswordById(userId);
+
+  if (!user) {
+    throw new Error("Utilisateur introuvable");
+  }
+
+  const passwordMatches = await argon2.verify(user.password, currentPassword);
+
+  if (!passwordMatches) {
+    throw new Error("Mot de passe actuel incorrect");
+  }
+
+  const hashedPassword = await argon2.hash(newPassword);
+
+  await userRepository.updatePassword(userId, hashedPassword);
+};
+
 export default {
   exportUserData,
   deleteMyAccount,
+  changePassword,
 };
