@@ -11,10 +11,14 @@ function Login() {
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
+
+    if (isSubmitting) return;
     setError("");
+    setIsSubmitting(true);
 
     try {
       const response = await fetch(
@@ -46,6 +50,8 @@ function Login() {
     } catch (err) {
       console.error(err);
       setError("Impossible de se connecter au serveur");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -82,8 +88,8 @@ function Login() {
             />
           </div>
 
-          <button type="submit" className="submit-btn">
-            SE CONNECTER
+          <button type="submit" className="submit-btn" disabled={isSubmitting}>
+            {isSubmitting ? "Connexion..." : "SE CONNECTER"}
           </button>
         </form>
         <div className="footer-login">
