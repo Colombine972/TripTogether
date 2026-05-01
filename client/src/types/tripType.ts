@@ -48,4 +48,7 @@ export type TheTrip = {
   user_id?: number;
   participants?: number;
   role?: "organizer" | "participant";
+  local_currency?: string;
+  base_currency?: string;
+  country_code?: string;
 };

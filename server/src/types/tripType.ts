@@ -10,6 +10,9 @@ export type Trip = {
   photo_reference?: string | null;
   owner_firstname?: string;
   owner_lastname?: string;
+  country_code?: string | null;
+  local_currency?: string | null;
+  base_currency?: string | null;
 };
 export type Step = {
   id: number;

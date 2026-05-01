@@ -8,6 +8,8 @@ type TripCardProps = {
   endAt: string;
   participants: number | undefined;
   role?: "organizer" | "participant";
+  localCurrency?: string | null;
+  baseCurrency?: string | null;
 };
 
 function TripCard({
@@ -17,6 +19,8 @@ function TripCard({
   startAt,
   endAt,
   participants,
+  localCurrency,
+  baseCurrency,
 }: TripCardProps) {
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
@@ -42,6 +46,11 @@ function TripCard({
           🗓️ {formatDate(startAt)} - {formatDate(endAt)}
         </span>
         <span className="tripcard-pill">👥 {participants} participant(s)</span>
+            {localCurrency && baseCurrency && (
+          <span className="tripcard-pill">
+            💱 {localCurrency} → {baseCurrency}
+          </span>
+        )}
       </div>
     </article>
   );

@@ -69,6 +69,8 @@ function TripInfos({ trip }: TripInfosProps) {
                 endAt={trip.end_at}
                 participants={trip.participants}
                 role={isOrganizer ? "organizer" : "participant"}
+                localCurrency={trip.local_currency}
+                baseCurrency={trip.base_currency}
               />
             </div>
           </div>

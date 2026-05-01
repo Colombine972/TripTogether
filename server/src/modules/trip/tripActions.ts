@@ -95,13 +95,25 @@ const add: RequestHandler = async (req, res, next) => {
   const authReq = req as AuthRequest;
 
   try {
+    console.log("BODY:", req.body);
+
     if (!authReq.auth) {
       res.status(401).json({ error: "Utilisateur non authentifié" });
       return;
     }
 
-    const { title, description, city, country, start_at, end_at, photo_reference } =
-      req.body;
+    const {
+      title,
+      description,
+      city,
+      country,
+      country_code,
+      local_currency,
+      base_currency,
+      start_at,
+      end_at,
+      photo_reference,
+    } = req.body;
 
     if (!title || !description || !city || !country || !start_at || !end_at) {
       res.status(400).json({ error: "Tous les champs sont obligatoires" });
@@ -126,12 +138,14 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-
     const newTrip: Trip = {
       title,
       description,
       city,
       country,
+      country_code,
+      local_currency,
+      base_currency,
       start_at,
       end_at,
       user_id: Number(authReq.auth.sub),

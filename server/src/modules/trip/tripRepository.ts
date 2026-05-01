@@ -5,12 +5,17 @@ import type { Trip } from "../../types/tripType";
 class TripRepository {
   async create(trip: Omit<Trip, "id">) {
     const [result] = await databaseClient.query<Result>(
-      "INSERT INTO trip (title, description, city, country, start_at, end_at, user_id, photo_reference) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      `INSERT INTO trip 
+  (title, description, city, country, country_code, local_currency, base_currency, start_at, end_at, user_id, photo_reference) 
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         trip.title,
         trip.description,
         trip.city,
         trip.country,
+        trip.country_code ?? null,
+        trip.local_currency ?? null,
+        trip.base_currency ?? "EUR",
         trip.start_at,
         trip.end_at,
         trip.user_id,
@@ -21,26 +26,48 @@ class TripRepository {
 
     await databaseClient.query<Result>(
       "INSERT INTO step (city, country, trip_id, user_id, photo_reference, is_initial) VALUES (?, ?, ?, ?, ?, ?)",
-      [trip.city, trip.country, newTripId, trip.user_id, trip.photo_reference ?? null, true],
+      [
+        trip.city,
+        trip.country,
+        newTripId,
+        trip.user_id,
+        trip.photo_reference ?? null,
+        true,
+      ],
     );
 
     return newTripId;
   }
 
   async readTripInfo(id: number): Promise<Trip | null> {
-    const [rows] = await databaseClient.query<Rows>(
-      `SELECT t.id, t.title, t.description, t.start_at, t.end_at, t.city, t.country, t.photo_reference, COUNT(i.id) AS participants 
-      FROM trip t 
-      LEFT JOIN invitation i ON i.trip_id = t.id AND i.status = "accepted" 
-      WHERE t.id = ? 
-      GROUP BY t.id`,
-      [id],
-    );
+  const [rows] = await databaseClient.query<Rows>(
+    `SELECT 
+      t.id,
+      t.title,
+      t.description,
+      t.start_at,
+      t.end_at,
+      t.city,
+      t.country,
+      t.country_code,
+      t.local_currency,
+      t.base_currency,
+      t.photo_reference,
+      t.user_id,
+      COUNT(i.id) AS participants 
+    FROM trip t 
+    LEFT JOIN invitation i 
+      ON i.trip_id = t.id 
+      AND i.status = "accepted" 
+    WHERE t.id = ? 
+    GROUP BY t.id`,
+    [id],
+  );
 
-    if (rows.length === 0) return null;
+  if (rows.length === 0) return null;
 
-    return rows[0] as Trip;
-  }
+  return rows[0] as Trip;
+}
 
   async isUserMemberOfTrip(tripId: number, userId: number): Promise<boolean> {
     const [rows] = await databaseClient.query<Rows>(
