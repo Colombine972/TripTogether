@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import "./styles/CreateTrip.css";
 import "./styles/mobile.css";
 import { useJsApiLoader } from "@react-google-maps/api";
-// import backArrowLogo from "../assets/images/back-arrow-logo.png";
 import { GOOGLE_MAPS_LIBRARIES } from "../constants/maps";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -26,6 +25,8 @@ export default function CreateTrip() {
   const [photoReference, setPhotoReference] = useState("");
   const [endOfTrip, setEndOfTrip] = useState({ end_at: "" });
   const [startDate, setStartDate] = useState("");
+  const [countryCode, setCountryCode] = useState("");
+  const [localCurrency, setLocalCurrency] = useState("");
 
   const inputRef = useRef<HTMLDivElement>(null);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -55,7 +56,6 @@ export default function CreateTrip() {
 
     const initAutocomplete = async () => {
       try {
-        // Importation dynamique de la librairie "places"
         // @ts-ignore
         const { PlaceAutocompleteElement } = (await google.maps.importLibrary(
           "places",
@@ -89,10 +89,16 @@ export default function CreateTrip() {
               comp.types.includes("country"),
             );
             const countryName = countryComp?.longText;
-            const photoUrl = place.photos?.[0]?.getURI({ maxHeight: 400 }) || "";
+            const countryCode = countryComp?.shortText;
+            const photoUrl =
+              place.photos?.[0]?.getURI({ maxHeight: 400 }) || "";
 
             setCity(cityName);
             if (countryName) setCountry(countryName);
+            if (countryCode) {
+              setCountryCode(countryCode);
+              fetchCurrencyByCountryCode(countryCode);
+            }
             setPhotoReference(photoUrl);
           },
         );
@@ -112,6 +118,27 @@ export default function CreateTrip() {
   const capitalize = (text: string) => {
     if (!text) return text;
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  };
+
+  const fetchCurrencyByCountryCode = async (countryCode: string) => {
+    try {
+      const response = await fetch(
+        `https://restcountries.com/v3.1/alpha/${countryCode}?fields=currencies`,
+      );
+
+      if (!response.ok) {
+        throw new Error("Impossible de récupérer la devise");
+      }
+
+      const data = await response.json();
+      const currencyCode = Object.keys(data.currencies)[0];
+
+      setLocalCurrency(currencyCode);
+    } catch (error) {
+      console.error(error);
+      setLocalCurrency("");
+      toast.error("Impossible de récupérer la devise du pays");
+    }
   };
 
   const submitCreateTrip = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -160,11 +187,6 @@ export default function CreateTrip() {
 
     if (!currentCity || !currentCountry || !endOfTrip.end_at) {
       toast.error("Veuillez remplir tous les champs obligatoires");
-      console.log("Champs manquants:", {
-        currentCity,
-        country: currentCountry,
-        endOfTrip: endOfTrip.end_at,
-      });
       return;
     }
 
@@ -175,10 +197,11 @@ export default function CreateTrip() {
       end_at: endOfTrip.end_at,
       city: capitalize(currentCity),
       country: capitalize(currentCountry),
+      country_code: countryCode,
+      local_currency: localCurrency,
+      base_currency: "EUR",
       photo_reference: photoReference,
     };
-
-    console.log("Données du voyage à envoyer:", newTrip);
 
     try {
       const response = await fetch(
@@ -251,6 +274,11 @@ export default function CreateTrip() {
           <label htmlFor="city">Lieu *</label>
           {/* Conteneur pour le composant Google Places */}
           <div ref={inputRef} style={{ width: "100%" }} />
+          {localCurrency && (
+            <p className="currency-info">
+              Devise locale détectée : <strong>{localCurrency}</strong>
+            </p>
+          )}
         </div>
 
         <div className="date-container">

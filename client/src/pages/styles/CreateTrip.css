@@ -183,6 +183,14 @@
   color: #999;
 }
 
+.currency-info {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+
+
 .astuces-container {
   display: flex;
   justify-content: center;
