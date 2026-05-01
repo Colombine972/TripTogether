@@ -1,3 +1,4 @@
+import CurrencyBadge from "../components/CurrencyBadge";
 import "./styles/TripCard.css";
 
 type TripCardProps = {
@@ -20,7 +21,6 @@ function TripCard({
   endAt,
   participants,
   localCurrency,
-  baseCurrency,
 }: TripCardProps) {
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
@@ -46,9 +46,9 @@ function TripCard({
           🗓️ {formatDate(startAt)} - {formatDate(endAt)}
         </span>
         <span className="tripcard-pill">👥 {participants} participant(s)</span>
-            {localCurrency && baseCurrency && (
+        {localCurrency && (
           <span className="tripcard-pill">
-            💱 {localCurrency} → {baseCurrency}
+            <CurrencyBadge currencyCode={localCurrency} />
           </span>
         )}
       </div>

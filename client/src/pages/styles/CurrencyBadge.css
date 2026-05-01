@@ -1,0 +1,11 @@
+.currency-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.currency-badge-symbol {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+}
