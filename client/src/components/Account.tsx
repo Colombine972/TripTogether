@@ -179,7 +179,9 @@ export default function Account() {
 
         <div className="account-card delete-account-card">
           <h2>Suppression du compte</h2>
+          <div className="card-content">
           <DeleteAccountCard />
+        </div>
         </div>
       </div>
 

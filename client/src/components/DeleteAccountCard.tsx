@@ -112,7 +112,7 @@ export default function DeleteAccountCard({
   };
   return (
     <>
-      <div>
+      <div className="delete-content" >
         <p className="delete-account-warning">
           En supprimant votre compte, vous perdez immédiatement l’accès à
           l’application. <br />Une nouvelle connexion ne sera plus possible, sauf en
