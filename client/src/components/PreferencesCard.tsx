@@ -105,34 +105,31 @@ export default function PreferencesCard() {
     });
   };
 
-
   return (
     <div>
       {loading ? (
         <p>Chargement...</p>
       ) : (
         <div className="preferences-list">
-        <label className="preference-item">
-          <input
-            type="checkbox"
-            checked={preferences.email_trip_notifications}
-            onChange={handleToggle}
-          />
+          <label className="preference-item">
+            <input
+              type="checkbox"
+              checked={preferences.email_trip_notifications}
+              onChange={handleToggle}
+            />
 
-          <div className="preference-text">
-            <p className="preference-title">Notifications du voyage</p>
-            <p>
-              Recevoir un email lors d’une activité sur un voyage auquel je
-              participe
-            </p>
-          </div>
-        </label>
-
-                  <div className="preference-item">
             <div className="preference-text">
-              <p className="preference-title">
-                Devise d’équilibrage préférée
+              <p className="preference-title">Notifications du voyage</p>
+              <p>
+                Recevoir un email lors d’une activité sur un voyage auquel je
+                participe
               </p>
+            </div>
+          </label>
+
+          <div className="preference-item currency-preference">
+            <div className="preference-text">
+              <p className="preference-title">Devise d’équilibrage préférée</p>
               <p>
                 Cette devise sera utilisée par défaut pour les comptes et les
                 remboursements.

@@ -214,13 +214,13 @@
 
 .preference-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+
   gap: 1rem;
 }
 
 .preference-item input[type="checkbox"] {
-  margin-top: 4px; 
+  margin-top: 12px; 
   transform: scale(1.4);
 }
 
@@ -231,6 +231,22 @@
 .preference-text p {
   margin: 4px 0 0;
   color: #555;
+}
+
+.currency-preference {
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.currency-select {
+  width: 100%;
+  max-width: 260px;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 0.95rem;
+  cursor: pointer;
 }
 
 /* SUPPRESSION COMPTE */
