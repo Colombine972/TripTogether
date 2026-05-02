@@ -186,6 +186,22 @@
 
 /* PREFERENCES */
 
+.preferences-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.currency-select {
+  min-width: 180px;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
 .preference-text {
   display: flex;
   flex-direction: column;
@@ -193,13 +209,14 @@
   font-size: 17px;
   line-height: 1.5;
   margin: 0;
+  flex: 1;
 }
 
 .preference-item {
   display: flex;
-  align-items: center; /* aligne en haut */
-  gap: 12px;
-  cursor: pointer;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .preference-item input[type="checkbox"] {

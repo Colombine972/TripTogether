@@ -5,13 +5,21 @@ import "../pages/styles/Account.css";
 
 type PreferencesType = {
   email_trip_notifications: boolean;
+  default_currency: string;
 };
+
+const mainCurrencies = [
+  { code: "EUR", label: "EUR - Euro" },
+  { code: "USD", label: "USD - Dollar américain" },
+  { code: "GBP", label: "GBP - Livre sterling" },
+];
 
 export default function PreferencesCard() {
   const { auth } = useAuth();
 
   const [preferences, setPreferences] = useState<PreferencesType>({
     email_trip_notifications: true,
+    default_currency: "EUR",
   });
 
   const [loading, setLoading] = useState(true);
@@ -36,6 +44,7 @@ export default function PreferencesCard() {
 
         setPreferences({
           email_trip_notifications: Boolean(data.email_trip_notifications),
+          default_currency: data.default_currency || "EUR",
         });
       } catch (error) {
         console.error(error);
@@ -50,15 +59,10 @@ export default function PreferencesCard() {
     }
   }, [auth?.token]);
 
-  const handleToggle = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const checked = event.target.checked;
+  const updatePreferences = async (updatedPreferences: PreferencesType) => {
+    const previousPreferences = preferences;
 
-    setPreferences({
-      email_trip_notifications: checked,
-    });
-
+    setPreferences(updatedPreferences);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/users/preferences`,
@@ -68,9 +72,7 @@ export default function PreferencesCard() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${auth?.token}`,
           },
-          body: JSON.stringify({
-            email_trip_notifications: checked,
-          }),
+          body: JSON.stringify(updatedPreferences),
         },
       );
 
@@ -82,19 +84,34 @@ export default function PreferencesCard() {
     } catch (error) {
       console.error(error);
 
-      setPreferences({
-        email_trip_notifications: !checked,
-      });
-
+      setPreferences(previousPreferences);
       toast.error("Erreur lors de la mise à jour des préférences.");
     }
   };
+
+  const handleToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    updatePreferences({
+      ...preferences,
+      email_trip_notifications: event.target.checked,
+    });
+  };
+
+  const handleCurrencyChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    updatePreferences({
+      ...preferences,
+      default_currency: event.target.value,
+    });
+  };
+
 
   return (
     <div>
       {loading ? (
         <p>Chargement...</p>
       ) : (
+        <div className="preferences-list">
         <label className="preference-item">
           <input
             type="checkbox"
@@ -110,6 +127,31 @@ export default function PreferencesCard() {
             </p>
           </div>
         </label>
+
+                  <div className="preference-item">
+            <div className="preference-text">
+              <p className="preference-title">
+                Devise d’équilibrage préférée
+              </p>
+              <p>
+                Cette devise sera utilisée par défaut pour les comptes et les
+                remboursements.
+              </p>
+            </div>
+
+            <select
+              className="currency-select"
+              value={preferences.default_currency}
+              onChange={handleCurrencyChange}
+            >
+              {mainCurrencies.map((currency) => (
+                <option key={currency.code} value={currency.code}>
+                  {currency.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       )}
     </div>
   );
