@@ -130,7 +130,7 @@ export default function Account() {
         <div className="account-card">
           <h2>Informations personnelles</h2>
 
-          <div className="account-display">
+          <div className="card-content">
             <div className="account-avatar">
               <img
                 src={preview || user.avatar_url || "/images/default-avatar.png"}
@@ -167,7 +167,9 @@ export default function Account() {
 
         <div className="account-card security-card">
           <h2>Sécurité</h2>
+          <div className="card-content">
           <SecurityCard />
+        </div>
         </div>
 
         <div className="account-card preference-card">

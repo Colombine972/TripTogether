@@ -74,8 +74,13 @@ export default function Account() {
   };
 
   return (
-    <div className="account-cards">
+    <>
       <div className="security-content">
+        <p className="security-description">
+          Gérez la sécurité de votre compte. Modifiez votre mot de passe pour
+          protéger vos informations personnelles et sécuriser l’accès à votre
+          compte.
+        </p>
         <button
           type="button"
           className="security-btn"
@@ -201,6 +206,6 @@ export default function Account() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
