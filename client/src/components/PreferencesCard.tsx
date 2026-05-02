@@ -1,3 +1,4 @@
+import { Bell, Coins } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useAuth } from "../contexts/AuthContext";
@@ -111,42 +112,53 @@ export default function PreferencesCard() {
         <p>Chargement...</p>
       ) : (
         <div className="preferences-list">
-          <label className="preference-item">
-            <input
-              type="checkbox"
-              checked={preferences.email_trip_notifications}
-              onChange={handleToggle}
-            />
+          <div className="preference-row">
+            <div className="preference-icon">
+              <Bell size={22} />
+            </div>
 
-            <div className="preference-text">
+            <div className="preference-content">
               <p className="preference-title">Notifications du voyage</p>
               <p>
                 Recevoir un email lors d’une activité sur un voyage auquel je
                 participe
               </p>
-            </div>
-          </label>
 
-          <div className="preference-item currency-preference">
-            <div className="preference-text">
+              <label className="preference-checkbox">
+                <input
+                  type="checkbox"
+                  checked={preferences.email_trip_notifications}
+                  onChange={handleToggle}
+                />
+                Activer les notifications
+              </label>
+            </div>
+          </div>
+
+          <div className="preference-row">
+            <div className="preference-icon">
+              <Coins size={22} />
+            </div>
+
+            <div className="preference-content">
               <p className="preference-title">Devise d’équilibrage préférée</p>
               <p>
                 Cette devise sera utilisée par défaut pour les comptes et les
                 remboursements.
               </p>
-            </div>
 
-            <select
-              className="currency-select"
-              value={preferences.default_currency}
-              onChange={handleCurrencyChange}
-            >
-              {mainCurrencies.map((currency) => (
-                <option key={currency.code} value={currency.code}>
-                  {currency.label}
-                </option>
-              ))}
-            </select>
+              <select
+                className="currency-select"
+                value={preferences.default_currency}
+                onChange={handleCurrencyChange}
+              >
+                {mainCurrencies.map((currency) => (
+                  <option key={currency.code} value={currency.code}>
+                    {currency.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       )}
