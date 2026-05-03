@@ -1,3 +1,4 @@
+import { LockKeyhole, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import "../pages/styles/Account.css";
@@ -86,6 +87,7 @@ export default function Account() {
           className="security-btn"
           onClick={() => setShowPasswordModal(true)}
         >
+          <LockKeyhole size={18} />
           Changer le mot de passe
         </button>
 
@@ -94,6 +96,7 @@ export default function Account() {
           className="logout-btn"
           onClick={() => setShowLogoutModal(true)}
         >
+          <LogOut size={18} />
           Se déconnecter
         </button>
       </div>

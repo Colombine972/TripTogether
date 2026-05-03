@@ -1,4 +1,4 @@
-import { Download } from "lucide-react";
+import { Pencil, Download } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
@@ -158,7 +158,8 @@ export default function Account() {
                 className="edit-btn"
                 onClick={handleOpenProfileModal}
               >
-                Modifier
+                <Pencil size={18} />
+                Modifier mon profil
               </button>
               <button
                 type="button"

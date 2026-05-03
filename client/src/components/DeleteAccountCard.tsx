@@ -1,3 +1,4 @@
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
@@ -124,6 +125,7 @@ export default function DeleteAccountCard({
           className="delete-btn"
           onClick={handleOpenDeleteModal}
         >
+          <Trash2 size={18} />
           Supprimer mon compte
         </button>
       </div>
