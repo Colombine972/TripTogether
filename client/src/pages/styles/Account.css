@@ -28,12 +28,6 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  transition: 0.2s;
-}
-
-.account-card:hover {
-  transform: translateY(-12px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
 }
 
 .account-card h2 {
@@ -58,7 +52,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: start; /* 🔥 centrage vertical */
+  justify-content: start;
 }
 
 /* HEADER (avatar + infos) */
