@@ -129,38 +129,45 @@ export default function Account() {
       <div className="account-cards">
         <div className="account-card">
           <h2>Informations personnelles</h2>
+          <p className="account-description">
+            Mettez à jour votre nom, votre email et photo de profil.
+          </p>
 
-          <div className="card-content">
-            <div className="account-avatar">
-              <img
-                src={preview || user.avatar_url || "/images/default-avatar.png"}
-                alt="avatar"
-              />
+          <div className="card-content account-profile-content">
+            <div className="account-header">
+              <div className="account-avatar">
+                <img
+                  src={
+                    preview || user.avatar_url || "/images/default-avatar.png"
+                  }
+                  alt="avatar"
+                />
+              </div>
+
+              <div className="account-identity">
+                <h3>
+                  {user.firstname} {user.lastname}
+                </h3>
+                <p>{user.email}</p>
+              </div>
             </div>
 
-            <div className="account-info">
-              <h3>
-                {user.firstname} {user.lastname}
-              </h3>
-              <p>{user.email}</p>
-
-              <div className="account-user-actions">
-                <button
-                  type="button"
-                  className="edit-btn"
-                  onClick={handleOpenProfileModal}
-                >
-                  Modifier
-                </button>
-                <button
-                  type="button"
-                  className="edit-btn-save"
-                  onClick={handleDownloadData}
-                >
-                  <Download size={18} />
-                  Télécharger mes données
-                </button>
-              </div>
+            <div className="account-user-actions">
+              <button
+                type="button"
+                className="edit-btn"
+                onClick={handleOpenProfileModal}
+              >
+                Modifier
+              </button>
+              <button
+                type="button"
+                className="edit-btn-save"
+                onClick={handleDownloadData}
+              >
+                <Download size={18} />
+                Télécharger mes données
+              </button>
             </div>
           </div>
         </div>
@@ -168,8 +175,8 @@ export default function Account() {
         <div className="account-card security-card">
           <h2>Sécurité</h2>
           <div className="card-content">
-          <SecurityCard />
-        </div>
+            <SecurityCard />
+          </div>
         </div>
 
         <div className="account-card preference-card">
@@ -180,8 +187,8 @@ export default function Account() {
         <div className="account-card delete-account-card">
           <h2>Suppression du compte</h2>
           <div className="card-content">
-          <DeleteAccountCard />
-        </div>
+            <DeleteAccountCard />
+          </div>
         </div>
       </div>
 
