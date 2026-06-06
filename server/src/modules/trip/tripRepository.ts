@@ -6,8 +6,8 @@ class TripRepository {
   async create(trip: Omit<Trip, "id">) {
     const [result] = await databaseClient.query<Result>(
       `INSERT INTO trip 
-  (title, description, city, country, country_code, local_currency, base_currency, start_at, end_at, user_id, photo_reference) 
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (title, description, city, country, country_code, local_currency, base_currency, start_at, end_at, user_id, place_id) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         trip.title,
         trip.description,
@@ -19,19 +19,22 @@ class TripRepository {
         trip.start_at,
         trip.end_at,
         trip.user_id,
-        trip.photo_reference ?? null,
+        trip.place_id ?? null,
       ],
     );
+
     const newTripId = result.insertId;
 
     await databaseClient.query<Result>(
-      "INSERT INTO step (city, country, trip_id, user_id, photo_reference, is_initial) VALUES (?, ?, ?, ?, ?, ?)",
+      `INSERT INTO step 
+      (city, country, trip_id, user_id, place_id, is_initial) 
+      VALUES (?, ?, ?, ?, ?, ?)`,
       [
         trip.city,
         trip.country,
         newTripId,
         trip.user_id,
-        trip.photo_reference ?? null,
+        trip.place_id ?? null,
         true,
       ],
     );
@@ -40,42 +43,42 @@ class TripRepository {
   }
 
   async readTripInfo(id: number): Promise<Trip | null> {
-  const [rows] = await databaseClient.query<Rows>(
-    `SELECT 
-      t.id,
-      t.title,
-      t.description,
-      t.start_at,
-      t.end_at,
-      t.city,
-      t.country,
-      t.country_code,
-      t.local_currency,
-      t.base_currency,
-      t.photo_reference,
-      t.user_id,
-      COUNT(i.id) AS participants 
-    FROM trip t 
-    LEFT JOIN invitation i 
-      ON i.trip_id = t.id 
-      AND i.status = "accepted" 
-    WHERE t.id = ? 
-    GROUP BY t.id`,
-    [id],
-  );
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT 
+        t.id,
+        t.title,
+        t.description,
+        t.start_at,
+        t.end_at,
+        t.city,
+        t.country,
+        t.country_code,
+        t.local_currency,
+        t.base_currency,
+        t.place_id,
+        t.user_id,
+        COUNT(i.id) AS participants 
+      FROM trip t 
+      LEFT JOIN invitation i 
+        ON i.trip_id = t.id 
+        AND i.status = "accepted" 
+      WHERE t.id = ? 
+      GROUP BY t.id`,
+      [id],
+    );
 
-  if (rows.length === 0) return null;
+    if (rows.length === 0) return null;
 
-  return rows[0] as Trip;
-}
+    return rows[0] as Trip;
+  }
 
   async isUserMemberOfTrip(tripId: number, userId: number): Promise<boolean> {
     const [rows] = await databaseClient.query<Rows>(
       `SELECT i.id
-        FROM invitation AS i
-        WHERE trip_id = ?
-        AND user_id = ?
-        AND status = "accepted"`,
+      FROM invitation AS i
+      WHERE trip_id = ?
+      AND user_id = ?
+      AND status = "accepted"`,
       [tripId, userId],
     );
 
@@ -88,20 +91,21 @@ class TripRepository {
 
     return ownerRows.length > 0;
   }
+
   async read(id: number): Promise<Trip | null> {
     const [rows] = await databaseClient.query<Rows>(
       `SELECT 
-      t.*,
-      u.firstname AS owner_firstname,
-      u.lastname  AS owner_lastname
+        t.*,
+        u.firstname AS owner_firstname,
+        u.lastname AS owner_lastname
       FROM trip t
       JOIN user u ON u.id = t.user_id
-      WHERE t.id = ?
-      `,
+      WHERE t.id = ?`,
       [id],
     );
 
     if (rows.length === 0) return null;
+
     return rows[0] as Trip;
   }
 
@@ -113,16 +117,29 @@ class TripRepository {
   async update(trip: Trip) {
     const [result] = await databaseClient.query<Result>(
       `UPDATE trip 
-       SET title = ?, description = ?, city = ?, country = ?, start_at = ?, end_at = ?, photo_reference = ? 
-       WHERE id = ?`,
+      SET 
+        title = ?, 
+        description = ?, 
+        city = ?, 
+        country = ?, 
+        country_code = ?,
+        local_currency = ?,
+        base_currency = ?,
+        start_at = ?, 
+        end_at = ?, 
+        place_id = ?
+      WHERE id = ?`,
       [
         trip.title,
         trip.description,
         trip.city,
         trip.country,
+        trip.country_code ?? null,
+        trip.local_currency ?? null,
+        trip.base_currency ?? "EUR",
         trip.start_at,
         trip.end_at,
-        trip.photo_reference,
+        trip.place_id ?? null,
         trip.id,
       ],
     );
@@ -165,10 +182,13 @@ class TripRepository {
         t.title, 
         t.description, 
         t.city, 
-        t.country, 
+        t.country,
+        t.country_code,
+        t.local_currency,
+        t.base_currency,
         t.start_at, 
         t.end_at, 
-        t.photo_reference,
+        t.place_id,
         u.firstname AS creator_firstname,
         u.lastname AS creator_lastname
       FROM trip t
@@ -180,6 +200,7 @@ class TripRepository {
       ORDER BY t.start_at ASC`,
       [userId, userId],
     );
+
     return rows as Trip[];
   }
 
@@ -187,25 +208,24 @@ class TripRepository {
     const [rows] = await databaseClient.query(
       "SELECT COUNT(*) AS count FROM trip",
     );
+
     return (rows as { count: number }[])[0].count;
   }
 
   async findMembersByTrip(tripId: number) {
     const [rows] = await databaseClient.query(
-      `
-    SELECT u.id, u.firstname, u.email
-    FROM user u
-    WHERE u.id = (
-      SELECT user_id FROM trip WHERE id = ?
-    )
+      `SELECT u.id, u.firstname, u.email
+      FROM user u
+      WHERE u.id = (
+        SELECT user_id FROM trip WHERE id = ?
+      )
 
-    UNION
+      UNION
 
-    SELECT u.id, u.firstname, u.email
-    FROM user u
-    JOIN invitation i ON i.user_id = u.id
-    WHERE i.trip_id = ? AND i.status = 'accepted'
-    `,
+      SELECT u.id, u.firstname, u.email
+      FROM user u
+      JOIN invitation i ON i.user_id = u.id
+      WHERE i.trip_id = ? AND i.status = 'accepted'`,
       [tripId, tripId],
     );
 

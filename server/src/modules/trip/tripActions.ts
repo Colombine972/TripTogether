@@ -112,7 +112,7 @@ const add: RequestHandler = async (req, res, next) => {
       base_currency,
       start_at,
       end_at,
-      photo_reference,
+      place_id,
     } = req.body;
 
     if (!title || !description || !city || !country || !start_at || !end_at) {
@@ -149,7 +149,7 @@ const add: RequestHandler = async (req, res, next) => {
       start_at,
       end_at,
       user_id: Number(authReq.auth.sub),
-      photo_reference: photo_reference || null,
+      place_id: place_id || null,
     };
 
     const insertId = await tripRepository.create(newTrip);
@@ -157,7 +157,7 @@ const add: RequestHandler = async (req, res, next) => {
     res.status(201).json({
       insertId,
       message: "Voyage créé avec succès",
-      photo_reference: newTrip.photo_reference,
+      place_id: newTrip.place_id,
     });
   } catch (err) {
     next(err);

@@ -16,11 +16,11 @@ CREATE TABLE trip (
   country VARCHAR(100) NOT NULL,
   country_code VARCHAR(2),
   local_currency VARCHAR(3),
-  base_currency VARCHAR(3) DEFAULT 'EUR'
+  base_currency VARCHAR(3) DEFAULT 'EUR',
   start_at DATE,
   end_at DATE,
   user_id INT NOT NULL,
-  photo_reference TEXT,
+  place_id VARCHAR(255),
   CONSTRAINT fk_trip_user
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
@@ -32,7 +32,7 @@ CREATE TABLE step (
   trip_id INT NOT NULL,
   user_id INT NOT NULL,
   is_initial BOOLEAN DEFAULT false,
-  photo_reference TEXT,
+  place_id VARCHAR(255),
   CONSTRAINT fk_step_trip
     FOREIGN KEY (trip_id) REFERENCES trip(id)
     ON DELETE CASCADE,
