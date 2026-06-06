@@ -9,7 +9,7 @@ interface TheTrip {
   id: number;
   title: string;
   description: string;
-  photo_reference?: string | null;
+  place_id?: string | null;
   start_at: string;
   city: string;
   country: string;
@@ -26,9 +26,12 @@ export default function MyTrips() {
 
   const [trips, setTrips] = useState<TheTrip[]>([]);
 
- 
+  const getPlaceImageUrl = (placeId?: string | null) => {
+    if (!placeId) return "/images/default-city.jpg";
 
-  // 🔥 SUPPRESSION VOYAGE
+    return `${import.meta.env.VITE_API_URL}/api/places/photo/${placeId}`;
+  };
+
   const handleDeleteTrip = async (e: React.MouseEvent, tripId: number) => {
     e.preventDefault();
     if (!window.confirm("Voulez-vous vraiment supprimer ce voyage ?")) return;
@@ -55,8 +58,6 @@ export default function MyTrips() {
     }
   };
 
-  
-  //  FETCH DES VOYAGES
   useEffect(() => {
     const token = localStorage.getItem("token") || auth?.token;
 
@@ -84,7 +85,6 @@ export default function MyTrips() {
       .catch((err) => console.error("Error fetching trips:", err));
   }, [activeTab, auth?.token, navigate]);
 
-  //  FORMAT DATE
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
@@ -152,14 +152,13 @@ export default function MyTrips() {
                   className="tripcard-image"
                   style={{ position: "relative" }}
                 >
-                  {/* IMG AVEC AUTO-RÉPARATION */}
                   <img
-                    src={trip.photo_reference || "/images/default-city.jpg"}
+                    src={getPlaceImageUrl(trip.place_id)}
                     alt={trip.title}
                     className="trip-bg-img"
                     onError={(e) => {
-                      e.currentTarget.onerror = null; // évite boucle infinie
-                      e.currentTarget.src = "/images/default-city.jpg"; // fallback
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/images/default-city.jpg";
                     }}
                   />
 

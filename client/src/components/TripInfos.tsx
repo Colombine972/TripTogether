@@ -28,10 +28,6 @@ function TripInfos({ trip }: TripInfosProps) {
 
   const headerImage = getPlaceImageUrl(trip.place_id);
 
-  console.log("Trip:", trip);
-  console.log("Place ID:", trip.place_id);
-  console.log("Header Image:", headerImage);
-
   const openInviteModal = () => setIsInviteModalOpen(true);
   const closeInviteModal = () => setIsInviteModalOpen(false);
 

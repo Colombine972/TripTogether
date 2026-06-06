@@ -12,7 +12,8 @@ interface AddStepProps {
 export default function AddStep({ onStepAdded }: AddStepProps) {
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
-  const [photoReference, setPhotoReference] = useState("");
+  const [placeId, setPlaceId] = useState("");
+
   const inputRef = useRef<HTMLDivElement>(null);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const placeAutocompleteRef = useRef<any>(null);
@@ -55,20 +56,24 @@ export default function AddStep({ onStepAdded }: AddStepProps) {
           const place = placePrediction.toPlace();
 
           await place.fetchFields({
-            fields: ["addressComponents", "displayName", "photos"],
+            fields: ["id", "addressComponents", "displayName"],
           });
 
           const cityName = place.displayName || "";
+          const selectedPlaceId = place.id || "";
+
           // biome-ignore lint/suspicious/noExplicitAny: <explanation>
           const countryComp = place.addressComponents?.find((comp: any) =>
             comp.types.includes("country"),
           );
           const countryName = countryComp?.longText;
-          const photoUrl = place.photos?.[0]?.getURI({ maxHeight: 400 }) || "";
 
           setCity(cityName);
-          if (countryName) setCountry(countryName);
-          setPhotoReference(photoUrl);
+          setPlaceId(selectedPlaceId);
+
+          if (countryName) {
+            setCountry(countryName);
+          }
         });
 
         autocomplete.addEventListener("change", () => {
@@ -100,16 +105,21 @@ export default function AddStep({ onStepAdded }: AddStepProps) {
 
     let currentCity = city;
     if (!currentCity && placeAutocompleteRef.current) {
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      currentCity = (placeAutocompleteRef.current as any).value;
+      currentCity = (
+        placeAutocompleteRef.current as HTMLElement & {
+          value: string;
+        }
+      ).value;
     }
 
     let currentCountry = country;
+
     if (!currentCountry && currentCity && currentCity.includes(",")) {
       const parts = currentCity.split(",").map((p) => p.trim());
+
       if (parts.length >= 2) {
-        currentCountry = parts[parts.length - 1]; // "Germany" dans "Berlin, Germany"
-        currentCity = parts.slice(0, -1).join(", "); // "Berlin"
+        currentCountry = parts[parts.length - 1];
+        currentCity = parts.slice(0, -1).join(", ");
       }
     }
 
@@ -126,7 +136,7 @@ export default function AddStep({ onStepAdded }: AddStepProps) {
             city: currentCity,
             country: currentCountry, // Utiliser currentCountry au lieu de country
             user_id,
-            photo_reference: photoReference,
+            place_id: placeId,
           }),
         },
       );
@@ -137,7 +147,7 @@ export default function AddStep({ onStepAdded }: AddStepProps) {
 
       setCity("");
       setCountry("");
-      setPhotoReference("");
+      setPlaceId("");
 
       if (placeAutocompleteRef.current) {
         placeAutocompleteRef.current.value = "";

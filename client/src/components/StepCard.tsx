@@ -32,9 +32,6 @@ function StepCard({
 
   const stepImage = getPlaceImageUrl(step.place_id);
 
-  console.log("STEP:", step);
-  console.log("STEP PLACE ID:", step.place_id);
-
   const thumbsUpLogo = (
     <img src="/logos/green-thumb.png" className="green-thumb" alt="Oui" />
   );

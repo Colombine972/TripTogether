@@ -57,7 +57,7 @@ const selectStepsByTrip: RequestHandler = async (req, res, next) => {
           country: step.country,
           creator_name: step.creator_name,
           trip_id: step.trip_id,
-          photo_reference: step.photo_reference,
+          place_id: step.place_id,
           is_initial: step.is_initial,
           status: "validated" as const,
           voteStats: {
@@ -85,7 +85,7 @@ const selectStepsByTrip: RequestHandler = async (req, res, next) => {
         id: step.id,
         city: step.city,
         country: step.country,
-        photo_reference: step.photo_reference,
+        place_id: step.place_id,
         creator_name: step.creator_name,
         trip_id: step.trip_id,
         is_initial: step.is_initial,
@@ -287,7 +287,7 @@ const addStepCity: RequestHandler = async (req, res, next) => {
       });
     }
 
-    const { city, country, photo_reference } = req.body;
+    const { city, country, place_id } = req.body;
 
     if (typeof city !== "string" || typeof country !== "string") {
       return res
@@ -299,7 +299,7 @@ const addStepCity: RequestHandler = async (req, res, next) => {
       trip_id: tripId,
       city,
       country,
-      photo_reference: photo_reference || null,
+      place_id: place_id || null,
       user_id: userId,
     });
 
@@ -310,13 +310,13 @@ const addStepCity: RequestHandler = async (req, res, next) => {
         description: trip.description,
         city: trip.city,
         country: trip.country,
-        photo_reference: trip.photo_reference,
+        place_id: trip.place_id,
       },
       step: {
         id: stepId,
         city,
         country,
-        photo_reference: photo_reference || null,
+        place_id: place_id || null,
         trip_id: tripId,
         creator_name: "Vous",
         is_initial: false,
