@@ -22,7 +22,7 @@ export default function CreateTrip() {
 
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
-  const [photoReference, setPhotoReference] = useState("");
+  const [placeId, setPlaceId] = useState("");
   const [endOfTrip, setEndOfTrip] = useState({ end_at: "" });
   const [startDate, setStartDate] = useState("");
   const [countryCode, setCountryCode] = useState("");
@@ -80,7 +80,7 @@ export default function CreateTrip() {
             const place = placePrediction.toPlace();
 
             await place.fetchFields({
-              fields: ["addressComponents", "displayName", "photos"],
+              fields: ["id", "addressComponents", "displayName"],
             });
 
             const cityName = place.displayName || "";
@@ -90,8 +90,7 @@ export default function CreateTrip() {
             );
             const countryName = countryComp?.longText;
             const countryCode = countryComp?.shortText;
-            const photoUrl =
-              place.photos?.[0]?.getURI({ maxHeight: 400 }) || "";
+            const selectedPlaceId = place.id || "";
 
             setCity(cityName);
             if (countryName) setCountry(countryName);
@@ -99,7 +98,7 @@ export default function CreateTrip() {
               setCountryCode(countryCode);
               fetchCurrencyByCountryCode(countryCode);
             }
-            setPhotoReference(photoUrl);
+            setPlaceId(selectedPlaceId);
           },
         );
 
@@ -200,7 +199,7 @@ export default function CreateTrip() {
       country_code: countryCode,
       local_currency: localCurrency,
       base_currency: "EUR",
-      photo_reference: photoReference,
+      place_id: placeId,
     };
 
     try {
