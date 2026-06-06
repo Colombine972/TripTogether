@@ -19,7 +19,18 @@ function TripInfos({ trip }: TripInfosProps) {
 
   const tripId = trip.id;
   const isOrganizer = Number(auth?.user?.id) === Number(trip.user_id);
-  const headerImage = trip.photo_reference || "/images/default-city.jpg";
+
+  const getPlaceImageUrl = (placeId?: string | null) => {
+    if (!placeId) return "/images/default-city.jpg";
+
+    return `${import.meta.env.VITE_API_URL}/api/places/photo/${placeId}`;
+  };
+
+  const headerImage = getPlaceImageUrl(trip.place_id);
+
+  console.log("Trip:", trip);
+  console.log("Place ID:", trip.place_id);
+  console.log("Header Image:", headerImage);
 
   const openInviteModal = () => setIsInviteModalOpen(true);
   const closeInviteModal = () => setIsInviteModalOpen(false);

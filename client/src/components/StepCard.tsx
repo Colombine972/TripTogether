@@ -22,7 +22,18 @@ function StepCard({
   const { auth, logout } = useAuth();
   const token = auth?.token;
 
-  const stepImage = step.photo_reference || "/images/default-city.jpg";
+  const getPlaceImageUrl = (placeId?: string | null) => {
+    if (!placeId) {
+      return "/images/default-city.jpg";
+    }
+
+    return `${import.meta.env.VITE_API_URL}/api/places/photo/${placeId}`;
+  };
+
+  const stepImage = getPlaceImageUrl(step.place_id);
+
+  console.log("STEP:", step);
+  console.log("STEP PLACE ID:", step.place_id);
 
   const thumbsUpLogo = (
     <img src="/logos/green-thumb.png" className="green-thumb" alt="Oui" />
@@ -156,6 +167,9 @@ function StepCard({
         src={stepImage}
         alt={`Vue de ${step.city}`}
         className="step-bg-img"
+        onError={(e) => {
+          e.currentTarget.src = "/images/default-city.jpg";
+        }}
         style={{
           minHeight: "180px",
           display: "block",

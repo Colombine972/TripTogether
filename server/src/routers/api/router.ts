@@ -6,6 +6,7 @@ import tripRouter from "../trip/router";
 import userRouter from "../user/router";
 import expenseCategoryRouter from "../expenseCategory/router";
 import preferencesRouter from "../preferences/router";
+import placesRouter from "../places/router";
 
 const router = express.Router();
 
@@ -20,6 +21,8 @@ router.use("/users", userRouter);
 router.use("/expenses", expenseRouter);
 
 router.use("/categories", expenseCategoryRouter);
+
+router.use("/places", placesRouter);
 
 
 export default router;

@@ -6,7 +6,7 @@ export type Step = {
   status?: "pending" | "validated" | "rejected";
   creator_name: string;
   is_initial: boolean;
-  photo_reference?: string | null;
+  place_id?: string | null;
   voteStats?: {
     yes: number;
     no: number;
@@ -44,7 +44,7 @@ export type TheTrip = {
   country: string;
   start_at: string;
   end_at: string;
-  photo_reference?: string | null;
+  place_id?: string | null;
   user_id?: number;
   participants?: number;
   role?: "organizer" | "participant";
