@@ -396,14 +396,133 @@
    RESPONSIVE
 ================================ */
 
-@media (max-width: 1200px) {
+/* ================================
+   RESPONSIVE ORDINATEUR PORTABLE
+   2 colonnes x 2 lignes
+================================ */
+
+.account-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.account-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(340px, 1fr));
+  gap: 2rem;
+  align-items: stretch;
+}
+
+.account-card {
+  min-height: 440px;
+  height: 100%;
+  margin-top: 0;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.account-card h2 {
+  min-height: 64px;
+  display: flex;
+  align-items: flex-start;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.card-content,
+.account-profile-content,
+.security-content,
+.delete-content,
+.preferences-list {
+  flex: 1;
+}
+
+.account-profile-content,
+.security-content,
+.delete-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.account-user-actions,
+.security-content,
+.delete-content {
+  width: 100%;
+}
+
+.edit-btn,
+.edit-btn-save,
+.security-btn,
+.logout-btn,
+.delete-btn {
+  width: 100%;
+  min-height: 58px;
+  padding: 0.8rem 1rem;
+  margin-top: 0.8rem;
+}
+
+.account-header {
+  align-items: center;
+}
+
+.preferences-list {
+  gap: 2rem;
+}
+
+.preference-row {
+  min-height: 130px;
+}
+
+.currency-select {
+  max-width: 100%;
+}
+
+/* Grand écran : retour en 4 colonnes */
+@media (min-width: 1500px) {
+  .account-page {
+    max-width: 1600px;
+    padding: 4rem 2rem;
+  }
+
   .account-cards {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, minmax(260px, 1fr));
+    gap: 2rem;
+  }
+
+  .account-card {
+    min-height: 520px;
   }
 }
 
-@media (max-width: 700px) {
+/* Ordinateur portable moyen */
+@media (max-width: 1300px) {
+  .account-page {
+    max-width: 1100px;
+  }
+
+  .account-cards {
+    grid-template-columns: repeat(2, minmax(320px, 1fr));
+  }
+
+  .account-card {
+    min-height: 430px;
+  }
+}
+
+/* Tablette / petit écran */
+@media (max-width: 850px) {
+  .account-page {
+    padding: 2rem 1rem;
+  }
+
   .account-cards {
     grid-template-columns: 1fr;
+  }
+
+  .account-card {
+    min-height: auto;
   }
 }
