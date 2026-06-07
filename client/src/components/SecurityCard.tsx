@@ -82,6 +82,7 @@ export default function Account() {
           protéger vos informations personnelles et sécuriser l’accès à votre
           compte.
         </p>
+        <div className="account-user-actions">
         <button
           type="button"
           className="security-btn"
@@ -99,6 +100,7 @@ export default function Account() {
           <LogOut size={18} />
           Se déconnecter
         </button>
+        </div>
       </div>
 
       {showPasswordModal && (

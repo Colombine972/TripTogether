@@ -113,13 +113,15 @@ export default function DeleteAccountCard({
   };
   return (
     <>
-      <div className="delete-content" >
+      <div className="delete-content">
         <p className="delete-account-warning">
           En supprimant votre compte, vous perdez immédiatement l’accès à
-          l’application. <br />Une nouvelle connexion ne sera plus possible, sauf en
-          cas de création d’un nouveau compte.
+          l’application. <br />
+          Une nouvelle connexion ne sera plus possible, sauf en cas de création
+          d’un nouveau compte.
         </p>
 
+        <div className="account-user-actions">
         <button
           type="button"
           className="delete-btn"
@@ -128,15 +130,17 @@ export default function DeleteAccountCard({
           <Trash2 size={18} />
           Supprimer mon compte
         </button>
+        </div>
       </div>
 
-        {showDeleteModal && (
+      {showDeleteModal && (
         <div className="modal-backdrop">
           <div className="modal delete-account-modal">
             <h4>Confirmer la suppression du compte</h4>
 
             <p className="delete-account-warning-text">
-              La suppression de votre compte est définitive.<br />
+              La suppression de votre compte est définitive.
+              <br />
               Après validation, vous n’aurez plus accès à votre espace et votre
               session sera immédiatement invalidée.
             </p>
@@ -165,7 +169,9 @@ export default function DeleteAccountCard({
                   <li>Les voyages liés à d’autres utilisateurs</li>
                   <li>Les dépenses déjà enregistrées</li>
                   <li>Les montants et calculs partagés</li>
-                  <li>Les participations nécessaires à la cohérence des données</li>
+                  <li>
+                    Les participations nécessaires à la cohérence des données
+                  </li>
                 </ul>
               </div>
 
@@ -177,7 +183,8 @@ export default function DeleteAccountCard({
 
             <div className="form-group">
               <label htmlFor="deleteConfirm">
-                Pour confirmer, saisissez <strong>{expectedConfirmation}</strong>
+                Pour confirmer, saisissez{" "}
+                <strong>{expectedConfirmation}</strong>
               </label>
               <input
                 id="deleteConfirm"

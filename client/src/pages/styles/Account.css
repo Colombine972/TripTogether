@@ -162,11 +162,17 @@
    CARD SÉCURITÉ
 ================================ */
 
-.security-content {
+/*.security-content {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   margin-top: 1rem;
+}*/
+
+.security-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .security-description {
@@ -175,6 +181,22 @@
   line-height: 1.5;
   margin: 0;
 }
+
+/* pousse les boutons vers le bas */
+.security-btn {
+  margin-top: auto;
+}
+
+.logout-btn {
+  margin-top: 0.8rem;
+}
+
+/*.security-description {
+  color: #666;
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0;
+}*/
 
 .security-btn,
 .logout-btn {
