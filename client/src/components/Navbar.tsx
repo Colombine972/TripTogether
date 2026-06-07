@@ -1,137 +1,138 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router";
-import "../pages/styles/Navbar.css";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
+import "../pages/styles/Navbar.css";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const [openNavBar, setOpenNavBar] = useState(false);
-  const { auth, logout } = useAuth();
   const location = useLocation();
+  const { auth, logout } = useAuth();
+
+  const [openNavBar, setOpenNavBar] = useState(false);
+
+  const pageTitles: Record<string, string> = {
+    "/account": "Mon compte",
+    "/my-trips": "Mes voyages",
+  };
+
+  const pageTitle = pageTitles[location.pathname] || "";
+
+  function closeMenu() {
+    setOpenNavBar(false);
+  }
+
+  function toggleMenu() {
+    setOpenNavBar((prev) => !prev);
+  }
 
   function navigateToCreateTrip() {
     navigate("/create-trip");
     closeMenu();
   }
 
-  function toggleMenu() {
-    setOpenNavBar((openNavBar) => !openNavBar);
-  }
-
-  function closeMenu() {
-    setOpenNavBar(false);
-  }
-
-  function hello() {
-    const now = new Date();
-    const hour = now.getHours();
+  function getGreeting() {
+    const hour = new Date().getHours();
     return hour < 17 ? "Bonjour" : "Bonsoir";
   }
 
-  const closelogout = () => {
+  function handleLogout() {
     logout();
     closeMenu();
-  };
-
-  const getTitle = () => {
-  if (location.pathname === "/account") return "Mon compte";
-  if (location.pathname === "/my-trips") return "Mes voyages";
-
-  return "";
-};
+  }
 
   return (
-    <nav className="navbar navbar-container">
-      <div className="navbar-left">
-        <Link to="/" onClick={closeMenu}>
-          <img src="/logos/logo.png" className="navbar-logo" alt="Logo" />
-        </Link>
-        <Link to="/" onClick={closeMenu}>
-          <div className="website-name">Trip Together</div>
-        </Link>
-      </div>
+    <nav className="navbar">
+      <div className="navbar-container">
+        <div className="navbar-left">
+          <Link to="/" onClick={closeMenu} className="navbar-logo-link">
+            <img src="/logos/logo.png" className="navbar-logo" alt="Logo Trip Together" />
+          </Link>
 
-      <div className="navbar-center">
-        <p className="navbar-page-title">
-          {getTitle()}
-        </p>
-      </div>
+          <Link to="/" onClick={closeMenu} className="navbar-brand-link">
+            <span className="website-name">Trip Together</span>
+          </Link>
+        </div>
 
-      <div className="navbar-right">
-        {auth && (
-          <button
-            type="button"
-            className="navbar-cta"
-            onClick={navigateToCreateTrip}
+        <div className="navbar-center">
+          {pageTitle && <p className="navbar-page-title">{pageTitle}</p>}
+        </div>
+
+        <div className="navbar-right">
+          {auth && (
+            <button
+              type="button"
+              className="navbar-cta"
+              onClick={navigateToCreateTrip}
+            >
+              Crée ton voyage !
+            </button>
+          )}
+
+          <div
+            className="navbar-profile"
+            onMouseEnter={() => setOpenNavBar(true)}
+            onMouseLeave={() => setOpenNavBar(false)}
           >
-            Crée ton voyage !
-          </button>
-        )}
+            {auth ? (
+              <>
+                <button
+                  type="button"
+                  className={`navbar-profile-button ${
+                    openNavBar ? "is-active" : ""
+                  }`}
+                  aria-label="Ouvrir le menu profil"
+                  aria-expanded={openNavBar}
+                  onClick={toggleMenu}
+                >
+                  <img
+                    src={auth.user.avatar_url || "/images/utilisateur.png"}
+                    className="user-icon"
+                    alt="Avatar utilisateur"
+                  />
+                </button>
 
-        <div
-          className="navbar-profile"
-          onMouseEnter={() => setOpenNavBar(true)}
-          onMouseLeave={() => setOpenNavBar(false)}
-        >
-          {auth ? (
-            <div>
-              <button
-                type="button"
-                className="navbar-profile-Button"
-                aria-label="Profil"
-                onClick={toggleMenu}
-              >
-                <img
-                  src={auth?.user?.avatar_url ? auth.user.avatar_url :"/images/utilisateur.png" }
-                  className="user-icone"
-                  alt=""
-                />
-              </button>
+                <div
+                  className={`navbar-menu ${openNavBar ? "is-open" : ""}`}
+                  role="menu"
+                >
+                  <p className="navbar-greeting">
+                    {getGreeting()} {auth.user.firstname}
+                  </p>
 
-              <div
-                className={`navbar-menu ${openNavBar ? "is-open" : ""}`}
-                role="menu"
-              >
-                <div className="navbar-username">
-                  <li>
-                    {hello()} {auth.user.firstname}
-                  </li>
-                  <li className="navbar-menu-links">
+                  <div className="navbar-menu-links">
                     <Link
-                      className="navbar-menu-link navbar-menuLink"
+                      className="navbar-menu-link"
                       to="/account"
                       onClick={closeMenu}
                     >
                       Mon compte
                     </Link>
+
                     <button
                       type="button"
-                      className="logout-by navbar-logout-btn"
-                      onClick={closelogout}
+                      className="navbar-logout-btn"
+                      onClick={handleLogout}
                     >
-                      Logout
+                      Se déconnecter
                     </button>
-                  </li>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ) : (
-            <div className="navbar-auth-links">
-              <li>
+              </>
+            ) : (
+              <div className="navbar-auth-links">
                 <Link to="/login" className="navbar-auth-link">
                   Se connecter
                 </Link>
-              </li>
-              <li>
+
                 <Link
                   to="/register"
                   className="navbar-auth-link navbar-auth-register"
                 >
                   Créer un compte
                 </Link>
-              </li>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>
