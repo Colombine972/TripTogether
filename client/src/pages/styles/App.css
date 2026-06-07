@@ -58,6 +58,23 @@ main {
   animation: dots 1.5s infinite;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
 @keyframes dots {
   0% {
     content: "";
