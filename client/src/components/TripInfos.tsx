@@ -2,15 +2,17 @@ import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import TripCard from "../pages/TripCard";
 import TripInvitation from "../pages/TripInvitation";
+import TripActions from "../pages/TripActions";
 import type { TheTrip } from "../types/tripType";
 import Modal from "./Modal";
 import "../pages/styles/TripInfos.css";
 
 type TripInfosProps = {
   trip: TheTrip | null;
+  onTripUpdated: (updatedTrip: TheTrip) => void;
 };
 
-function TripInfos({ trip }: TripInfosProps) {
+function TripInfos({ trip, onTripUpdated }: TripInfosProps) {
   const { auth } = useAuth();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -27,12 +29,6 @@ function TripInfos({ trip }: TripInfosProps) {
   };
 
   const headerImage = getPlaceImageUrl(trip.place_id);
-
-  const openInviteModal = () => setIsInviteModalOpen(true);
-  const closeInviteModal = () => setIsInviteModalOpen(false);
-
-  const openEditModal = () => setIsEditModalOpen(true);
-  const closeEditModal = () => setIsEditModalOpen(false);
 
   return (
     <>
@@ -52,7 +48,7 @@ function TripInfos({ trip }: TripInfosProps) {
                 <button
                   type="button"
                   className="trip-hero-btn trip-hero-btn-primary"
-                  onClick={openInviteModal}
+                  onClick={() => setIsInviteModalOpen(true)}
                 >
                   Inviter
                 </button>
@@ -60,7 +56,7 @@ function TripInfos({ trip }: TripInfosProps) {
                 <button
                   type="button"
                   className="trip-hero-btn trip-hero-btn-secondary"
-                  onClick={openEditModal}
+                  onClick={() => setIsEditModalOpen(true)}
                 >
                   Modifier
                 </button>
@@ -84,7 +80,10 @@ function TripInfos({ trip }: TripInfosProps) {
         </div>
       </section>
 
-      <Modal isOpen={isInviteModalOpen} onClose={closeInviteModal}>
+      <Modal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+      >
         <TripInvitation
           tripId={tripId}
           title={trip.title}
@@ -93,15 +92,16 @@ function TripInfos({ trip }: TripInfosProps) {
           startAt={trip.start_at}
           endAt={trip.end_at}
           participants={trip.participants}
-          onClose={closeInviteModal}
+          onClose={() => setIsInviteModalOpen(false)}
         />
       </Modal>
 
-      <Modal isOpen={isEditModalOpen} onClose={closeEditModal}>
-        <div style={{ padding: "1rem" }}>
-          <h2>Modifier le voyage</h2>
-          <p>Le formulaire de modification viendra ici.</p>
-        </div>
+      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
+        <TripActions
+          trip={trip}
+          onClose={() => setIsEditModalOpen(false)}
+          onTripUpdated={onTripUpdated}
+        />
       </Modal>
     </>
   );

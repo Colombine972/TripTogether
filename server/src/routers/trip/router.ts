@@ -20,6 +20,7 @@ router.get("/:id", tripActions.browseMyTrip);
 router.post("/:id/invitations", invitationActions.add);
 
 router.post("/", verifyToken, tripActions.add);
+router.put("/:id", verifyToken, tripActions.edit);
 router.delete("/:id", verifyToken, tripActions.delate);
 router.delete("/:tripId/steps/:stepId", verifyToken, stepActions.deleteStep);
 

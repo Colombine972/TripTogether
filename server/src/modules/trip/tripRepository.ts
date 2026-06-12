@@ -231,6 +231,62 @@ class TripRepository {
 
     return rows;
   }
+
+  async updateTripEdit(tripId: number, userId: number, trip: Trip) {
+    const {
+      title,
+      description,
+      city,
+      country,
+      country_code,
+      local_currency,
+      base_currency,
+      start_at,
+      end_at,
+      place_id,
+    } = trip;
+
+    const [result] = await databaseClient.query<Result>(
+      `
+    UPDATE trip
+    SET 
+      title = ?,
+      description = ?,
+      city = ?,
+      country = ?,
+      country_code = ?,
+      local_currency = ?,
+      base_currency = ?,
+      start_at = ?,
+      end_at = ?,
+      place_id = ?
+    WHERE id = ? AND user_id = ?
+    `,
+      [
+        title,
+        description,
+        city,
+        country,
+        country_code ?? null,
+        local_currency ?? null,
+        base_currency ?? "EUR",
+        start_at,
+        end_at,
+        place_id ?? null,
+        tripId,
+        userId,
+      ],
+    );
+
+    if (result.affectedRows === 0) return null;
+
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT * FROM trip WHERE id = ? AND user_id = ?",
+      [tripId, userId],
+    );
+
+    return rows[0] as Trip;
+  }
 }
 
 export default new TripRepository();

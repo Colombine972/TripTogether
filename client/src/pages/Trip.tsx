@@ -122,7 +122,9 @@ function Trip() {
 
   return (
     <>
-      {!loading && myTrip && <TripInfos trip={myTrip} />}
+      {!loading && myTrip && (
+        <TripInfos trip={myTrip} onTripUpdated={setMyTrip}/>
+        )}
       <main className="trip-page">
         <NavTabs />
         <section className="steps-section">

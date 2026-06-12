@@ -181,6 +181,30 @@ const getMembersByTrip: RequestHandler = async (req, res, next) => {
   }
 };
 
+const edit: RequestHandler = async (req, res, next) => {
+  try {
+    const authReq = req as AuthRequest;
+
+    const tripId = Number(req.params.id);
+    const userId = Number(authReq.auth.sub);
+
+    const updatedTrip = await tripRepository.updateTripEdit(
+      tripId,
+      userId,
+      req.body,
+    );
+
+    if (!updatedTrip) {
+      res.status(404).json({ error: "Voyage introuvable ou non autorisé" });
+      return;
+    }
+
+    res.status(200).json(updatedTrip);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   browse,
   browseTheTrip,
@@ -190,4 +214,5 @@ export default {
   add,
   count,
   getMembersByTrip,
+  edit
 };
