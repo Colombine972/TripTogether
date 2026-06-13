@@ -118,12 +118,29 @@ function Trip() {
       });
   }, [tripId, token, navigate]);
 
+  const handleTripUpdated = (updatedTrip: TheTrip) => {
+  setMyTrip(updatedTrip);
+
+  setSteps((previousSteps) =>
+    previousSteps.map((step) =>
+      step.is_initial
+        ? {
+            ...step,
+            city: updatedTrip.city,
+            country: updatedTrip.country,
+            place_id: updatedTrip.place_id,
+          }
+        : step,
+    ),
+  );
+};
+
   const validatedSteps = steps.filter((s) => s.status === "validated");
 
   return (
     <>
       {!loading && myTrip && (
-        <TripInfos trip={myTrip} onTripUpdated={setMyTrip}/>
+        <TripInfos trip={myTrip} onTripUpdated={handleTripUpdated}/>
         )}
       <main className="trip-page">
         <NavTabs />

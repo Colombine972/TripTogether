@@ -280,6 +280,13 @@ class TripRepository {
 
     if (result.affectedRows === 0) return null;
 
+    await databaseClient.query<Result>(
+      `UPDATE step
+       SET city = ?, country = ?, place_id = ?
+       WHERE trip_id = ? AND is_initial = true`,
+      [city, country, place_id ?? null, tripId],
+    );
+
     const [rows] = await databaseClient.query<Rows>(
       "SELECT * FROM trip WHERE id = ? AND user_id = ?",
       [tripId, userId],
