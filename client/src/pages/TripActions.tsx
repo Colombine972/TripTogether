@@ -1,7 +1,7 @@
+import { useJsApiLoader } from "@react-google-maps/api";
 import { Pencil } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { useJsApiLoader } from "@react-google-maps/api";
 import { GOOGLE_MAPS_LIBRARIES } from "../constants/maps";
 import { useAuth } from "../contexts/AuthContext";
 import type { TheTrip } from "../types/tripType";
@@ -58,10 +58,27 @@ function TripActions({ trip, onClose, onTripUpdated }: TripActionsProps) {
         // @ts-ignore
         const autocomplete = new PlaceAutocompleteElement();
 
+        (autocomplete as HTMLElement & { value: string }).value =
+          `${trip.city}, ${trip.country}`;
+
         placeAutocompleteRef.current = autocomplete;
 
-        inputRef.current!.innerHTML = "";
-        inputRef.current!.appendChild(autocomplete);
+        let hasClearedDestination = false;
+
+        autocomplete.addEventListener("click", () => {
+          if (hasClearedDestination) return;
+
+          hasClearedDestination = true;
+
+          (autocomplete as HTMLElement & { value: string }).value = "";
+        });
+
+        const container = inputRef.current;
+
+        if (!container) return;
+
+        container.innerHTML = "";
+        container.appendChild(autocomplete);
 
         autocomplete.addEventListener(
           "gmp-select",
@@ -118,7 +135,7 @@ function TripActions({ trip, onClose, onTripUpdated }: TripActionsProps) {
     };
 
     initAutocomplete();
-  }, [isLoaded, formData.local_currency]);
+  }, [isLoaded, trip.city, trip.country, formData.local_currency]);
 
   const fetchCurrencyByCountryCode = async (countryCode: string) => {
     try {
@@ -131,9 +148,7 @@ function TripActions({ trip, onClose, onTripUpdated }: TripActionsProps) {
       }
 
       const data = await response.json();
-      const currencyCode = Object.keys(data.currencies)[0];
-
-      return currencyCode;
+      return Object.keys(data.currencies)[0];
     } catch (error) {
       console.error(error);
       toast.error("Impossible de récupérer la devise du pays");
@@ -261,23 +276,20 @@ function TripActions({ trip, onClose, onTripUpdated }: TripActionsProps) {
           </label>
         </div>
 
-        <label>
-          Destination
-          <div ref={inputRef} className="trip-actions-place-input" />
-        </label>
+        <div className="trip-actions-field">
+          <span className="trip-actions-label">Destination</span>
+          <div
+            ref={inputRef}
+            className="trip-actions-place-input"
+            aria-label="Destination"
+          />
+        </div>
 
         {formData.local_currency && (
           <p className="currency-info">
             Devise locale détectée : <strong>{formData.local_currency}</strong>
           </p>
         )}
-
-        <div className="trip-actions-current-location">
-          Destination actuelle :{" "}
-          <strong>
-            {formData.city}, {formData.country}
-          </strong>
-        </div>
 
         <div className="trip-actions-buttons">
           <button type="button" className="btn-secondary" onClick={onClose}>

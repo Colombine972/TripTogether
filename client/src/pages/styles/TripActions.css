@@ -122,6 +122,8 @@
   color: #374151;
 }
 
+
+
 @media (max-width: 600px) {
   .trip-actions {
     padding: 1.3rem;

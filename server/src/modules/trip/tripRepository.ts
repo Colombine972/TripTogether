@@ -282,9 +282,17 @@ class TripRepository {
 
     await databaseClient.query<Result>(
       `UPDATE step
-       SET city = ?, country = ?, place_id = ?
-       WHERE trip_id = ? AND is_initial = true`,
+   SET city = ?, country = ?, place_id = ?
+   WHERE trip_id = ? AND is_initial = true`,
       [city, country, place_id ?? null, tripId],
+    );
+
+    await databaseClient.query<Result>(
+      `DELETE FROM step
+   WHERE trip_id = ?
+   AND is_initial = false
+   AND country <> ?`,
+      [tripId, country],
     );
 
     const [rows] = await databaseClient.query<Rows>(

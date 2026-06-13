@@ -122,16 +122,21 @@ function Trip() {
   setMyTrip(updatedTrip);
 
   setSteps((previousSteps) =>
-    previousSteps.map((step) =>
-      step.is_initial
-        ? {
-            ...step,
-            city: updatedTrip.city,
-            country: updatedTrip.country,
-            place_id: updatedTrip.place_id,
-          }
-        : step,
-    ),
+    previousSteps
+      .filter(
+        (step) =>
+          step.is_initial || step.country === updatedTrip.country,
+      )
+      .map((step) =>
+        step.is_initial
+          ? {
+              ...step,
+              city: updatedTrip.city,
+              country: updatedTrip.country,
+              place_id: updatedTrip.place_id,
+            }
+          : step,
+      ),
   );
 };
 
