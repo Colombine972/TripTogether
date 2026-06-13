@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { GOOGLE_MAPS_LIBRARIES } from "../constants/maps";
 import { useAuth } from "../contexts/AuthContext";
+import { COUNTRY_CURRENCY_MAP } from "../constants/currencies";
 import type { TheTrip } from "../types/tripType";
 import "../pages/styles/TripActions.css";
 
@@ -104,11 +105,9 @@ function TripActions({ trip, onClose, onTripUpdated }: TripActionsProps) {
             const countryCode = countryComp?.shortText || "";
             const selectedPlaceId = place.id || "";
 
-            let currencyCode = formData.local_currency;
-
-            if (countryCode) {
-              currencyCode = await fetchCurrencyByCountryCode(countryCode);
-            }
+            const currencyCode = countryCode
+              ? getCurrencyByCountryCode(countryCode)
+              : formData.local_currency;
 
             setFormData((previous) => ({
               ...previous,
@@ -137,23 +136,8 @@ function TripActions({ trip, onClose, onTripUpdated }: TripActionsProps) {
     initAutocomplete();
   }, [isLoaded, trip.city, trip.country, formData.local_currency]);
 
-  const fetchCurrencyByCountryCode = async (countryCode: string) => {
-    try {
-      const response = await fetch(
-        `https://restcountries.com/v3.1/alpha/${countryCode}?fields=currencies`,
-      );
-
-      if (!response.ok) {
-        throw new Error("Impossible de récupérer la devise");
-      }
-
-      const data = await response.json();
-      return Object.keys(data.currencies)[0];
-    } catch (error) {
-      console.error(error);
-      toast.error("Impossible de récupérer la devise du pays");
-      return "";
-    }
+  const getCurrencyByCountryCode = (countryCode: string) => {
+    return COUNTRY_CURRENCY_MAP[countryCode] || formData.local_currency || "";
   };
 
   const capitalize = (text: string) => {
