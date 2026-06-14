@@ -180,23 +180,36 @@
 }
 
 /* Astuce */
+/* Astuce */
 .astuces-container {
+  width: 100%;
+  box-sizing: border-box;
+
+  min-height: 80px;
+  margin: 1.5rem 0 0;
+  padding: 1rem;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  width: min(100%, 440px);
-  min-height: 80px;
-  margin-top: 2rem;
-  padding: 1rem;
+
   border: 1px solid rgba(217, 217, 217, 0.5);
   border-radius: 8px;
   background: rgba(217, 217, 217, 0.3);
+}
+
+.astuces-container p {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+
   color: var(--black);
   font-family: var(--body-text);
   font-size: 0.95rem;
   line-height: 1.4;
   text-align: center;
 }
+
 
 /* Boutons */
 .button-container {
@@ -259,72 +272,23 @@
 
 /* Tablette */
 @media (max-width: 768px) {
-  .button-back-arrow {
-    top: 1.25rem;
-    left: 1.25rem;
-    width: 2.2rem;
+  .astuces-container {
+    min-height: auto;
+    padding: 1rem;
   }
 
-  .create-trip-page h1,
-  .create-trip-page h1 span {
-    font-size: 1.6rem;
-  }
-
-  .create-trip-form {
-    width: min(560px, 94vw);
-    padding: 1.5rem;
-  }
-
-  .date-container {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .button-container {
-    flex-direction: column-reverse;
-  }
-
-  .button-container button,
-  .button-container button[type="submit"],
-  .button-container button[type="button"] {
-    width: 100%;
-    max-width: none;
+  .astuces-container p {
+    font-size: 0.95rem;
   }
 }
 
 /* Mobile */
 @media (max-width: 480px) {
-  .create-trip-page {
-    padding: 0.75rem 0.75rem 1.5rem;
-  }
-
-  .create-trip-page > img {
-    width: 3rem;
-    height: 3rem;
-  }
-
-  .create-trip-page h1,
-  .create-trip-page h1 span {
-    font-size: 1.4rem;
-  }
-
-  .create-trip-page > p {
-    font-size: 0.9rem;
-  }
-
-  .create-trip-form {
-    width: 96vw;
-    padding: 1.25rem 1rem;
-    border-radius: 0.9rem;
-  }
-
-  .form-group input,
-  .create-trip-form gmp-place-autocomplete {
-    height: 2.7rem;
-    font-size: 0.95rem;
-  }
-
   .astuces-container {
+    padding: 0.9rem;
+  }
+
+  .astuces-container p {
     font-size: 0.9rem;
   }
 }

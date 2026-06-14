@@ -308,8 +308,8 @@ export default function CreateTrip() {
           </div>
         </div>
 
-        <div>
-          <p className="astuces-container">
+        <div className="astuces-container">
+          <p>
             💡 Vous pourrez inviter des membres et ajouter des destinations une
             fois le voyage créé. Un voyage nécessite au minimum 2 participants.
           </p>
