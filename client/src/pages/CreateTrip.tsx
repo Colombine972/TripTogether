@@ -1,24 +1,17 @@
+import { useJsApiLoader } from "@react-google-maps/api";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import "./styles/CreateTrip.css";
-import "./styles/mobile.css";
-import { useJsApiLoader } from "@react-google-maps/api";
+import { COUNTRY_CURRENCY_MAP } from "../constants/currencies";
 import { GOOGLE_MAPS_LIBRARIES } from "../constants/maps";
 import { useAuth } from "../contexts/AuthContext";
+import "./styles/CreateTrip.css";
+import "./styles/mobile.css";
 
 export default function CreateTrip() {
   const { auth } = useAuth();
   const navigate = useNavigate();
   const token = localStorage.getItem("token") || auth?.token;
-
-  useEffect(() => {
-    const isAuthenticated = token || auth?.token;
-    if (!isAuthenticated) {
-      toast.error("Vous devez être connecté pour créer un voyage");
-      navigate("/login");
-    }
-  }, [token, auth?.token, navigate]);
 
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
@@ -29,7 +22,7 @@ export default function CreateTrip() {
   const [localCurrency, setLocalCurrency] = useState("");
 
   const inputRef = useRef<HTMLDivElement>(null);
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: Google Places web component
   const placeAutocompleteRef = useRef<any>(null);
 
   const titleRef = useRef<HTMLInputElement>(null);
@@ -38,13 +31,23 @@ export default function CreateTrip() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
   const todayString = today.toLocaleDateString("fr-CA");
+
+  const hasDestination = city.trim() !== "";
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY || "",
     libraries: GOOGLE_MAPS_LIBRARIES,
   });
+
+  useEffect(() => {
+    const isAuthenticated = token || auth?.token;
+
+    if (!isAuthenticated) {
+      toast.error("Vous devez être connecté pour créer un voyage");
+      navigate("/login");
+    }
+  }, [token, auth?.token, navigate]);
 
   useEffect(() => {
     if (!isLoaded || !inputRef.current) return;
@@ -63,12 +66,15 @@ export default function CreateTrip() {
 
         // @ts-ignore
         const autocomplete = new PlaceAutocompleteElement();
+
         placeAutocompleteRef.current = autocomplete;
 
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        inputRef.current!.innerHTML = "";
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        inputRef.current!.appendChild(autocomplete);
+        const container = inputRef.current;
+
+        if (!container) return;
+
+        container.innerHTML = "";
+        container.appendChild(autocomplete);
 
         autocomplete.addEventListener(
           "gmp-select",
@@ -84,27 +90,38 @@ export default function CreateTrip() {
             });
 
             const cityName = place.displayName || "";
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+
+            // biome-ignore lint/suspicious/noExplicitAny: Google address component
             const countryComp = place.addressComponents?.find((comp: any) =>
               comp.types.includes("country"),
             );
-            const countryName = countryComp?.longText;
-            const countryCode = countryComp?.shortText;
+
+            const countryName = countryComp?.longText || "";
+            const selectedCountryCode = countryComp?.shortText || "";
             const selectedPlaceId = place.id || "";
 
+            const detectedCurrency =
+              COUNTRY_CURRENCY_MAP[selectedCountryCode] || "";
+
             setCity(cityName);
-            if (countryName) setCountry(countryName);
-            if (countryCode) {
-              setCountryCode(countryCode);
-              fetchCurrencyByCountryCode(countryCode);
-            }
+            setCountry(countryName);
+            setCountryCode(selectedCountryCode);
             setPlaceId(selectedPlaceId);
+            setLocalCurrency(detectedCurrency);
           },
         );
 
         autocomplete.addEventListener("change", () => {
-          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-          setCity((autocomplete as any).value);
+          const value = (autocomplete as HTMLElement & { value: string }).value;
+
+          setCity(value);
+
+          if (!value.trim()) {
+            setCountry("");
+            setCountryCode("");
+            setPlaceId("");
+            setLocalCurrency("");
+          }
         });
       } catch (error) {
         console.error("Error loading Google Maps Places library:", error);
@@ -119,29 +136,8 @@ export default function CreateTrip() {
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
   };
 
-  const fetchCurrencyByCountryCode = async (countryCode: string) => {
-    try {
-      const response = await fetch(
-        `https://restcountries.com/v3.1/alpha/${countryCode}?fields=currencies`,
-      );
-
-      if (!response.ok) {
-        throw new Error("Impossible de récupérer la devise");
-      }
-
-      const data = await response.json();
-      const currencyCode = Object.keys(data.currencies)[0];
-
-      setLocalCurrency(currencyCode);
-    } catch (error) {
-      console.error(error);
-      setLocalCurrency("");
-      toast.error("Impossible de récupérer la devise du pays");
-    }
-  };
-
-  const submitCreateTrip = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const submitCreateTrip = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
     const token = localStorage.getItem("token") || auth?.token;
 
@@ -156,18 +152,20 @@ export default function CreateTrip() {
     }
 
     let currentCity = city;
+    let currentCountry = country;
+
     if (!currentCity && placeAutocompleteRef.current) {
       currentCity = (
         placeAutocompleteRef.current as HTMLElement & { value: string }
       ).value;
     }
 
-    let currentCountry = country;
-    if (!currentCountry && currentCity && currentCity.includes(",")) {
-      const parts = currentCity.split(",").map((p) => p.trim());
+    if (!currentCountry && currentCity.includes(",")) {
+      const parts = currentCity.split(",").map((part) => part.trim());
+
       if (parts.length >= 2) {
-        currentCountry = parts[parts.length - 1]; // "Germany" dans "Berlin, Germany"
-        currentCity = parts.slice(0, -1).join(", "); // "Berlin"
+        currentCountry = parts[parts.length - 1];
+        currentCity = parts.slice(0, -1).join(", ");
       }
     }
 
@@ -189,6 +187,7 @@ export default function CreateTrip() {
       return;
     }
 
+
     const newTrip = {
       title: capitalize(titleRef.current.value),
       description: capitalize(descriptionRef.current.value),
@@ -197,7 +196,7 @@ export default function CreateTrip() {
       city: capitalize(currentCity),
       country: capitalize(currentCountry),
       country_code: countryCode,
-      local_currency: localCurrency,
+      local_currency: localCurrency || null,
       base_currency: "EUR",
       place_id: placeId,
     };
@@ -215,15 +214,15 @@ export default function CreateTrip() {
         },
       );
 
-      if (response.ok) {
-        const result = await response.json();
-        navigate(`/trip/${result.insertId}`);
-        toast.success("Voyage créé avec succès !");
-      } else {
-        const result = await response.json();
+      const result = await response.json();
+
+      if (!response.ok) {
         toast.error(result.error || "Erreur lors de la création");
-        console.error("Erreur serveur:", result);
+        return;
       }
+
+      navigate(`/trip/${result.insertId}`);
+      toast.success("Voyage créé avec succès !");
     } catch (err) {
       console.error(err);
       toast.error("Impossible de créer le voyage.");
@@ -232,18 +231,12 @@ export default function CreateTrip() {
 
   return (
     <div className="create-trip-page">
-      {/*<button
-        type="button"
-        className="button-back-arrow"
-        onClick={() => navigate(-1)}
-        aria-label="Retour"
-      >
-        <img className="back-arrow" src={backArrowLogo} alt="" />
-      </button>*/}
       <img src="/logos/logo-airplane.png" alt="logo-avion" />
+
       <h1>
         Créer un nouveau <span>voyage</span>
       </h1>
+
       <p>Commencez par définir les bases de votre aventure</p>
 
       <form className="create-trip-form" onSubmit={submitCreateTrip}>
@@ -270,13 +263,19 @@ export default function CreateTrip() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="city">Lieu *</label>
-          {/* Conteneur pour le composant Google Places */}
-          <div ref={inputRef} style={{ width: "100%" }} />
-          {localCurrency && (
+          <span className="form-label">Lieu *</span>
+          <div ref={inputRef} style={{ width: "100%" }} aria-label="Lieu" />
+
+          {localCurrency ? (
             <p className="currency-info">
-              Devise locale détectée : <strong>{localCurrency}</strong>
+              💱 Devise locale détectée : <strong>{localCurrency}</strong>
             </p>
+          ) : (
+            hasDestination && (
+              <p className="currency-warning">
+                ⚠️ Devise non disponible pour cette destination.
+              </p>
+            )
           )}
         </div>
 
@@ -288,7 +287,7 @@ export default function CreateTrip() {
               id="start-date"
               ref={startAtRef}
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(event) => setStartDate(event.target.value)}
               min={todayString}
               required
               className={!endOfTrip.end_at ? "date-empty" : ""}
@@ -301,13 +300,14 @@ export default function CreateTrip() {
               type="date"
               id="end-date"
               value={endOfTrip.end_at}
-              onChange={(e) => setEndOfTrip({ end_at: e.target.value })}
+              onChange={(event) => setEndOfTrip({ end_at: event.target.value })}
               min={startDate || todayString}
               required
               className={!endOfTrip.end_at ? "date-empty" : ""}
             />
           </div>
         </div>
+
         <div>
           <p className="astuces-container">
             💡 Vous pourrez inviter des membres et ajouter des destinations une
@@ -323,6 +323,7 @@ export default function CreateTrip() {
           >
             Annuler
           </button>
+
           <button type="submit" className="create-trip-button">
             Créer le voyage
           </button>

@@ -1,3 +1,5 @@
+import type { CurrencyCode } from "../constants/currencies";
+
 export type Step = {
   id: number;
   city: string;
@@ -48,7 +50,7 @@ export type TheTrip = {
   user_id?: number;
   participants?: number;
   role?: "organizer" | "participant";
-  local_currency?: string;
-  base_currency?: string;
+  local_currency?: CurrencyCode | null;
+  base_currency?: CurrencyCode | null;
   country_code?: string;
 };
