@@ -13,6 +13,7 @@ type InvitationForm = {
 type TripInvitationProps = {
   tripId: number;
   title: string;
+  description?: string;
   city: string;
   country: string;
   startAt: string;
@@ -23,6 +24,7 @@ type TripInvitationProps = {
 
 function TripInvitation({
   title,
+  description,
   city,
   country,
   startAt,
@@ -122,10 +124,9 @@ function TripInvitation({
 
         <article className="tripinvitation-head">
           <p>
-            <img src="/letter-picture.png" alt="" width={80} />
-            Inviter un participant
+            <img src="/letter-picture.png" alt="" width={50} />
+            Invitez une personne à rejoindre ce voyage par email
           </p>
-          <p>Invitez une personne à rejoindre ce voyage par email</p>
         </article>
 
         <article className="tripinvitation-bg-image" />
@@ -135,6 +136,10 @@ function TripInvitation({
             {city}, {country}
           </p>
           <h2>{title}</h2>
+           {description && (
+    <p className="tripinvitation-description">{description}</p>
+  )}
+
           <p className="tripcard-dates">
             {formatDate(startAt)} - {formatDate(endAt)}
           </p>

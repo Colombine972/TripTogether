@@ -87,6 +87,7 @@ function TripInfos({ trip, onTripUpdated }: TripInfosProps) {
         <TripInvitation
           tripId={tripId}
           title={trip.title}
+          description={trip.description}
           city={trip.city}
           country={trip.country}
           startAt={trip.start_at}
