@@ -1,6 +1,7 @@
 import { Bell, Coins } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import { CURRENCIES } from "../constants/currencies";
 import { useAuth } from "../contexts/AuthContext";
 import "../pages/styles/Account.css";
 
@@ -9,11 +10,7 @@ type PreferencesType = {
   default_currency: string;
 };
 
-const mainCurrencies = [
-  { code: "EUR", label: "EUR - Euro" },
-  { code: "USD", label: "USD - Dollar américain" },
-  { code: "GBP", label: "GBP - Livre sterling" },
-];
+const MAIN_CURRENCY_CODES = ["EUR", "USD", "GBP"];
 
 export default function PreferencesCard() {
   const { auth } = useAuth();
@@ -24,6 +21,25 @@ export default function PreferencesCard() {
   });
 
   const [loading, setLoading] = useState(true);
+
+  const mainCurrencies = useMemo(
+    () =>
+      MAIN_CURRENCY_CODES.map((code) => ({
+        code,
+        ...CURRENCIES[code as keyof typeof CURRENCIES],
+      })),
+    [],
+  );
+
+  const otherCurrencies = useMemo(
+    () =>
+      Object.entries(CURRENCIES)
+        .filter(([code]) => !MAIN_CURRENCY_CODES.includes(code))
+        .sort(([, currencyA], [, currencyB]) =>
+          currencyA.name.localeCompare(currencyB.name, "fr"),
+        ),
+    [],
+  );
 
   useEffect(() => {
     const fetchPreferences = async () => {
@@ -64,6 +80,7 @@ export default function PreferencesCard() {
     const previousPreferences = preferences;
 
     setPreferences(updatedPreferences);
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/users/preferences`,
@@ -84,7 +101,6 @@ export default function PreferencesCard() {
       toast.success("Préférences enregistrées.");
     } catch (error) {
       console.error(error);
-
       setPreferences(previousPreferences);
       toast.error("Erreur lors de la mise à jour des préférences.");
     }
@@ -143,8 +159,8 @@ export default function PreferencesCard() {
             <div className="preference-content">
               <p className="preference-title">Devise d’équilibrage préférée</p>
               <p>
-                Cette devise sera utilisée par défaut pour les comptes et les
-                remboursements.
+                Cette devise sera utilisée par défaut pour les comptes, les
+                remboursements et l’affichage des conversions.
               </p>
 
               <select
@@ -152,11 +168,21 @@ export default function PreferencesCard() {
                 value={preferences.default_currency}
                 onChange={handleCurrencyChange}
               >
-                {mainCurrencies.map((currency) => (
-                  <option key={currency.code} value={currency.code}>
-                    {currency.label}
-                  </option>
-                ))}
+                <optgroup label="Devises principales">
+                  {mainCurrencies.map((currency) => (
+                    <option key={currency.code} value={currency.code}>
+                      {currency.code} — {currency.name} ({currency.symbol})
+                    </option>
+                  ))}
+                </optgroup>
+
+                <optgroup label="Autres devises disponibles">
+                  {otherCurrencies.map(([code, currency]) => (
+                    <option key={code} value={code}>
+                      {code} — {currency.name} ({currency.symbol})
+                    </option>
+                  ))}
+                </optgroup>
               </select>
             </div>
           </div>

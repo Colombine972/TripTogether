@@ -258,268 +258,268 @@ export const CURRENCIES = {
     symbol: "Bs.",
   },
   LYD: {
-  name: "Dinar libyen",
-  symbol: "LD",
-},
+    name: "Dinar libyen",
+    symbol: "LD",
+  },
 
-GNF: {
-  name: "Franc guinéen",
-  symbol: "FG",
-},
+  GNF: {
+    name: "Franc guinéen",
+    symbol: "FG",
+  },
 
-CVE: {
-  name: "Escudo cap-verdien",
-  symbol: "Esc",
-},
+  CVE: {
+    name: "Escudo cap-verdien",
+    symbol: "Esc",
+  },
 
-GHS: {
-  name: "Cedi ghanéen",
-  symbol: "₵",
-},
+  GHS: {
+    name: "Cedi ghanéen",
+    symbol: "₵",
+  },
 
-NGN: {
-  name: "Naira nigérian",
-  symbol: "₦",
-},
+  NGN: {
+    name: "Naira nigérian",
+    symbol: "₦",
+  },
 
-SLL: {
-  name: "Leone sierra-léonais",
-  symbol: "Le",
-},
+  SLL: {
+    name: "Leone sierra-léonais",
+    symbol: "Le",
+  },
 
-LRD: {
-  name: "Dollar libérien",
-  symbol: "$",
-},
+  LRD: {
+    name: "Dollar libérien",
+    symbol: "$",
+  },
 
-GMD: {
-  name: "Dalasi gambien",
-  symbol: "D",
-},
+  GMD: {
+    name: "Dalasi gambien",
+    symbol: "D",
+  },
 
-CDF: {
-  name: "Franc congolais",
-  symbol: "FC",
-},
+  CDF: {
+    name: "Franc congolais",
+    symbol: "FC",
+  },
 
-STN: {
-  name: "Dobra de Sao Tomé-et-Principe",
-  symbol: "Db",
-},
+  STN: {
+    name: "Dobra de Sao Tomé-et-Principe",
+    symbol: "Db",
+  },
 
-UGX: {
-  name: "Shilling ougandais",
-  symbol: "USh",
-},
+  UGX: {
+    name: "Shilling ougandais",
+    symbol: "USh",
+  },
 
-RWF: {
-  name: "Franc rwandais",
-  symbol: "FRw",
-},
+  RWF: {
+    name: "Franc rwandais",
+    symbol: "FRw",
+  },
 
-BIF: {
-  name: "Franc burundais",
-  symbol: "FBu",
-},
+  BIF: {
+    name: "Franc burundais",
+    symbol: "FBu",
+  },
 
-ETB: {
-  name: "Birr éthiopien",
-  symbol: "Br",
-},
+  ETB: {
+    name: "Birr éthiopien",
+    symbol: "Br",
+  },
 
-DJF: {
-  name: "Franc djiboutien",
-  symbol: "Fdj",
-},
+  DJF: {
+    name: "Franc djiboutien",
+    symbol: "Fdj",
+  },
 
-SOS: {
-  name: "Shilling somalien",
-  symbol: "Sh",
-},
+  SOS: {
+    name: "Shilling somalien",
+    symbol: "Sh",
+  },
 
-ERN: {
-  name: "Nakfa érythréen",
-  symbol: "Nfk",
-},
+  ERN: {
+    name: "Nakfa érythréen",
+    symbol: "Nfk",
+  },
 
-NAD: {
-  name: "Dollar namibien",
-  symbol: "$",
-},
+  NAD: {
+    name: "Dollar namibien",
+    symbol: "$",
+  },
 
-BWP: {
-  name: "Pula botswanais",
-  symbol: "P",
-},
+  BWP: {
+    name: "Pula botswanais",
+    symbol: "P",
+  },
 
-ZMW: {
-  name: "Kwacha zambien",
-  symbol: "ZK",
-},
+  ZMW: {
+    name: "Kwacha zambien",
+    symbol: "ZK",
+  },
 
-MWK: {
-  name: "Kwacha malawite",
-  symbol: "MK",
-},
+  MWK: {
+    name: "Kwacha malawite",
+    symbol: "MK",
+  },
 
-MZN: {
-  name: "Metical mozambicain",
-  symbol: "MT",
-},
+  MZN: {
+    name: "Metical mozambicain",
+    symbol: "MT",
+  },
 
-LSL: {
-  name: "Loti du Lesotho",
-  symbol: "L",
-},
+  LSL: {
+    name: "Loti du Lesotho",
+    symbol: "L",
+  },
 
-SZL: {
-  name: "Lilangeni de l'Eswatini",
-  symbol: "E",
-},
+  SZL: {
+    name: "Lilangeni de l'Eswatini",
+    symbol: "E",
+  },
 
-SCR: {
-  name: "Roupie seychelloise",
-  symbol: "₨",
-},
+  SCR: {
+    name: "Roupie seychelloise",
+    symbol: "₨",
+  },
 
-MGA: {
-  name: "Ariary malgache",
-  symbol: "Ar",
-},
+  MGA: {
+    name: "Ariary malgache",
+    symbol: "Ar",
+  },
 
-KMF: {
-  name: "Franc comorien",
-  symbol: "CF",
-},
-TWD: {
-  name: "Dollar taïwanais",
-  symbol: "NT$",
-},
+  KMF: {
+    name: "Franc comorien",
+    symbol: "CF",
+  },
+  TWD: {
+    name: "Dollar taïwanais",
+    symbol: "NT$",
+  },
 
-MOP: {
-  name: "Pataca de Macao",
-  symbol: "MOP$",
-},
+  MOP: {
+    name: "Pataca de Macao",
+    symbol: "MOP$",
+  },
 
-MNT: {
-  name: "Tögrög mongol",
-  symbol: "₮",
-},
+  MNT: {
+    name: "Tögrög mongol",
+    symbol: "₮",
+  },
 
-LAK: {
-  name: "Kip laotien",
-  symbol: "₭",
-},
+  LAK: {
+    name: "Kip laotien",
+    symbol: "₭",
+  },
 
-KHR: {
-  name: "Riel cambodgien",
-  symbol: "៛",
-},
+  KHR: {
+    name: "Riel cambodgien",
+    symbol: "៛",
+  },
 
-BND: {
-  name: "Dollar de Brunei",
-  symbol: "$",
-},
+  BND: {
+    name: "Dollar de Brunei",
+    symbol: "$",
+  },
 
-PKR: {
-  name: "Roupie pakistanaise",
-  symbol: "₨",
-},
+  PKR: {
+    name: "Roupie pakistanaise",
+    symbol: "₨",
+  },
 
-BDT: {
-  name: "Taka bangladais",
-  symbol: "৳",
-},
+  BDT: {
+    name: "Taka bangladais",
+    symbol: "৳",
+  },
 
-LKR: {
-  name: "Roupie sri-lankaise",
-  symbol: "₨",
-},
+  LKR: {
+    name: "Roupie sri-lankaise",
+    symbol: "₨",
+  },
 
-NPR: {
-  name: "Roupie népalaise",
-  symbol: "₨",
-},
+  NPR: {
+    name: "Roupie népalaise",
+    symbol: "₨",
+  },
 
-BTN: {
-  name: "Ngultrum bhoutanais",
-  symbol: "Nu.",
-},
+  BTN: {
+    name: "Ngultrum bhoutanais",
+    symbol: "Nu.",
+  },
 
-MVR: {
-  name: "Rufiyaa maldivienne",
-  symbol: "Rf",
-},
+  MVR: {
+    name: "Rufiyaa maldivienne",
+    symbol: "Rf",
+  },
 
-KZT: {
-  name: "Tenge kazakh",
-  symbol: "₸",
-},
+  KZT: {
+    name: "Tenge kazakh",
+    symbol: "₸",
+  },
 
-UZS: {
-  name: "Sum ouzbek",
-  symbol: "so'm",
-},
+  UZS: {
+    name: "Sum ouzbek",
+    symbol: "so'm",
+  },
 
-KGS: {
-  name: "Som kirghize",
-  symbol: "с",
-},
+  KGS: {
+    name: "Som kirghize",
+    symbol: "с",
+  },
 
-TJS: {
-  name: "Somoni tadjik",
-  symbol: "SM",
-},
+  TJS: {
+    name: "Somoni tadjik",
+    symbol: "SM",
+  },
 
-TMT: {
-  name: "Manat turkmène",
-  symbol: "m",
-},
+  TMT: {
+    name: "Manat turkmène",
+    symbol: "m",
+  },
 
-KWD: {
-  name: "Dinar koweïtien",
-  symbol: "KD",
-},
+  KWD: {
+    name: "Dinar koweïtien",
+    symbol: "KD",
+  },
 
-BHD: {
-  name: "Dinar bahreïni",
-  symbol: "BD",
-},
+  BHD: {
+    name: "Dinar bahreïni",
+    symbol: "BD",
+  },
 
-OMR: {
-  name: "Rial omanais",
-  symbol: "OMR",
-},
+  OMR: {
+    name: "Rial omanais",
+    symbol: "OMR",
+  },
 
-JOD: {
-  name: "Dinar jordanien",
-  symbol: "JD",
-},
+  JOD: {
+    name: "Dinar jordanien",
+    symbol: "JD",
+  },
 
-LBP: {
-  name: "Livre libanaise",
-  symbol: "L£",
-},
+  LBP: {
+    name: "Livre libanaise",
+    symbol: "L£",
+  },
 
-IQD: {
-  name: "Dinar irakien",
-  symbol: "IQD",
-},
+  IQD: {
+    name: "Dinar irakien",
+    symbol: "IQD",
+  },
 
-AMD: {
-  name: "Dram arménien",
-  symbol: "֏",
-},
+  AMD: {
+    name: "Dram arménien",
+    symbol: "֏",
+  },
 
-GEL: {
-  name: "Lari géorgien",
-  symbol: "₾",
-},
+  GEL: {
+    name: "Lari géorgien",
+    symbol: "₾",
+  },
 
-AZN: {
-  name: "Manat azerbaïdjanais",
-  symbol: "₼",
-},
+  AZN: {
+    name: "Manat azerbaïdjanais",
+    symbol: "₼",
+  },
 } as const;
 
 export type CurrencyCode = keyof typeof CURRENCIES;
@@ -637,58 +637,57 @@ export const COUNTRY_CURRENCY_MAP: Record<string, CurrencyCode> = {
   LS: "LSL", // Lesotho
   SZ: "SZL", // Eswatini
   MU: "MUR", // Maurice
-SC: "SCR", // Seychelles
-MG: "MGA", // Madagascar
-KM: "KMF", // Comores
-RE: "EUR", // Réunion
-YT: "EUR", // Mayotte
+  SC: "SCR", // Seychelles
+  MG: "MGA", // Madagascar
+  KM: "KMF", // Comores
+  RE: "EUR", // Réunion
+  YT: "EUR", // Mayotte
 
- // Asie de l'Est
-TW: "TWD", // Taïwan
-MO: "MOP", // Macao
-MN: "MNT", // Mongolie
+  // Asie de l'Est
+  TW: "TWD", // Taïwan
+  MO: "MOP", // Macao
+  MN: "MNT", // Mongolie
 
-// Asie du Sud-Est
-LA: "LAK", // Laos
-KH: "KHR", // Cambodge
-BN: "BND", // Brunei
-TL: "USD", // Timor oriental
+  // Asie du Sud-Est
+  LA: "LAK", // Laos
+  KH: "KHR", // Cambodge
+  BN: "BND", // Brunei
+  TL: "USD", // Timor oriental
 
-// Asie du Sud
-PK: "PKR", // Pakistan
-BD: "BDT", // Bangladesh
-LK: "LKR", // Sri Lanka
-NP: "NPR", // Népal
-BT: "BTN", // Bhoutan
-MV: "MVR", // Maldives
+  // Asie du Sud
+  PK: "PKR", // Pakistan
+  BD: "BDT", // Bangladesh
+  LK: "LKR", // Sri Lanka
+  NP: "NPR", // Népal
+  BT: "BTN", // Bhoutan
+  MV: "MVR", // Maldives
 
-// Asie Centrale
-KZ: "KZT", // Kazakhstan
-UZ: "UZS", // Ouzbékistan
-KG: "KGS", // Kirghizistan
-TJ: "TJS", // Tadjikistan
-TM: "TMT", // Turkménistan
+  // Asie Centrale
+  KZ: "KZT", // Kazakhstan
+  UZ: "UZS", // Ouzbékistan
+  KG: "KGS", // Kirghizistan
+  TJ: "TJS", // Tadjikistan
+  TM: "TMT", // Turkménistan
 
-// Moyen-Orient
-IL: "ILS", // Israël
-QA: "QAR", // Qatar
-SA: "SAR", // Arabie saoudite
-KW: "KWD", // Koweït
-BH: "BHD", // Bahreïn
-OM: "OMR", // Oman
-JO: "JOD", // Jordanie
-LB: "LBP", // Liban
-IQ: "IQD", // Irak
+  // Moyen-Orient
+  IL: "ILS", // Israël
+  QA: "QAR", // Qatar
+  SA: "SAR", // Arabie saoudite
+  KW: "KWD", // Koweït
+  BH: "BHD", // Bahreïn
+  OM: "OMR", // Oman
+  JO: "JOD", // Jordanie
+  LB: "LBP", // Liban
+  IQ: "IQD", // Irak
 
-// Caucase
-AM: "AMD", // Arménie
-GE: "GEL", // Géorgie
-AZ: "AZN", // Azerbaïdjan
+  // Caucase
+  AM: "AMD", // Arménie
+  GE: "GEL", // Géorgie
+  AZ: "AZN", // Azerbaïdjan
 
   // Océanie
   AU: "AUD",
   NZ: "NZD",
-
 
   // Territoires français
   GP: "EUR",
