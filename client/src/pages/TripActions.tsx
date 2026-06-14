@@ -189,10 +189,11 @@ function TripActions({ trip, onClose, onTripUpdated }: TripActionsProps) {
       if (!response.ok) {
         throw new Error(data.error || "Erreur lors de la modification");
       }
-
+      
       toast.success("Voyage modifié ✅");
       onTripUpdated(data);
       onClose();
+      
     } catch (error) {
       toast.error("Impossible de modifier le voyage");
     } finally {
@@ -205,8 +206,9 @@ function TripActions({ trip, onClose, onTripUpdated }: TripActionsProps) {
       <header className="trip-actions-header">
         <h2>Modifier le voyage</h2>
         <p>
-          Mets à jour les informations principales de ton voyage : titre,
-          description, dates et destination.
+          Mets à jour les informations principales de ton voyage : 
+          <br />
+          Titre, description, dates et destination.
         </p>
       </header>
 
@@ -276,11 +278,11 @@ function TripActions({ trip, onClose, onTripUpdated }: TripActionsProps) {
         )}
 
         <div className="trip-actions-buttons">
-          <button type="button" className="btn-secondary" onClick={onClose}>
+          <button type="button" className="btn-cancel" onClick={onClose}>
             Annuler
           </button>
 
-          <button type="submit" className="btn-primary" disabled={isSubmitting}>
+          <button type="submit" className="btn-send" disabled={isSubmitting}>
             {isSubmitting ? "Modification..." : "Enregistrer"}
           </button>
         </div>

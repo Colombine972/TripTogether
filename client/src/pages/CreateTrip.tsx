@@ -221,8 +221,8 @@ export default function CreateTrip() {
         return;
       }
 
-      navigate(`/trip/${result.insertId}`);
       toast.success("Voyage créé avec succès !");
+      navigate(`/trip/${result.insertId}`);
     } catch (err) {
       console.error(err);
       toast.error("Impossible de créer le voyage.");
