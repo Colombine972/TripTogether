@@ -142,43 +142,56 @@ function Trip() {
 
   const validatedSteps = steps.filter((s) => s.status === "validated");
 
-  return (
-    <>
-      {!loading && myTrip && (
-        <TripInfos trip={myTrip} onTripUpdated={handleTripUpdated}/>
-        )}
-      <main className="trip-page">
-        <NavTabs />
-        <section className="steps-section">
-          <h2 className="section-title">Récapitulatif du voyage</h2>
-          <p className="section-subtitle">
-            Voici les étapes validées par les membres
-          </p>
+return (
+  <>
+    {!loading && myTrip && (
+      <TripInfos trip={myTrip} onTripUpdated={handleTripUpdated} />
+    )}
 
-          {loading && <p className="loading-text">Chargement des étapes</p>}
-          {error && <p className="error">{error}</p>}
+    <main className="trip-page">
+      {!loading && myTrip?.description && (
+        <section className="trip-about-card">
+          <div className="trip-about-header">
+            <span className="trip-about-icon">✦</span>
+            <h2>À propos du voyage</h2>
+          </div>
 
-          {!loading && !error && (
-            <section className="steps-container">
-              {validatedSteps.length > 0 ? (
-                validatedSteps.map((step) => (
-                  <StepCard
-                    key={step.id}
-                    step={step}
-                    currentUserId={currentUserId}
-                    tripId={tripId}
-                    memberCount={memberCount}
-                  />
-                ))
-              ) : (
-                <p className="no-steps">Aucune étape validée pour le moment</p>
-              )}
-            </section>
-          )}
+          <p>{myTrip.description}</p>
         </section>
-      </main>
-    </>
-  );
+      )}
+
+      <NavTabs />
+
+      <section className="steps-section">
+        <h2 className="section-title">Récapitulatif du voyage</h2>
+        <p className="section-subtitle">
+          Voici les étapes validées par les membres
+        </p>
+
+        {loading && <p className="loading-text">Chargement des étapes</p>}
+        {error && <p className="error">{error}</p>}
+
+        {!loading && !error && (
+          <section className="steps-container">
+            {validatedSteps.length > 0 ? (
+              validatedSteps.map((step) => (
+                <StepCard
+                  key={step.id}
+                  step={step}
+                  currentUserId={currentUserId}
+                  tripId={tripId}
+                  memberCount={memberCount}
+                />
+              ))
+            ) : (
+              <p className="no-steps">Aucune étape validée pour le moment</p>
+            )}
+          </section>
+        )}
+      </section>
+    </main>
+  </>
+);
 }
 
 export default Trip;
