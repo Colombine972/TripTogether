@@ -206,8 +206,7 @@ function TripActions({ trip, onClose, onTripUpdated }: TripActionsProps) {
       <header className="trip-actions-header">
         <h2>Modifier le voyage</h2>
         <p>
-          Mets à jour les informations principales de ton voyage : 
-          <br />
+          Mets à jour les informations de ton voyage :
           Titre, description, dates et destination.
         </p>
       </header>
