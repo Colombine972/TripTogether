@@ -1,99 +1,81 @@
 import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
 
-type ExpenseShare = {
-  user_id: number;
-  firstname: string;
-  share_amount: number;
-};
-
-type Expense = {
-  id: number;
-  trip_id: number;
+type CreateExpensePayload = {
+  tripId: number;
   title: string;
-  amount: number;
+  emoji?: string;
+  originalAmount: number;
+  originalCurrency: string;
+  convertedAmount: number;
+  convertedCurrency: string;
+  exchangeRate: number;
+  paidBy: number;
+  categoryId: number;
   date: string;
-  paid_by: number;
-  paid_by_name?: string;
-  category_name?: string;
-  shares?: ExpenseShare[];
 };
 
 class ExpenseRepository {
-  async findExpenseByTrip(tripId: number) {
-    const [rows] = await databaseClient.query<Rows>(
-      "SELECT * FROM expense where  trip_id = ?",
-      [tripId],
-    );
-    return rows as Expense[];
-  }
-
-  async findByTrip(tripId: number) {
-    const [rows] = await databaseClient.query(
-      `
-    SELECT 
-  e.*,
-  ec.name AS category_name,
-  u.firstname AS paid_by_name
-FROM expense e
-JOIN expense_category ec ON ec.id = e.category_id
-JOIN user u ON u.id = e.paid_by
-WHERE e.trip_id = ?
-ORDER BY e.id DESC
-    `,
-      [tripId],
-    );
-
-    const expenses = rows as Expense[];
-
-    for (const expense of expenses) {
-      const shares = await this.findSharesByExpense(expense.id);
-      expense.shares = shares;
-    }
-
-    return expenses;
-  }
-
-  async findSharesByExpense(expenseId: number) {
-    const [rows] = await databaseClient.query(
-      `
-    SELECT 
-      es.user_id,
-      u.firstname,
-      es.share_amount
-    FROM expense_share es
-    JOIN user u ON u.id = es.user_id
-    WHERE es.expense_id = ?
-    `,
-      [expenseId],
-    );
-
-    return rows as ExpenseShare[];
-  }
-
-  async create(
-    tripId: number,
-    title: string,
-    amount: number,
-    paid_by: number,
-    category_id: number,
-  ) {
+  async create(payload: CreateExpensePayload) {
     const [result] = await databaseClient.query<Result>(
-      "INSERT INTO expense (trip_id, title, amount, paid_by, category_id) VALUES (?, ?, ?, ?, ?)",
-      [tripId, title, amount, paid_by, category_id],
+      `
+      INSERT INTO expense (
+        trip_id,
+        title,
+        emoji,
+        amount,
+        original_amount,
+        original_currency,
+        converted_amount,
+        converted_currency,
+        exchange_rate,
+        paid_by,
+        category_id,
+        date
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      [
+        payload.tripId,
+        payload.title,
+        payload.emoji || null,
+        payload.convertedAmount,
+        payload.originalAmount,
+        payload.originalCurrency,
+        payload.convertedAmount,
+        payload.convertedCurrency,
+        payload.exchangeRate,
+        payload.paidBy,
+        payload.categoryId,
+        payload.date,
+      ],
     );
+
     return result.insertId;
   }
 
-  async readAll() {
-    const [rows] = await databaseClient.query<Rows>("select * from expense");
+  async findByTrip(tripId: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      `
+      SELECT 
+        e.*,
+        ec.name AS category_name,
+        u.firstname AS paid_by_name
+      FROM expense e
+      JOIN expense_category ec ON ec.id = e.category_id
+      JOIN user u ON u.id = e.paid_by
+      WHERE e.trip_id = ?
+      ORDER BY e.date DESC, e.created_at DESC
+      `,
+      [tripId],
+    );
 
-    return rows as Expense[];
+    return rows;
   }
 
   async sumTotalByTrip(tripId: number) {
     const [rows] = await databaseClient.query<Rows>(
-      "SELECT SUM(amount) as total FROM expense WHERE trip_id = ?",
+      "SELECT SUM(converted_amount) as total FROM expense WHERE trip_id = ?",
       [tripId],
     );
 
@@ -102,7 +84,11 @@ ORDER BY e.id DESC
 
   async sumPaidByUser(tripId: number, userId: number) {
     const [rows] = await databaseClient.query<Rows>(
-      "SELECT SUM(amount) as total FROM expense WHERE trip_id = ? AND paid_by = ?",
+      `
+      SELECT SUM(converted_amount) as total
+      FROM expense
+      WHERE trip_id = ? AND paid_by = ?
+      `,
       [tripId, userId],
     );
 

@@ -1,9 +1,7 @@
 import type { RequestHandler } from "express";
 import expenseRepository from "./expenseRepository";
 import expenseShareRepository from "../expenseShare/expenseShareRepository";
-import expenseShareService from "../expenseShare/expenseShareService";
 import notificationService from "../notification/notificationService";
-import tripRepository from "../trip/tripRepository";
 
 const read: RequestHandler = async (req, res, next) => {
   try {
@@ -24,61 +22,114 @@ const read: RequestHandler = async (req, res, next) => {
 const add: RequestHandler = async (req, res, next) => {
   try {
     const tripId = Number(req.params.id);
-    const { title, amount, paid_by, category_id } = req.body;
+
+    const {
+      title,
+      emoji,
+      original_amount,
+      original_currency,
+      converted_currency,
+      exchange_rate,
+      paid_by,
+      category_id,
+      date,
+      participants,
+    } = req.body;
 
     if (Number.isNaN(tripId)) {
       res.status(400).json({ error: "ID du voyage invalide" });
       return;
     }
 
-    if (!title || amount == null || !paid_by || !category_id) {
-      res
-        .status(400)
-        .json({ error: "Titre, montant, payeur, et catégorie requis" });
+    if (
+      !title ||
+      !original_amount ||
+      !original_currency ||
+      !converted_currency ||
+      !exchange_rate ||
+      !paid_by ||
+      !category_id ||
+      !date ||
+      !Array.isArray(participants) ||
+      participants.length === 0
+    ) {
+      res.status(400).json({ error: "Champs obligatoires manquants" });
       return;
     }
 
-    const numericAmount = Number(amount);
-    if (Number.isNaN(numericAmount) || numericAmount <= 0) {
-      res.status(400).json({ error: "Montant invalide" });
+    const originalAmount = Number(original_amount);
+    const exchangeRate = Number(exchange_rate);
+    const convertedAmount = Number((originalAmount * exchangeRate).toFixed(2));
+
+    if (originalAmount <= 0 || exchangeRate <= 0) {
+      res.status(400).json({ error: "Montant ou taux invalide" });
       return;
     }
 
-    // 1- Crée la dépense
-    const expenseId = await expenseRepository.create(
+    const expenseId = await expenseRepository.create({
       tripId,
       title,
-      numericAmount,
-      Number(paid_by),
-      Number(category_id),
+      emoji,
+      originalAmount,
+      originalCurrency: original_currency,
+      convertedAmount,
+      convertedCurrency: converted_currency,
+      exchangeRate,
+      paidBy: Number(paid_by),
+      categoryId: Number(category_id),
+      date,
+    });
+
+    const hasExactSplit = participants.some(
+      (participant) => participant.split_type === "exact",
     );
 
-    // 2- Récupère les membres du voyage
-    const members = await tripRepository.findMembersByTrip(tripId);
-    const participantIds = (members as { id: number }[]).map((m) => m.id);
+    if (hasExactSplit) {
+      const exactTotal = participants.reduce(
+        (sum, participant) => sum + Number(participant.share_amount || 0),
+        0,
+      );
 
-    if (participantIds.length === 0) {
-      res.status(400).json({ error: "Aucun participant pour ce voyage" });
-      return;
+      if (Number(exactTotal.toFixed(2)) !== convertedAmount) {
+        res.status(400).json({
+          error: "La somme des montants exacts doit correspondre à la dépense",
+        });
+        return;
+      }
+
+      for (const participant of participants) {
+        await expenseShareRepository.create(
+          expenseId,
+          Number(participant.user_id),
+          Number(participant.share_amount),
+          "exact",
+        );
+      }
+    } else {
+      const shareAmount = Number(
+        (convertedAmount / participants.length).toFixed(2),
+      );
+
+      for (const participant of participants) {
+        await expenseShareRepository.create(
+          expenseId,
+          Number(participant.user_id),
+          shareAmount,
+          "equal",
+        );
+      }
     }
-
-    // 3- Crée les shares égaux
-    await expenseShareService.createEqualShares(
-      expenseId,
-      numericAmount,
-      participantIds,
-    );
 
     await notificationService.notifyExpenseAdded(
       tripId,
       Number(paid_by),
       title,
-      numericAmount,
+      convertedAmount,
     );
 
     res.status(201).json({
       id: expenseId,
-      message: "Dépense ajoutée et répartie avec succès",
+      message: "Dépense ajoutée avec succès",
     });
   } catch (err) {
     next(err);
@@ -98,12 +149,15 @@ const getExpensesByTrip: RequestHandler = async (req, res, next) => {
   try {
     const tripId = Number(req.params.id);
 
-    const expenses = await expenseRepository.findByTrip(tripId);
+    if (Number.isNaN(tripId)) {
+      res.status(400).json({ error: "ID du voyage invalide" });
+      return;
+    }
 
+    const expenses = await expenseRepository.findByTrip(tripId);
     res.json(expenses);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Erreur récupération dépenses" });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -137,7 +191,8 @@ const remove: RequestHandler = async (req, res, next) => {
     const expenseId = Number(req.params.id);
 
     if (Number.isNaN(expenseId)) {
-      return res.status(400).json({ error: "ID invalide" });
+      res.status(400).json({ error: "ID invalide" });
+      return;
     }
 
     await expenseRepository.delete(expenseId);
@@ -148,4 +203,11 @@ const remove: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { read, add, browse, getExpensesByTrip, getSummary, remove };
+export default {
+  read,
+  add,
+  browse,
+  getExpensesByTrip,
+  getSummary,
+  remove,
+};

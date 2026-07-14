@@ -1,11 +1,10 @@
+import { useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import "../pages/styles/AddExpenseForm.css";
-import { useEffect, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
 
 type Member = {
   id: number;
-  firstname?: string;
-  email?: string;
+  firstname: string;
 };
 
 type Category = {
@@ -16,77 +15,87 @@ type Category = {
 type AddExpenseFormProps = {
   tripId: number;
   members: Member[];
-  onSuccess: () => void;
+  categories: Category[];
+  localCurrency: string;
+  preferredCurrency: string;
+  token: string;
+  onExpenseAdded: () => void;
+};
+
+const categoryEmojis: Record<string, string> = {
+  Transport: "🚗",
+  Logement: "🏠",
+  Nourriture: "🍽️",
+  Activités: "🎟️",
+  Autre: "💸",
 };
 
 function AddExpenseForm({
   tripId,
   members,
-  onSuccess,
+  categories,
+  localCurrency,
+  preferredCurrency,
+  token,
+  onExpenseAdded,
 }: AddExpenseFormProps) {
-  const { auth } = useAuth();
-
   const [title, setTitle] = useState("");
+  const [emoji, setEmoji] = useState("");
   const [amount, setAmount] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [exchangeRate, setExchangeRate] = useState("1");
   const [paidBy, setPaidBy] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [splitMode, setSplitMode] = useState<"equal" | "exact">("equal");
+  const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
+  const [exactShares, setExactShares] = useState<Record<number, string>>({});
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const selectedCategory = categories.find(
+    (category) => category.id === Number(categoryId),
+  );
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/categories`,
-        );
+  const automaticEmoji = selectedCategory
+    ? categoryEmojis[selectedCategory.name] || "💸"
+    : "💸";
 
-        if (!response.ok) {
-          throw new Error("Erreur lors du chargement des catégories");
-        }
+  const finalEmoji = emoji || automaticEmoji;
 
-        const data = await response.json();
-        setCategories(data);
-      } catch (error) {
-        console.error("Erreur récupération catégories :", error);
-      }
-    };
+  const convertedAmount = useMemo(() => {
+    return Number(amount || 0) * Number(exchangeRate || 0);
+  }, [amount, exchangeRate]);
 
-    fetchCategories();
-  }, []);
-
-  const resetForm = () => {
-    setTitle("");
-    setAmount("");
-    setCategoryId("");
-    setPaidBy("");
+  const toggleMember = (memberId: number) => {
+    setSelectedMembers((currentMembers) =>
+      currentMembers.includes(memberId)
+        ? currentMembers.filter((id) => id !== memberId)
+        : [...currentMembers, memberId],
+    );
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (isSubmitting) {
+    if (!title || !amount || !paidBy || !categoryId || !date) {
+      toast.error("Merci de remplir tous les champs obligatoires.");
       return;
     }
 
-    if (!auth?.token) {
-      console.error("Utilisateur non authentifié");
+    if (selectedMembers.length === 0) {
+      toast.error("Sélectionne au moins un participant.");
       return;
     }
 
-    if (!title || !amount || !categoryId || !paidBy) {
-      console.error("Champs manquants");
-      return;
-    }
-
-    const numericAmount = Number(amount);
-
-    if (Number.isNaN(numericAmount) || numericAmount <= 0) {
-      console.error("Montant invalide");
-      return;
-    }
-
-    setIsSubmitting(true);
+    const participants =
+      splitMode === "equal"
+        ? selectedMembers.map((userId) => ({
+            user_id: userId,
+            split_type: "equal",
+          }))
+        : selectedMembers.map((userId) => ({
+            user_id: userId,
+            split_type: "exact",
+            share_amount: Number(exactShares[userId] || 0),
+          }));
 
     try {
       const response = await fetch(
@@ -95,94 +104,190 @@ function AddExpenseForm({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${auth.token}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            tripId,
-            title: title.trim(),
-            amount: numericAmount,
+            title,
+            emoji: finalEmoji,
+            original_amount: Number(amount),
+            original_currency: localCurrency,
+            converted_currency: preferredCurrency,
+            exchange_rate: Number(exchangeRate),
             paid_by: Number(paidBy),
             category_id: Number(categoryId),
+            date,
+            participants,
           }),
         },
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Erreur backend :", errorData);
-        throw new Error(errorData.message || "Erreur création dépense");
+        throw new Error(data.error || "Erreur lors de l'ajout");
       }
 
-      resetForm();
-      onSuccess();
+      toast.success("Dépense ajoutée.");
+      onExpenseAdded();
+
+      setTitle("");
+      setEmoji("");
+      setAmount("");
+      setExchangeRate("1");
+      setPaidBy("");
+      setCategoryId("");
+      setSelectedMembers([]);
+      setExactShares({});
+      setSplitMode("equal");
     } catch (error) {
-      console.error("Erreur ajout dépense :", error);
-    } finally {
-      setIsSubmitting(false);
+      toast.error((error as Error).message);
     }
   };
 
   return (
     <form className="add-expense-form" onSubmit={handleSubmit}>
-      <h2>Ajouter une dépense</h2>
+      <h3>Ajouter une dépense</h3>
 
-      <input
-        type="text"
-        placeholder="Titre"
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-        disabled={isSubmitting}
-        required
-      />
+      <label>
+        Titre
+        <input
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Ex : Restaurant, hôtel, taxi..."
+        />
+      </label>
 
-      <input
-        type="number"
-        placeholder="Montant"
-        value={amount}
-        onChange={(event) => setAmount(event.target.value)}
-        min="0.01"
-        step="0.01"
-        disabled={isSubmitting}
-        required
-      />
+      <label>
+        Emoji
+        <input
+          value={emoji}
+          onChange={(event) => setEmoji(event.target.value)}
+          placeholder={automaticEmoji}
+          maxLength={2}
+        />
+      </label>
 
-      <select
-        value={categoryId}
-        onChange={(event) => setCategoryId(event.target.value)}
-        disabled={isSubmitting}
-        required
-      >
-        <option value="">Choisir une catégorie</option>
+      <label>
+        Catégorie
+        <select
+          value={categoryId}
+          onChange={(event) => setCategoryId(event.target.value)}
+        >
+          <option value="">Choisir une catégorie</option>
 
-        {categories.map((category) => (
-          <option key={category.id} value={category.id}>
-            {category.name}
-          </option>
-        ))}
-      </select>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {categoryEmojis[category.name] || "💸"} {category.name}
+            </option>
+          ))}
+        </select>
+      </label>
 
-      <select
-        value={paidBy}
-        onChange={(event) => setPaidBy(event.target.value)}
-        disabled={isSubmitting}
-        required
-      >
-        <option value="">Payé par</option>
+      <label>
+        Montant en devise locale ({localCurrency})
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          value={amount}
+          onChange={(event) => setAmount(event.target.value)}
+        />
+      </label>
 
+      <label>
+        Taux de conversion : 1 {localCurrency} = ? {preferredCurrency}
+        <input
+          type="number"
+          min="0"
+          step="0.000001"
+          value={exchangeRate}
+          onChange={(event) => setExchangeRate(event.target.value)}
+        />
+      </label>
+
+      <p className="converted-preview">
+        Montant converti :{" "}
+        <strong>
+          {new Intl.NumberFormat("fr-FR", {
+            style: "currency",
+            currency: preferredCurrency,
+          }).format(convertedAmount || 0)}
+        </strong>
+      </p>
+
+      <label>
+        Payé par
+        <select value={paidBy} onChange={(event) => setPaidBy(event.target.value)}>
+          <option value="">Choisir une personne</option>
+
+          {members.map((member) => (
+            <option key={member.id} value={member.id}>
+              {member.firstname}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Date de la dépense
+        <input
+          type="date"
+          value={date}
+          onChange={(event) => setDate(event.target.value)}
+        />
+      </label>
+
+      <div className="split-choice">
+        <button
+          type="button"
+          className={splitMode === "equal" ? "active" : ""}
+          onClick={() => setSplitMode("equal")}
+        >
+          Répartition égale
+        </button>
+
+        <button
+          type="button"
+          className={splitMode === "exact" ? "active" : ""}
+          onClick={() => setSplitMode("exact")}
+        >
+          Montants exacts
+        </button>
+      </div>
+
+      <div className="participants-list">
         {members.map((member) => (
-          <option key={member.id} value={member.id}>
-            {member.firstname || member.email}
-          </option>
-        ))}
-      </select>
+          <div key={member.id} className="participant-row">
+            <label className="participant-checkbox">
+              <input
+                type="checkbox"
+                checked={selectedMembers.includes(member.id)}
+                onChange={() => toggleMember(member.id)}
+              />
+              {member.firstname}
+            </label>
 
-      <button
-        type="submit"
-        disabled={
-          isSubmitting || !title || !amount || !categoryId || !paidBy
-        }
-      >
-        {isSubmitting ? "Enregistrement en cours..." : "Enregistrer"}
+            {splitMode === "exact" && selectedMembers.includes(member.id) && (
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder={`Montant en ${preferredCurrency}`}
+                value={exactShares[member.id] || ""}
+                onChange={(event) =>
+                  setExactShares({
+                    ...exactShares,
+                    [member.id]: event.target.value,
+                  })
+                }
+              />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <button type="submit" className="submit-expense-button">
+        Ajouter
       </button>
     </form>
   );

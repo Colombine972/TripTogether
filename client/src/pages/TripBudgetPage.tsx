@@ -194,6 +194,8 @@ function TripBudgetPage() {
           total={summary.total}
           paid={summary.paid}
           balance={summary.balance}
+          expenseCount={expenses.length}
+          currency={trip?.base_currency || "EUR"}
         />
 
         <section className="expenses-section">

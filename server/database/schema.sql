@@ -105,12 +105,26 @@ CREATE TABLE expense_category (
 CREATE TABLE expense (
   id INT PRIMARY KEY AUTO_INCREMENT,
   trip_id INT NOT NULL,
+
   title VARCHAR(255) NOT NULL,
+  emoji VARCHAR(10) NULL,
+
   amount DECIMAL(10,2) NOT NULL,
+
+  original_amount DECIMAL(10,2) NULL,
+  original_currency VARCHAR(3) NULL,
+
+  converted_amount DECIMAL(10,2) NULL,
+  converted_currency VARCHAR(3) NULL,
+
+  exchange_rate DECIMAL(10,6) NULL,
+
   date DATE DEFAULT (CURRENT_DATE),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
   paid_by INT NOT NULL,
   category_id INT NOT NULL,
-  
+
   FOREIGN KEY (trip_id) REFERENCES trip(id) ON DELETE CASCADE,
   FOREIGN KEY (paid_by) REFERENCES user(id) ON DELETE CASCADE,
   FOREIGN KEY (category_id) REFERENCES expense_category(id)
@@ -119,9 +133,14 @@ CREATE TABLE expense (
 
 CREATE TABLE expense_share (
   id INT AUTO_INCREMENT PRIMARY KEY,
+
   expense_id INT NOT NULL,
-  user_id INT NOT NULL, 
-  share_amount DECIMAL (10,2) NOT NULL,
+  user_id INT NOT NULL,
+
+  share_amount DECIMAL(10,2) NOT NULL,
+
+  split_type ENUM('equal', 'exact') DEFAULT 'equal',
+
   FOREIGN KEY (expense_id) REFERENCES expense(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
