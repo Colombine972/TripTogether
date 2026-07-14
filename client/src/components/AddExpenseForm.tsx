@@ -1,16 +1,18 @@
-import { useMemo, useState } from "react";
-import { toast } from "react-toastify";
 import {
   ArrowRightLeft,
+  BadgeEuro,
+  Banknote,
   CalendarDays,
   CircleDollarSign,
-  FileText,
+  ClipboardList,
+  ListChecks,
   PieChart,
-  Smile,
   Tag,
   Users,
   Wallet,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import "../pages/styles/AddExpenseForm.css";
 
 type Member = {
@@ -35,23 +37,29 @@ type AddExpenseFormProps = {
   onExpenseAdded: () => void;
 };
 
-const categoryEmojis: Record<string, string> = {
-  transport: "🚗",
-  logement: "🏠",
-  nourriture: "🍽️",
-  activités: "🎟️",
-  activites: "🎟️",
-  autre: "💸",
+const categoryEmojiOptions: Record<string, string[]> = {
+  transport: ["🚗", "✈️", "🚆", "🚌", "🚕", "⛽", "🚲"],
+  logement: ["🏠", "🏨", "🛏️", "🏡", "🏕️", "🛎️"],
+  nourriture: ["🍽️", "🍕", "🍔", "🥐", "☕", "🍷", "🛒"],
+  activité: ["🎟️", "🎭", "🎨", "🏖️", "🎢", "🏛️", "⚽"],
+  activités: ["🎟️", "🎭", "🎨", "🏖️", "🎢", "🏛️", "⚽"],
+  activite: ["🎟️", "🎭", "🎨", "🏖️", "🎢", "🏛️", "⚽"],
+  activites: ["🎟️", "🎭", "🎨", "🏖️", "🎢", "🏛️", "⚽"],
+  autre: ["💸", "🧾", "🛍️", "🎁", "📦", "💳"],
 };
 
-function getCategoryEmoji(categoryName?: string) {
-  if (!categoryName) {
-    return "💸";
-  }
+function normalizeCategoryName(categoryName?: string) {
+  return categoryName?.trim().toLowerCase() || "";
+}
 
-  const normalizedCategoryName = categoryName.trim().toLowerCase();
+function getCategoryEmojiOptions(categoryName?: string) {
+  const normalizedName = normalizeCategoryName(categoryName);
 
-  return categoryEmojis[normalizedCategoryName] || "💸";
+  return categoryEmojiOptions[normalizedName] || ["💸"];
+}
+
+function getDefaultCategoryEmoji(categoryName?: string) {
+  return getCategoryEmojiOptions(categoryName)[0];
 }
 
 function getTodayDate() {
@@ -67,35 +75,141 @@ function AddExpenseForm({
   token = "",
   onExpenseAdded,
 }: AddExpenseFormProps) {
-  const safeLocalCurrency = localCurrency || "EUR";
-  const safePreferredCurrency = preferredCurrency || "EUR";
+  const safeLocalCurrency = (localCurrency || "EUR").toUpperCase();
+  const safePreferredCurrency = (preferredCurrency || "EUR").toUpperCase();
 
   const [title, setTitle] = useState("");
-  const [emoji, setEmoji] = useState("");
-  const [amount, setAmount] = useState("");
-  const [exchangeRate, setExchangeRate] = useState("1");
-  const [paidBy, setPaidBy] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [selectedEmoji, setSelectedEmoji] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const [amount, setAmount] = useState("");
+  const [exchangeRate, setExchangeRate] = useState("");
+  const [isRateLoading, setIsRateLoading] = useState(false);
+  const [exchangeRateError, setExchangeRateError] = useState<string | null>(
+    null,
+  );
+
+  const [paidBy, setPaidBy] = useState("");
   const [date, setDate] = useState(getTodayDate());
+
   const [splitMode, setSplitMode] = useState<SplitMode>("equal");
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
   const [exactShares, setExactShares] = useState<Record<number, string>>({});
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  /*
+   * Récupération automatique du taux de conversion.
+   *
+   * Cette fonction appelle :
+   * GET /api/exchange-rates?from=MUR&to=EUR
+   *
+   * Réponse attendue :
+   * { "rate": 0.0185 }
+   */
+  useEffect(() => {
+    const abortController = new AbortController();
+
+    const fetchExchangeRate = async () => {
+      setExchangeRateError(null);
+
+      if (safeLocalCurrency === safePreferredCurrency) {
+        setExchangeRate("1");
+        setIsRateLoading(false);
+        return;
+      }
+
+      setIsRateLoading(true);
+      setExchangeRate("");
+
+      try {
+        const searchParams = new URLSearchParams({
+          from: safeLocalCurrency,
+          to: safePreferredCurrency,
+        });
+
+        const headers: HeadersInit = {};
+
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
+        const response = await fetch(
+          `${
+            import.meta.env.VITE_API_URL
+          }/api/exchange-rates?${searchParams.toString()}`,
+          {
+            method: "GET",
+            headers,
+            signal: abortController.signal,
+          },
+        );
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error ||
+              data?.message ||
+              "Impossible de récupérer le taux de conversion.",
+          );
+        }
+
+        const receivedRate = Number(data?.rate);
+
+        if (!Number.isFinite(receivedRate) || receivedRate <= 0) {
+          throw new Error("Le taux de conversion reçu est invalide.");
+        }
+
+        setExchangeRate(String(receivedRate));
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        console.error("Erreur récupération taux de change :", error);
+
+        setExchangeRate("");
+        setExchangeRateError(
+          "Taux automatique indisponible. Vous pouvez le saisir manuellement.",
+        );
+      } finally {
+        if (!abortController.signal.aborted) {
+          setIsRateLoading(false);
+        }
+      }
+    };
+
+    fetchExchangeRate();
+
+    return () => {
+      abortController.abort();
+    };
+  }, [safeLocalCurrency, safePreferredCurrency, token]);
 
   const selectedCategory = categories.find(
     (category) => category.id === Number(categoryId),
   );
 
-  const automaticEmoji = getCategoryEmoji(selectedCategory?.name);
-  const finalEmoji = emoji.trim() || automaticEmoji;
+  const availableEmojis = useMemo(
+    () => getCategoryEmojiOptions(selectedCategory?.name),
+    [selectedCategory?.name],
+  );
+
+  const automaticEmoji = selectedCategory
+    ? getDefaultCategoryEmoji(selectedCategory.name)
+    : "";
+
+  const finalEmoji = selectedEmoji || automaticEmoji;
 
   const convertedAmount = useMemo(() => {
     const numericAmount = Number(amount);
     const numericExchangeRate = Number(exchangeRate);
 
     if (
-      Number.isNaN(numericAmount) ||
-      Number.isNaN(numericExchangeRate) ||
+      !Number.isFinite(numericAmount) ||
+      !Number.isFinite(numericExchangeRate) ||
       numericAmount <= 0 ||
       numericExchangeRate <= 0
     ) {
@@ -115,6 +229,21 @@ function AddExpenseForm({
       return `${convertedAmount.toFixed(2)} ${safePreferredCurrency}`;
     }
   }, [convertedAmount, safePreferredCurrency]);
+
+  const handleCategoryChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setCategoryId(event.target.value);
+    setSelectedEmoji("");
+    setShowEmojiPicker(false);
+  };
+
+  const handleExchangeRateChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setExchangeRate(event.target.value);
+    setExchangeRateError(null);
+  };
 
   const toggleMember = (memberId: number) => {
     setSelectedMembers((currentMembers) => {
@@ -138,12 +267,15 @@ function AddExpenseForm({
 
   const resetForm = () => {
     setTitle("");
-    setEmoji("");
-    setAmount("");
-    setExchangeRate("1");
-    setPaidBy("");
     setCategoryId("");
+    setSelectedEmoji("");
+    setShowEmojiPicker(false);
+
+    setAmount("");
+
+    setPaidBy("");
     setDate(getTodayDate());
+
     setSplitMode("equal");
     setSelectedMembers([]);
     setExactShares({});
@@ -165,7 +297,11 @@ function AddExpenseForm({
       return false;
     }
 
-    if (!exchangeRate || Number(exchangeRate) <= 0) {
+    if (
+      !exchangeRate ||
+      !Number.isFinite(Number(exchangeRate)) ||
+      Number(exchangeRate) <= 0
+    ) {
       toast.error("Le taux de conversion doit être supérieur à zéro.");
       return false;
     }
@@ -198,7 +334,7 @@ function AddExpenseForm({
         return (
           value === undefined ||
           value === "" ||
-          Number.isNaN(shareAmount) ||
+          !Number.isFinite(shareAmount) ||
           shareAmount < 0
         );
       });
@@ -316,47 +452,29 @@ function AddExpenseForm({
 
         <div>
           <h3>Ajouter une nouvelle dépense</h3>
-
         </div>
       </header>
 
       <fieldset className="form-section expense-info-section">
         <legend className="section-legend">
-          <FileText size={18} />
+          <ClipboardList size={18} />
           Informations de la dépense
         </legend>
 
-        <div className="two-columns">
-          <label className="form-field">
-            <span className="field-label">
-              <FileText size={17} />
-              Titre
-            </span>
+        <label className="form-field full-width">
+          <span className="field-label">
+            <ListChecks size={17} />
+            Titre
+          </span>
 
-            <input
-              type="text"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="Ex : Restaurant, hôtel, taxi..."
-              maxLength={255}
-            />
-          </label>
-
-          <label className="form-field">
-            <span className="field-label">
-              <Smile size={17} />
-              Emoji
-            </span>
-
-            <input
-              type="text"
-              value={emoji}
-              onChange={(event) => setEmoji(event.target.value)}
-              placeholder={automaticEmoji}
-              maxLength={10}
-            />
-          </label>
-        </div>
+          <input
+            type="text"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="Ex : Restaurant, hôtel, taxi..."
+            maxLength={255}
+          />
+        </label>
 
         <label className="form-field full-width">
           <span className="field-label">
@@ -366,13 +484,14 @@ function AddExpenseForm({
 
           <select
             value={categoryId}
-            onChange={(event) => setCategoryId(event.target.value)}
+            onChange={handleCategoryChange}
           >
             <option value="">Choisir une catégorie</option>
 
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
-                {getCategoryEmoji(category.name)} {category.name}
+                {getDefaultCategoryEmoji(category.name)}{" "}
+                {category.name}
               </option>
             ))}
           </select>
@@ -382,6 +501,64 @@ function AddExpenseForm({
           <p className="form-info">
             Aucune catégorie disponible pour le moment.
           </p>
+        )}
+
+        {selectedCategory && (
+          <div className="emoji-customization">
+            <div className="emoji-preview">
+              <span className="emoji-preview-icon">
+                {finalEmoji}
+              </span>
+
+              <div>
+                <p className="emoji-preview-title">
+                  Emoji de la dépense
+                </p>
+
+                <p className="emoji-preview-description">
+                  Choisi automatiquement selon la catégorie{" "}
+                  {selectedCategory.name}.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="emoji-toggle-button"
+              onClick={() =>
+                setShowEmojiPicker((currentValue) => !currentValue)
+              }
+              aria-expanded={showEmojiPicker}
+            >
+              {showEmojiPicker ? "Fermer" : "Modifier l’emoji"}
+            </button>
+
+            {showEmojiPicker && (
+              <div className="emoji-picker">
+                {availableEmojis.map((emojiOption) => {
+                  const isSelected = finalEmoji === emojiOption;
+
+                  return (
+                    <button
+                      key={emojiOption}
+                      type="button"
+                      className={`emoji-option ${
+                        isSelected ? "selected" : ""
+                      }`}
+                      onClick={() => {
+                        setSelectedEmoji(emojiOption);
+                        setShowEmojiPicker(false);
+                      }}
+                      aria-label={`Choisir l’emoji ${emojiOption}`}
+                      aria-pressed={isSelected}
+                    >
+                      {emojiOption}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
       </fieldset>
 
@@ -394,7 +571,7 @@ function AddExpenseForm({
         <div className="amount-grid">
           <div className="amount-card">
             <span className="amount-label">
-              <CircleDollarSign size={16} />
+              <Banknote size={16} />
               Montant en devise locale
             </span>
 
@@ -430,20 +607,35 @@ function AddExpenseForm({
                 min="0.000001"
                 step="0.000001"
                 value={exchangeRate}
-                onChange={(event) =>
-                  setExchangeRate(event.target.value)
+                onChange={handleExchangeRateChange}
+                placeholder={
+                  isRateLoading ? "Chargement..." : "Saisir le taux"
                 }
+                disabled={isRateLoading}
+                aria-label={`Taux de conversion de ${safeLocalCurrency} vers ${safePreferredCurrency}`}
               />
 
               <span className="currency-tag">
                 {safePreferredCurrency}
               </span>
             </div>
+
+            {isRateLoading && (
+              <small className="rate-message">
+                Récupération du taux en cours…
+              </small>
+            )}
+
+            {exchangeRateError && (
+              <small className="rate-error">
+                {exchangeRateError}
+              </small>
+            )}
           </div>
 
           <div className="amount-card converted-card">
             <span className="amount-label">
-              <Wallet size={16} />
+              <BadgeEuro size={16} />
               Montant converti
             </span>
 
@@ -454,7 +646,7 @@ function AddExpenseForm({
 
       <div className="payer-date-grid">
         <fieldset className="form-section payer-section">
-        <label className="form-field">
+          <label className="form-field">
             <span className="field-label">
               <Users size={17} />
               Payé par

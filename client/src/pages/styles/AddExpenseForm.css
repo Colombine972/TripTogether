@@ -14,10 +14,12 @@
 
   --expense-background: #ffffff;
   --expense-section: #fbfcfd;
+
   --expense-border: #e2e8f0;
-  --expense-border-hover: #b9c8be;
+  --expense-border-hover: #b7c7bc;
 
   --expense-danger: #c0392b;
+
   --expense-warning-bg: #fff8e6;
   --expense-warning-border: #f2d28b;
   --expense-warning-text: #8a6115;
@@ -26,8 +28,9 @@
   flex-direction: column;
   gap: 1.4rem;
 
-  width: min(920px, 90vw);
+  width: min(920px, 92vw);
   max-height: 88vh;
+
   padding: 2rem;
 
   overflow-y: auto;
@@ -38,7 +41,9 @@
   color: var(--expense-text);
 }
 
-/* Barre de défilement */
+/* =========================================================
+   BARRE DE DÉFILEMENT
+========================================================= */
 
 .add-expense-form::-webkit-scrollbar {
   width: 8px;
@@ -58,7 +63,7 @@
 }
 
 /* =========================================================
-   EN-TÊTE DU FORMULAIRE
+   EN-TÊTE
 ========================================================= */
 
 .expense-form-header {
@@ -66,7 +71,7 @@
   align-items: center;
   gap: 1rem;
 
-  padding: 0.2rem 0 0.5rem;
+  padding-bottom: 0.3rem;
 }
 
 .expense-form-header-icon {
@@ -87,17 +92,9 @@
   margin: 0;
 
   color: var(--expense-text);
-  font-size: clamp(1.55rem, 3vw, 2rem);
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 800;
   line-height: 1.2;
-}
-
-.expense-form-header p {
-  margin: 0.35rem 0 0;
-
-  color: var(--expense-muted);
-  font-size: 0.95rem;
-  line-height: 1.5;
 }
 
 /* =========================================================
@@ -119,7 +116,7 @@
 }
 
 .form-section:focus-within {
-  border-color: rgba(22, 131, 59, 0.42);
+  border-color: rgba(22, 131, 59, 0.45);
   box-shadow: 0 0 0 4px rgba(22, 131, 59, 0.07);
 }
 
@@ -141,15 +138,8 @@
 }
 
 /* =========================================================
-   GRILLES DU FORMULAIRE
+   INFORMATIONS DE LA DÉPENSE
 ========================================================= */
-
-.two-columns,
-.payer-date-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-}
 
 .expense-info-section {
   display: flex;
@@ -179,7 +169,7 @@
   gap: 0.55rem;
 
   color: var(--expense-text);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 700;
 }
 
@@ -251,6 +241,142 @@
 .add-expense-form input[type="number"]::-webkit-outer-spin-button {
   margin: 0;
   appearance: none;
+}
+
+/* =========================================================
+   EMOJI AUTOMATIQUE ET PERSONNALISATION
+========================================================= */
+
+.emoji-customization {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 1rem;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(234, 247, 239, 0.95),
+      rgba(247, 252, 249, 0.98)
+    );
+
+  border: 1px solid #ccebd6;
+  border-radius: 14px;
+}
+
+.emoji-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+
+  min-width: 0;
+}
+
+.emoji-preview-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  width: 46px;
+  height: 46px;
+
+  background: #ffffff;
+  border: 1px solid #d9ece0;
+  border-radius: 13px;
+
+  font-size: 1.5rem;
+}
+
+.emoji-preview-title {
+  margin: 0;
+
+  color: var(--expense-text);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.emoji-preview-description {
+  margin: 0.2rem 0 0;
+
+  color: var(--expense-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.emoji-toggle-button {
+  padding: 0.55rem 0.85rem;
+
+  background: transparent;
+  border: 1px solid var(--expense-primary);
+  border-radius: 10px;
+
+  color: var(--expense-primary);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.emoji-toggle-button:hover {
+  background: var(--expense-primary);
+  color: #ffffff;
+}
+
+.emoji-toggle-button:active {
+  transform: scale(0.98);
+}
+
+.emoji-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+  gap: 0.55rem;
+
+  width: 100%;
+  padding-top: 0.9rem;
+
+  border-top: 1px solid #d9ece0;
+}
+
+.emoji-option {
+  display: grid;
+  place-items: center;
+
+  min-height: 44px;
+  padding: 0.4rem;
+
+  background: #ffffff;
+  border: 1px solid var(--expense-border);
+  border-radius: 11px;
+
+  font-size: 1.35rem;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.emoji-option:hover {
+  border-color: var(--expense-primary);
+  transform: translateY(-1px);
+}
+
+.emoji-option.selected {
+  background: var(--expense-primary-light);
+  border-color: var(--expense-primary);
+  box-shadow: 0 0 0 3px rgba(22, 131, 59, 0.07);
 }
 
 /* =========================================================
@@ -387,6 +513,7 @@
     );
 
   border-color: #ccebd6;
+  padding-top: 2px;
 }
 
 .converted-card strong {
@@ -399,6 +526,12 @@
 /* =========================================================
    PAYEUR ET DATE
 ========================================================= */
+
+.payer-date-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
 
 .payer-section,
 .date-section {
@@ -629,7 +762,7 @@
 }
 
 /* =========================================================
-   ÉTATS D’ERREUR
+   ERREURS
 ========================================================= */
 
 .field-error {
@@ -696,16 +829,11 @@
     font-size: 1.4rem;
   }
 
-  .expense-form-header p {
-    font-size: 0.86rem;
-  }
-
   .form-section {
     padding: 1rem;
     border-radius: 15px;
   }
 
-  .two-columns,
   .payer-date-grid,
   .amount-grid,
   .participants-list {
@@ -719,6 +847,18 @@
   .split-choice {
     grid-template-columns: 1fr;
     gap: 0.25rem;
+  }
+
+  .emoji-customization {
+    align-items: stretch;
+  }
+
+  .emoji-toggle-button {
+    width: 100%;
+  }
+
+  .emoji-picker {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
@@ -767,6 +907,10 @@
   .currency-tag {
     min-width: 55px;
     padding: 0 0.6rem;
+  }
+
+  .emoji-picker {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .submit-expense-button {

@@ -7,12 +7,14 @@ import userRouter from "../user/router";
 import expenseCategoryRouter from "../expenseCategory/router";
 import preferencesRouter from "../preferences/router";
 import placesRouter from "../places/router";
+import exchangeRateRouter from "../exchangeRate/router";
 
 const router = express.Router();
 
 router.use("/auth", authRouter);
 
 router.use("/invitation", invitationRouter);
+
 router.use("/trips", tripRouter);
 
 router.use("/users/preferences", preferencesRouter);
@@ -24,5 +26,6 @@ router.use("/categories", expenseCategoryRouter);
 
 router.use("/places", placesRouter);
 
+router.use("/exchange-rates", exchangeRateRouter);
 
 export default router;
