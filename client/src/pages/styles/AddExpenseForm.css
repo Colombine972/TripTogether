@@ -1,24 +1,776 @@
+/* =========================================================
+   VARIABLES ET CONTENEUR PRINCIPAL
+========================================================= */
+
 .add-expense-form {
+  --expense-primary: #16833b;
+  --expense-primary-hover: #116d31;
+  --expense-primary-light: #eaf7ef;
+  --expense-primary-soft: #f4fbf6;
+
+  --expense-text: #172033;
+  --expense-muted: #667085;
+  --expense-placeholder: #98a2b3;
+
+  --expense-background: #ffffff;
+  --expense-section: #fbfcfd;
+  --expense-border: #e2e8f0;
+  --expense-border-hover: #b9c8be;
+
+  --expense-danger: #c0392b;
+  --expense-warning-bg: #fff8e6;
+  --expense-warning-border: #f2d28b;
+  --expense-warning-text: #8a6115;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+
+  width: min(920px, 90vw);
+  max-height: 88vh;
+  padding: 2rem;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  background: var(--expense-background);
+  border-radius: 24px;
+  color: var(--expense-text);
+}
+
+/* Barre de défilement */
+
+.add-expense-form::-webkit-scrollbar {
+  width: 8px;
+}
+
+.add-expense-form::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.add-expense-form::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
+}
+
+.add-expense-form::-webkit-scrollbar-thumb:hover {
+  background: #b7bdc5;
+}
+
+/* =========================================================
+   EN-TÊTE DU FORMULAIRE
+========================================================= */
+
+.expense-form-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  padding: 0.2rem 0 0.5rem;
+}
+
+.expense-form-header-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  width: 58px;
+  height: 58px;
+
+  background: var(--expense-primary-light);
+  border-radius: 50%;
+
+  color: var(--expense-primary);
+}
+
+.expense-form-header h3 {
+  margin: 0;
+
+  color: var(--expense-text);
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.expense-form-header p {
+  margin: 0.35rem 0 0;
+
+  color: var(--expense-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   SECTIONS ET LEGENDS
+========================================================= */
+
+.form-section {
+  min-width: 0;
+  margin: 0;
+  padding: 1.4rem;
+
+  background: var(--expense-section);
+  border: 1px solid var(--expense-border);
+  border-radius: 18px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.form-section:focus-within {
+  border-color: rgba(22, 131, 59, 0.42);
+  box-shadow: 0 0 0 4px rgba(22, 131, 59, 0.07);
+}
+
+.section-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+
+  padding: 0 0.55rem;
+
+  color: var(--expense-text);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.section-legend svg {
+  flex-shrink: 0;
+  color: var(--expense-primary);
+}
+
+/* =========================================================
+   GRILLES DU FORMULAIRE
+========================================================= */
+
+.two-columns,
+.payer-date-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.expense-info-section {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
 }
+
+.full-width {
+  width: 100%;
+}
+
+/* =========================================================
+   CHAMPS GÉNÉRAUX
+========================================================= */
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+
+  min-width: 0;
+}
+
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+
+  color: var(--expense-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.field-label svg {
+  flex-shrink: 0;
+  color: var(--expense-primary);
+}
+
+.field-help {
+  color: var(--expense-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   INPUTS ET SELECTS
+========================================================= */
 
 .add-expense-form input,
 .add-expense-form select {
-  padding: 0.6rem;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+
+  padding: 0.78rem 0.9rem;
+
+  background: #ffffff;
+  border: 1px solid var(--expense-border);
+  border-radius: 12px;
+
+  color: var(--expense-text);
+  font: inherit;
+  font-size: 0.95rem;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
-.add-expense-form button {
-  padding: 0.7rem;
-  border-radius: 8px;
-  border: none;
-  background: var(--primary-button);
-  color: white;
+.add-expense-form input:hover,
+.add-expense-form select:hover {
+  border-color: var(--expense-border-hover);
+}
+
+.add-expense-form input:focus,
+.add-expense-form select:focus {
+  background: #ffffff;
+  border-color: var(--expense-primary);
+  box-shadow: 0 0 0 4px rgba(22, 131, 59, 0.09);
+}
+
+.add-expense-form input::placeholder {
+  color: var(--expense-placeholder);
+}
+
+.add-expense-form select,
+.add-expense-form input[type="date"] {
   cursor: pointer;
+}
+
+.add-expense-form input[type="number"] {
+  appearance: textfield;
+}
+
+.add-expense-form input[type="number"]::-webkit-inner-spin-button,
+.add-expense-form input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+/* =========================================================
+   SECTION MONTANT
+========================================================= */
+
+.amount-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.amount-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1.15fr)
+    minmax(0, 0.9fr);
+  gap: 1rem;
+}
+
+.amount-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+
+  min-width: 0;
+  min-height: 126px;
+  padding: 1rem;
+
+  background: #ffffff;
+  border: 1px solid var(--expense-border);
+  border-radius: 14px;
+}
+
+.amount-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  color: var(--expense-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.amount-label svg {
+  flex-shrink: 0;
+  color: var(--expense-primary);
+}
+
+.amount-input {
+  display: flex;
+  align-items: stretch;
+
+  width: 100%;
+  min-width: 0;
+
+  background: #ffffff;
+  border: 1px solid var(--expense-border);
+  border-radius: 11px;
+
+  overflow: hidden;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.amount-input:focus-within {
+  border-color: var(--expense-primary);
+  box-shadow: 0 0 0 4px rgba(22, 131, 59, 0.08);
+}
+
+.amount-input input {
+  flex: 1;
+  min-width: 0;
+  min-height: 46px;
+
+  padding: 0.7rem 0.75rem;
+
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.amount-input input:hover,
+.amount-input input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+.currency-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  min-width: 64px;
+  padding: 0 0.85rem;
+
+  background: #f7f9fb;
+  border-left: 1px solid var(--expense-border);
+
+  color: #5d697b;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.conversion-prefix {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  padding-left: 0.75rem;
+
+  color: var(--expense-muted);
+  font-size: 0.83rem;
+  white-space: nowrap;
+}
+
+.conversion-input input {
+  text-align: center;
+}
+
+.converted-card {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(234, 247, 239, 0.96),
+      rgba(247, 252, 249, 0.98)
+    );
+
+  border-color: #ccebd6;
+}
+
+.converted-card strong {
+  color: var(--expense-primary);
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* =========================================================
+   PAYEUR ET DATE
+========================================================= */
+
+.payer-section,
+.date-section {
+  height: 100%;
+}
+
+.payer-section .form-field,
+.date-section .form-field {
+  height: 100%;
+  justify-content: center;
+}
+
+/* =========================================================
+   INFORMATIONS ET ALERTES
+========================================================= */
+
+.form-info {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+
+  background: var(--expense-warning-bg);
+  border: 1px solid var(--expense-warning-border);
+  border-radius: 10px;
+
+  color: var(--expense-warning-text);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   SECTION RÉPARTITION
+========================================================= */
+
+.split-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.split-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  padding: 0.3rem;
+
+  background: #edf2ee;
+  border-radius: 14px;
+}
+
+.split-choice button {
+  min-height: 44px;
+  padding: 0.7rem 1rem;
+
+  background: transparent;
+  border: none;
+  border-radius: 11px;
+
+  color: var(--expense-muted);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.split-choice button:hover {
+  color: var(--expense-primary);
+}
+
+.split-choice button.active {
+  background: var(--expense-primary);
+  color: #ffffff;
+  box-shadow: 0 5px 14px rgba(22, 131, 59, 0.2);
+}
+
+.split-choice button:active {
+  transform: scale(0.985);
+}
+
+/* =========================================================
+   PARTICIPANTS
+========================================================= */
+
+.participants-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.participant-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+
+  min-width: 0;
+  padding: 0.85rem;
+
+  background: #ffffff;
+  border: 1px solid var(--expense-border);
+  border-radius: 14px;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.participant-row.selected,
+.participant-row:has(input[type="checkbox"]:checked) {
+  background: var(--expense-primary-soft);
+  border-color: var(--expense-primary);
+  box-shadow: 0 0 0 3px rgba(22, 131, 59, 0.06);
+}
+
+.participant-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+
+  min-width: 0;
+
+  color: var(--expense-text);
+  font-size: 0.92rem;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.participant-checkbox span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.participant-checkbox input[type="checkbox"] {
+  flex-shrink: 0;
+
+  width: 21px;
+  height: 21px;
+  min-height: auto;
+  margin: 0;
+  padding: 0;
+
+  accent-color: var(--expense-primary);
+  cursor: pointer;
+}
+
+.participant-row > input[type="number"] {
+  min-height: 42px;
+  padding: 0.65rem 0.75rem;
+
+  font-size: 0.88rem;
+}
+
+/* =========================================================
+   BOUTON AJOUTER
+========================================================= */
+
+.submit-expense-button {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+
+  width: 100%;
+  min-height: 52px;
+  padding: 0.85rem 1.4rem;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--expense-primary),
+      #20a153
+    );
+
+  border: none;
+  border-radius: 14px;
+
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+
+  box-shadow:
+    0 8px 20px rgba(22, 131, 59, 0.2),
+    0 -10px 20px rgba(255, 255, 255, 0.92);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.submit-expense-button::before {
+  content: "+";
+  margin-right: 0.45rem;
+
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.submit-expense-button:hover:not(:disabled) {
+  box-shadow:
+    0 11px 25px rgba(22, 131, 59, 0.28),
+    0 -10px 20px rgba(255, 255, 255, 0.92);
+
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+}
+
+.submit-expense-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-expense-button:disabled {
+  background: #aab7ae;
+  box-shadow: none;
+
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* =========================================================
+   ÉTATS D’ERREUR
+========================================================= */
+
+.field-error {
+  margin: 0;
+
+  color: var(--expense-danger);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.add-expense-form input[aria-invalid="true"],
+.add-expense-form select[aria-invalid="true"] {
+  border-color: var(--expense-danger);
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.08);
+}
+
+/* =========================================================
+   TABLETTES
+========================================================= */
+
+@media (max-width: 900px) {
+  .add-expense-form {
+    width: min(94vw, 760px);
+  }
+
+  .amount-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .converted-card {
+    grid-column: 1 / -1;
+    min-height: 105px;
+  }
+
+  .participants-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   MOBILES
+========================================================= */
+
+@media (max-width: 700px) {
+  .add-expense-form {
+    width: min(95vw, 540px);
+    max-height: 92vh;
+    gap: 1rem;
+
+    padding: 1.2rem;
+    border-radius: 20px;
+  }
+
+  .expense-form-header {
+    align-items: flex-start;
+  }
+
+  .expense-form-header-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .expense-form-header h3 {
+    font-size: 1.4rem;
+  }
+
+  .expense-form-header p {
+    font-size: 0.86rem;
+  }
+
+  .form-section {
+    padding: 1rem;
+    border-radius: 15px;
+  }
+
+  .two-columns,
+  .payer-date-grid,
+  .amount-grid,
+  .participants-list {
+    grid-template-columns: 1fr;
+  }
+
+  .converted-card {
+    grid-column: auto;
+  }
+
+  .split-choice {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}
+
+/* =========================================================
+   PETITS MOBILES
+========================================================= */
+
+@media (max-width: 420px) {
+  .add-expense-form {
+    width: 96vw;
+    padding: 0.9rem;
+  }
+
+  .expense-form-header {
+    gap: 0.75rem;
+  }
+
+  .expense-form-header-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .expense-form-header-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .expense-form-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .section-legend {
+    font-size: 0.92rem;
+  }
+
+  .amount-card {
+    min-height: auto;
+    padding: 0.85rem;
+  }
+
+  .conversion-prefix {
+    padding-left: 0.55rem;
+    font-size: 0.76rem;
+  }
+
+  .currency-tag {
+    min-width: 55px;
+    padding: 0 0.6rem;
+  }
+
+  .submit-expense-button {
+    min-height: 48px;
+    font-size: 0.92rem;
+  }
 }
