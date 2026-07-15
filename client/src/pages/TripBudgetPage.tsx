@@ -17,6 +17,11 @@ type BudgetSummaryData = {
   balance: number;
 };
 
+type UserPreferences = {
+  email_trip_notifications: boolean;
+  default_currency: string;
+};
+
 type ExpenseShare = {
   user_id: number;
   firstname: string;
@@ -74,6 +79,12 @@ function TripBudgetPage() {
   const currentUserId = auth?.user?.id;
 
   const [trip, setTrip] = useState<TheTrip | null>(null);
+
+  const [userPreferences, setUserPreferences] =
+    useState<UserPreferences>({
+      email_trip_notifications: true,
+      default_currency: "EUR",
+    });
 
   const [summary, setSummary] = useState<BudgetSummaryData>({
     total: 0,
@@ -138,6 +149,58 @@ function TripBudgetPage() {
     }
   }, [tripId, authHeaders]);
 
+  const getUserPreferences = useCallback(async () => {
+    if (!token) {
+      setUserPreferences({
+        email_trip_notifications: true,
+        default_currency: "EUR",
+      });
+
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/preferences`,
+        {
+          headers: authHeaders,
+        },
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            data?.message ||
+            "Impossible de charger les préférences utilisateur.",
+        );
+      }
+
+      setUserPreferences({
+        email_trip_notifications: Boolean(
+          data?.email_trip_notifications,
+        ),
+        default_currency: String(
+          data?.default_currency || "EUR",
+        ).toUpperCase(),
+      });
+    } catch (error) {
+      console.error("Erreur getUserPreferences :", error);
+
+      setUserPreferences({
+        email_trip_notifications: true,
+        default_currency: "EUR",
+      });
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Impossible de charger les préférences utilisateur.",
+      );
+    }
+  }, [token, authHeaders]);
+
   const getMembers = useCallback(async () => {
     try {
       const response = await fetch(
@@ -163,13 +226,15 @@ function TripBudgetPage() {
           ? data.members
           : [];
 
-      const formattedMembers: Member[] = receivedMembers.map((member) => ({
-        id: member.id,
-        firstname:
-          member.firstname?.trim() ||
-          member.email?.trim() ||
-          "Participant",
-      }));
+      const formattedMembers: Member[] = receivedMembers.map(
+        (member) => ({
+          id: member.id,
+          firstname:
+            member.firstname?.trim() ||
+            member.email?.trim() ||
+            "Participant",
+        }),
+      );
 
       setMembers(formattedMembers);
     } catch (error) {
@@ -317,6 +382,7 @@ function TripBudgetPage() {
 
       await Promise.all([
         getTrip(),
+        getUserPreferences(),
         getMembers(),
         getCategories(),
         getExpenses(),
@@ -330,14 +396,19 @@ function TripBudgetPage() {
   }, [
     tripId,
     getTrip,
+    getUserPreferences,
     getMembers,
     getCategories,
     getExpenses,
     getSummary,
   ]);
 
+  /*
+   * Devise utilisée pour l'affichage du budget.
+   * La préférence utilisateur est prioritaire.
+   */
   const displayCurrency =
-    trip?.base_currency ||
+    userPreferences.default_currency ||
     expenses.find((expense) => expense.converted_currency)
       ?.converted_currency ||
     "EUR";
@@ -347,7 +418,11 @@ function TripBudgetPage() {
     currency?: string | null,
   ) => {
     const safeAmount = Number(amount || 0);
-    const safeCurrency = currency || displayCurrency || "EUR";
+    const safeCurrency = (
+      currency ||
+      displayCurrency ||
+      "EUR"
+    ).toUpperCase();
 
     try {
       return new Intl.NumberFormat("fr-FR", {
@@ -377,17 +452,19 @@ function TripBudgetPage() {
   const groupedExpenses = useMemo(() => {
     const groups: Record<string, Expense[]> = {};
 
-    const sortedExpenses = [...expenses].sort((expenseA, expenseB) => {
-      const dateA = new Date(
-        expenseA.date || expenseA.created_at || 0,
-      ).getTime();
+    const sortedExpenses = [...expenses].sort(
+      (expenseA, expenseB) => {
+        const dateA = new Date(
+          expenseA.date || expenseA.created_at || 0,
+        ).getTime();
 
-      const dateB = new Date(
-        expenseB.date || expenseB.created_at || 0,
-      ).getTime();
+        const dateB = new Date(
+          expenseB.date || expenseB.created_at || 0,
+        ).getTime();
 
-      return dateB - dateA;
-    });
+        return dateB - dateA;
+      },
+    );
 
     for (const expense of sortedExpenses) {
       const dateKey =
@@ -511,7 +588,10 @@ function TripBudgetPage() {
               ) : (
                 Object.entries(groupedExpenses).map(
                   ([date, dateExpenses]) => (
-                    <section key={date} className="expense-date-block">
+                    <section
+                      key={date}
+                      className="expense-date-block"
+                    >
                       <h3 className="expense-date-title">
                         {date === "Date inconnue"
                           ? date
@@ -597,7 +677,9 @@ function TripBudgetPage() {
                                   <span className="expense-participants">
                                     {participantCount > 0
                                       ? `${participantCount} participant${
-                                          participantCount > 1 ? "s" : ""
+                                          participantCount > 1
+                                            ? "s"
+                                            : ""
                                         }`
                                       : "Aucun participant"}
                                   </span>
@@ -684,7 +766,8 @@ function TripBudgetPage() {
             members={members}
             categories={categories}
             localCurrency={trip?.local_currency || "EUR"}
-            preferredCurrency={trip?.base_currency || "EUR"}
+            preferredCurrency={
+            userPreferences.default_currency}
             token={token}
             onExpenseAdded={handleExpenseAdded}
           />

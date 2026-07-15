@@ -5,15 +5,16 @@ type UserPreferences = {
   id: number;
   user_id: number;
   email_trip_notifications: boolean;
+  default_currency: string;
 };
 
 const create = async (userId: number) => {
   const [result] = await databaseClient.query<Result>(
     `
-      INSERT INTO user_preferences (user_id, email_trip_notifications)
-      VALUES (?, ?)
+      INSERT INTO user_preferences (user_id, email_trip_notifications, default_currency)
+      VALUES (?, ?, ?)
     `,
-    [userId, true],
+    [userId, true, "EUR"],
   );
 
   return result;
@@ -22,7 +23,7 @@ const create = async (userId: number) => {
 const readByUserId = async (userId: number) => {
   const [rows] = await databaseClient.query<Rows>(
     `
-      SELECT id, user_id, email_trip_notifications
+      SELECT id, user_id, email_trip_notifications, default_currency
       FROM user_preferences
       WHERE user_id = ?
     `,
@@ -35,17 +36,19 @@ const readByUserId = async (userId: number) => {
 const updateByUserId = async (
   userId: number,
   emailTripNotifications: boolean,
+  defaultCurrency: string,
 ) => {
   const [result] = await databaseClient.query<Result>(
     `
       UPDATE user_preferences
-      SET email_trip_notifications = ?
+      SET email_trip_notifications = ?,
+      default_currency = ?
       WHERE user_id = ?
     `,
-    [emailTripNotifications, userId],
+    [emailTripNotifications, defaultCurrency, userId],
   );
 
-  return result;
+  return readByUserId(userId);
 };
 
 export default {

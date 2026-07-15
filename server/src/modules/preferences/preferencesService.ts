@@ -14,6 +14,7 @@ const getUserPreferences = async (userId: number) => {
 const updateUserPreferences = async (
   userId: number,
   emailTripNotifications: boolean,
+  defaultCurrency: string,
 ) => {
   const existing = await preferencesRepository.readByUserId(userId);
 
@@ -21,12 +22,11 @@ const updateUserPreferences = async (
     await preferencesRepository.create(userId);
   }
 
-  await preferencesRepository.updateByUserId(
+  return preferencesRepository.updateByUserId(
     userId,
     emailTripNotifications,
+    defaultCurrency,
   );
-
-  return preferencesRepository.readByUserId(userId);
 };
 
 export default {

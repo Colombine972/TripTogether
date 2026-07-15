@@ -58,7 +58,7 @@ export default function PreferencesCard() {
         }
 
         const data = await response.json();
-
+console.log("RÉPONSE GET PRÉFÉRENCES :", data);
         setPreferences({
           email_trip_notifications: Boolean(data.email_trip_notifications),
           default_currency: data.default_currency || "EUR",
@@ -94,11 +94,19 @@ export default function PreferencesCard() {
         },
       );
 
-      if (!response.ok) {
-        throw new Error("Erreur mise à jour");
-      }
+const data = await response.json().catch(() => null);
 
-      toast.success("Préférences enregistrées.");
+console.log("RÉPONSE PUT PRÉFÉRENCES :", data);
+
+if (!response.ok) {
+  throw new Error(
+    data?.error ||
+      data?.message ||
+      "Erreur lors de la mise à jour des préférences.",
+  );
+}
+
+toast.success("Préférences enregistrées.");
     } catch (error) {
       console.error(error);
       setPreferences(previousPreferences);
