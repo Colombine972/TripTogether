@@ -18,6 +18,7 @@ import "../pages/styles/AddExpenseForm.css";
 type Member = {
   id: number;
   firstname: string;
+  avatar_url?: string | null;
 };
 
 type Category = {
@@ -352,8 +353,7 @@ function AddExpenseForm({
       );
 
       if (
-        Number(exactTotal.toFixed(2)) !==
-        Number(convertedAmount.toFixed(2))
+        Number(exactTotal.toFixed(2)) !== Number(convertedAmount.toFixed(2))
       ) {
         toast.error(
           `La somme des montants répartis doit être égale à ${formattedConvertedAmount}.`,
@@ -365,9 +365,7 @@ function AddExpenseForm({
     return true;
   };
 
-  const handleSubmit = async (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!validateForm()) {
@@ -440,11 +438,7 @@ function AddExpenseForm({
   };
 
   return (
-    <form
-      className="add-expense-form"
-      onSubmit={handleSubmit}
-      noValidate
-    >
+    <form className="add-expense-form" onSubmit={handleSubmit} noValidate>
       <header className="expense-form-header">
         <div className="expense-form-header-icon">
           <Wallet size={28} strokeWidth={2.1} />
@@ -482,16 +476,12 @@ function AddExpenseForm({
             Catégorie
           </span>
 
-          <select
-            value={categoryId}
-            onChange={handleCategoryChange}
-          >
+          <select value={categoryId} onChange={handleCategoryChange}>
             <option value="">Choisir une catégorie</option>
 
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
-                {getDefaultCategoryEmoji(category.name)}{" "}
-                {category.name}
+                {getDefaultCategoryEmoji(category.name)} {category.name}
               </option>
             ))}
           </select>
@@ -506,14 +496,10 @@ function AddExpenseForm({
         {selectedCategory && (
           <div className="emoji-customization">
             <div className="emoji-preview">
-              <span className="emoji-preview-icon">
-                {finalEmoji}
-              </span>
+              <span className="emoji-preview-icon">{finalEmoji}</span>
 
               <div>
-                <p className="emoji-preview-title">
-                  Emoji de la dépense
-                </p>
+                <p className="emoji-preview-title">Emoji de la dépense</p>
 
                 <p className="emoji-preview-description">
                   Choisi automatiquement selon la catégorie{" "}
@@ -542,9 +528,7 @@ function AddExpenseForm({
                     <button
                       key={emojiOption}
                       type="button"
-                      className={`emoji-option ${
-                        isSelected ? "selected" : ""
-                      }`}
+                      className={`emoji-option ${isSelected ? "selected" : ""}`}
                       onClick={() => {
                         setSelectedEmoji(emojiOption);
                         setShowEmojiPicker(false);
@@ -585,9 +569,7 @@ function AddExpenseForm({
                 placeholder="0,00"
               />
 
-              <span className="currency-tag">
-                {safeLocalCurrency}
-              </span>
+              <span className="currency-tag">{safeLocalCurrency}</span>
             </div>
           </div>
 
@@ -598,9 +580,7 @@ function AddExpenseForm({
             </span>
 
             <div className="amount-input conversion-input">
-              <span className="conversion-prefix">
-                1 {safeLocalCurrency} =
-              </span>
+              <span className="conversion-prefix">1 {safeLocalCurrency} =</span>
 
               <input
                 type="number"
@@ -608,16 +588,12 @@ function AddExpenseForm({
                 step="0.000001"
                 value={exchangeRate}
                 onChange={handleExchangeRateChange}
-                placeholder={
-                  isRateLoading ? "Chargement..." : "Saisir le taux"
-                }
+                placeholder={isRateLoading ? "Chargement..." : "Saisir le taux"}
                 disabled={isRateLoading}
                 aria-label={`Taux de conversion de ${safeLocalCurrency} vers ${safePreferredCurrency}`}
               />
 
-              <span className="currency-tag">
-                {safePreferredCurrency}
-              </span>
+              <span className="currency-tag">{safePreferredCurrency}</span>
             </div>
 
             {isRateLoading && (
@@ -627,9 +603,7 @@ function AddExpenseForm({
             )}
 
             {exchangeRateError && (
-              <small className="rate-error">
-                {exchangeRateError}
-              </small>
+              <small className="rate-error">{exchangeRateError}</small>
             )}
           </div>
 
@@ -722,9 +696,7 @@ function AddExpenseForm({
             return (
               <div
                 key={member.id}
-                className={`participant-row ${
-                  isSelected ? "selected" : ""
-                }`}
+                className={`participant-row ${isSelected ? "selected" : ""}`}
               >
                 <label className="participant-checkbox">
                   <input
@@ -733,7 +705,13 @@ function AddExpenseForm({
                     onChange={() => toggleMember(member.id)}
                   />
 
-                  <span>{member.firstname}</span>
+                  <img
+                    src={member.avatar_url || "/images/utilisateur.png"}
+                    alt={`Avatar de ${member.firstname}`}
+                    className="participant-avatar"
+                  />
+
+                  <span className="participant-name">{member.firstname}</span>
                 </label>
 
                 {splitMode === "exact" && isSelected && (
@@ -762,14 +740,10 @@ function AddExpenseForm({
         type="submit"
         className="submit-expense-button"
         disabled={
-          isSubmitting ||
-          categories.length === 0 ||
-          members.length === 0
+          isSubmitting || categories.length === 0 || members.length === 0
         }
       >
-        {isSubmitting
-          ? "Ajout en cours..."
-          : "Ajouter la dépense"}
+        {isSubmitting ? "Ajout en cours..." : "Ajouter la dépense"}
       </button>
     </form>
   );

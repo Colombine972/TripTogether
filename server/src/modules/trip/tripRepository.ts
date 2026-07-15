@@ -213,19 +213,36 @@ class TripRepository {
   }
 
   async findMembersByTrip(tripId: number) {
-    const [rows] = await databaseClient.query(
-      `SELECT u.id, u.firstname, u.email
+    const [rows] = await databaseClient.query<Rows>(
+      `
+      SELECT
+        u.id,
+        u.firstname,
+        u.lastname,
+        u.email,
+        u.avatar_url
       FROM user u
       WHERE u.id = (
-        SELECT user_id FROM trip WHERE id = ?
+        SELECT t.user_id
+        FROM trip t
+        WHERE t.id = ?
       )
 
       UNION
 
-      SELECT u.id, u.firstname, u.email
+      SELECT
+        u.id,
+        u.firstname,
+        u.lastname,
+        u.email,
+        u.avatar_url
       FROM user u
-      JOIN invitation i ON i.user_id = u.id
-      WHERE i.trip_id = ? AND i.status = 'accepted'`,
+      JOIN invitation i
+        ON i.user_id = u.id
+      WHERE
+        i.trip_id = ?
+        AND i.status = 'accepted'
+    `,
       [tripId, tripId],
     );
 

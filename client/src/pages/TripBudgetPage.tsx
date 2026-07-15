@@ -57,11 +57,13 @@ type MemberApiResponse = {
   firstname?: string;
   lastname?: string;
   email?: string;
+  avatar_url?: string | null;
 };
 
 type Member = {
   id: number;
   firstname: string;
+  avatar_url: string | null;
 };
 
 type Category = {
@@ -80,11 +82,10 @@ function TripBudgetPage() {
 
   const [trip, setTrip] = useState<TheTrip | null>(null);
 
-  const [userPreferences, setUserPreferences] =
-    useState<UserPreferences>({
-      email_trip_notifications: true,
-      default_currency: "EUR",
-    });
+  const [userPreferences, setUserPreferences] = useState<UserPreferences>({
+    email_trip_notifications: true,
+    default_currency: "EUR",
+  });
 
   const [summary, setSummary] = useState<BudgetSummaryData>({
     total: 0,
@@ -100,8 +101,7 @@ function TripBudgetPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [expenseToDelete, setExpenseToDelete] =
-    useState<Expense | null>(null);
+  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
 
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -131,9 +131,7 @@ function TripBudgetPage() {
 
       if (!response.ok) {
         throw new Error(
-          data?.error ||
-            data?.message ||
-            "Impossible de charger le voyage.",
+          data?.error || data?.message || "Impossible de charger le voyage.",
         );
       }
 
@@ -178,12 +176,8 @@ function TripBudgetPage() {
       }
 
       setUserPreferences({
-        email_trip_notifications: Boolean(
-          data?.email_trip_notifications,
-        ),
-        default_currency: String(
-          data?.default_currency || "EUR",
-        ).toUpperCase(),
+        email_trip_notifications: Boolean(data?.email_trip_notifications),
+        default_currency: String(data?.default_currency || "EUR").toUpperCase(),
       });
     } catch (error) {
       console.error("Erreur getUserPreferences :", error);
@@ -226,15 +220,12 @@ function TripBudgetPage() {
           ? data.members
           : [];
 
-      const formattedMembers: Member[] = receivedMembers.map(
-        (member) => ({
-          id: member.id,
-          firstname:
-            member.firstname?.trim() ||
-            member.email?.trim() ||
-            "Participant",
-        }),
-      );
+      const formattedMembers: Member[] = receivedMembers.map((member) => ({
+        id: member.id,
+        firstname:
+          member.firstname?.trim() || member.email?.trim() || "Participant",
+        avatar_url: member.avatar_url || null,
+      }));
 
       setMembers(formattedMembers);
     } catch (error) {
@@ -300,9 +291,7 @@ function TripBudgetPage() {
 
       if (!response.ok) {
         throw new Error(
-          data?.error ||
-            data?.message ||
-            "Impossible de charger les dépenses.",
+          data?.error || data?.message || "Impossible de charger les dépenses.",
         );
       }
 
@@ -413,16 +402,9 @@ function TripBudgetPage() {
       ?.converted_currency ||
     "EUR";
 
-  const formatCurrency = (
-    amount?: number | null,
-    currency?: string | null,
-  ) => {
+  const formatCurrency = (amount?: number | null, currency?: string | null) => {
     const safeAmount = Number(amount || 0);
-    const safeCurrency = (
-      currency ||
-      displayCurrency ||
-      "EUR"
-    ).toUpperCase();
+    const safeCurrency = (currency || displayCurrency || "EUR").toUpperCase();
 
     try {
       return new Intl.NumberFormat("fr-FR", {
@@ -452,25 +434,21 @@ function TripBudgetPage() {
   const groupedExpenses = useMemo(() => {
     const groups: Record<string, Expense[]> = {};
 
-    const sortedExpenses = [...expenses].sort(
-      (expenseA, expenseB) => {
-        const dateA = new Date(
-          expenseA.date || expenseA.created_at || 0,
-        ).getTime();
+    const sortedExpenses = [...expenses].sort((expenseA, expenseB) => {
+      const dateA = new Date(
+        expenseA.date || expenseA.created_at || 0,
+      ).getTime();
 
-        const dateB = new Date(
-          expenseB.date || expenseB.created_at || 0,
-        ).getTime();
+      const dateB = new Date(
+        expenseB.date || expenseB.created_at || 0,
+      ).getTime();
 
-        return dateB - dateA;
-      },
-    );
+      return dateB - dateA;
+    });
 
     for (const expense of sortedExpenses) {
       const dateKey =
-        expense.date ||
-        expense.created_at?.split("T")[0] ||
-        "Date inconnue";
+        expense.date || expense.created_at?.split("T")[0] || "Date inconnue";
 
       if (!groups[dateKey]) {
         groups[dateKey] = [];
@@ -512,9 +490,7 @@ function TripBudgetPage() {
         const data = await response.json().catch(() => null);
 
         throw new Error(
-          data?.error ||
-            data?.message ||
-            "Impossible de supprimer la dépense.",
+          data?.error || data?.message || "Impossible de supprimer la dépense.",
         );
       }
 
@@ -586,188 +562,164 @@ function TripBudgetPage() {
                   </button>
                 </div>
               ) : (
-                Object.entries(groupedExpenses).map(
-                  ([date, dateExpenses]) => (
-                    <section
-                      key={date}
-                      className="expense-date-block"
-                    >
-                      <h3 className="expense-date-title">
-                        {date === "Date inconnue"
-                          ? date
-                          : formatExpenseDate(date)}
-                      </h3>
+                Object.entries(groupedExpenses).map(([date, dateExpenses]) => (
+                  <section key={date} className="expense-date-block">
+                    <h3 className="expense-date-title">
+                      {date === "Date inconnue"
+                        ? date
+                        : formatExpenseDate(date)}
+                    </h3>
 
-                      <div className="expense-date-list">
-                        {dateExpenses.map((expense) => {
-                          const displayedAmount =
-                            expense.converted_amount ??
-                            expense.amount ??
-                            expense.original_amount ??
-                            0;
+                    <div className="expense-date-list">
+                      {dateExpenses.map((expense) => {
+                        const displayedAmount =
+                          expense.converted_amount ??
+                          expense.amount ??
+                          expense.original_amount ??
+                          0;
 
-                          const expenseCurrency =
-                            expense.converted_currency ||
-                            displayCurrency;
+                        const expenseCurrency =
+                          expense.converted_currency || displayCurrency;
 
-                          const participantCount =
-                            expense.shares?.length || 0;
+                        const participantCount = expense.shares?.length || 0;
 
-                          return (
-                            <article
-                              key={expense.id}
-                              className="expense-card"
-                            >
-                              <div className="expense-header-row">
-                                <div className="expense-left">
-                                  <div className="expense-icon">
-                                    {expense.emoji || "💸"}
-                                  </div>
-
-                                  <div>
-                                    <h4 className="expense-description">
-                                      {expense.title}
-                                    </h4>
-
-                                    <p className="expense-paid">
-                                      Payé par{" "}
-                                      {expense.paid_by_name ||
-                                        "un participant"}
-                                    </p>
-
-                                    {expense.category_name && (
-                                      <p className="expense-category">
-                                        {expense.category_name}
-                                      </p>
-                                    )}
-                                  </div>
+                        return (
+                          <article key={expense.id} className="expense-card">
+                            <div className="expense-header-row">
+                              <div className="expense-left">
+                                <div className="expense-icon">
+                                  {expense.emoji || "💸"}
                                 </div>
 
-                                <div className="expense-right">
-                                  <button
-                                    type="button"
-                                    className="delete-expense-btn"
-                                    onClick={() =>
-                                      setExpenseToDelete(expense)
-                                    }
-                                    aria-label={`Supprimer la dépense ${expense.title}`}
-                                  >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      viewBox="0 0 24 24"
-                                      fill="currentColor"
-                                      className="trash-icon"
-                                      aria-hidden="true"
-                                    >
-                                      <path
-                                        fillRule="evenodd"
-                                        d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-3.536 4.569a.75.75 0 0 0-1.44.32l.5 10a.75.75 0 0 0 1.498-.06l-.558-10.26Zm4.5 0a.75.75 0 0 0-1.5 0v10.26a.75.75 0 0 0 1.5 0v-10.26Zm3.536.26a.75.75 0 0 0-1.44-.32l-.558 10.26a.75.75 0 0 0 1.498.06l.5-10Z"
-                                        clipRule="evenodd"
-                                      />
-                                    </svg>
-                                  </button>
+                                <div>
+                                  <h4 className="expense-description">
+                                    {expense.title}
+                                  </h4>
 
-                                  <strong className="expense-amount">
-                                    {formatCurrency(
-                                      displayedAmount,
-                                      expenseCurrency,
-                                    )}
-                                  </strong>
+                                  <p className="expense-paid">
+                                    Payé par{" "}
+                                    {expense.paid_by_name || "un participant"}
+                                  </p>
 
-                                  <span className="expense-participants">
-                                    {participantCount > 0
-                                      ? `${participantCount} participant${
-                                          participantCount > 1
-                                            ? "s"
-                                            : ""
-                                        }`
-                                      : "Aucun participant"}
-                                  </span>
+                                  {expense.category_name && (
+                                    <p className="expense-category">
+                                      {expense.category_name}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
 
-                              {expense.shares &&
-                                expense.shares.length > 0 &&
-                                currentUserId && (
-                                  <>
-                                    <div className="expense-divider" />
+                              <div className="expense-right">
+                                <button
+                                  type="button"
+                                  className="delete-expense-btn"
+                                  onClick={() => setExpenseToDelete(expense)}
+                                  aria-label={`Supprimer la dépense ${expense.title}`}
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="trash-icon"
+                                    aria-hidden="true"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-3.536 4.569a.75.75 0 0 0-1.44.32l.5 10a.75.75 0 0 0 1.498-.06l-.558-10.26Zm4.5 0a.75.75 0 0 0-1.5 0v10.26a.75.75 0 0 0 1.5 0v-10.26Zm3.536.26a.75.75 0 0 0-1.44-.32l-.558 10.26a.75.75 0 0 0 1.498.06l.5-10Z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
 
-                                    <div className="expense-debt">
-                                      {expense.paid_by ===
-                                      currentUserId ? (
-                                        <div className="debt-positive">
-                                          <p>💰 On te doit :</p>
+                                <strong className="expense-amount">
+                                  {formatCurrency(
+                                    displayedAmount,
+                                    expenseCurrency,
+                                  )}
+                                </strong>
 
-                                          {expense.shares
-                                            .filter(
-                                              (share) =>
-                                                share.user_id !==
-                                                currentUserId,
-                                            )
-                                            .map((share) => (
-                                              <div
-                                                key={share.user_id}
-                                              >
-                                                {share.firstname} te doit{" "}
-                                                <strong>
-                                                  {formatCurrency(
-                                                    share.share_amount,
-                                                    expenseCurrency,
-                                                  )}
-                                                </strong>
-                                              </div>
-                                            ))}
-                                        </div>
-                                      ) : (
-                                        <div className="debt-negative">
-                                          {expense.shares
-                                            .filter(
-                                              (share) =>
-                                                share.user_id ===
-                                                currentUserId,
-                                            )
-                                            .map((share) => (
-                                              <p key={share.user_id}>
-                                                ⚠ Tu dois{" "}
-                                                <strong>
-                                                  {formatCurrency(
-                                                    share.share_amount,
-                                                    expenseCurrency,
-                                                  )}
-                                                </strong>{" "}
-                                                à{" "}
-                                                {expense.paid_by_name ||
-                                                  "ce participant"}
-                                              </p>
-                                            ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </>
-                                )}
-                            </article>
-                          );
-                        })}
-                      </div>
-                    </section>
-                  ),
-                )
+                                <span className="expense-participants">
+                                  {participantCount > 0
+                                    ? `${participantCount} participant${
+                                        participantCount > 1 ? "s" : ""
+                                      }`
+                                    : "Aucun participant"}
+                                </span>
+                              </div>
+                            </div>
+
+                            {expense.shares &&
+                              expense.shares.length > 0 &&
+                              currentUserId && (
+                                <>
+                                  <div className="expense-divider" />
+
+                                  <div className="expense-debt">
+                                    {expense.paid_by === currentUserId ? (
+                                      <div className="debt-positive">
+                                        <p>💰 On te doit :</p>
+
+                                        {expense.shares
+                                          .filter(
+                                            (share) =>
+                                              share.user_id !== currentUserId,
+                                          )
+                                          .map((share) => (
+                                            <div key={share.user_id}>
+                                              {share.firstname} te doit{" "}
+                                              <strong>
+                                                {formatCurrency(
+                                                  share.share_amount,
+                                                  expenseCurrency,
+                                                )}
+                                              </strong>
+                                            </div>
+                                          ))}
+                                      </div>
+                                    ) : (
+                                      <div className="debt-negative">
+                                        {expense.shares
+                                          .filter(
+                                            (share) =>
+                                              share.user_id === currentUserId,
+                                          )
+                                          .map((share) => (
+                                            <p key={share.user_id}>
+                                              ⚠ Tu dois{" "}
+                                              <strong>
+                                                {formatCurrency(
+                                                  share.share_amount,
+                                                  expenseCurrency,
+                                                )}
+                                              </strong>{" "}
+                                              à{" "}
+                                              {expense.paid_by_name ||
+                                                "ce participant"}
+                                            </p>
+                                          ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </>
+                              )}
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ))
               )}
             </section>
           </>
         )}
 
-        <Modal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        >
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <AddExpenseForm
             tripId={tripId}
             members={members}
             categories={categories}
             localCurrency={trip?.local_currency || "EUR"}
-            preferredCurrency={
-            userPreferences.default_currency}
+            preferredCurrency={userPreferences.default_currency}
             token={token}
             onExpenseAdded={handleExpenseAdded}
           />
@@ -781,9 +733,7 @@ function TripBudgetPage() {
               aria-modal="true"
               aria-labelledby="delete-expense-title"
             >
-              <h4 id="delete-expense-title">
-                Supprimer cette dépense ?
-              </h4>
+              <h4 id="delete-expense-title">Supprimer cette dépense ?</h4>
 
               <p>
                 Voulez-vous vraiment supprimer la dépense{" "}
@@ -806,9 +756,7 @@ function TripBudgetPage() {
                   onClick={handleDeleteExpense}
                   disabled={isDeleting}
                 >
-                  {isDeleting
-                    ? "Suppression..."
-                    : "Confirmer la suppression"}
+                  {isDeleting ? "Suppression..." : "Confirmer la suppression"}
                 </button>
               </div>
             </div>
