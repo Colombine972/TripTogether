@@ -115,18 +115,23 @@ const selectInvitationsByTrip: RequestHandler = async (req, res, next) => {
     const tripId = Number(req.params.id);
 
     if (Number.isNaN(tripId)) {
-      res.status(400).json({ error: "ID de voyage invalide" });
+      res.status(400).json({
+        error: "ID de voyage invalide",
+      });
       return;
     }
 
     const trip = await tripRepository.read(tripId);
 
     if (!trip) {
-      res.status(404).json({ error: "Voyage introuvable" });
+      res.status(404).json({
+        error: "Voyage introuvable",
+      });
       return;
     }
 
-    const invitations = await invitationRepository.selectByTrip(tripId);
+    const invitations =
+      await invitationRepository.selectByTrip(tripId);
 
     res.json({
       trip: {
@@ -136,8 +141,11 @@ const selectInvitationsByTrip: RequestHandler = async (req, res, next) => {
         start_at: trip.start_at,
         end_at: trip.end_at,
         user_id: trip.user_id,
+
         owner_firstname: trip.owner_firstname,
         owner_lastname: trip.owner_lastname,
+        owner_avatar_url: trip.owner_avatar_url,
+
         image_url: trip.image_url,
       },
       invitations,

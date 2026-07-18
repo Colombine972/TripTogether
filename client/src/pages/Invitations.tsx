@@ -17,6 +17,7 @@ type InvitationsResponse =
       trip: TheTrip & {
         owner_firstname?: string;
         owner_lastname?: string;
+        owner_avatar_url?: string | null;
       };
       invitations: invitationType[];
     }
@@ -112,20 +113,25 @@ function Invitations() {
 
         const creator: Guest = {
           id: trip.user_id || 0,
-          name: `${trip.owner_firstname ?? ""} ${trip.owner_lastname ?? ""}`.trim(),
-          avatarUrl: null,
+          name:
+            `${trip.owner_firstname ?? ""} ${trip.owner_lastname ?? ""}`.trim() ||
+            "Organisateur",
+          avatarUrl: trip.owner_avatar_url ?? null,
           addedAt: null,
           role: "organisateur",
         };
 
         const acceptedInvitations = invitations.filter(
-          (invitation) => invitation.status === "accepted",
+          (invitation): invitation is invitationType & { user_id: number } =>
+            invitation.status === "accepted" && invitation.user_id !== null,
         );
 
         const acceptedGuests: Guest[] = acceptedInvitations.map((inv) => ({
           id: inv.user_id,
-          name: `${inv.invited_firstname} ${inv.invited_lastname}`,
-          avatarUrl: null,
+          name:
+            `${inv.invited_firstname ?? ""} ${inv.invited_lastname ?? ""}`.trim() ||
+            "Participant",
+          avatarUrl: inv.invited_avatar_url ?? null,
           addedAt: inv.created_at,
           role: "membre",
         }));
@@ -135,12 +141,15 @@ function Invitations() {
         const otherInvitationsGuests: Guest[] = invitations
           .filter((invitation) => invitation.status !== "accepted")
           .map((inv) => ({
-            id: inv.user_id,
-            name: `${inv.invited_firstname} ${inv.invited_lastname}`,
-            avatarUrl: null,
+            id: inv.id,
+            name:
+              `${inv.invited_firstname ?? ""} ${inv.invited_lastname ?? ""}`.trim() ||
+              inv.email ||
+              "Invité",
+            avatarUrl: inv.invited_avatar_url ?? null,
             addedAt: inv.created_at,
             inviteState: inv.status === "refused" ? "refuse" : "en-attente",
-            lastReminderAt: null,
+            lastReminderAt: inv.lastReminderAt ?? null,
           }));
 
         setAttendees(attendees);

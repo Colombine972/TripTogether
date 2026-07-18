@@ -8,12 +8,18 @@ export type Trip = {
   end_at: string;
   user_id: number;
   place_id?: string | null;
+
+  image_url?: string | null;
+
   owner_firstname?: string;
   owner_lastname?: string;
+  owner_avatar_url?: string | null;
+
   country_code?: string | null;
   local_currency?: string | null;
   base_currency?: string | null;
 };
+
 export type Step = {
   id: number;
   city: string;
@@ -22,4 +28,5 @@ export type Step = {
   place_id?: string | null;
   user_id: number;
 };
+
 export type TripStatus = "futur" | "past" | "current";
