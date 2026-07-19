@@ -164,23 +164,10 @@
   opacity: 0.8;
 }
 
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(15, 23, 42, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 40;
-}
 
-.modal {
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 20px 24px;
-  max-width: 400px;
-  width: 90%;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4);
+
+.modal-backdrop .modal {
+  position: relative;
 }
 
 .modal h4 {
@@ -195,8 +182,130 @@
   color: #4b5563;
 }
 
-.modal-actions {
+.expense-delete-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.expense-delete-dialog {
+  position: relative;
+
+  width: min(420px, 100%);
+  margin: 0;
+  padding: 1.5rem;
+
+  color: #1f2937;
+  background: #ffffff;
+
+  border: none;
+  border-radius: 18px;
+
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.3),
+    0 8px 20px rgba(15, 23, 42, 0.15);
+}
+
+.expense-delete-dialog::before {
+  content: "";
+  display: block;
+
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+
+  background:
+    #fee2e2
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23dc2626'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z'/%3E%3C/svg%3E")
+    center / 26px no-repeat;
+
+  border-radius: 50%;
+}
+
+.expense-delete-dialog h4 {
+  margin: 0 0 0.5rem;
+
+  color: #111827;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.expense-delete-dialog p {
+  margin: 0 0 1.5rem;
+
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.expense-delete-dialog p strong {
+  color: #374151;
+}
+
+.expense-delete-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 0.75rem;
+}
+
+.expense-delete-cancel,
+.expense-delete-confirm {
+  min-height: 42px;
+  padding: 0.65rem 1rem;
+
+  border-radius: 9px;
+
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.expense-delete-cancel {
+  color: #374151;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+}
+
+.expense-delete-cancel:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.expense-delete-confirm {
+  color: #ffffff;
+  background: #dc2626;
+  border: 1px solid #dc2626;
+}
+
+.expense-delete-confirm:hover:not(:disabled) {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.expense-delete-cancel:focus-visible,
+.expense-delete-confirm:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.3);
+  outline-offset: 2px;
+}
+
+.expense-delete-cancel:disabled,
+.expense-delete-confirm:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
 }

@@ -105,17 +105,16 @@ function TripBudgetPage() {
 
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const authHeaders = useMemo<Record<string, string>>(() => {
-    if (!token) {
-      return {
-        "Content-Type": "application/json",
-      };
+  const authHeaders = useMemo((): Record<string, string> => {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
 
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    };
+    return headers;
   }, [token]);
 
   const getTrip = useCallback(async () => {
@@ -513,7 +512,7 @@ function TripBudgetPage() {
 
   return (
     <>
-      {trip && <TripInfos trip={trip} />}
+      {trip && <TripInfos trip={trip} onTripUpdated={setTrip} />}
 
       <main className="page-membre trip-budget-page">
         <NavTabs />
@@ -726,11 +725,10 @@ function TripBudgetPage() {
         </Modal>
 
         {expenseToDelete && (
-          <div className="modal-backdrop">
-            <div
-              className="modal"
-              role="dialog"
-              aria-modal="true"
+          <div className="expense-delete-backdrop">
+            <dialog
+              open
+              className="expense-delete-dialog"
               aria-labelledby="delete-expense-title"
             >
               <h4 id="delete-expense-title">Supprimer cette dépense ?</h4>
@@ -740,10 +738,10 @@ function TripBudgetPage() {
                 <strong>{expenseToDelete.title}</strong> ?
               </p>
 
-              <div className="modal-actions">
+              <div className="expense-delete-actions">
                 <button
                   type="button"
-                  className="btn-role"
+                  className="expense-delete-cancel"
                   onClick={() => setExpenseToDelete(null)}
                   disabled={isDeleting}
                 >
@@ -752,14 +750,14 @@ function TripBudgetPage() {
 
                 <button
                   type="button"
-                  className="btn-danger"
+                  className="expense-delete-confirm"
                   onClick={handleDeleteExpense}
                   disabled={isDeleting}
                 >
                   {isDeleting ? "Suppression..." : "Confirmer la suppression"}
                 </button>
               </div>
-            </div>
+            </dialog>
           </div>
         )}
       </main>

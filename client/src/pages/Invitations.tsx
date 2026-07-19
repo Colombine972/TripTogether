@@ -28,13 +28,14 @@ function Invitations() {
   const tripId = Number(id);
 
   const [trip, setTrip] = useState<TheTrip | null>(null);
-  const [mytrip, setmyTrip] = useState<TheTrip | null>(null);
   const [attendees, setAttendees] = useState<Guest[]>([]);
   const [otherInvitations, setOtherInvitations] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [deleteInvitation, setdeleteInvitation] = useState<Guest | null>(null);
+  const [invitationToDelete, setInvitationToDelete] = useState<Guest | null>(
+    null,
+  );
   const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
@@ -54,17 +55,18 @@ function Invitations() {
     setLoading(true);
     setError(null);
     fetch(`${import.meta.env.VITE_API_URL}/api/trips/${tripId}`)
-
       .then(async (response) => {
         if (!response.ok) {
           if (response.status === 401) {
             toast.error("Veuillez vous connecter pour accéder à ce voyage.");
             return;
           }
+
           throw new Error("Erreur chargement voyage");
         }
-        const data = await response.json();
-        setmyTrip(data);
+
+        const data: TheTrip = await response.json();
+        setTrip(data);
       })
       .catch((err) => {
         console.error(err);
@@ -108,15 +110,15 @@ function Invitations() {
           return;
         }
 
-        const { trip, invitations } = result;
-        setTrip(trip);
+        const { trip: invitationTrip, invitations } = result;
 
         const creator: Guest = {
-          id: trip.user_id || 0,
+          id: invitationTrip.user_id || 0,
           name:
-            `${trip.owner_firstname ?? ""} ${trip.owner_lastname ?? ""}`.trim() ||
-            "Organisateur",
-          avatarUrl: trip.owner_avatar_url ?? null,
+            `${invitationTrip.owner_firstname ?? ""} ${
+              invitationTrip.owner_lastname ?? ""
+            }`.trim() || "Organisateur",
+          avatarUrl: invitationTrip.owner_avatar_url ?? null,
           addedAt: null,
           role: "organisateur",
         };
@@ -207,13 +209,13 @@ function Invitations() {
       })
       .finally(() => {
         setIsDeleting(false);
-        setdeleteInvitation(null);
+        setInvitationToDelete(null);
       });
   };
 
   return (
     <>
-      {!loading && trip && <TripInfos trip={mytrip} />}
+      {!loading && trip && <TripInfos trip={trip} onTripUpdated={setTrip} />}
       <div className="page-membre">
         <NavTabs />
         <section id="member-list">
@@ -226,7 +228,7 @@ function Invitations() {
                 title="Participants"
                 invited={attendees}
                 type="attendees"
-                delete={setdeleteInvitation}
+                delete={setInvitationToDelete}
               />
               <Guests
                 title="Invités"
@@ -237,34 +239,44 @@ function Invitations() {
           )}
         </section>
 
-        {deleteInvitation && (
-          <div className="modal-backdrop">
-            <div className="modal">
-              <h4>Retirer ce membre ?</h4>
+        {invitationToDelete && (
+          <div className="participant-delete-backdrop">
+            <dialog
+              open
+              className="participant-delete-dialog"
+              aria-labelledby="delete-participant-title"
+            >
+              <div className="participant-delete-icon" aria-hidden="true">
+                !
+              </div>
+
+              <h4 id="delete-participant-title">Retirer ce participant ?</h4>
+
               <p>
                 Voulez-vous vraiment retirer{" "}
-                <strong>{deleteInvitation.name}</strong> de ce voyage ?
+                <strong>{invitationToDelete.name}</strong> de ce voyage ?
               </p>
 
-              <div className="modal-actions">
+              <div className="participant-delete-actions">
                 <button
                   type="button"
-                  className="btn-role"
-                  onClick={() => setdeleteInvitation(null)}
+                  className="participant-delete-cancel"
+                  onClick={() => setInvitationToDelete(null)}
                   disabled={isDeleting}
                 >
                   Annuler
                 </button>
+
                 <button
                   type="button"
-                  className="btn-danger"
-                  onClick={() => removeParticipant(deleteInvitation.id)}
+                  className="participant-delete-confirm"
+                  onClick={() => removeParticipant(invitationToDelete.id)}
                   disabled={isDeleting}
                 >
-                  {isDeleting ? "Suppression..." : "Confirmer le retrait"}
+                  {isDeleting ? "Retrait..." : "Confirmer le retrait"}
                 </button>
               </div>
-            </div>
+            </dialog>
           </div>
         )}
       </div>
