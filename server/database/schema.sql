@@ -155,3 +155,26 @@ CREATE TABLE user_preferences (
   CONSTRAINT fk_user_preferences_user
   FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
+
+CREATE TABLE user_payment_preference (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL UNIQUE,
+
+  preferred_method ENUM(
+    'wero',
+    'bank_transfer'
+  ) DEFAULT NULL,
+
+  wero_phone VARCHAR(20) DEFAULT NULL,
+  iban VARCHAR(34) DEFAULT NULL,
+  iban_holder_name VARCHAR(120) DEFAULT NULL,
+
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_user_payment_preference_user
+    FOREIGN KEY (user_id)
+    REFERENCES user(id)
+    ON DELETE CASCADE
+);
