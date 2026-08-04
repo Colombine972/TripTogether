@@ -59,7 +59,10 @@ const add: RequestHandler = async (req, res, next) => {
 
     const originalAmount = Number(original_amount);
     const exchangeRate = Number(exchange_rate);
-    const convertedAmount = Number((originalAmount * exchangeRate).toFixed(2));
+    const convertedAmount =
+      original_currency === converted_currency
+        ? originalAmount
+        : Number((originalAmount * exchangeRate).toFixed(2));
 
     if (originalAmount <= 0 || exchangeRate <= 0) {
       res.status(400).json({ error: "Montant ou taux invalide" });
@@ -106,15 +109,40 @@ const add: RequestHandler = async (req, res, next) => {
         );
       }
     } else {
-      const shareAmount = Number(
-        (convertedAmount / participants.length).toFixed(2),
+      const totalInCents = Math.round(convertedAmount * 100);
+      const participantCount = participants.length;
+
+      const baseShareInCents = Math.floor(totalInCents / participantCount);
+
+      const remainderInCents = totalInCents % participantCount;
+
+      const payerIndex = participants.findIndex(
+        (participant) => Number(participant.user_id) === Number(paid_by),
       );
 
-      for (const participant of participants) {
+      // Si le payeur participe à la dépense,
+      // il reçoit en priorité le centime restant.
+      // Sinon, le premier participant reçoit le reliquat.
+      const priorityIndex = payerIndex >= 0 ? payerIndex : 0;
+
+      const remainderIndexes = Array.from(
+        { length: remainderInCents },
+        (_, offset) => (priorityIndex + offset) % participantCount,
+      );
+
+      for (let index = 0; index < participants.length; index += 1) {
+        const participant = participants[index];
+
+        let shareInCents = baseShareInCents;
+
+        if (remainderIndexes.includes(index)) {
+          shareInCents += 1;
+        }
+
         await expenseShareRepository.create(
           expenseId,
           Number(participant.user_id),
-          shareAmount,
+          shareInCents / 100,
           "equal",
         );
       }

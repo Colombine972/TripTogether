@@ -34,7 +34,7 @@ function BudgetSummary({
       </div>
 
       <div className="budget-card">
-        <p className="card-label">Mes dépenses</p>
+        <p className="card-label">J'ai payé</p>
         <h3>{formatCurrency(paid)}</h3>
       </div>
 
@@ -45,13 +45,9 @@ function BudgetSummary({
       >
         <p className="card-label">Mon solde</p>
 
-        {balance > 0 && (
-          <h3>🟢 On me doit {formatCurrency(balance)}</h3>
-        )}
+        {balance > 0 && <h3>🟢 On me doit {formatCurrency(balance)}</h3>}
 
-        {balance < 0 && (
-          <h3>🔴 Je dois {formatCurrency(Math.abs(balance))}</h3>
-        )}
+        {balance < 0 && <h3>🔴 Je dois {formatCurrency(Math.abs(balance))}</h3>}
 
         {balance === 0 && <h3>⚖️ Comptes équilibrés</h3>}
       </div>

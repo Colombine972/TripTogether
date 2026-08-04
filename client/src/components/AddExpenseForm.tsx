@@ -28,6 +28,34 @@ type Category = {
 
 type SplitMode = "equal" | "exact";
 
+type ExpenseShare = {
+  user_id: number;
+  firstname: string;
+  share_amount: number;
+  split_type?: SplitMode;
+};
+
+type EditableExpense = {
+  id: number;
+  title: string;
+  emoji?: string | null;
+
+  amount?: number;
+  original_amount?: number | null;
+  original_currency?: string | null;
+  converted_amount?: number | null;
+  converted_currency?: string | null;
+  exchange_rate?: number | null;
+
+  paid_by: number;
+  category_id: number;
+
+  date?: string | null;
+  created_at?: string | null;
+
+  participants?: ExpenseShare[];
+};
+
 type AddExpenseFormProps = {
   tripId: number;
   members?: Member[];
@@ -35,7 +63,10 @@ type AddExpenseFormProps = {
   localCurrency?: string;
   preferredCurrency?: string;
   token?: string;
-  onExpenseAdded: () => void;
+
+  expenseToEdit?: EditableExpense | null;
+
+  onExpenseAdded: () => void | Promise<void>;
 };
 
 const categoryEmojiOptions: Record<string, string[]> = {
@@ -74,8 +105,11 @@ function AddExpenseForm({
   localCurrency = "EUR",
   preferredCurrency = "EUR",
   token = "",
+  expenseToEdit = null,
   onExpenseAdded,
 }: AddExpenseFormProps) {
+  const isEditMode = Boolean(expenseToEdit);
+  
   const safeLocalCurrency = (localCurrency || "EUR").toUpperCase();
   const safePreferredCurrency = (preferredCurrency || "EUR").toUpperCase();
 

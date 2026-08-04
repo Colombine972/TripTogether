@@ -55,23 +55,46 @@ class ExpenseRepository {
   }
 
   async findByTrip(tripId: number) {
-    const [rows] = await databaseClient.query<Rows>(
-      `
-      SELECT 
-        e.*,
-        ec.name AS category_name,
-        u.firstname AS paid_by_name
-      FROM expense e
-      JOIN expense_category ec ON ec.id = e.category_id
-      JOIN user u ON u.id = e.paid_by
-      WHERE e.trip_id = ?
-      ORDER BY e.date DESC, e.created_at DESC
-      `,
-      [tripId],
-    );
+  const [expenses] = await databaseClient.query<Rows>(
+    `
+    SELECT 
+      e.*,
+      ec.name AS category_name,
+      u.firstname AS paid_by_name
+    FROM expense e
+    JOIN expense_category ec ON ec.id = e.category_id
+    JOIN user u ON u.id = e.paid_by
+    WHERE e.trip_id = ?
+    ORDER BY e.date DESC, e.created_at DESC
+    `,
+    [tripId],
+  );
 
-    return rows;
-  }
+  const expensesWithParticipants = await Promise.all(
+    expenses.map(async (expense) => {
+      const [participants] = await databaseClient.query<Rows>(
+        `
+        SELECT
+          es.user_id,
+          es.share_amount,
+          es.split_type,
+          u.firstname
+        FROM expense_share es
+        JOIN user u ON u.id = es.user_id
+        WHERE es.expense_id = ?
+        `,
+        [expense.id],
+      );
+
+      return {
+        ...expense,
+        participants,
+      };
+    }),
+  );
+
+  return expensesWithParticipants;
+}
 
   async sumTotalByTrip(tripId: number) {
     const [rows] = await databaseClient.query<Rows>(

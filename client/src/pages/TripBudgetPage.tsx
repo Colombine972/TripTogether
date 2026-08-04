@@ -5,6 +5,7 @@ import AddExpenseForm from "../components/AddExpenseForm";
 import BudgetSummary from "../components/BudgetSummary";
 import Modal from "../components/Modal";
 import NavTabs from "../components/NavTabs";
+import RemboursementSummary from "../components/RemboursementSummary";
 import TripInfos from "../components/TripInfos";
 import { useAuth } from "../contexts/AuthContext";
 import type { TheTrip } from "../types/tripType";
@@ -44,12 +45,12 @@ type Expense = {
 
   paid_by: number;
   category_id: number;
-  date: string;
-  created_at?: string;
+  date?: string | null;
+  created_at?: string | null;
 
   category_name?: string;
   paid_by_name?: string;
-  shares?: ExpenseShare[];
+  participants?: ExpenseShare[];
 };
 
 type MemberApiResponse = {
@@ -100,6 +101,8 @@ function TripBudgetPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
 
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
 
@@ -415,39 +418,72 @@ function TripBudgetPage() {
     }
   };
 
-  const formatExpenseDate = (date: string) => {
-    const parsedDate = new Date(`${date}T12:00:00`);
+  const getExpenseDateKey = (expense: Expense): string => {
+    const rawDate = expense.date || expense.created_at;
+
+    if (!rawDate) {
+      return "Date inconnue";
+    }
+
+    // Cas d'une date SQL : 2026-07-19
+    if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+      return rawDate;
+    }
+
+    const parsedDate = new Date(rawDate);
 
     if (Number.isNaN(parsedDate.getTime())) {
       return "Date inconnue";
     }
 
-    return new Intl.DateTimeFormat("fr-FR", {
-      weekday: "long",
+    const year = parsedDate.getFullYear();
+    const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(parsedDate.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatExpenseDate = (date: string) => {
+    if (date === "Date inconnue") {
+      return date;
+    }
+
+    const [year, month, day] = date.split("-").map(Number);
+
+    if (!year || !month || !day) {
+      return "Date inconnue";
+    }
+
+    const parsedDate = new Date(year, month - 1, day);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Date inconnue";
+    }
+
+    const formattedDate = new Intl.DateTimeFormat("fr-FR", {
       day: "2-digit",
       month: "long",
       year: "numeric",
     }).format(parsedDate);
+
+    return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
   };
 
   const groupedExpenses = useMemo(() => {
     const groups: Record<string, Expense[]> = {};
 
     const sortedExpenses = [...expenses].sort((expenseA, expenseB) => {
-      const dateA = new Date(
-        expenseA.date || expenseA.created_at || 0,
-      ).getTime();
+      const dateKeyA = getExpenseDateKey(expenseA);
+      const dateKeyB = getExpenseDateKey(expenseB);
 
-      const dateB = new Date(
-        expenseB.date || expenseB.created_at || 0,
-      ).getTime();
+      if (dateKeyA === "Date inconnue") return 1;
+      if (dateKeyB === "Date inconnue") return -1;
 
-      return dateB - dateA;
+      return dateKeyB.localeCompare(dateKeyA);
     });
 
     for (const expense of sortedExpenses) {
-      const dateKey =
-        expense.date || expense.created_at?.split("T")[0] || "Date inconnue";
+      const dateKey = getExpenseDateKey(expense);
 
       if (!groups[dateKey]) {
         groups[dateKey] = [];
@@ -459,8 +495,136 @@ function TripBudgetPage() {
     return groups;
   }, [expenses]);
 
-  const handleExpenseAdded = async () => {
+  const balancesByParticipant = useMemo(() => {
+    if (!currentUserId) {
+      return [];
+    }
+
+    type ParticipantBalance = {
+      userId: number;
+      firstname: string;
+      amountToReceive: number;
+      amountToPay: number;
+      netBalance: number;
+    };
+
+    const balancesMap = new Map<number, ParticipantBalance>();
+    const connectedUserId = Number(currentUserId);
+
+    const getOrCreateBalance = (
+      userId: number,
+      firstname: string,
+    ): ParticipantBalance => {
+      const existingBalance = balancesMap.get(userId);
+
+      if (existingBalance) {
+        return existingBalance;
+      }
+
+      const newBalance: ParticipantBalance = {
+        userId,
+        firstname,
+        amountToReceive: 0,
+        amountToPay: 0,
+        netBalance: 0,
+      };
+
+      balancesMap.set(userId, newBalance);
+
+      return newBalance;
+    };
+
+    for (const expense of expenses) {
+      const payerId = Number(expense.paid_by);
+      const payerName = expense.paid_by_name || "Participant";
+
+      /*
+       * Cas 1 :
+       * l’utilisateur connecté a payé la dépense.
+       *
+       * Chaque autre participant lui doit sa part.
+       */
+      if (payerId === connectedUserId) {
+        for (const participant of expense.participants || []) {
+          const participantId = Number(participant.user_id);
+
+          if (participantId === connectedUserId) {
+            continue;
+          }
+
+          const balance = getOrCreateBalance(
+            participantId,
+            participant.firstname || "Participant",
+          );
+
+          balance.amountToReceive += Number(participant.share_amount || 0);
+        }
+
+        continue;
+      }
+
+      /*
+       * Cas 2 :
+       * un autre participant a payé.
+       *
+       * Si l’utilisateur connecté participe à la dépense,
+       * il doit sa propre part au payeur.
+       */
+      const currentUserShare = expense.participants?.find(
+        (participant) => Number(participant.user_id) === connectedUserId,
+      );
+
+      if (!currentUserShare) {
+        continue;
+      }
+
+      const balance = getOrCreateBalance(payerId, payerName);
+
+      balance.amountToPay += Number(currentUserShare.share_amount || 0);
+    }
+
+    return (
+      Array.from(balancesMap.values())
+        .map((balance) => {
+          const amountToReceive = Number(balance.amountToReceive.toFixed(2));
+
+          const amountToPay = Number(balance.amountToPay.toFixed(2));
+
+          const netBalance = Number((amountToReceive - amountToPay).toFixed(2));
+
+          return {
+            ...balance,
+            amountToReceive,
+            amountToPay,
+            netBalance,
+          };
+        })
+        /*
+         * On masque les soldes exactement nuls.
+         */
+        .filter((balance) => Math.abs(balance.netBalance) >= 0.01)
+        /*
+         * Les montants les plus importants apparaissent en premier.
+         */
+        .sort(
+          (balanceA, balanceB) =>
+            Math.abs(balanceB.netBalance) - Math.abs(balanceA.netBalance),
+        )
+    );
+  }, [expenses, currentUserId]);
+
+  const handleEditExpense = (expense: Expense) => {
+    setExpenseToEdit(expense);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseExpenseModal = () => {
     setIsModalOpen(false);
+    setExpenseToEdit(null);
+  };
+
+  const handleExpenseAdded = async () => {
+    handleCloseExpenseModal();
     await refreshBudget();
   };
 
@@ -528,21 +692,24 @@ function TripBudgetPage() {
               expenseCount={expenses.length}
               currency={displayCurrency}
             />
+            <RemboursementSummary
+              balances={balancesByParticipant}
+              currency={displayCurrency}
+            />
 
             <section className="expenses-section">
               <div className="expenses-header">
-                <div>
-                  <h2>Dépenses ({expenses.length})</h2>
-
-                  <p className="expenses-subtitle">
-                    Retrouvez toutes les dépenses du voyage.
-                  </p>
-                </div>
+                <p className="expenses-subtitle">
+                  Retrouvez toutes les dépenses du voyage.
+                </p>
 
                 <button
                   type="button"
                   className="add-expense-btn"
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={() => {
+                    setExpenseToEdit(null);
+                    setIsModalOpen(true);
+                  }}
                 >
                   + Ajouter une dépense
                 </button>
@@ -555,7 +722,10 @@ function TripBudgetPage() {
                   <button
                     type="button"
                     className="add-expense-btn"
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={() => {
+                      setExpenseToEdit(null);
+                      setIsModalOpen(true);
+                    }}
                   >
                     Ajouter la première dépense
                   </button>
@@ -564,11 +734,8 @@ function TripBudgetPage() {
                 Object.entries(groupedExpenses).map(([date, dateExpenses]) => (
                   <section key={date} className="expense-date-block">
                     <h3 className="expense-date-title">
-                      {date === "Date inconnue"
-                        ? date
-                        : formatExpenseDate(date)}
+                      {formatExpenseDate(date)}
                     </h3>
-
                     <div className="expense-date-list">
                       {dateExpenses.map((expense) => {
                         const displayedAmount =
@@ -580,7 +747,8 @@ function TripBudgetPage() {
                         const expenseCurrency =
                           expense.converted_currency || displayCurrency;
 
-                        const participantCount = expense.shares?.length || 0;
+                        const participantCount =
+                          expense.participants?.length || 0;
 
                         return (
                           <article key={expense.id} className="expense-card">
@@ -609,26 +777,58 @@ function TripBudgetPage() {
                               </div>
 
                               <div className="expense-right">
-                                <button
-                                  type="button"
-                                  className="delete-expense-btn"
-                                  onClick={() => setExpenseToDelete(expense)}
-                                  aria-label={`Supprimer la dépense ${expense.title}`}
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    className="trash-icon"
-                                    aria-hidden="true"
+                                <div className="expense-actions">
+                                  <button
+                                    type="button"
+                                    className="edit-expense-btn"
+                                    onClick={() => handleEditExpense(expense)}
+                                    aria-label={`Modifier la dépense ${expense.title}`}
+                                    title="Modifier la dépense"
                                   >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-3.536 4.569a.75.75 0 0 0-1.44.32l.5 10a.75.75 0 0 0 1.498-.06l-.558-10.26Zm4.5 0a.75.75 0 0 0-1.5 0v10.26a.75.75 0 0 0 1.5 0v-10.26Zm3.536.26a.75.75 0 0 0-1.44-.32l-.558 10.26a.75.75 0 0 0 1.498.06l.5-10Z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>
-                                </button>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="1.8"
+                                      className="edit-icon"
+                                      aria-hidden="true"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487Zm0 0L19.5 7.125"
+                                      />
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M18 14.25v4.125A2.625 2.625 0 0 1 15.375 21H5.625A2.625 2.625 0 0 1 3 18.375V8.625A2.625 2.625 0 0 1 5.625 6H9.75"
+                                      />
+                                    </svg>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="delete-expense-btn"
+                                    onClick={() => setExpenseToDelete(expense)}
+                                    aria-label={`Supprimer la dépense ${expense.title}`}
+                                    title="Supprimer la dépense"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                      className="trash-icon"
+                                      aria-hidden="true"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-3.536 4.569a.75.75 0 0 0-1.44.32l.5 10a.75.75 0 0 0 1.498-.06l-.558-10.26Zm4.5 0a.75.75 0 0 0-1.5 0v10.26a.75.75 0 0 0 1.5 0v-10.26Zm3.536.26a.75.75 0 0 0-1.44-.32l-.558 10.26a.75.75 0 0 0 1.498.06l.5-10Z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  </button>
+                                </div>
 
                                 <strong className="expense-amount">
                                   {formatCurrency(
@@ -637,18 +837,32 @@ function TripBudgetPage() {
                                   )}
                                 </strong>
 
-                                <span className="expense-participants">
-                                  {participantCount > 0
-                                    ? `${participantCount} participant${
-                                        participantCount > 1 ? "s" : ""
-                                      }`
-                                    : "Aucun participant"}
-                                </span>
+                                <div className="expense-participants-wrapper">
+                                  <span className="expense-participants">
+                                    👥 {expense.participants?.length || 0}{" "}
+                                    participant
+                                    {(expense.participants?.length || 0) > 1
+                                      ? "s"
+                                      : ""}
+                                  </span>
+
+                                  {expense.participants &&
+                                    expense.participants.length > 0 && (
+                                      <span className="expense-participants-tooltip">
+                                        {expense.participants
+                                          .map(
+                                            (participant) =>
+                                              participant.firstname,
+                                          )
+                                          .join(" • ")}
+                                      </span>
+                                    )}
+                                </div>
                               </div>
                             </div>
 
-                            {expense.shares &&
-                              expense.shares.length > 0 &&
+                            {expense.participants &&
+                              expense.participants.length > 0 &&
                               currentUserId && (
                                 <>
                                   <div className="expense-divider" />
@@ -658,7 +872,7 @@ function TripBudgetPage() {
                                       <div className="debt-positive">
                                         <p>💰 On te doit :</p>
 
-                                        {expense.shares
+                                        {expense.participants
                                           .filter(
                                             (share) =>
                                               share.user_id !== currentUserId,
@@ -677,7 +891,7 @@ function TripBudgetPage() {
                                       </div>
                                     ) : (
                                       <div className="debt-negative">
-                                        {expense.shares
+                                        {expense.participants
                                           .filter(
                                             (share) =>
                                               share.user_id === currentUserId,
@@ -712,7 +926,7 @@ function TripBudgetPage() {
           </>
         )}
 
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <Modal isOpen={isModalOpen} onClose={handleCloseExpenseModal}>
           <AddExpenseForm
             tripId={tripId}
             members={members}
@@ -720,6 +934,7 @@ function TripBudgetPage() {
             localCurrency={trip?.local_currency || "EUR"}
             preferredCurrency={userPreferences.default_currency}
             token={token}
+            expenseToEdit={expenseToEdit}
             onExpenseAdded={handleExpenseAdded}
           />
         </Modal>

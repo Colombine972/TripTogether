@@ -1,170 +1,508 @@
+/* =========================================================
+   1. SECTION DES DÉPENSES
+   ========================================================= */
+
+.expenses-section {
+  width: 100%;
+  margin-top: 2rem;
+}
+
 .expenses-header {
   display: flex;
-  justify-content: space-between; /* 👈 pousse à gauche et droite */
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1.5rem;
+  padding: 0.25rem 0;
+}
+
+.expenses-subtitle {
+  margin: 0;
+  color: #374151;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 .add-expense-btn {
+  flex-shrink: 0;
+  padding: 0.65rem 1.2rem;
+  color: #ffffff;
   background-color: var(--primary-button);
-  color: white;
   border: none;
-  padding: 0.6rem 1.2rem;
   border-radius: 8px;
-  font-weight: 500;
+  font-family: inherit;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .add-expense-btn:hover {
-  opacity: 70%;
-  transition: opacity .1s ease-out;
-  cursor: pointer;
+  opacity: 0.75;
+  transform: translateY(-1px);
 }
 
-.category-block {
+.add-expense-btn:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.3);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   2. ÉTAT VIDE
+   ========================================================= */
+
+.empty-expenses {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+  background: #ffffff;
+  border: 1px dashed #d1d5db;
+  border-radius: 14px;
+}
+
+.empty-expenses p {
+  margin: 0;
+  color: #6b7280;
+}
+
+/* =========================================================
+   3. REGROUPEMENT DES DÉPENSES PAR DATE
+   ========================================================= */
+
+.expense-date-block {
   margin-bottom: 2rem;
 }
 
-.category-title {
-  font-size: var(--font-size-M);
-  margin-bottom: 1rem;
-  color: #444;
+.expense-date-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0 1rem;
+  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
+
+.expense-date-title::before,
+.expense-date-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #d1d5db;
+}
+
+/* Grille des cartes : 3 colonnes sur ordinateur */
+.expense-date-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 1rem;
+}
+
+/* =========================================================
+   4. CARTE D'UNE DÉPENSE
+   ========================================================= */
 
 .expense-card {
-  background: white;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  padding: 1.1rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.18);
   border-radius: 12px;
-  padding: 1.2rem;
-  margin-bottom: 1rem;
-  border: 1px solid rgba(0, 0, 0, 0.392);
-}
-
-.expense-description {
-  font-size: 1.3rem;
-  padding-bottom: 10px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
 }
 
 .expense-header-row {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .expense-left {
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.expense-left > div:last-child {
+  min-width: 0;
 }
 
 .expense-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
   width: 40px;
   height: 40px;
+  background: #ffffff;
+  border: 1px solid #cccccc;
   border-radius: 50%;
-  background: white;
-  border: 1px solid #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
+  font-weight: 700;
 }
 
-.expense-paid {
-  font-size: var(--font-size-M);
-  color: #666;
+.expense-description {
+  margin: 0;
+  padding-bottom: 0.35rem;
+  color: #1f2937;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
+
+.expense-paid,
+.expense-category {
+  margin: 0.15rem 0 0;
+  color: #666666;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.expense-category {
+  color: #76685f;
+}
+
+/* =========================================================
+   5. PARTIE DROITE : MONTANT, PARTICIPANTS ET SUPPRESSION
+   ========================================================= */
 
 .expense-right {
-  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 0.35rem;
+  min-width: 0;
   margin-left: auto;
+  text-align: right;
 }
 
+.expense-amount,
 .expense-right strong {
   display: block;
-  font-size: 1.3rem;
-}
-
-.expense-right span {
-  font-size: 1rem;
-  color: #777;
-}
-
-.expense-divider {
-  height: 1px;
-  background: grey;
-  margin: 1rem 0;
-}
-
-.expense-debt {
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-.debt-positive {
-  color: #16a34a;
-  background: #f0fdf4;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.debt-negative {
-  color: #dc2626;
-  background: #fef2f2;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.debt-negative p {
-  font-size: 1.3rem;
-}
-
-.debt-positive p {
-  font-size: 1.3rem;
-}
-
-.debt-positive div {
-  font-size: 1rem;
-  padding-top: 2px;
-}
-
-/*.delete-expense-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
+  color: #1f2937;
   font-size: 1.1rem;
-  margin-left: 0.8rem;
-  transition: transform 0.2s ease;
+  line-height: 1.3;
+  white-space: nowrap;
 }
-
-.delete-expense-btn:hover {
-  transform: scale(1.2);
-}*/
 
 .delete-expense-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 12rem;
+  align-self: flex-end;
+  padding: 0.3rem;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-expense-btn:focus-visible {
+  outline: 3px solid rgba(220, 38, 38, 0.22);
+  outline-offset: 2px;
 }
 
 .trash-icon {
   width: 20px;
   height: 20px;
-  color: #c0392b; /* rouge doux */
+  color: #c0392b;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .delete-expense-btn:hover .trash-icon {
-  transform: scale(1.15);
   opacity: 0.8;
+  transform: scale(1.15);
 }
 
+/* =========================================================
+   6. PARTICIPANTS ET INFOBULLE
+   ========================================================= */
 
+.expense-participants-wrapper {
+  position: relative;
+  display: inline-flex;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.expense-participants {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 100%;
+  color: #76685f;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.expense-participants-tooltip {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.5rem);
+  z-index: 20;
+  min-width: max-content;
+  max-width: 260px;
+  padding: 0.45rem 0.7rem;
+  color: #ffffff;
+  background: #2f2933;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+.expense-participants-wrapper:hover .expense-participants-tooltip,
+.expense-participants-wrapper:focus-within .expense-participants-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* =========================================================
+   7. RÉPARTITION ET DETTES DE LA DÉPENSE
+   ========================================================= */
+
+.expense-divider {
+  width: 100%;
+  height: 1px;
+  margin: 1rem 0;
+  background: #d1d5db;
+}
+
+.expense-debt {
+  margin-top: 0;
+  font-size: 0.9rem;
+}
+
+.debt-positive,
+.debt-negative {
+  padding: 0.75rem;
+  border-radius: 8px;
+
+
+  min-height: 100px;
+
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+
+
+}
+
+.debt-positive {
+  color: #16a34a;
+  background: #f0fdf4;
+}
+
+.debt-negative {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.debt-positive p,
+.debt-negative p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.debt-positive div {
+  padding-top: 0.25rem;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+/* =========================================================
+   8. RÉSUMÉ DES REMBOURSEMENTS
+   ========================================================= */
+
+.reimbursement-summary {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #ece7ef;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(47, 41, 51, 0.06);
+}
+
+.reimbursement-summary-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 1.25rem;
+}
+
+.reimbursement-summary-header h3 {
+  margin: 0 0 0.35rem;
+  color: #302735;
+  font-size: 1.2rem;
+}
+
+.reimbursement-summary-header p {
+  max-width: 720px;
+  margin: 0;
+  color: #766f79;
+  line-height: 1.5;
+}
+
+.participant-balances-totals {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 1.5rem;
+}
+
+.participant-balances-total {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-width: 0;
+}
+
+.participant-balances-total span {
+  color: #766f79;
+  font-size: 0.82rem;
+}
+
+.participant-balances-total strong {
+  font-size: 1.05rem;
+}
+
+.participant-balances-total.positive strong {
+  color: #13883d;
+}
+
+.participant-balances-total.negative strong {
+  color: #d23b31;
+}
+
+.participant-balances-total.net {
+  padding-left: 1.5rem;
+  border-left: 1px solid #e4dfe7;
+}
+
+.reimbursement-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.reimbursement-summary-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: #faf8fb;
+  border: 1px solid #eee8f0;
+  border-radius: 14px;
+}
+
+.reimbursement-summary-card.balance-positive {
+  border-left: 4px solid #27a95b;
+}
+
+.reimbursement-summary-card.balance-negative {
+  border-left: 4px solid #dc493f;
+}
+
+.reimbursement-summary-person {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.reimbursement-summary-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  color: #5d426a;
+  background: #eee6f3;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.reimbursement-summary-person h4 {
+  margin: 0 0 0.2rem;
+  color: #302735;
+  font-size: 1rem;
+}
+
+.reimbursement-summary-person p {
+  margin: 0;
+  color: #847b87;
+  font-size: 0.9rem;
+}
+
+.participant-net-balance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 0.25rem;
+}
+
+.participant-net-balance strong {
+  color: #302735;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.participant-balance-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.participant-balance-status.positive {
+  color: #13883d;
+}
+
+.participant-balance-status.negative {
+  color: #d23b31;
+}
+
+.reimbursement-summary-empty {
+  padding: 1rem;
+  color: #39704b;
+  background: #f1faf4;
+  border: 1px solid #d9eee0;
+  border-radius: 12px;
+}
+
+.reimbursement-summary-empty p {
+  margin: 0;
+}
+
+/* =========================================================
+   9. MODALE DE SUPPRESSION
+   ========================================================= */
 
 .modal-backdrop .modal {
   position: relative;
@@ -178,19 +516,17 @@
 
 .modal p {
   margin: 0 0 16px;
-  font-size: 14px;
   color: #4b5563;
+  font-size: 14px;
 }
 
 .expense-delete-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1000;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 1rem;
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(3px);
@@ -198,41 +534,31 @@
 
 .expense-delete-dialog {
   position: relative;
-
   width: min(420px, 100%);
   margin: 0;
   padding: 1.5rem;
-
   color: #1f2937;
   background: #ffffff;
-
   border: none;
   border-radius: 18px;
-
-  box-shadow:
-    0 24px 60px rgba(15, 23, 42, 0.3),
-    0 8px 20px rgba(15, 23, 42, 0.15);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3), 0 8px 20px
+    rgba(15, 23, 42, 0.15);
 }
 
 .expense-delete-dialog::before {
   content: "";
   display: block;
-
   width: 48px;
   height: 48px;
   margin-bottom: 1rem;
-
-  background:
-    #fee2e2
+  background: #fee2e2
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23dc2626'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z'/%3E%3C/svg%3E")
     center / 26px no-repeat;
-
   border-radius: 50%;
 }
 
 .expense-delete-dialog h4 {
   margin: 0 0 0.5rem;
-
   color: #111827;
   font-size: 1.2rem;
   font-weight: 700;
@@ -240,7 +566,6 @@
 
 .expense-delete-dialog p {
   margin: 0 0 1.5rem;
-
   color: #6b7280;
   font-size: 0.95rem;
   line-height: 1.5;
@@ -260,18 +585,13 @@
 .expense-delete-confirm {
   min-height: 42px;
   padding: 0.65rem 1rem;
-
   border-radius: 9px;
-
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 600;
-
   cursor: pointer;
-  transition:
-    transform 0.15s ease,
-    opacity 0.15s ease,
-    background-color 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s
+    ease;
 }
 
 .expense-delete-cancel {
@@ -308,4 +628,349 @@
   opacity: 0.55;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Conteneur des boutons modifier et supprimer */
+
+.expense-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+/* Bouton modifier */
+
+.edit-expense-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  margin: 0;
+
+  background: transparent;
+  border: none;
+  outline: none;
+
+  color: #64748b;
+  cursor: pointer;
+
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.edit-expense-btn:hover {
+  color: #2563eb;
+  transform: scale(1.1);
+}
+
+.edit-expense-btn:active {
+  transform: scale(0.95);
+}
+
+.edit-expense-btn:focus-visible {
+  outline: none;
+}
+
+/* Icône crayon */
+
+.edit-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Harmonisation avec le bouton supprimer */
+
+.delete-expense-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+  padding: 0;
+
+  border-radius: 10px;
+}
+
+/* Responsive mobile */
+
+@media (max-width: 480px) {
+  .expense-actions {
+    gap: 0.3rem;
+  }
+
+  .edit-expense-btn,
+  .delete-expense-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .edit-icon,
+  .trash-icon {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+/* =========================================================
+   10. RESPONSIVE — PETIT ORDINATEUR / GRANDE TABLETTE
+   3 cartes -> 2 cartes
+   ========================================================= */
+
+/* =========================================================
+   10. RESPONSIVE — PETIT ORDINATEUR / GRANDE TABLETTE
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .expense-date-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reimbursement-summary-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  /* Le texte peut enfin se réduire */
+  .reimbursement-summary-header > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .reimbursement-summary-header p {
+    max-width: none;
+  }
+
+  /* Les totaux restent à droite */
+  .participant-balances-totals {
+    flex-shrink: 0;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: flex-end;
+  }
+}
+
+/* =========================================================
+   11. RESPONSIVE — TABLETTE
+   Texte sur toute la largeur + totaux en dessous
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .expenses-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-expense-btn {
+    width: 100%;
+  }
+
+  .reimbursement-summary {
+    padding: 1rem;
+  }
+
+  /*
+   * On annule la disposition en ligne définie à 1024 px.
+   * Le texte occupe toute la largeur et les totaux passent dessous.
+   */
+  .reimbursement-summary-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+  }
+
+  .reimbursement-summary-header > div:first-child {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .reimbursement-summary-header h3,
+  .reimbursement-summary-header p {
+    width: 100%;
+    max-width: none;
+  }
+
+  .participant-balances-totals {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    justify-items: center;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .participant-balances-total {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .participant-balances-total.net {
+    grid-column: auto;
+    padding: 0;
+    border: 0;
+  }
+
+  .reimbursement-summary-card {
+    align-items: flex-start;
+    padding: 1rem;
+  }
+}
+
+/* =========================================================
+   12. RESPONSIVE — MOBILE
+   2 cartes -> 1 carte
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .expense-date-list {
+    grid-template-columns: 1fr;
+  }
+
+  .expense-card {
+    padding: 1rem;
+  }
+
+  .expense-header-row {
+    gap: 0.5rem;
+  }
+
+  .expense-description {
+    font-size: 1rem;
+  }
+
+  .expense-amount,
+  .expense-right strong {
+    font-size: 1rem;
+  }
+
+  .expense-participants {
+    font-size: 0.8rem;
+  }
+
+  .expense-participants-tooltip {
+    display: none;
+  }
+
+  .reimbursement-summary-header {
+    gap: 1rem;
+  }
+
+  .participant-balances-totals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .participant-balances-total {
+    align-items: center;
+    text-align: center;
+  }
+
+  .participant-balances-total span {
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  .participant-balances-total strong {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .participant-balances-total.net {
+    grid-column: auto;
+    padding: 0;
+    border: 0;
+  }
+}
+
+/* =========================================================
+   13. RESPONSIVE — PETIT MOBILE
+   ========================================================= */
+
+@media (max-width: 430px) {
+  .expense-header-row {
+    flex-direction: column;
+  }
+
+  .expense-left,
+  .expense-right {
+    width: 100%;
+  }
+
+  .expense-right {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .delete-expense-btn {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .expense-amount {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .expense-participants-wrapper {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .expense-delete-actions {
+    flex-direction: column-reverse;
+  }
+
+  .expense-delete-cancel,
+  .expense-delete-confirm {
+    width: 100%;
+  }
+
+  .reimbursement-summary-card {
+    flex-direction: column;
+  }
+
+  .participant-net-balance {
+    align-items: flex-start;
+    width: 100%;
+    padding-top: 0.75rem;
+    border-top: 1px solid #ece6ee;
+  }
+
+  .participant-balances-totals {
+    gap: 0.5rem;
+  }
+
+  .participant-balances-total span {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .participant-balances-total strong {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .participant-balances-total.net {
+    grid-column: auto;
+    padding: 0;
+    border: 0;
+  }
 }

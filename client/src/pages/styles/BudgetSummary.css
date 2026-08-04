@@ -1,37 +1,92 @@
+/* =========================================================
+   1. CONTENEUR PRINCIPAL DU BUDGET
+   ========================================================= */
+
 .trip-budget-page {
+  width: 100%;
   padding: 1.5rem;
 }
 
+/* =========================================================
+   2. RÉSUMÉ DU BUDGET
+   ========================================================= */
+
 .budget-summary {
-  margin: 40px 0 40px 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
+  margin: 2.5rem 0;
 }
 
 .budget-card {
-  background: white;
-  border-radius: 10px;
-  padding: 0.9rem;
+  min-width: 0;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #ece7ef;
+  border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-  width: 600px;
 }
 
 .card-label {
+  margin: 0 0 0.5rem;
+  color: #666666;
   font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 0.5rem;
+  line-height: 1.4;
 }
 
 .budget-card h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
   margin: 0;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
+/* =========================================================
+   3. ÉTATS DU SOLDE
+   ========================================================= */
+
+.budget-card.positive h3,
 .positive h3 {
   color: #1e7e34;
 }
 
+.budget-card.negative h3,
 .negative h3 {
   color: #c82333;
+}
+
+.budget-card.neutral h3,
+.neutral h3 {
+  color: #374151;
+}
+
+/* =========================================================
+   4. RESPONSIVE — TABLETTE
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .budget-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   5. RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .trip-budget-page {
+    padding: 1rem;
+  }
+
+  .budget-summary {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+  }
+
+  .budget-card {
+    padding: 0.9rem;
+  }
 }
