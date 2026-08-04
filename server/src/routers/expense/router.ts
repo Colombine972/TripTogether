@@ -12,6 +12,7 @@ router.post("/:id/shares", expenseShareActions.create);
 router.get("/:id", expenseActions.getExpensesByTrip);
 router.post("/:id", verifyToken, expenseActions.add);
 
+router.put("/:id", verifyToken, expenseActions.update);
 router.delete("/:id", verifyToken, expenseActions.remove);
 
 export default router;

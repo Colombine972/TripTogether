@@ -24,6 +24,16 @@ class ExpenseShareRepository {
     return result.insertId;
   }
 
+  async deleteByExpense(expenseId: number) {
+    await databaseClient.query(
+      `
+    DELETE FROM expense_share
+    WHERE expense_id = ?
+    `,
+      [expenseId],
+    );
+  }
+
   async sumSharesByUser(tripId: number, userId: number) {
     const [rows] = await databaseClient.query<Rows>(
       `

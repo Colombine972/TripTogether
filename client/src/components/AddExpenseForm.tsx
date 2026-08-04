@@ -98,6 +98,37 @@ function getTodayDate() {
   return new Date().toISOString().split("T")[0];
 }
 
+function formatDateForInput(rawDate?: string | null): string {
+  if (!rawDate) {
+    return getTodayDate();
+  }
+
+  // Une vraie date sans heure est déjà compatible avec input type="date".
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+    return rawDate;
+  }
+
+  /*
+   * Pour une date avec une heure, on la convertit dans le fuseau local
+   * avant de reconstruire YYYY-MM-DD.
+   */
+  const normalizedDate = rawDate.includes(" ")
+    ? rawDate.replace(" ", "T")
+    : rawDate;
+
+  const parsedDate = new Date(normalizedDate);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return getTodayDate();
+  }
+
+  const year = parsedDate.getFullYear();
+  const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+  const day = String(parsedDate.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 function AddExpenseForm({
   tripId,
   members = [],
@@ -109,7 +140,7 @@ function AddExpenseForm({
   onExpenseAdded,
 }: AddExpenseFormProps) {
   const isEditMode = Boolean(expenseToEdit);
-  
+
   const safeLocalCurrency = (localCurrency || "EUR").toUpperCase();
   const safePreferredCurrency = (preferredCurrency || "EUR").toUpperCase();
 
@@ -133,6 +164,62 @@ function AddExpenseForm({
   const [exactShares, setExactShares] = useState<Record<number, string>>({});
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!expenseToEdit) {
+      return;
+    }
+
+    setTitle(expenseToEdit.title);
+
+    setCategoryId(String(expenseToEdit.category_id));
+
+    setSelectedEmoji(expenseToEdit.emoji || "");
+
+    setAmount(
+      String(
+        expenseToEdit.original_amount ??
+          expenseToEdit.amount ??
+          expenseToEdit.converted_amount ??
+          "",
+      ),
+    );
+
+    setExchangeRate(String(expenseToEdit.exchange_rate ?? 1));
+
+    setPaidBy(String(expenseToEdit.paid_by));
+
+    setDate(formatDateForInput(expenseToEdit.date || expenseToEdit.created_at));
+
+    setSelectedMembers(
+      expenseToEdit.participants?.map((participant) => participant.user_id) ||
+        [],
+    );
+
+    setSplitMode(
+      expenseToEdit.participants?.some(
+        (participant) => participant.split_type === "exact",
+      )
+        ? "exact"
+        : "equal",
+    );
+
+    if (
+      expenseToEdit.participants?.some(
+        (participant) => participant.split_type === "exact",
+      )
+    ) {
+      const shares: Record<number, string> = {};
+
+      for (const participant of expenseToEdit.participants) {
+        shares[participant.user_id] = String(participant.share_amount);
+      }
+
+      setExactShares(shares);
+    } else {
+      setExactShares({});
+    }
+  }, [expenseToEdit]);
 
   /*
    * Récupération automatique du taux de conversion.
@@ -421,28 +508,32 @@ function AddExpenseForm({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/expenses/${tripId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            title: title.trim(),
-            emoji: finalEmoji,
-            original_amount: Number(amount),
-            original_currency: safeLocalCurrency,
-            converted_currency: safePreferredCurrency,
-            exchange_rate: Number(exchangeRate),
-            paid_by: Number(paidBy),
-            category_id: Number(categoryId),
-            date,
-            participants,
-          }),
+      const endpoint =
+        isEditMode && expenseToEdit
+          ? `${import.meta.env.VITE_API_URL}/api/expenses/${expenseToEdit.id}`
+          : `${import.meta.env.VITE_API_URL}/api/expenses/${tripId}`;
+
+      const method = isEditMode ? "PUT" : "POST";
+
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify({
+          title: title.trim(),
+          emoji: finalEmoji,
+          original_amount: Number(amount),
+          original_currency: safeLocalCurrency,
+          converted_currency: safePreferredCurrency,
+          exchange_rate: Number(exchangeRate),
+          paid_by: Number(paidBy),
+          category_id: Number(categoryId),
+          date,
+          participants,
+        }),
+      });
 
       const data = await response.json().catch(() => null);
 
@@ -450,21 +541,32 @@ function AddExpenseForm({
         throw new Error(
           data?.error ||
             data?.message ||
-            "Erreur lors de l'ajout de la dépense.",
+            (isEditMode
+              ? "Erreur lors de la modification de la dépense."
+              : "Erreur lors de l'ajout de la dépense."),
         );
       }
 
-      toast.success("Dépense ajoutée avec succès.");
+      toast.success(
+        isEditMode
+          ? "Dépense modifiée avec succès."
+          : "Dépense ajoutée avec succès.",
+      );
 
       resetForm();
-      onExpenseAdded();
+      await onExpenseAdded();
     } catch (error) {
-      console.error("Erreur ajout dépense :", error);
+      console.error(
+        isEditMode ? "Erreur modification dépense :" : "Erreur ajout dépense :",
+        error,
+      );
 
       toast.error(
         error instanceof Error
           ? error.message
-          : "Impossible d'ajouter la dépense.",
+          : isEditMode
+            ? "Impossible de modifier la dépense."
+            : "Impossible d'ajouter la dépense.",
       );
     } finally {
       setIsSubmitting(false);
@@ -479,7 +581,11 @@ function AddExpenseForm({
         </div>
 
         <div>
-          <h3>Ajouter une nouvelle dépense</h3>
+          <h3>
+            {isEditMode
+              ? "Modifier la dépense"
+              : "Ajouter une nouvelle dépense"}
+          </h3>
         </div>
       </header>
 
@@ -777,7 +883,13 @@ function AddExpenseForm({
           isSubmitting || categories.length === 0 || members.length === 0
         }
       >
-        {isSubmitting ? "Ajout en cours..." : "Ajouter la dépense"}
+        {isSubmitting
+          ? isEditMode
+            ? "Enregistrement..."
+            : "Ajout en cours..."
+          : isEditMode
+            ? "Enregistrer les modifications"
+            : "Ajouter la dépense"}
       </button>
     </form>
   );
