@@ -418,7 +418,7 @@ function TripBudgetPage() {
     }
   };
 
-  const getExpenseDateKey = (expense: Expense): string => {
+  const getExpenseDateKey = useCallback((expense: Expense): string => {
     const rawDate = expense.date || expense.created_at;
 
     if (!rawDate) {
@@ -441,7 +441,7 @@ function TripBudgetPage() {
     const day = String(parsedDate.getDate()).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
-  };
+  }, []);
 
   const formatExpenseDate = (date: string) => {
     if (date === "Date inconnue") {
@@ -493,7 +493,7 @@ function TripBudgetPage() {
     }
 
     return groups;
-  }, [expenses]);
+  }, [expenses, getExpenseDateKey]);
 
   const balancesByParticipant = useMemo(() => {
     if (!currentUserId) {
@@ -747,8 +747,6 @@ function TripBudgetPage() {
                         const expenseCurrency =
                           expense.converted_currency || displayCurrency;
 
-                        const participantCount =
-                          expense.participants?.length || 0;
 
                         return (
                           <article key={expense.id} className="expense-card">

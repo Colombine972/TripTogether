@@ -6,7 +6,6 @@ import expenseActions from "../../modules/expense/expenseAction";
 import expenseShareActions from "../../modules/expenseShare/expenseShareActions";
 
 router.get("/:id/summary", verifyToken, expenseActions.getSummary);
-router.get("/:id/budget", expenseActions.read);
 router.post("/:id/shares", expenseShareActions.create);
 
 router.get("/:id", expenseActions.getExpensesByTrip);

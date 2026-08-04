@@ -3,21 +3,6 @@ import expenseRepository from "./expenseRepository";
 import expenseShareRepository from "../expenseShare/expenseShareRepository";
 import notificationService from "../notification/notificationService";
 
-const read: RequestHandler = async (req, res, next) => {
-  try {
-    const tripId = Number(req.params.id);
-
-    if (Number.isNaN(tripId)) {
-      res.status(400).json({ error: "ID invalide" });
-      return;
-    }
-
-    const budget = await expenseRepository.findExpenseByTrip(tripId);
-    res.status(200).json(budget);
-  } catch (err) {
-    next(err);
-  }
-};
 
 const add: RequestHandler = async (req, res, next) => {
   try {
@@ -383,14 +368,6 @@ const update: RequestHandler = async (req, res, next) => {
   }
 };
 
-const browse: RequestHandler = async (_req, res, next) => {
-  try {
-    const budgets = await expenseRepository.readAll();
-    res.json(budgets);
-  } catch (err) {
-    next(err);
-  }
-};
 
 const getExpensesByTrip: RequestHandler = async (req, res, next) => {
   try {
@@ -451,10 +428,8 @@ const remove: RequestHandler = async (req, res, next) => {
 };
 
 export default {
-  read,
   add,
   update,
-  browse,
   getExpensesByTrip,
   getSummary,
   remove,

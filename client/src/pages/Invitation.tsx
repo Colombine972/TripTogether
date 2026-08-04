@@ -13,7 +13,7 @@ function Invitation() {
     invitationId: string;
   }>();
   const [invitation, setInvitation] = useState<invitationType | null>(null);
-  const [mytrip, setmyTrip] = useState<TheTrip | null>(null);
+  const [myTrip, setMyTrip] = useState<TheTrip | null>(null);
   const navigate = useNavigate();
   const { auth } = useAuth();
 
@@ -35,7 +35,7 @@ function Invitation() {
           throw new Error("Erreur chargement voyage");
         }
         const data = await response.json();
-        setmyTrip(data);
+        setMyTrip(data);
       })
       .catch((err) => {
         console.error(err);
@@ -117,7 +117,7 @@ function Invitation() {
 
   return (
     <>
-      <TripInfos trip={mytrip} />
+      <TripInfos trip={myTrip} onTripUpdated={setMyTrip} />
       <main className="invitation-main">
         <article id="invitation" className="invitation-card">
           <p className="invitation-text">{`${auth?.user.firstname ?? ""}, vous avez été invité au voyage de`}</p>

@@ -143,7 +143,7 @@ function Steps() {
 
   return (
     <>
-      {!loading && trip && <TripInfos trip={trip} />}
+      {!loading && trip && <TripInfos trip={trip} onTripUpdated={setTrip} />}
       <section className="steps-page">
         <NavTabs />
 

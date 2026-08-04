@@ -39,9 +39,7 @@ class ExchangeRateService {
       return cachedRate.rate;
     }
 
-    const apiUrl =
-      `https://api.frankfurter.dev/v2/rate/` +
-      `${encodeURIComponent(source)}/${encodeURIComponent(target)}`;
+    const apiUrl = `https://api.frankfurter.dev/v2/rate/${encodeURIComponent(source)}/${encodeURIComponent(target)}`;
 
     console.log("Appel Frankfurter :", apiUrl);
 
@@ -52,9 +50,9 @@ class ExchangeRateService {
       },
     });
 
-    const data = (await response.json().catch(() => null)) as
-      | FrankfurterRateResponse
-      | null;
+    const data = (await response
+      .json()
+      .catch(() => null)) as FrankfurterRateResponse | null;
 
     if (!response.ok) {
       console.error("Réponse Frankfurter :", {
@@ -62,9 +60,7 @@ class ExchangeRateService {
         data,
       });
 
-      throw new Error(
-        `Impossible de récupérer le taux ${source}/${target}.`,
-      );
+      throw new Error(`Impossible de récupérer le taux ${source}/${target}.`);
     }
 
     const rate = Number(data?.rate);
@@ -72,9 +68,7 @@ class ExchangeRateService {
     if (!Number.isFinite(rate) || rate <= 0) {
       console.error("Réponse Frankfurter invalide :", data);
 
-      throw new Error(
-        `Taux de conversion ${source}/${target} introuvable.`,
-      );
+      throw new Error(`Taux de conversion ${source}/${target} introuvable.`);
     }
 
     this.cache.set(cacheKey, {
