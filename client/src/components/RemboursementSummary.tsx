@@ -1,19 +1,15 @@
-type ParticipantBalance = {
-  userId: number;
-  firstname: string;
-  amountToReceive: number;
-  amountToPay: number;
-  netBalance: number;
-};
+import type { ParticipantBalance } from "../types/participantBalance";
 
 type RemboursementSummaryProps = {
   balances: ParticipantBalance[];
   currency: string;
+  onReimburse: (balance: ParticipantBalance) => void;
 };
 
 function RemboursementSummary({
   balances,
   currency,
+  onReimburse,
 }: RemboursementSummaryProps) {
   const safeCurrency = (currency || "EUR").toUpperCase();
 
@@ -127,6 +123,15 @@ function RemboursementSummary({
 
                   <strong>{formatCurrency(balance.netBalance)}</strong>
                 </div>
+                {balance.netBalance < -0.01 && (
+                  <button
+                    type="button"
+                    className="participant-reimburse-btn"
+                    onClick={() => onReimburse(balance)}
+                  >
+                    Rembourser
+                  </button>
+                )}
               </article>
             );
           })}

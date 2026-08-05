@@ -5,6 +5,7 @@ import AddExpenseForm from "../components/AddExpenseForm";
 import BudgetSummary from "../components/BudgetSummary";
 import Modal from "../components/Modal";
 import NavTabs from "../components/NavTabs";
+import PaymentDetailsModal from "../components/PaymentDetailsModal";
 import RemboursementSummary from "../components/RemboursementSummary";
 import TripInfos from "../components/TripInfos";
 import { useAuth } from "../contexts/AuthContext";
@@ -88,6 +89,9 @@ function TripBudgetPage() {
     email_trip_notifications: true,
     default_currency: "EUR",
   });
+
+  const [participantToReimburse, setParticipantToReimburse] =
+    useState<ParticipantBalance | null>(null);
 
   const [summary, setSummary] = useState<BudgetSummaryData>({
     total: 0,
@@ -688,6 +692,7 @@ function TripBudgetPage() {
             <RemboursementSummary
               balances={balancesByParticipant}
               currency={displayCurrency}
+              onReimburse={setParticipantToReimburse}
             />
 
             <section className="expenses-section">
@@ -739,7 +744,6 @@ function TripBudgetPage() {
 
                         const expenseCurrency =
                           expense.converted_currency || displayCurrency;
-
 
                         return (
                           <article key={expense.id} className="expense-card">
@@ -965,6 +969,20 @@ function TripBudgetPage() {
               </div>
             </dialog>
           </div>
+        )}
+
+        {participantToReimburse && (
+          <PaymentDetailsModal
+            tripId={tripId}
+            participant={{
+              userId: participantToReimburse.userId,
+              firstname: participantToReimburse.firstname,
+              amount: Math.abs(participantToReimburse.netBalance),
+            }}
+            currency={displayCurrency}
+            token={token}
+            onClose={() => setParticipantToReimburse(null)}
+          />
         )}
       </main>
     </>
