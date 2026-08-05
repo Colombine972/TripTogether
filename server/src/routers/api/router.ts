@@ -6,6 +6,7 @@ import tripRouter from "../trip/router";
 import userRouter from "../user/router";
 import expenseCategoryRouter from "../expenseCategory/router";
 import preferencesRouter from "../preferences/router";
+import userPaymentPreferenceRouter from "../userPaymentPreference/router";
 import placesRouter from "../places/router";
 import exchangeRateRouter from "../exchangeRate/router";
 
@@ -18,6 +19,10 @@ router.use("/invitation", invitationRouter);
 router.use("/trips", tripRouter);
 
 router.use("/users/preferences", preferencesRouter);
+router.use(
+  "/users/payment-preferences",
+  userPaymentPreferenceRouter,
+);
 router.use("/users", userRouter);
 
 router.use("/expenses", expenseRouter);
