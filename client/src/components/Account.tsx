@@ -1,4 +1,5 @@
 import ProfileCard from "./ProfileCard";
+import PaymentPreferencesCard from "./PaymentPreferencesCard";
 import SecurityCard from "./SecurityCard";
 import PreferencesCard from "./PreferencesCard";
 import DeleteAccountCard from "./DeleteAccountCard";
@@ -23,6 +24,11 @@ export default function Account() {
         <section className="account-card preference-card">
           <h2>Mes Préférences</h2>
           <PreferencesCard />
+        </section>
+
+        <section className="account-card payment-preference-card">
+          <h2>Moyens de remboursement</h2>
+          <PaymentPreferencesCard />
         </section>
 
         <section className="account-card delete-account-card">

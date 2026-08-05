@@ -296,6 +296,139 @@
 }
 
 /* ================================
+   CARD MOYENS DE REMBOURSEMENT
+================================ */
+
+.payment-preference-card {
+  min-height: 620px;
+}
+
+.payment-preferences-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.payment-preferences-description {
+  margin: 0;
+  color: #666;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.payment-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.payment-form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #333;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.payment-label-icon {
+  color: #2d7738;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-preference-input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #d7d7d7;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-family: inherit;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.payment-preference-input:focus {
+  outline: none;
+  border-color: #2d7738;
+  box-shadow: 0 0 0 3px rgba(45, 119, 56, 0.12);
+}
+
+.payment-preference-input::placeholder {
+  color: #999;
+}
+
+.payment-iban-input {
+  text-transform: uppercase;
+}
+
+.payment-field-help {
+  margin: 0;
+  color: #777;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.payment-security-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.9rem;
+  border-radius: 10px;
+  background: #f2f8f3;
+  color: #2d7738;
+}
+
+.payment-security-note svg {
+  min-width: 20px;
+  margin-top: 2px;
+}
+
+.payment-security-note p {
+  margin: 0;
+  color: #4c6350;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.payment-preference-save-btn {
+  width: 100%;
+  min-height: 54px;
+  margin-top: auto;
+  padding: 0.8rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #2d7738;
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  transition:
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.payment-preference-save-btn:hover:not(:disabled) {
+  background: #25642f;
+}
+
+.payment-preference-save-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* ================================
    CARD SUPPRESSION DU COMPTE
 ================================ */
 
@@ -535,6 +668,7 @@
 }
 
 /* Tablette / petit écran */
+
 @media (max-width: 850px) {
   .account-page {
     padding: 2rem 1rem;
@@ -544,7 +678,40 @@
     grid-template-columns: 1fr;
   }
 
-  .account-card {
+  .account-card,
+  .payment-preference-card {
     min-height: auto;
+  }
+
+  .payment-preference-save-btn {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .account-page {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .account-card {
+    padding: 1.4rem;
+  }
+
+  .account-card h2 {
+    min-height: auto;
+    font-size: 1.6rem;
+  }
+
+  .payment-preferences-description {
+    font-size: 1rem;
+  }
+
+  .payment-preference-input {
+    font-size: 16px;
+  }
+
+  .payment-preference-save-btn {
+    min-height: 52px;
+    font-size: 0.95rem;
   }
 }

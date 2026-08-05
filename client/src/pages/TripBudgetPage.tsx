@@ -9,6 +9,7 @@ import RemboursementSummary from "../components/RemboursementSummary";
 import TripInfos from "../components/TripInfos";
 import { useAuth } from "../contexts/AuthContext";
 import type { TheTrip } from "../types/tripType";
+import type { ParticipantBalance } from "../types/participantBalance";
 import "./styles/TripBugdetPage.css";
 
 type BudgetSummaryData = {
@@ -499,14 +500,6 @@ function TripBudgetPage() {
     if (!currentUserId) {
       return [];
     }
-
-    type ParticipantBalance = {
-      userId: number;
-      firstname: string;
-      amountToReceive: number;
-      amountToPay: number;
-      netBalance: number;
-    };
 
     const balancesMap = new Map<number, ParticipantBalance>();
     const connectedUserId = Number(currentUserId);
