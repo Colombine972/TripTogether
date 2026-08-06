@@ -1,13 +1,89 @@
 import preferencesRepository from "../preferences/preferencesRepository";
 import tripRepository from "../trip/tripRepository";
+import userRepository from "../user/userRepository";
+import notificationRepository, {
+  type CreateNotificationPayload,
+} from "../notification/notificationRepository";
+
 import sendEmail from "../../utils/sendEmail";
 import buildExpenseNotificationTemplate from "../../utils/buildExpenseNotificationTemplate";
-import userRepository from "../user/userRepository";
 
 type TripMember = {
   id: number;
   firstname: string;
   email: string;
+};
+
+const createNotification = async (
+  payload: CreateNotificationPayload,
+): Promise<number> => {
+  if (!payload.userId) {
+    throw new Error(
+      "Le destinataire de la notification est obligatoire.",
+    );
+  }
+
+  if (!payload.title.trim()) {
+    throw new Error(
+      "Le titre de la notification est obligatoire.",
+    );
+  }
+
+  if (!payload.message.trim()) {
+    throw new Error(
+      "Le message de la notification est obligatoire.",
+    );
+  }
+
+  return notificationRepository.create({
+    ...payload,
+    title: payload.title.trim(),
+    message: payload.message.trim(),
+  });
+};
+
+const getUserNotifications = async (userId: number) => {
+  if (!userId || Number.isNaN(userId)) {
+    throw new Error("Utilisateur invalide.");
+  }
+
+  return notificationRepository.findByUserId(userId);
+};
+
+const getUnreadCount = async (userId: number): Promise<number> => {
+  if (!userId || Number.isNaN(userId)) {
+    throw new Error("Utilisateur invalide.");
+  }
+
+  return notificationRepository.countUnreadByUserId(userId);
+};
+
+const markAsRead = async (
+  notificationId: number,
+  userId: number,
+): Promise<void> => {
+  if (!notificationId || Number.isNaN(notificationId)) {
+    throw new Error("Notification invalide.");
+  }
+
+  const updated = await notificationRepository.markAsRead(
+    notificationId,
+    userId,
+  );
+
+  if (!updated) {
+    throw new Error("Notification introuvable.");
+  }
+};
+
+const markAllAsRead = async (
+  userId: number,
+): Promise<number> => {
+  if (!userId || Number.isNaN(userId)) {
+    throw new Error("Utilisateur invalide.");
+  }
+
+  return notificationRepository.markAllAsRead(userId);
 };
 
 const notifyExpenseAdded = async (
@@ -16,7 +92,6 @@ const notifyExpenseAdded = async (
   expenseTitle: string,
   amount: number,
 ) => {
-  
   const trip = await tripRepository.read(tripId);
 
   if (!trip) {
@@ -40,11 +115,53 @@ const notifyExpenseAdded = async (
       continue;
     }
 
+    /*
+     * 1. Notification interne TripTogether
+     *
+     * Celle-ci est créée même si l'utilisateur
+     * a désactivé les emails.
+     */
+    try {
+      await createNotification({
+        userId: member.id,
+
+        tripId,
+
+        type: "expense_created",
+
+        title: "Nouvelle dépense",
+
+        message: `${payerName} a ajouté « ${expenseTitle} » — ${amount.toFixed(
+          2,
+        )} €.`,
+
+        emoji: "💰",
+
+        contextLabel: `Voyage ${trip.title}`,
+
+        referenceType: "expense",
+      });
+    } catch (error) {
+      console.error(
+        `Erreur création notification interne pour l'utilisateur ${member.id} :`,
+        error,
+      );
+    }
+
+    /*
+     * 2. Notification email
+     *
+     * L'email reste soumis aux préférences
+     * de l'utilisateur.
+     */
     if (!member.email) {
       continue;
     }
 
-    const preferences = await preferencesRepository.readByUserId(member.id);
+    const preferences =
+      await preferencesRepository.readByUserId(
+        member.id,
+      );
 
     if (!preferences?.email_trip_notifications) {
       continue;
@@ -67,11 +184,22 @@ const notifyExpenseAdded = async (
         html,
       );
     } catch (error) {
-      console.error(`Erreur envoi email à ${member.email} :`, error);
+      console.error(
+        `Erreur envoi email à ${member.email} :`,
+        error,
+      );
     }
   }
 };
 
 export default {
+  createNotification,
+
+  getUserNotifications,
+  getUnreadCount,
+
+  markAsRead,
+  markAllAsRead,
+
   notifyExpenseAdded,
 };

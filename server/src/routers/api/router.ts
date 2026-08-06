@@ -10,6 +10,7 @@ import userPaymentPreferenceRouter from "../userPaymentPreference/router";
 import placesRouter from "../places/router";
 import exchangeRateRouter from "../exchangeRate/router";
 import reimbursementRouter from "../reimbursement/router";
+import notificationRouter from "../notification/router";
 
 const router = express.Router();
 
@@ -31,6 +32,8 @@ router.use("/expenses", expenseRouter);
 router.use("/reimbursements", reimbursementRouter);
 
 router.use("/categories", expenseCategoryRouter);
+
+router.use("/notifications", notificationRouter);
 
 router.use("/places", placesRouter);
 

@@ -230,3 +230,39 @@ CREATE TABLE reimbursement (
   CONSTRAINT chk_reimbursement_positive_amount
     CHECK (amount > 0)
 );
+
+CREATE TABLE notification (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+
+  user_id INT NOT NULL,
+  trip_id INT NULL,
+
+  type VARCHAR(50) NOT NULL,
+
+  title VARCHAR(150) NOT NULL,
+  message TEXT NOT NULL,
+
+  emoji VARCHAR(10) NULL,
+
+  context_label VARCHAR(255) NULL,
+
+  reference_type VARCHAR(50) NULL,
+  reference_id INT NULL,
+
+  is_read BOOLEAN NOT NULL DEFAULT FALSE,
+
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_notification_user
+    FOREIGN KEY (user_id)
+    REFERENCES user(id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_notification_trip
+    FOREIGN KEY (trip_id)
+    REFERENCES trip(id)
+    ON DELETE CASCADE,
+
+  INDEX idx_notification_user_created_at (user_id, created_at),
+  INDEX idx_notification_user_is_read (user_id, is_read)
+);
