@@ -411,11 +411,17 @@
 }
 
 .reimbursement-summary-card {
-  display: flex;
+  display: grid;
+  grid-template-columns:
+    minmax(260px, 1fr)
+    minmax(150px, 220px)
+    130px;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
+  gap: 1.5rem;
+
+  min-height: 82px;
+  padding: 1rem 1.5rem;
+
   background: #faf8fb;
   border: 1px solid #eee8f0;
   border-radius: 14px;
@@ -464,9 +470,12 @@
 .participant-net-balance {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   gap: 0.25rem;
+
+  min-width: 150px;
+  text-align: center;
 }
 
 .participant-net-balance strong {
@@ -506,23 +515,32 @@
    ========================================================= */
 
 .participant-reimburse-btn {
-  min-height: 40px;
-  padding: 0.6rem 1rem;
-  border: none;
+  justify-self: end;
+
+  min-height: 38px;
+  padding: 0.5rem 0.9rem;
+
+  color: #2d7738;
+  background: #ffffff;
+  border: 1px solid #2d7738;
   border-radius: 8px;
-  background: #2d7738;
-  color: white;
+
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
+  white-space: nowrap;
+
   cursor: pointer;
+
   transition:
+    color 0.2s ease,
     background-color 0.2s ease,
     transform 0.2s ease;
 }
 
 .participant-reimburse-btn:hover {
-  background: #25642f;
+  color: #ffffff;
+  background: #2d7738;
   transform: translateY(-1px);
 }
 
@@ -1055,10 +1073,21 @@
     border: 0;
   }
 
-  .reimbursement-summary-card {
-    align-items: flex-start;
-    padding: 1rem;
-  }
+.reimbursement-summary-card {
+  grid-template-columns:
+    minmax(200px, 1fr)
+    minmax(130px, 170px)
+    115px;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.participant-reimburse-btn {
+  min-height: 36px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8rem;
+}
 }
 
 /* =========================================================
@@ -1160,10 +1189,33 @@
     justify-content: center;
   }
 
-  .participant-reimburse-btn {
-    width: 100%;
-    margin-top: 0.6rem;
-  }
+.reimbursement-summary-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.8rem;
+}
+
+.reimbursement-summary-person {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.participant-net-balance {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: auto;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.participant-reimburse-btn {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: stretch;
+
+  width: 100%;
+  min-height: 40px;
+  margin-top: 0.25rem;
+}
 }
 
 
@@ -1215,15 +1267,32 @@
   }
 
   .reimbursement-summary-card {
-    flex-direction: column;
-  }
+  grid-template-columns: 1fr;
+}
 
-  .participant-net-balance {
-    align-items: flex-start;
-    width: 100%;
-    padding-top: 0.75rem;
-    border-top: 1px solid #ece6ee;
-  }
+.reimbursement-summary-person,
+.participant-net-balance,
+.participant-reimburse-btn {
+  grid-column: 1;
+}
+
+.reimbursement-summary-person {
+  grid-row: 1;
+}
+
+.participant-net-balance {
+  grid-row: 2;
+  width: 100%;
+  padding-top: 0.75rem;
+  border-top: 1px solid #ece6ee;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.participant-reimburse-btn {
+  grid-row: 3;
+  justify-self: stretch;
+}
 
   .participant-balances-totals {
     gap: 0.5rem;

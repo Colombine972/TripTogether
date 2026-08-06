@@ -62,6 +62,47 @@ class UserPaymentPreferenceRepository {
 
     return result.affectedRows;
   }
+
+  async findForTripParticipant(
+  tripId: number,
+  requesterId: number,
+  participantId: number,
+) {
+  const [rows] = await databaseClient.query<Rows>(
+    `
+    SELECT
+      u.id AS participant_id,
+      u.firstname,
+      upp.preferred_method,
+      upp.wero_phone,
+      upp.iban,
+      upp.iban_holder_name
+    FROM user u
+
+    INNER JOIN trip_user requested_participant
+      ON requested_participant.user_id = u.id
+      AND requested_participant.trip_id = ?
+
+    INNER JOIN trip_user connected_participant
+      ON connected_participant.trip_id = ?
+      AND connected_participant.user_id = ?
+
+    LEFT JOIN user_payment_preference upp
+      ON upp.user_id = u.id
+
+    WHERE u.id = ?
+    LIMIT 1
+    `,
+    [
+      tripId,
+      tripId,
+      requesterId,
+      participantId,
+    ],
+  );
+
+  return rows[0] ?? null;
+}
 }
 
 export default new UserPaymentPreferenceRepository();

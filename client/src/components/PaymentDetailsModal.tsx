@@ -1,10 +1,13 @@
 import {
+  BadgeCheck,
   Check,
   Copy,
   CreditCard,
   Eye,
   EyeOff,
+  Info,
   Phone,
+  ShieldCheck,
   WalletCards,
   X,
 } from "lucide-react";
@@ -20,7 +23,7 @@ type PaymentPreference = {
   iban_holder_name: string | null;
 };
 
-type Participant = {
+type ParticipantToReimburse = {
   userId: number;
   firstname: string;
   amount: number;
@@ -28,7 +31,7 @@ type Participant = {
 
 type PaymentDetailsModalProps = {
   tripId: number;
-  participant: Participant;
+  participant: ParticipantToReimburse;
   currency: string;
   token: string;
   onClose: () => void;
@@ -46,6 +49,7 @@ export default function PaymentDetailsModal({
 
   const [loading, setLoading] = useState(true);
   const [showIban, setShowIban] = useState(false);
+
   const [copiedField, setCopiedField] = useState<
     "wero" | "iban" | null
   >(null);
@@ -103,13 +107,15 @@ export default function PaymentDetailsModal({
   }, [participant.userId, tripId, token]);
 
   const formatCurrency = (amount: number) => {
+    const safeCurrency = (currency || "EUR").toUpperCase();
+
     try {
       return new Intl.NumberFormat("fr-FR", {
         style: "currency",
-        currency,
+        currency: safeCurrency,
       }).format(amount);
     } catch {
-      return `${amount.toFixed(2)} ${currency}`;
+      return `${amount.toFixed(2)} ${safeCurrency}`;
     }
   };
 
@@ -145,8 +151,15 @@ export default function PaymentDetailsModal({
     }
   };
 
+  const handleDeclareReimbursement = () => {
+    toast.info(
+      "L’enregistrement du remboursement sera ajouté à la prochaine étape.",
+    );
+  };
+
   const hasWero = Boolean(paymentPreference?.wero_phone);
   const hasBankTransfer = Boolean(paymentPreference?.iban);
+  const hasPaymentMethod = hasWero || hasBankTransfer;
 
   return (
     <div
@@ -164,79 +177,103 @@ export default function PaymentDetailsModal({
           type="button"
           className="payment-modal-close"
           onClick={onClose}
-          aria-label="Fermer"
+          aria-label="Fermer la fenêtre"
         >
-          <X size={22} />
+          <X size={24} />
         </button>
 
-        <div className="payment-modal-header">
-          <WalletCards size={28} />
+        <header className="payment-modal-header">
+          <div className="payment-modal-title-icon">
+            <WalletCards size={31} />
+          </div>
 
           <div>
             <h3 id="payment-details-title">
               Rembourser {participant.firstname}
             </h3>
 
-            <p>
-              Montant à rembourser :{" "}
-              <strong>
-                {formatCurrency(participant.amount)}
-              </strong>
+            <p>Montant à rembourser</p>
+
+            <strong className="payment-modal-amount">
+              {formatCurrency(participant.amount)}
+            </strong>
+          </div>
+        </header>
+
+        <section className="payment-instructions">
+          <Info size={28} />
+
+          <div>
+            <h4>Effectuer le remboursement</h4>
+
+            <p className="payment-instructions-desktop">
+              TripTogether calcule les sommes dues, mais ne réalise pas le
+              transfert d’argent. Copiez les informations ci-dessous, puis
+              effectuez le paiement depuis <strong>Wero</strong> ou votre{" "}
+              <strong>application bancaire</strong>.
+            </p>
+
+            <p className="payment-instructions-mobile">
+              Le remboursement s’effectue depuis <strong>Wero</strong> ou votre{" "}
+              <strong>application bancaire</strong>. TripTogether vous aide à
+              retrouver les coordonnées du bénéficiaire et à suivre le
+              remboursement.
             </p>
           </div>
-        </div>
+        </section>
 
         {loading ? (
-          <p className="payment-modal-loading">
-            Chargement des moyens de remboursement...
-          </p>
-        ) : !paymentPreference ||
-          (!hasWero && !hasBankTransfer) ? (
+          <div className="payment-modal-loading">
+            <p>Chargement des moyens de remboursement...</p>
+          </div>
+        ) : !hasPaymentMethod ? (
           <div className="payment-method-empty">
             <p>
-              {participant.firstname} n’a pas encore renseigné
-              de moyen de remboursement.
+              {participant.firstname} n’a pas encore renseigné de moyen de
+              remboursement.
             </p>
           </div>
         ) : (
           <div className="payment-methods-list">
-            {paymentPreference.preferred_method && (
-              <p className="preferred-payment-label">
-                Moyen préféré :{" "}
-                <strong>
-                  {paymentPreference.preferred_method === "wero"
-                    ? "Wero"
-                    : "Virement bancaire"}
-                </strong>
-              </p>
-            )}
-
             {hasWero && (
               <section
                 className={`payment-method-block ${
-                  paymentPreference.preferred_method === "wero"
+                  paymentPreference?.preferred_method === "wero"
                     ? "preferred"
                     : ""
                 }`}
               >
-                <div className="payment-method-heading">
-                  <Phone size={22} />
+                <div className="payment-method-top-row">
+                  <div className="payment-method-title">
+                    <Phone size={22} />
 
-                  <div>
-                    <h4>Wero</h4>
-                    <p>Numéro associé au compte Wero</p>
+                    <div>
+                      <div className="payment-method-label-row">
+                        <h4>Wero</h4>
+
+                        {paymentPreference?.preferred_method === "wero" && (
+                          <span className="preferred-payment-badge">
+                            Moyen préféré
+                          </span>
+                        )}
+                      </div>
+
+                      <p>Numéro associé au compte Wero</p>
+                    </div>
                   </div>
                 </div>
 
                 <div className="payment-value-row">
-                  <span>{paymentPreference.wero_phone}</span>
+                  <strong className="payment-wero-value">
+                    {paymentPreference?.wero_phone}
+                  </strong>
 
                   <button
                     type="button"
                     className="payment-copy-btn"
                     onClick={() =>
                       copyValue(
-                        paymentPreference.wero_phone || "",
+                        paymentPreference?.wero_phone || "",
                         "wero",
                       )
                     }
@@ -247,61 +284,66 @@ export default function PaymentDetailsModal({
                       <Copy size={18} />
                     )}
 
-                    {copiedField === "wero"
-                      ? "Copié"
-                      : "Copier"}
+                    {copiedField === "wero" ? "Copié" : "Copier"}
                   </button>
                 </div>
               </section>
             )}
 
+            {hasWero && hasBankTransfer && (
+              <div className="payment-method-divider">
+                <span>ou</span>
+              </div>
+            )}
+
             {hasBankTransfer && (
               <section
                 className={`payment-method-block ${
-                  paymentPreference.preferred_method ===
-                  "bank_transfer"
+                  paymentPreference?.preferred_method === "bank_transfer"
                     ? "preferred"
                     : ""
                 }`}
               >
-                <div className="payment-method-heading">
+                <div className="payment-method-title">
                   <CreditCard size={22} />
 
                   <div>
-                    <h4>Virement bancaire</h4>
+                    <div className="payment-method-label-row">
+                      <h4>Virement bancaire</h4>
 
-                    {paymentPreference.iban_holder_name && (
+                      {paymentPreference?.preferred_method ===
+                        "bank_transfer" && (
+                        <span className="preferred-payment-badge">
+                          Moyen préféré
+                        </span>
+                      )}
+                    </div>
+
+                    {paymentPreference?.iban_holder_name && (
                       <p>
-                        Titulaire :{" "}
-                        {paymentPreference.iban_holder_name}
+                        Titulaire : {paymentPreference.iban_holder_name}
                       </p>
                     )}
                   </div>
                 </div>
 
-                <div className="payment-value-row">
-                  <span className="payment-iban-value">
-                    {showIban
-                      ? paymentPreference.iban
-                      : maskIban(paymentPreference.iban || "")}
-                  </span>
+                <div className="payment-bank-details">
+                  <div className="payment-bank-iban">
+                    <span>IBAN</span>
+
+                    <strong>
+                      {showIban
+                        ? paymentPreference?.iban
+                        : maskIban(paymentPreference?.iban || "")}
+                    </strong>
+                  </div>
 
                   <div className="payment-value-actions">
                     <button
                       type="button"
-                      className="payment-icon-btn"
+                      className="payment-show-btn"
                       onClick={() =>
                         setShowIban((currentValue) => !currentValue)
-                      }
-                      aria-label={
-                        showIban
-                          ? "Masquer l’IBAN"
-                          : "Afficher l’IBAN"
-                      }
-                      title={
-                        showIban
-                          ? "Masquer l’IBAN"
-                          : "Afficher l’IBAN"
                       }
                     >
                       {showIban ? (
@@ -309,6 +351,8 @@ export default function PaymentDetailsModal({
                       ) : (
                         <Eye size={18} />
                       )}
+
+                      {showIban ? "Masquer" : "Afficher"}
                     </button>
 
                     <button
@@ -316,7 +360,7 @@ export default function PaymentDetailsModal({
                       className="payment-copy-btn"
                       onClick={() =>
                         copyValue(
-                          paymentPreference.iban || "",
+                          paymentPreference?.iban || "",
                           "iban",
                         )
                       }
@@ -327,14 +371,48 @@ export default function PaymentDetailsModal({
                         <Copy size={18} />
                       )}
 
-                      {copiedField === "iban"
-                        ? "Copié"
-                        : "Copier"}
+                      {copiedField === "iban" ? "Copié" : "Copier"}
                     </button>
                   </div>
                 </div>
               </section>
             )}
+
+            <section className="payment-declaration-section">
+              <div className="payment-declaration-text">
+                <BadgeCheck size={27} />
+
+                <div>
+                  <h4>Le paiement est terminé ?</h4>
+
+                  <p>
+                    Déclarez votre remboursement afin que le bénéficiaire
+                    puisse le confirmer.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="payment-declaration-btn"
+                onClick={handleDeclareReimbursement}
+              >
+                <Check size={21} />
+                J’ai effectué le remboursement
+              </button>
+            </section>
+
+            <section className="payment-disclaimer">
+              <ShieldCheck size={27} />
+
+              <p>
+                Cette action ne réalise aucun transfert d’argent. Elle informe
+                simplement <strong>{participant.firstname}</strong> que vous
+                déclarez avoir effectué le remboursement.{" "}
+                {participant.firstname} devra ensuite confirmer la réception
+                des fonds.
+              </p>
+            </section>
           </div>
         )}
 

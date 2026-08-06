@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import userPaymentPreferenceRepository from "./userPaymentPreferenceRepository";
+import tripRepository from "../trip/tripRepository";
 import type { PaymentMethod } from "../../types/paymentPreference";
 
 const normalizeOptionalString = (
@@ -185,7 +186,127 @@ const update: RequestHandler = async (req, res, next) => {
   }
 };
 
+const getForTripParticipant: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
+  try {
+    const tripId = Number(req.params.tripId);
+    const participantId = Number(req.params.participantId);
+    const requesterId = Number(req.auth?.sub);
+
+    if (!Number.isInteger(requesterId) || requesterId <= 0) {
+      res.status(401).json({
+        error: "Utilisateur non authentifié",
+      });
+      return;
+    }
+
+    if (!Number.isInteger(tripId) || tripId <= 0) {
+      res.status(400).json({
+        error: "Identifiant du voyage invalide",
+      });
+      return;
+    }
+
+    if (
+      !Number.isInteger(participantId) ||
+      participantId <= 0
+    ) {
+      res.status(400).json({
+        error: "Identifiant du participant invalide",
+      });
+      return;
+    }
+
+    if (requesterId === participantId) {
+      res.status(400).json({
+        error:
+          "Cette route sert à consulter les préférences d’un autre participant",
+      });
+      return;
+    }
+
+    /*
+     * Vérification que l’utilisateur connecté participe
+     * réellement au voyage.
+     *
+     * Cette méthode vérifie :
+     * - le propriétaire dans trip.user_id ;
+     * - les invités acceptés dans invitation.
+     */
+    const requesterIsMember =
+      await tripRepository.isUserMemberOfTrip(
+        tripId,
+        requesterId,
+      );
+
+    if (!requesterIsMember) {
+      res.status(403).json({
+        error:
+          "Vous n’êtes pas autorisé à consulter les informations de ce voyage",
+      });
+      return;
+    }
+
+    /*
+     * Vérification qu’Anthony appartient également
+     * à ce même voyage.
+     */
+    const participantIsMember =
+      await tripRepository.isUserMemberOfTrip(
+        tripId,
+        participantId,
+      );
+
+    if (!participantIsMember) {
+      res.status(404).json({
+        error:
+          "Ce participant n’appartient pas au voyage",
+      });
+      return;
+    }
+
+    const paymentPreference =
+      await userPaymentPreferenceRepository.findByUserId(
+        participantId,
+      );
+
+    /*
+     * L’absence de préférences n’est pas une erreur.
+     * Le frontend affichera simplement que le participant
+     * n’a encore rien renseigné.
+     */
+    if (!paymentPreference) {
+      res.status(200).json({
+        paymentPreference: {
+          preferred_method: null,
+          wero_phone: null,
+          iban: null,
+          iban_holder_name: null,
+        },
+      });
+      return;
+    }
+
+    res.status(200).json({
+      paymentPreference: {
+        preferred_method:
+          paymentPreference.preferred_method,
+        wero_phone: paymentPreference.wero_phone,
+        iban: paymentPreference.iban,
+        iban_holder_name:
+          paymentPreference.iban_holder_name,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   get,
   update,
+  getForTripParticipant,
 };

@@ -4,6 +4,7 @@ import invitationActions from "../../modules/invitation/invitationActions";
 import invitationServices from "../../modules/invitation/invitationServices";
 import stepActions from "../../modules/step/stepActions";
 import tripActions from "../../modules/trip/tripActions";
+import userPaymentPreferenceActions from "../../modules/userPaymentPreference/userPaymentPreferenceActions";
 
 const router = express.Router();
 
@@ -11,6 +12,12 @@ router.get("/count", tripActions.count);
 router.get("/info/:id", tripActions.read);
 
 router.get("/:id/members", tripActions.getMembersByTrip);
+
+router.get(
+  "/:tripId/participants/:participantId/payment-preferences",
+  verifyToken,
+  userPaymentPreferenceActions.getForTripParticipant,
+);
 
 router.get("/countries", tripActions.browse);
 router.get("/", tripActions.browse);
