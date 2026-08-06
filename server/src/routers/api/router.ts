@@ -9,6 +9,7 @@ import preferencesRouter from "../preferences/router";
 import userPaymentPreferenceRouter from "../userPaymentPreference/router";
 import placesRouter from "../places/router";
 import exchangeRateRouter from "../exchangeRate/router";
+import reimbursementRouter from "../reimbursement/router";
 
 const router = express.Router();
 
@@ -26,6 +27,8 @@ router.use(
 router.use("/users", userRouter);
 
 router.use("/expenses", expenseRouter);
+
+router.use("/reimbursements", reimbursementRouter);
 
 router.use("/categories", expenseCategoryRouter);
 

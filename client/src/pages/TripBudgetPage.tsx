@@ -6,11 +6,13 @@ import BudgetSummary from "../components/BudgetSummary";
 import Modal from "../components/Modal";
 import NavTabs from "../components/NavTabs";
 import PaymentDetailsModal from "../components/PaymentDetailsModal";
+import PendingReimbursements from "../components/PendingReimbursements";
 import RemboursementSummary from "../components/RemboursementSummary";
 import TripInfos from "../components/TripInfos";
 import { useAuth } from "../contexts/AuthContext";
-import type { TheTrip } from "../types/tripType";
 import type { ParticipantBalance } from "../types/participantBalance";
+import type { Reimbursement } from "../types/reimbursement";
+import type { TheTrip } from "../types/tripType";
 import "./styles/TripBugdetPage.css";
 
 type BudgetSummaryData = {
@@ -112,6 +114,8 @@ function TripBudgetPage() {
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
 
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const [reimbursements, setReimbursements] = useState<Reimbursement[]>([]);
 
   const authHeaders = useMemo((): Record<string, string> => {
     const headers: Record<string, string> = {
@@ -285,6 +289,37 @@ function TripBudgetPage() {
     }
   }, [authHeaders]);
 
+  const getReimbursements = useCallback(async () => {
+    if (!token) {
+      setReimbursements([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/reimbursements/trip/${tripId}`,
+        {
+          headers: authHeaders,
+        },
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            data?.message ||
+            "Impossible de charger les remboursements.",
+        );
+      }
+
+      setReimbursements(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Erreur getReimbursements :", error);
+      setReimbursements([]);
+    }
+  }, [tripId, token, authHeaders]);
+
   const getExpenses = useCallback(async () => {
     try {
       const response = await fetch(
@@ -363,8 +398,8 @@ function TripBudgetPage() {
   }, [tripId, token, authHeaders]);
 
   const refreshBudget = useCallback(async () => {
-    await Promise.all([getExpenses(), getSummary()]);
-  }, [getExpenses, getSummary]);
+    await Promise.all([getExpenses(), getSummary(), getReimbursements()]);
+  }, [getExpenses, getSummary, getReimbursements]);
 
   useEffect(() => {
     if (!tripId || Number.isNaN(tripId)) {
@@ -383,6 +418,7 @@ function TripBudgetPage() {
         getCategories(),
         getExpenses(),
         getSummary(),
+        getReimbursements(),
       ]);
 
       setIsLoading(false);
@@ -397,6 +433,7 @@ function TripBudgetPage() {
     getCategories,
     getExpenses,
     getSummary,
+    getReimbursements,
   ]);
 
   /*
@@ -580,6 +617,43 @@ function TripBudgetPage() {
       balance.amountToPay += Number(currentUserShare.share_amount || 0);
     }
 
+    for (const reimbursement of reimbursements) {
+      if (reimbursement.status !== "confirmed") {
+        continue;
+      }
+
+      const amount = Number(reimbursement.amount || 0);
+      const fromUserId = Number(reimbursement.from_user_id);
+      const toUserId = Number(reimbursement.to_user_id);
+
+      /*
+       * L’utilisateur connecté a remboursé un participant.
+       * Son solde augmente vers zéro.
+       */
+      if (fromUserId === connectedUserId) {
+        const balance = balancesMap.get(toUserId);
+
+        if (balance) {
+          balance.amountToPay = Math.max(0, balance.amountToPay - amount);
+        }
+      }
+
+      /*
+       * L’utilisateur connecté a reçu un remboursement.
+       * La somme à recevoir diminue.
+       */
+      if (toUserId === connectedUserId) {
+        const balance = balancesMap.get(fromUserId);
+
+        if (balance) {
+          balance.amountToReceive = Math.max(
+            0,
+            balance.amountToReceive - amount,
+          );
+        }
+      }
+    }
+
     return (
       Array.from(balancesMap.values())
         .map((balance) => {
@@ -608,7 +682,19 @@ function TripBudgetPage() {
             Math.abs(balanceB.netBalance) - Math.abs(balanceA.netBalance),
         )
     );
-  }, [expenses, currentUserId]);
+  }, [expenses, reimbursements, currentUserId]);
+
+  const updatedBalance = useMemo(() => {
+    return Number(
+      balancesByParticipant
+        .reduce(
+          (total, participantBalance) =>
+            total + participantBalance.netBalance,
+          0,
+        )
+        .toFixed(2),
+    );
+  }, [balancesByParticipant]);
 
   const handleEditExpense = (expense: Expense) => {
     setExpenseToEdit(expense);
@@ -685,10 +771,19 @@ function TripBudgetPage() {
             <BudgetSummary
               total={summary.total}
               paid={summary.paid}
-              balance={summary.balance}
+              balance={updatedBalance}
               expenseCount={expenses.length}
               currency={displayCurrency}
             />
+            {currentUserId && (
+              <PendingReimbursements
+                reimbursements={reimbursements}
+                currentUserId={Number(currentUserId)}
+                token={token}
+                onUpdated={refreshBudget}
+              />
+            )}
+
             <RemboursementSummary
               balances={balancesByParticipant}
               currency={displayCurrency}
@@ -982,6 +1077,7 @@ function TripBudgetPage() {
             currency={displayCurrency}
             token={token}
             onClose={() => setParticipantToReimburse(null)}
+            onReimbursementDeclared={refreshBudget}
           />
         )}
       </main>

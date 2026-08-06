@@ -178,3 +178,55 @@ CREATE TABLE user_payment_preference (
     REFERENCES user(id)
     ON DELETE CASCADE
 );
+
+CREATE TABLE reimbursement (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+
+  trip_id INT NOT NULL,
+  from_user_id INT NOT NULL,
+  to_user_id INT NOT NULL,
+
+  amount DECIMAL(10, 2) NOT NULL,
+  currency VARCHAR(3) NOT NULL,
+
+  payment_method ENUM(
+    'wero',
+    'bank_transfer',
+    'other'
+  ) DEFAULT NULL,
+
+  status ENUM(
+    'pending',
+    'confirmed',
+    'rejected',
+    'cancelled'
+  ) NOT NULL DEFAULT 'pending',
+
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP,
+
+  confirmed_at DATETIME DEFAULT NULL,
+  rejected_at DATETIME DEFAULT NULL,
+
+  CONSTRAINT fk_reimbursement_trip
+    FOREIGN KEY (trip_id)
+    REFERENCES trip(id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_reimbursement_from_user
+    FOREIGN KEY (from_user_id)
+    REFERENCES user(id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_reimbursement_to_user
+    FOREIGN KEY (to_user_id)
+    REFERENCES user(id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT chk_reimbursement_different_users
+    CHECK (from_user_id <> to_user_id),
+
+  CONSTRAINT chk_reimbursement_positive_amount
+    CHECK (amount > 0)
+);

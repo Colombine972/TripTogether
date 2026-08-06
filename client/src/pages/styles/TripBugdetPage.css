@@ -294,19 +294,12 @@
 
 .debt-positive,
 .debt-negative {
-  padding: 0.75rem;
-  border-radius: 8px;
-
-
-  min-height: 100px;
-
-
   display: flex;
   flex-direction: column;
   justify-content: center;
-
-
-
+  min-height: 100px;
+  padding: 0.75rem;
+  border-radius: 8px;
 }
 
 .debt-positive {
@@ -330,6 +323,317 @@
   padding-top: 0.25rem;
   font-size: 0.9rem;
   line-height: 1.35;
+}
+
+/* =========================================================
+   REMBOURSEMENTS À CONFIRMER
+   ========================================================= */
+
+.pending-reimbursements {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 1.35rem;
+
+  background: linear-gradient(135deg, #fffaf0 0%, #fffdf8 100%);
+
+  border: 1px solid #f1d697;
+  border-radius: 18px;
+
+  box-shadow: 0 8px 24px rgba(116, 81, 19, 0.07);
+
+  box-sizing: border-box;
+}
+
+/* En-tête de la section */
+
+.pending-reimbursements-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+
+  margin-bottom: 1rem;
+}
+
+.pending-reimbursements-header > svg {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  padding: 0.55rem;
+
+  color: #a86c08;
+  background: #fff0c9;
+  border-radius: 50%;
+
+  box-sizing: border-box;
+}
+
+.pending-reimbursements-header h3 {
+  margin: 0 0 0.25rem;
+
+  color: #6f4809;
+  font-size: 1.18rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.pending-reimbursements-header p {
+  margin: 0;
+
+  color: #6e6252;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+/* Liste */
+
+.pending-reimbursements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Carte d’un remboursement */
+
+.pending-reimbursement-card {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1fr)
+    auto;
+  align-items: center;
+  gap: 1.25rem;
+
+  min-height: 82px;
+  padding: 1rem 1.15rem;
+
+  background: #ffffff;
+  border: 1px solid #e6e1d8;
+  border-radius: 14px;
+
+  box-shadow: 0 4px 14px rgba(30, 41, 59, 0.05);
+
+  box-sizing: border-box;
+}
+
+.pending-reimbursement-person {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.pending-reimbursement-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+
+  color: #64476d;
+  background: #eee8ff;
+  border-radius: 50%;
+
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.pending-reimbursement-content {
+  min-width: 0;
+}
+
+.pending-reimbursement-content > strong {
+  display: block;
+  margin-bottom: 0.2rem;
+
+  color: #2e2930;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.pending-reimbursement-content p {
+  margin: 0;
+
+  color: #706873;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.pending-reimbursement-content p strong {
+  display: inline-block;
+  margin-left: 0.35rem;
+
+  color: #237535;
+  font-size: 1.05rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* Actions */
+
+.pending-reimbursement-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.7rem;
+
+  flex-shrink: 0;
+}
+
+/* Boutons communs */
+
+.reimbursement-reject-btn,
+.reimbursement-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+
+  min-height: 40px;
+  padding: 0.55rem 0.85rem;
+
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+/* Bouton Non reçu */
+
+.reimbursement-reject-btn {
+  color: #c62828;
+  background: #ffffff;
+  border: 1px solid #ef5350;
+}
+
+.reimbursement-reject-btn:hover:not(:disabled) {
+  color: #ffffff;
+  background: #d73a35;
+  border-color: #d73a35;
+  transform: translateY(-1px);
+}
+
+/* Bouton confirmation */
+
+.reimbursement-confirm-btn {
+  color: #ffffff;
+  background: #237535;
+  border: 1px solid #237535;
+}
+
+.reimbursement-confirm-btn:hover:not(:disabled) {
+  background: #1b612b;
+  border-color: #1b612b;
+  transform: translateY(-1px);
+}
+
+/* Accessibilité */
+
+.reimbursement-reject-btn:focus-visible,
+.reimbursement-confirm-btn:focus-visible {
+  outline: 3px solid rgba(45, 119, 56, 0.22);
+  outline-offset: 2px;
+}
+
+.reimbursement-reject-btn:disabled,
+.reimbursement-confirm-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================================
+   RESPONSIVE TABLETTE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .pending-reimbursements {
+    padding: 1rem;
+  }
+
+  .pending-reimbursement-card {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .pending-reimbursement-actions {
+    width: 100%;
+  }
+
+  .reimbursement-reject-btn,
+  .reimbursement-confirm-btn {
+    flex: 1;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .pending-reimbursements {
+    margin-top: 1rem;
+    padding: 0.9rem;
+
+    border-radius: 15px;
+  }
+
+  .pending-reimbursements-header {
+    gap: 0.7rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .pending-reimbursements-header > svg {
+    flex-basis: 36px;
+    width: 36px;
+    height: 36px;
+    padding: 0.45rem;
+  }
+
+  .pending-reimbursements-header h3 {
+    font-size: 1.05rem;
+  }
+
+  .pending-reimbursements-header p {
+    font-size: 0.84rem;
+  }
+
+  .pending-reimbursement-card {
+    min-height: auto;
+    padding: 0.9rem;
+  }
+
+  .pending-reimbursement-avatar {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+  }
+
+  .pending-reimbursement-content p {
+    font-size: 0.84rem;
+  }
+
+  .pending-reimbursement-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .reimbursement-reject-btn,
+  .reimbursement-confirm-btn {
+    width: 100%;
+    min-height: 42px;
+  }
 }
 
 /* =========================================================
@@ -509,7 +813,6 @@
   margin: 0;
 }
 
-
 /* =========================================================
    9. BOUTON DE REMBOURSEMENT 
    ========================================================= */
@@ -532,10 +835,7 @@
 
   cursor: pointer;
 
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
 .participant-reimburse-btn:hover {
@@ -549,208 +849,769 @@
   outline-offset: 2px;
 }
 
-
-/* ================================
+/* =========================================================
    MODALE MOYENS DE REMBOURSEMENT
-================================ */
+   ========================================================= */
 
 .payment-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1200;
+  z-index: 99999;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
-  background: rgba(10, 20, 40, 0.6);
+
+  min-height: 100dvh;
+  padding: 1rem;
+
+  overflow-y: auto;
+
+  background: rgba(31, 41, 55, 0.68);
   box-sizing: border-box;
 }
 
+/*
+ * La modale reste entièrement dans la fenêtre.
+ * Son contenu interne défile uniquement si nécessaire.
+ */
 .payment-details-dialog {
   position: relative;
-  width: min(620px, 100%);
-  max-height: calc(100vh - 3rem);
-  margin: 0;
-  padding: 2rem;
+
+  width: min(660px, 100%);
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 1.5rem;
+
+  overflow-x: hidden;
   overflow-y: auto;
+
+  color: #27222a;
+  background: #ffffff;
   border: none;
-  border-radius: 18px;
-  background: white;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  border-radius: 22px;
+
+  box-shadow: 0 24px 65px rgba(15, 23, 42, 0.32), 0 8px 24px
+    rgba(15, 23, 42, 0.16);
+
   box-sizing: border-box;
 }
+
+/* Barre de défilement plus discrète */
+
+.payment-details-dialog::-webkit-scrollbar {
+  width: 8px;
+}
+
+.payment-details-dialog::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.payment-details-dialog::-webkit-scrollbar-thumb {
+  background: #c7c7c7;
+  border-radius: 999px;
+}
+
+/* =========================================================
+   BOUTON DE FERMETURE SUPÉRIEUR
+   ========================================================= */
 
 .payment-modal-close {
   position: absolute;
   top: 1rem;
   right: 1rem;
+  z-index: 2;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+
+  width: 42px;
+  height: 42px;
   padding: 0;
+
+  color: #444444;
+  background: #f2f2f2;
   border: none;
   border-radius: 50%;
-  background: #f2f2f2;
-  color: #444;
+
   cursor: pointer;
+
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .payment-modal-close:hover {
   background: #e5e5e5;
+  transform: scale(1.04);
 }
+
+.payment-modal-close:focus-visible {
+  outline: 3px solid rgba(45, 119, 56, 0.25);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   EN-TÊTE
+   ========================================================= */
 
 .payment-modal-header {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  padding-right: 3rem;
-  margin-bottom: 1.5rem;
-  color: #2d7738;
+  gap: 0.9rem;
+
+  padding-right: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+.payment-modal-title-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+
+  color: #237535;
 }
 
 .payment-modal-header h3 {
   margin: 0;
-  color: #222;
-  font-size: 1.5rem;
+
+  color: #252126;
+  font-size: 1.55rem;
+  line-height: 1.2;
 }
 
 .payment-modal-header p {
-  margin: 0.45rem 0 0;
-  color: #555;
+  margin: 0.25rem 0 0;
+
+  color: #6f6871;
+  font-size: 0.93rem;
 }
+
+.payment-modal-amount {
+  display: block;
+
+  margin-top: 0.2rem;
+
+  color: #237535;
+  font-size: 1.9rem;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   EXPLICATION DU REMBOURSEMENT
+   ========================================================= */
+
+.payment-instructions {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+
+  color: #17642a;
+  background: #f1f8f2;
+  border: 1px solid #dcecdf;
+  border-radius: 13px;
+
+  box-sizing: border-box;
+}
+
+.payment-instructions > svg {
+  flex: 0 0 25px;
+  margin-top: 0.05rem;
+}
+
+.payment-instructions > div {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.payment-instructions h4 {
+  margin: 0 0 0.3rem;
+
+  color: #17642a;
+  font-size: 1rem;
+}
+
+.payment-instructions p {
+  width: 100%;
+  margin: 0;
+
+  color: #354b39;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.payment-instructions strong {
+  color: #17642a;
+}
+
+.payment-instructions-mobile {
+  display: none;
+}
+
+/* =========================================================
+   CHARGEMENT ET ÉTAT VIDE
+   ========================================================= */
 
 .payment-modal-loading,
 .payment-method-empty {
-  padding: 1.5rem;
-  border-radius: 12px;
+  padding: 1.2rem;
+
+  color: #555555;
   background: #f7f7f7;
-  color: #555;
+  border-radius: 12px;
+
   text-align: center;
 }
+
+.payment-modal-loading p,
+.payment-method-empty p {
+  margin: 0;
+}
+
+/* =========================================================
+   MOYENS DE REMBOURSEMENT
+   ========================================================= */
 
 .payment-methods-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-}
-
-.preferred-payment-label {
-  margin: 0;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  background: #f2f8f3;
-  color: #36563b;
+  gap: 0.85rem;
 }
 
 .payment-method-block {
-  padding: 1.1rem;
-  border: 1px solid #e1e1e1;
-  border-radius: 14px;
-  background: #fff;
+  padding: 1rem;
+
+  background: #ffffff;
+  border: 1px solid #dfdfe2;
+  border-radius: 13px;
 }
 
 .payment-method-block.preferred {
-  border-color: #8fbe96;
-  box-shadow: 0 0 0 3px rgba(45, 119, 56, 0.08);
+  border-color: #91bd98;
+  box-shadow: 0 0 0 2px rgba(45, 119, 56, 0.07);
 }
 
-.payment-method-heading {
+.payment-method-top-row,
+.payment-method-title {
   display: flex;
   align-items: flex-start;
-  gap: 0.8rem;
-  color: #2d7738;
+  gap: 0.7rem;
 }
 
-.payment-method-heading h4 {
+.payment-method-title {
+  color: #237535;
+}
+
+.payment-method-title > div {
+  min-width: 0;
+}
+
+.payment-method-label-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.payment-method-label-row h4 {
   margin: 0;
-  color: #222;
-  font-size: 1.05rem;
+
+  color: #282329;
+  font-size: 1rem;
 }
 
-.payment-method-heading p {
-  margin: 0.25rem 0 0;
-  color: #666;
-  font-size: 0.9rem;
+.payment-method-title p {
+  margin: 0.2rem 0 0;
+
+  color: #706a72;
+  font-size: 0.86rem;
 }
+
+.preferred-payment-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0.25rem 0.55rem;
+
+  color: #17642a;
+  background: #e7f4e9;
+  border-radius: 7px;
+
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+/* =========================================================
+   NUMÉRO WERO
+   ========================================================= */
 
 .payment-value-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-top: 1rem;
-  padding: 0.8rem;
-  border-radius: 10px;
-  background: #f7f7f7;
+
+  margin-top: 0.75rem;
 }
 
-.payment-iban-value {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  font-family: monospace;
-  font-size: 0.95rem;
+.payment-wero-value {
+  color: #282329;
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
 }
+
+/* =========================================================
+   SÉPARATEUR
+   ========================================================= */
+
+.payment-method-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+
+  color: #79727c;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.payment-method-divider::before,
+.payment-method-divider::after {
+  content: "";
+
+  flex: 1;
+  height: 1px;
+
+  background: #dedce0;
+}
+
+/* =========================================================
+   VIREMENT ET IBAN
+   ========================================================= */
+
+.payment-bank-details {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-top: 0.75rem;
+}
+
+.payment-bank-iban {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  min-width: 0;
+}
+
+.payment-bank-iban span {
+  color: #777078;
+  font-size: 0.8rem;
+}
+
+.payment-bank-iban strong {
+  color: #282329;
+  font-family: monospace;
+  font-size: 0.94rem;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   BOUTONS COPIER ET AFFICHER
+   ========================================================= */
 
 .payment-value-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  flex-shrink: 0;
 }
 
 .payment-copy-btn,
-.payment-icon-btn {
-  border: none;
-  color: #2d7738;
+.payment-show-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+
+  min-height: 37px;
+  padding: 0.45rem 0.75rem;
+
+  font-family: inherit;
+  font-size: 0.83rem;
+  font-weight: 700;
+
+  border-radius: 8px;
   cursor: pointer;
+
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .payment-copy-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 38px;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  background: #eaf4eb;
-  font-weight: 700;
-}
-
-.payment-icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  padding: 0;
-  border-radius: 8px;
-  background: #ececec;
+  color: #237535;
+  background: #ffffff;
+  border: 1px solid #2d7738;
 }
 
 .payment-copy-btn:hover {
-  background: #dceede;
+  color: #ffffff;
+  background: #2d7738;
+  transform: translateY(-1px);
 }
 
-.payment-icon-btn:hover {
-  background: #dfdfdf;
+.payment-show-btn {
+  color: #49434b;
+  background: #ffffff;
+  border: 1px solid #aaa5ab;
 }
+
+.payment-show-btn:hover {
+  background: #f2f2f2;
+  transform: translateY(-1px);
+}
+
+.payment-copy-btn:focus-visible,
+.payment-show-btn:focus-visible {
+  outline: 3px solid rgba(45, 119, 56, 0.2);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   DÉCLARATION DU REMBOURSEMENT
+   ========================================================= */
+
+.payment-declaration-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 0.9rem 1rem;
+
+  background: #fff8e8;
+  border: 1px solid #f3e5bd;
+  border-radius: 13px;
+}
+
+.payment-declaration-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+
+  min-width: 0;
+  color: #93631a;
+}
+
+.payment-declaration-text > svg {
+  flex: 0 0 24px;
+}
+
+.payment-declaration-text h4 {
+  margin: 0 0 0.2rem;
+
+  color: #825719;
+  font-size: 0.95rem;
+}
+
+.payment-declaration-text p {
+  margin: 0;
+
+  color: #685a43;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.payment-declaration-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  flex-shrink: 0;
+  min-height: 41px;
+  padding: 0.6rem 0.85rem;
+
+  color: #ffffff;
+  background: #237535;
+  border: none;
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.payment-declaration-btn:hover {
+  background: #1b612b;
+  transform: translateY(-1px);
+}
+
+.payment-declaration-btn:focus-visible {
+  outline: 3px solid rgba(45, 119, 56, 0.25);
+  outline-offset: 2px;
+}
+
+.payment-declaration-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+}
+
+/* =========================================================
+   AVERTISSEMENT
+   ========================================================= */
+
+.payment-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+
+  padding: 0.85rem 1rem;
+
+  color: #555158;
+  background: #f7f7f7;
+  border-radius: 13px;
+}
+
+.payment-disclaimer > svg {
+  flex: 0 0 24px;
+  color: #666168;
+}
+
+.payment-disclaimer p {
+  margin: 0;
+
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.payment-disclaimer strong {
+  color: #343035;
+}
+
+/* =========================================================
+   BOUTON FERMER
+   ========================================================= */
 
 .payment-modal-close-bottom {
   width: 100%;
-  min-height: 46px;
-  margin-top: 1.5rem;
-  padding: 0.7rem 1rem;
-  border: none;
+  min-height: 42px;
+
+  margin-top: 1rem;
+  padding: 0.6rem 1rem;
+
+  color: #403b41;
+  background: #ffffff;
+  border: 1px solid #aaa5ab;
   border-radius: 8px;
-  background: #706f6f;
-  color: white;
+
+  font-family: inherit;
+  font-size: 0.9rem;
   font-weight: 700;
+
   cursor: pointer;
+
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .payment-modal-close-bottom:hover {
-  background: #5f5f5f;
+  background: #f3f3f3;
+  border-color: #7d787e;
+}
+
+/* =========================================================
+   RESPONSIVE TABLETTE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .payment-modal-backdrop {
+    padding: 0.75rem;
+  }
+
+  .payment-details-dialog {
+    width: min(620px, 100%);
+    max-height: calc(100dvh - 1.5rem);
+    padding: 1.25rem;
+    border-radius: 18px;
+  }
+
+  .payment-modal-header h3 {
+    font-size: 1.4rem;
+  }
+
+  .payment-modal-amount {
+    font-size: 1.7rem;
+  }
+
+  .payment-declaration-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .payment-declaration-btn {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .payment-modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .payment-details-dialog {
+    width: 100%;
+    max-height: 92dvh;
+    margin: 0;
+    padding: 1rem;
+
+    border-radius: 18px 18px 0 0;
+  }
+
+  .payment-modal-close {
+    top: 0.8rem;
+    right: 0.8rem;
+
+    width: 38px;
+    height: 38px;
+  }
+
+  .payment-modal-header {
+    gap: 0.65rem;
+    padding-right: 2.8rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .payment-modal-title-icon {
+    flex-basis: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .payment-modal-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .payment-modal-header p {
+    font-size: 0.84rem;
+  }
+
+  .payment-modal-amount {
+    font-size: 1.55rem;
+  }
+
+  .payment-instructions {
+    gap: 0.65rem;
+    margin-bottom: 0.85rem;
+    padding: 0.75rem;
+  }
+
+  .payment-instructions-desktop {
+    display: none;
+  }
+
+  .payment-instructions-mobile {
+    display: block;
+  }
+
+  .payment-instructions h4 {
+    font-size: 0.92rem;
+  }
+
+  .payment-instructions p {
+    font-size: 0.82rem;
+  }
+
+  .payment-method-block {
+    padding: 0.85rem;
+  }
+
+  .payment-value-row,
+  .payment-bank-details {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .payment-wero-value {
+    font-size: 1.1rem;
+  }
+
+  .payment-value-actions {
+    width: 100%;
+  }
+
+  .payment-copy-btn,
+  .payment-show-btn {
+    flex: 1;
+  }
+
+  .payment-declaration-section {
+    padding: 0.8rem;
+  }
+
+  .payment-declaration-btn {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .payment-disclaimer {
+    gap: 0.65rem;
+    padding: 0.75rem;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE PETIT MOBILE
+   ========================================================= */
+
+@media (max-width: 430px) {
+  .payment-modal-title-icon {
+    display: none;
+  }
+
+  .payment-modal-header {
+    padding-right: 2.6rem;
+  }
+
+  .payment-modal-header h3 {
+    font-size: 1.15rem;
+  }
+
+  .payment-value-actions {
+    flex-direction: column;
+  }
+
+  .payment-copy-btn,
+  .payment-show-btn {
+    width: 100%;
+  }
+
+  .payment-method-label-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
 }
 
 /* =========================================================
@@ -969,11 +1830,7 @@
 
 /* =========================================================
    10. RESPONSIVE — PETIT ORDINATEUR / GRANDE TABLETTE
-   3 cartes -> 2 cartes
-   ========================================================= */
-
-/* =========================================================
-   10. RESPONSIVE — PETIT ORDINATEUR / GRANDE TABLETTE
+   3 cartes → 2 cartes
    ========================================================= */
 
 @media (max-width: 1024px) {
@@ -1073,21 +1930,21 @@
     border: 0;
   }
 
-.reimbursement-summary-card {
-  grid-template-columns:
-    minmax(200px, 1fr)
-    minmax(130px, 170px)
-    115px;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-}
+  .reimbursement-summary-card {
+    grid-template-columns:
+      minmax(200px, 1fr)
+      minmax(130px, 170px)
+      115px;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+  }
 
-.participant-reimburse-btn {
-  min-height: 36px;
-  padding: 0.45rem 0.75rem;
-  font-size: 0.8rem;
-}
+  .participant-reimburse-btn {
+    min-height: 36px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.8rem;
+  }
 }
 
 /* =========================================================
@@ -1159,65 +2016,33 @@
     border: 0;
   }
 
-  .payment-modal-backdrop {
+  .reimbursement-summary-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.8rem;
+  }
+
+  .reimbursement-summary-person {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .participant-net-balance {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: auto;
     align-items: flex-end;
-    padding: 0;
+    text-align: right;
   }
 
-  .payment-details-dialog {
+  .participant-reimburse-btn {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: stretch;
     width: 100%;
-    max-height: 88vh;
-    padding: 1.4rem;
-    border-radius: 18px 18px 0 0;
+    min-height: 40px;
+    margin-top: 0.25rem;
   }
-
-  .payment-modal-header h3 {
-    font-size: 1.3rem;
-  }
-
-  .payment-value-row {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .payment-value-actions {
-    width: 100%;
-  }
-
-  .payment-copy-btn {
-    flex: 1;
-    justify-content: center;
-  }
-
-.reimbursement-summary-card {
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.8rem;
 }
-
-.reimbursement-summary-person {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.participant-net-balance {
-  grid-column: 2;
-  grid-row: 1;
-  min-width: auto;
-  align-items: flex-end;
-  text-align: right;
-}
-
-.participant-reimburse-btn {
-  grid-column: 1 / -1;
-  grid-row: 2;
-  justify-self: stretch;
-
-  width: 100%;
-  min-height: 40px;
-  margin-top: 0.25rem;
-}
-}
-
 
 /* =========================================================
    13. RESPONSIVE — PETIT MOBILE
@@ -1267,32 +2092,32 @@
   }
 
   .reimbursement-summary-card {
-  grid-template-columns: 1fr;
-}
+    grid-template-columns: 1fr;
+  }
 
-.reimbursement-summary-person,
-.participant-net-balance,
-.participant-reimburse-btn {
-  grid-column: 1;
-}
+  .reimbursement-summary-person,
+  .participant-net-balance,
+  .participant-reimburse-btn {
+    grid-column: 1;
+  }
 
-.reimbursement-summary-person {
-  grid-row: 1;
-}
+  .reimbursement-summary-person {
+    grid-row: 1;
+  }
 
-.participant-net-balance {
-  grid-row: 2;
-  width: 100%;
-  padding-top: 0.75rem;
-  border-top: 1px solid #ece6ee;
-  align-items: flex-start;
-  text-align: left;
-}
+  .participant-net-balance {
+    grid-row: 2;
+    width: 100%;
+    padding-top: 0.75rem;
+    border-top: 1px solid #ece6ee;
+    align-items: flex-start;
+    text-align: left;
+  }
 
-.participant-reimburse-btn {
-  grid-row: 3;
-  justify-self: stretch;
-}
+  .participant-reimburse-btn {
+    grid-row: 3;
+    justify-self: stretch;
+  }
 
   .participant-balances-totals {
     gap: 0.5rem;

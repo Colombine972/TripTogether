@@ -35,6 +35,7 @@ type PaymentDetailsModalProps = {
   currency: string;
   token: string;
   onClose: () => void;
+  onReimbursementDeclared: () => Promise<void> | void;
 };
 
 export default function PaymentDetailsModal({
@@ -43,6 +44,7 @@ export default function PaymentDetailsModal({
   currency,
   token,
   onClose,
+  onReimbursementDeclared,
 }: PaymentDetailsModalProps) {
   const [paymentPreference, setPaymentPreference] =
     useState<PaymentPreference | null>(null);
@@ -50,9 +52,9 @@ export default function PaymentDetailsModal({
   const [loading, setLoading] = useState(true);
   const [showIban, setShowIban] = useState(false);
 
-  const [copiedField, setCopiedField] = useState<
-    "wero" | "iban" | null
-  >(null);
+  const [isDeclaring, setIsDeclaring] = useState(false);
+
+  const [copiedField, setCopiedField] = useState<"wero" | "iban" | null>(null);
 
   useEffect(() => {
     const fetchPaymentPreference = async () => {
@@ -77,9 +79,7 @@ export default function PaymentDetailsModal({
         }
 
         const preference =
-          data?.paymentPreference ??
-          data?.payment_preference ??
-          data;
+          data?.paymentPreference ?? data?.payment_preference ?? data;
 
         setPaymentPreference({
           preferred_method: preference?.preferred_method ?? null,
@@ -88,10 +88,7 @@ export default function PaymentDetailsModal({
           iban_holder_name: preference?.iban_holder_name ?? null,
         });
       } catch (error) {
-        console.error(
-          "Erreur fetchPaymentPreference :",
-          error,
-        );
+        console.error("Erreur fetchPaymentPreference :", error);
 
         toast.error(
           error instanceof Error
@@ -132,10 +129,7 @@ export default function PaymentDetailsModal({
     return `${beginning} •••• •••• •••• ${ending}`;
   };
 
-  const copyValue = async (
-    value: string,
-    field: "wero" | "iban",
-  ) => {
+  const copyValue = async (value: string, field: "wero" | "iban") => {
     try {
       await navigator.clipboard.writeText(value);
 
@@ -151,10 +145,60 @@ export default function PaymentDetailsModal({
     }
   };
 
-  const handleDeclareReimbursement = () => {
-    toast.info(
-      "L’enregistrement du remboursement sera ajouté à la prochaine étape.",
-    );
+  const handleDeclareReimbursement = async () => {
+    if (!token) {
+      toast.error("Session invalide. Merci de vous reconnecter.");
+      return;
+    }
+
+    setIsDeclaring(true);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/reimbursements`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            trip_id: tripId,
+            to_user_id: participant.userId,
+            amount: participant.amount,
+            currency,
+            payment_method: paymentPreference?.preferred_method || null,
+          }),
+        },
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            data?.message ||
+            "Impossible de déclarer le remboursement.",
+        );
+      }
+
+      toast.success(
+        `${participant.firstname} doit maintenant confirmer la réception du remboursement.`,
+      );
+
+      await onReimbursementDeclared();
+      onClose();
+    } catch (error) {
+      console.error("Erreur handleDeclareReimbursement :", error);
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Impossible de déclarer le remboursement.",
+      );
+    } finally {
+      setIsDeclaring(false);
+    }
   };
 
   const hasWero = Boolean(paymentPreference?.wero_phone);
@@ -272,10 +316,7 @@ export default function PaymentDetailsModal({
                     type="button"
                     className="payment-copy-btn"
                     onClick={() =>
-                      copyValue(
-                        paymentPreference?.wero_phone || "",
-                        "wero",
-                      )
+                      copyValue(paymentPreference?.wero_phone || "", "wero")
                     }
                   >
                     {copiedField === "wero" ? (
@@ -320,9 +361,7 @@ export default function PaymentDetailsModal({
                     </div>
 
                     {paymentPreference?.iban_holder_name && (
-                      <p>
-                        Titulaire : {paymentPreference.iban_holder_name}
-                      </p>
+                      <p>Titulaire : {paymentPreference.iban_holder_name}</p>
                     )}
                   </div>
                 </div>
@@ -346,11 +385,7 @@ export default function PaymentDetailsModal({
                         setShowIban((currentValue) => !currentValue)
                       }
                     >
-                      {showIban ? (
-                        <EyeOff size={18} />
-                      ) : (
-                        <Eye size={18} />
-                      )}
+                      {showIban ? <EyeOff size={18} /> : <Eye size={18} />}
 
                       {showIban ? "Masquer" : "Afficher"}
                     </button>
@@ -359,10 +394,7 @@ export default function PaymentDetailsModal({
                       type="button"
                       className="payment-copy-btn"
                       onClick={() =>
-                        copyValue(
-                          paymentPreference?.iban || "",
-                          "iban",
-                        )
+                        copyValue(paymentPreference?.iban || "", "iban")
                       }
                     >
                       {copiedField === "iban" ? (
@@ -386,8 +418,8 @@ export default function PaymentDetailsModal({
                   <h4>Le paiement est terminé ?</h4>
 
                   <p>
-                    Déclarez votre remboursement afin que le bénéficiaire
-                    puisse le confirmer.
+                    Déclarez votre remboursement afin que le bénéficiaire puisse
+                    le confirmer.
                   </p>
                 </div>
               </div>
@@ -396,9 +428,13 @@ export default function PaymentDetailsModal({
                 type="button"
                 className="payment-declaration-btn"
                 onClick={handleDeclareReimbursement}
+                disabled={isDeclaring}
               >
                 <Check size={21} />
-                J’ai effectué le remboursement
+
+                {isDeclaring
+                  ? "Déclaration..."
+                  : "J’ai effectué le remboursement"}
               </button>
             </section>
 
@@ -409,8 +445,8 @@ export default function PaymentDetailsModal({
                 Cette action ne réalise aucun transfert d’argent. Elle informe
                 simplement <strong>{participant.firstname}</strong> que vous
                 déclarez avoir effectué le remboursement.{" "}
-                {participant.firstname} devra ensuite confirmer la réception
-                des fonds.
+                {participant.firstname} devra ensuite confirmer la réception des
+                fonds.
               </p>
             </section>
           </div>
