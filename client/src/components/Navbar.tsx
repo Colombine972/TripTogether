@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
+import NotificationBell from "../components/NotificationBell";
 import "../pages/styles/Navbar.css";
 
 export default function Navbar() {
@@ -32,6 +33,7 @@ export default function Navbar() {
 
   function getGreeting() {
     const hour = new Date().getHours();
+
     return hour < 17 ? "Bonjour" : "Bonsoir";
   }
 
@@ -44,28 +46,50 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-left">
-          <Link to="/" onClick={closeMenu} className="navbar-logo-link">
-            <img src="/logos/logo.png" className="navbar-logo" alt="Logo Trip Together" />
+          <Link
+            to="/"
+            onClick={closeMenu}
+            className="navbar-logo-link"
+          >
+            <img
+              src="/logos/logo.png"
+              className="navbar-logo"
+              alt="Logo Trip Together"
+            />
           </Link>
 
-          <Link to="/" onClick={closeMenu} className="navbar-brand-link">
-            <span className="website-name">Trip Together</span>
+          <Link
+            to="/"
+            onClick={closeMenu}
+            className="navbar-brand-link"
+          >
+            <span className="website-name">
+              Trip Together
+            </span>
           </Link>
         </div>
 
         <div className="navbar-center">
-          {pageTitle && <p className="navbar-page-title">{pageTitle}</p>}
+          {pageTitle && (
+            <p className="navbar-page-title">
+              {pageTitle}
+            </p>
+          )}
         </div>
 
         <div className="navbar-right">
           {auth && (
-            <button
-              type="button"
-              className="navbar-cta"
-              onClick={navigateToCreateTrip}
-            >
-              Crée ton voyage !
-            </button>
+            <>
+              <button
+                type="button"
+                className="navbar-cta"
+                onClick={navigateToCreateTrip}
+              >
+                Crée ton voyage !
+              </button>
+
+              <NotificationBell />
+            </>
           )}
 
           <div
@@ -85,18 +109,24 @@ export default function Navbar() {
                   onClick={toggleMenu}
                 >
                   <img
-                    src={auth.user.avatar_url || "/images/utilisateur.png"}
+                    src={
+                      auth.user.avatar_url ||
+                      "/images/utilisateur.png"
+                    }
                     className="user-icon"
                     alt="Avatar utilisateur"
                   />
                 </button>
 
                 <div
-                  className={`navbar-menu ${openNavBar ? "is-open" : ""}`}
+                  className={`navbar-menu ${
+                    openNavBar ? "is-open" : ""
+                  }`}
                   role="menu"
                 >
                   <p className="navbar-greeting">
-                    {getGreeting()} {auth.user.firstname}
+                    {getGreeting()}{" "}
+                    {auth.user.firstname}
                   </p>
 
                   <div className="navbar-menu-links">
@@ -120,7 +150,10 @@ export default function Navbar() {
               </>
             ) : (
               <div className="navbar-auth-links">
-                <Link to="/login" className="navbar-auth-link">
+                <Link
+                  to="/login"
+                  className="navbar-auth-link"
+                >
                   Se connecter
                 </Link>
 

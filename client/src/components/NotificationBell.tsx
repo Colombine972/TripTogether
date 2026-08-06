@@ -9,152 +9,217 @@ import {
 } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
-import type { Notification } from "../types/notification";
-import "./styles/NotificationBell.css";
+import "../pages/styles/NotificationBell.css";
 
-function NotificationBell() {
+type NotificationType =
+  | "reimbursement_pending"
+  | "reimbursement_confirmed"
+  | "reimbursement_rejected"
+  | "expense_created"
+  | "expense_updated"
+  | "participant_joined"
+  | "trip_invitation"
+  | "trip_updated"
+  | "vote_created"
+  | "general";
+
+type Notification = {
+  id: number;
+  user_id: number;
+  trip_id: number | null;
+
+  type: NotificationType;
+
+  title: string;
+  message: string;
+
+  emoji: string | null;
+
+  context_label: string | null;
+
+  reference_type: string | null;
+  reference_id: number | null;
+
+  is_read: boolean;
+
+  created_at: string;
+};
+
+export default function NotificationBell() {
   const navigate = useNavigate();
-
   const { auth } = useAuth();
 
+  const [notifications, setNotifications] =
+    useState<Notification[]>([]);
+
+  const [unreadCount, setUnreadCount] =
+    useState(0);
+
+  const [isOpen, setIsOpen] =
+    useState(false);
+
+  const [isLoading, setIsLoading] =
+    useState(false);
+
+  /*
+   * On récupère le token comme dans tes autres
+   * composants TripTogether.
+   *
+   * Si ton AuthContext contient directement auth.token,
+   * il sera utilisé.
+   *
+   * Sinon on regarde localStorage.
+   */
   const token =
     auth?.token ||
     localStorage.getItem("token") ||
     "";
 
-  const [notifications, setNotifications] = useState<
-    Notification[]
-  >([]);
-
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  const [isOpen, setIsOpen] = useState(false);
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const authHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  if (token) {
-    authHeaders.Authorization = `Bearer ${token}`;
-  }
-
-  const getUnreadCount = useCallback(async () => {
-    if (!token) {
-      setUnreadCount(0);
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/notifications/unread-count`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(
-          data?.message ||
-            "Impossible de récupérer le nombre de notifications.",
-        );
+  /*
+   * Récupération du nombre de notifications non lues.
+   */
+  const fetchUnreadCount = useCallback(
+    async () => {
+      if (!token) {
+        setUnreadCount(0);
+        return;
       }
 
-      setUnreadCount(Number(data?.count || 0));
-    } catch (error) {
-      console.error(
-        "Erreur récupération compteur notifications :",
-        error,
-      );
-
-      setUnreadCount(0);
-    }
-  }, [token]);
-
-  const getNotifications = useCallback(async () => {
-    if (!token) {
-      setNotifications([]);
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/notifications`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/notifications/unread-count`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        },
-      );
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(
-          data?.message ||
-            "Impossible de récupérer les notifications.",
         );
+
+        const data =
+          await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(
+            data?.message ||
+              "Impossible de récupérer le compteur des notifications.",
+          );
+        }
+
+        setUnreadCount(
+          Number(data?.count || 0),
+        );
+      } catch (error) {
+        console.error(
+          "Erreur compteur notifications :",
+          error,
+        );
+
+        setUnreadCount(0);
+      }
+    },
+    [token],
+  );
+
+  /*
+   * Récupération de la liste des notifications.
+   */
+  const fetchNotifications = useCallback(
+    async () => {
+      if (!token) {
+        setNotifications([]);
+        return;
       }
 
-      setNotifications(
-        Array.isArray(data)
-          ? data
-          : [],
-      );
-    } catch (error) {
-      console.error(
-        "Erreur récupération notifications :",
-        error,
-      );
+      setIsLoading(true);
 
-      setNotifications([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/notifications`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
+        const data =
+          await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(
+            data?.message ||
+              "Impossible de récupérer les notifications.",
+          );
+        }
+
+        setNotifications(
+          Array.isArray(data)
+            ? data
+            : [],
+        );
+      } catch (error) {
+        console.error(
+          "Erreur récupération notifications :",
+          error,
+        );
+
+        setNotifications([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [token],
+  );
+
+  /*
+   * Chargement du compteur dès que la Navbar apparaît.
+   */
   useEffect(() => {
-    getUnreadCount();
-  }, [getUnreadCount]);
+    fetchUnreadCount();
+  }, [fetchUnreadCount]);
 
+  /*
+   * Ouverture du panneau au survol.
+   */
   const openPanel = () => {
     setIsOpen(true);
 
-    if (notifications.length === 0) {
-      getNotifications();
-    }
+    fetchNotifications();
   };
 
+  /*
+   * Fermeture quand la souris quitte
+   * toute la zone notification.
+   */
   const closePanel = () => {
     setIsOpen(false);
   };
 
-  const handleBellClick = () => {
+  /*
+   * Clic utile notamment sur mobile/tablette.
+   */
+  const togglePanel = () => {
     setIsOpen((currentValue) => {
       const nextValue = !currentValue;
 
-      if (
-        nextValue &&
-        notifications.length === 0
-      ) {
-        getNotifications();
+      if (nextValue) {
+        fetchNotifications();
       }
 
       return nextValue;
     });
   };
 
+  /*
+   * Marquer une notification comme lue.
+   */
   const markAsRead = async (
     notification: Notification,
   ) => {
-    if (!token || notification.is_read) {
+    if (
+      !token ||
+      notification.is_read
+    ) {
       return;
     }
 
@@ -163,32 +228,44 @@ function NotificationBell() {
         `${import.meta.env.VITE_API_URL}/api/notifications/${notification.id}/read`,
         {
           method: "PATCH",
-          headers: authHeaders,
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type":
+              "application/json",
+          },
         },
       );
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
+      const data =
+        await response.json().catch(() => null);
 
+      if (!response.ok) {
         throw new Error(
           data?.message ||
-            "Impossible de marquer la notification comme lue.",
+            "Impossible de marquer cette notification comme lue.",
         );
       }
 
-      setNotifications((currentNotifications) =>
-        currentNotifications.map((currentNotification) =>
-          currentNotification.id === notification.id
-            ? {
-                ...currentNotification,
-                is_read: true,
-              }
-            : currentNotification,
-        ),
+      setNotifications(
+        (currentNotifications) =>
+          currentNotifications.map(
+            (currentNotification) =>
+              currentNotification.id ===
+              notification.id
+                ? {
+                    ...currentNotification,
+                    is_read: true,
+                  }
+                : currentNotification,
+          ),
       );
 
       setUnreadCount((currentCount) =>
-        Math.max(0, currentCount - 1),
+        Math.max(
+          0,
+          currentCount - 1,
+        ),
       );
     } catch (error) {
       console.error(
@@ -198,22 +275,39 @@ function NotificationBell() {
     }
   };
 
+  /*
+   * Clic sur une notification.
+   */
   const handleNotificationClick = async (
     notification: Notification,
   ) => {
     await markAsRead(notification);
 
-    setIsOpen(false);
-
+    /*
+     * Pour la V1 :
+     * si la notification est liée à un voyage,
+     * on ouvre simplement le voyage.
+     *
+     * Plus tard on pourra rediriger précisément vers
+     * Budget, Participants, Votes, etc.
+     */
     if (notification.trip_id) {
       navigate(
-        `/trip/${notification.trip_id}/budget`,
+        `/trip/${notification.trip_id}`,
       );
     }
+
+    setIsOpen(false);
   };
 
+  /*
+   * Tout marquer comme lu.
+   */
   const markAllAsRead = async () => {
-    if (!token || unreadCount === 0) {
+    if (
+      !token ||
+      unreadCount === 0
+    ) {
       return;
     }
 
@@ -222,87 +316,121 @@ function NotificationBell() {
         `${import.meta.env.VITE_API_URL}/api/notifications/read-all`,
         {
           method: "PATCH",
-          headers: authHeaders,
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type":
+              "application/json",
+          },
         },
       );
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
+      const data =
+        await response.json().catch(() => null);
 
+      if (!response.ok) {
         throw new Error(
           data?.message ||
-            "Impossible de marquer les notifications comme lues.",
+            "Impossible de marquer toutes les notifications comme lues.",
         );
       }
 
-      setNotifications((currentNotifications) =>
-        currentNotifications.map((notification) => ({
-          ...notification,
-          is_read: true,
-        })),
+      setNotifications(
+        (currentNotifications) =>
+          currentNotifications.map(
+            (notification) => ({
+              ...notification,
+              is_read: true,
+            }),
+          ),
       );
 
       setUnreadCount(0);
     } catch (error) {
       console.error(
-        "Erreur lecture de toutes les notifications :",
+        "Erreur lecture notifications :",
         error,
       );
     }
   };
 
+  /*
+   * Affichage :
+   * À l'instant
+   * Il y a 5 min
+   * Il y a 2 h
+   * Hier
+   * etc.
+   */
   const formatNotificationDate = (
     createdAt: string,
   ): string => {
-    const notificationDate = new Date(createdAt);
+    const notificationDate =
+      new Date(createdAt);
 
-    if (Number.isNaN(notificationDate.getTime())) {
+    if (
+      Number.isNaN(
+        notificationDate.getTime(),
+      )
+    ) {
       return "";
     }
 
     const now = new Date();
 
-    const differenceInMilliseconds =
-      now.getTime() - notificationDate.getTime();
+    const differenceMilliseconds =
+      now.getTime() -
+      notificationDate.getTime();
 
-    const differenceInMinutes = Math.floor(
-      differenceInMilliseconds / 60000,
-    );
+    const differenceMinutes =
+      Math.floor(
+        differenceMilliseconds /
+          60000,
+      );
 
-    if (differenceInMinutes < 1) {
+    if (differenceMinutes < 1) {
       return "À l’instant";
     }
 
-    if (differenceInMinutes < 60) {
-      return `Il y a ${differenceInMinutes} min`;
+    if (differenceMinutes < 60) {
+      return `Il y a ${differenceMinutes} min`;
     }
 
-    const differenceInHours = Math.floor(
-      differenceInMinutes / 60,
-    );
+    const differenceHours =
+      Math.floor(
+        differenceMinutes / 60,
+      );
 
-    if (differenceInHours < 24) {
-      return `Il y a ${differenceInHours} h`;
+    if (differenceHours < 24) {
+      return `Il y a ${differenceHours} h`;
     }
 
-    const differenceInDays = Math.floor(
-      differenceInHours / 24,
-    );
+    const differenceDays =
+      Math.floor(
+        differenceHours / 24,
+      );
 
-    if (differenceInDays === 1) {
+    if (differenceDays === 1) {
       return "Hier";
     }
 
-    if (differenceInDays < 7) {
-      return `Il y a ${differenceInDays} jours`;
+    if (differenceDays < 7) {
+      return `Il y a ${differenceDays} jours`;
     }
 
-    return new Intl.DateTimeFormat("fr-FR", {
-      day: "2-digit",
-      month: "short",
-    }).format(notificationDate);
+    return new Intl.DateTimeFormat(
+      "fr-FR",
+      {
+        day: "2-digit",
+        month: "short",
+      },
+    ).format(notificationDate);
   };
 
+  /*
+   * Pour le petit panneau :
+   * seulement les 5 dernières.
+   */
   const visibleNotifications =
     notifications.slice(0, 5);
 
@@ -314,17 +442,27 @@ function NotificationBell() {
     >
       <button
         type="button"
-        className="notification-bell-button"
-        onClick={handleBellClick}
+        className={`notification-bell-button ${
+          isOpen ? "is-active" : ""
+        }`}
+        onClick={togglePanel}
         aria-label={
           unreadCount > 0
-            ? `${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`
+            ? `${unreadCount} notification${
+                unreadCount > 1
+                  ? "s"
+                  : ""
+              } non lue${
+                unreadCount > 1
+                  ? "s"
+                  : ""
+              }`
             : "Notifications"
         }
         aria-expanded={isOpen}
       >
         <Bell
-          size={23}
+          size={25}
           strokeWidth={2}
         />
 
@@ -337,133 +475,116 @@ function NotificationBell() {
         )}
       </button>
 
-      {isOpen && (
-        <div className="notification-panel">
-          <div className="notification-panel-header">
-            <div>
-              <h3>Notifications</h3>
+     {isOpen && (
+  <div className="notification-panel">
+    <div className="notification-panel-header">
+      <div>
+        <h3>Notifications</h3>
 
-              {unreadCount > 0 && (
-                <span>
-                  {unreadCount} non lue
-                  {unreadCount > 1
-                    ? "s"
-                    : ""}
-                </span>
-              )}
-            </div>
-          </div>
+        {unreadCount > 0 ? (
+          <span>
+            {unreadCount} non lue
+            {unreadCount > 1 ? "s" : ""}
+          </span>
+        ) : (
+          <span>Tout est à jour</span>
+        )}
+      </div>
+    </div>
 
-          <div className="notification-panel-content">
-            {isLoading ? (
-              <div className="notification-empty">
-                Chargement...
-              </div>
-            ) : visibleNotifications.length === 0 ? (
-              <div className="notification-empty">
-                <span>🔔</span>
-
-                <p>
-                  Aucune notification pour le moment.
-                </p>
-              </div>
-            ) : (
-              visibleNotifications.map(
-                (notification) => (
-                  <button
-                    key={notification.id}
-                    type="button"
-                    className={`notification-item ${
-                      !notification.is_read
-                        ? "notification-item-unread"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      handleNotificationClick(
-                        notification,
-                      )
-                    }
-                  >
-                    <div className="notification-item-icon">
-                      {notification.emoji ||
-                        "🔔"}
-                    </div>
-
-                    <div className="notification-item-content">
-                      <div className="notification-item-title-row">
-                        <strong>
-                          {notification.title}
-                        </strong>
-
-                        {!notification.is_read && (
-                          <span
-                            className="notification-unread-dot"
-                            aria-label="Non lue"
-                          />
-                        )}
-                      </div>
-
-                      <p>
-                        {notification.message}
-                      </p>
-
-                      <div className="notification-item-meta">
-                        {notification.context_label && (
-                          <span>
-                            {
-                              notification.context_label
-                            }
-                          </span>
-                        )}
-
-                        {notification.context_label && (
-                          <span aria-hidden="true">
-                            ·
-                          </span>
-                        )}
-
-                        <span>
-                          {formatNotificationDate(
-                            notification.created_at,
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                ),
-              )
-            )}
-          </div>
-
-          {visibleNotifications.length > 0 && (
-            <div className="notification-panel-footer">
-              <button
-                type="button"
-                className="notification-mark-all"
-                onClick={markAllAsRead}
-                disabled={unreadCount === 0}
-              >
-                <CheckCheck size={17} />
-
-                Tout marquer comme lu
-              </button>
-
-              <button
-                type="button"
-                className="notification-see-all"
-                onClick={() => {
-                  setIsOpen(false);
-                  navigate("/notifications");
-                }}
-              >
-                Voir toutes les notifications
-              </button>
-            </div>
-          )}
+    <div className="notification-panel-content">
+      {isLoading ? (
+        <div className="notification-empty">
+          <span>🔔</span>
+          <p>Chargement...</p>
         </div>
+      ) : visibleNotifications.length === 0 ? (
+        <div className="notification-empty">
+          <span>🔔</span>
+          <p>Aucune notification pour le moment.</p>
+        </div>
+      ) : (
+        visibleNotifications.map((notification) => (
+          <button
+            key={notification.id}
+            type="button"
+            className={`notification-item ${
+              !notification.is_read
+                ? "notification-item-unread"
+                : ""
+            }`}
+            onClick={() =>
+              handleNotificationClick(notification)
+            }
+          >
+            <div className="notification-item-icon">
+              {notification.emoji || "🔔"}
+            </div>
+
+            <div className="notification-item-content">
+              <div className="notification-item-title-row">
+                <strong>{notification.title}</strong>
+
+                {!notification.is_read && (
+                  <span
+                    className="notification-unread-dot"
+                    aria-label="Notification non lue"
+                  />
+                )}
+              </div>
+
+              <p>{notification.message}</p>
+
+              <div className="notification-item-meta">
+                {notification.context_label && (
+                  <>
+                    <span>
+                      {notification.context_label}
+                    </span>
+
+                    <span aria-hidden="true">·</span>
+                  </>
+                )}
+
+                <span>
+                  {formatNotificationDate(
+                    notification.created_at,
+                  )}
+                </span>
+              </div>
+            </div>
+          </button>
+        ))
       )}
     </div>
+
+    {visibleNotifications.length > 0 && (
+      <div className="notification-panel-footer">
+        <button
+          type="button"
+          className="notification-mark-all"
+          disabled={unreadCount === 0}
+          onClick={markAllAsRead}
+        >
+          <CheckCheck size={17} />
+          Tout marquer comme lu
+        </button>
+
+        <button
+          type="button"
+          className="notification-see-all"
+          onClick={() => {
+            console.log(
+              "Page complète des notifications à venir.",
+            );
+          }}
+        >
+          Voir toutes les notifications
+        </button>
+      </div>
+    )}
+  </div>
+)}
+</div>
   );
 }
-
-export default NotificationBell;
