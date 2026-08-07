@@ -1,5 +1,13 @@
-import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationBell from "../components/NotificationBell";
 import "../pages/styles/Navbar.css";
@@ -9,42 +17,118 @@ export default function Navbar() {
   const location = useLocation();
   const { auth, logout } = useAuth();
 
-  const [openNavBar, setOpenNavBar] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  const [openNavBar, setOpenNavBar] =
+    useState(false);
 
   const pageTitles: Record<string, string> = {
     "/account": "Mon compte",
     "/my-trips": "Mes voyages",
   };
 
-  const pageTitle = pageTitles[location.pathname] || "";
+  const pageTitle =
+    pageTitles[location.pathname] || "";
 
+  /*
+   * =========================================================
+   * FERMETURE DU MENU PROFIL AU CLIC EN DEHORS
+   * =========================================================
+   */
+  useEffect(() => {
+    const handleClickOutside = (
+      event: MouseEvent,
+    ) => {
+      const target =
+        event.target as Node;
+
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(
+          target,
+        )
+      ) {
+        setOpenNavBar(false);
+      }
+    };
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside,
+    );
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside,
+      );
+    };
+  }, []);
+
+  /*
+   * =========================================================
+   * FERMETURE DU MENU
+   * =========================================================
+   */
   function closeMenu() {
     setOpenNavBar(false);
   }
 
+  /*
+   * =========================================================
+   * OUVERTURE / FERMETURE AU CLIC SUR L'AVATAR
+   * =========================================================
+   */
   function toggleMenu() {
-    setOpenNavBar((prev) => !prev);
+    setOpenNavBar(
+      (currentValue) =>
+        !currentValue,
+    );
   }
 
+  /*
+   * =========================================================
+   * CRÉATION D'UN VOYAGE
+   * =========================================================
+   */
   function navigateToCreateTrip() {
     navigate("/create-trip");
+
     closeMenu();
   }
 
+  /*
+   * =========================================================
+   * BONJOUR / BONSOIR
+   * =========================================================
+   */
   function getGreeting() {
-    const hour = new Date().getHours();
+    const hour =
+      new Date().getHours();
 
-    return hour < 17 ? "Bonjour" : "Bonsoir";
+    return hour < 17
+      ? "Bonjour"
+      : "Bonsoir";
   }
 
+  /*
+   * =========================================================
+   * DÉCONNEXION
+   * =========================================================
+   */
   function handleLogout() {
     logout();
+
     closeMenu();
   }
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
+        {/* =========================
+            GAUCHE
+        ========================== */}
+
         <div className="navbar-left">
           <Link
             to="/"
@@ -69,6 +153,10 @@ export default function Navbar() {
           </Link>
         </div>
 
+        {/* =========================
+            CENTRE
+        ========================== */}
+
         <div className="navbar-center">
           {pageTitle && (
             <p className="navbar-page-title">
@@ -77,13 +165,19 @@ export default function Navbar() {
           )}
         </div>
 
+        {/* =========================
+            DROITE
+        ========================== */}
+
         <div className="navbar-right">
           {auth && (
             <>
               <button
                 type="button"
                 className="navbar-cta"
-                onClick={navigateToCreateTrip}
+                onClick={
+                  navigateToCreateTrip
+                }
               >
                 Crée ton voyage !
               </button>
@@ -92,25 +186,33 @@ export default function Navbar() {
             </>
           )}
 
+          {/* =========================
+              PROFIL
+          ========================== */}
+
           <div
+            ref={profileRef}
             className="navbar-profile"
-            onMouseEnter={() => setOpenNavBar(true)}
-            onMouseLeave={() => setOpenNavBar(false)}
           >
             {auth ? (
               <>
                 <button
                   type="button"
                   className={`navbar-profile-button ${
-                    openNavBar ? "is-active" : ""
+                    openNavBar
+                      ? "is-active"
+                      : ""
                   }`}
                   aria-label="Ouvrir le menu profil"
-                  aria-expanded={openNavBar}
+                  aria-expanded={
+                    openNavBar
+                  }
                   onClick={toggleMenu}
                 >
                   <img
                     src={
-                      auth.user.avatar_url ||
+                      auth.user
+                        .avatar_url ||
                       "/images/utilisateur.png"
                     }
                     className="user-icon"
@@ -120,20 +222,27 @@ export default function Navbar() {
 
                 <div
                   className={`navbar-menu ${
-                    openNavBar ? "is-open" : ""
+                    openNavBar
+                      ? "is-open"
+                      : ""
                   }`}
                   role="menu"
                 >
                   <p className="navbar-greeting">
                     {getGreeting()}{" "}
-                    {auth.user.firstname}
+                    {
+                      auth.user
+                        .firstname
+                    }
                   </p>
 
                   <div className="navbar-menu-links">
                     <Link
                       className="navbar-menu-link"
                       to="/account"
-                      onClick={closeMenu}
+                      onClick={
+                        closeMenu
+                      }
                     >
                       Mon compte
                     </Link>
@@ -141,7 +250,9 @@ export default function Navbar() {
                     <button
                       type="button"
                       className="navbar-logout-btn"
-                      onClick={handleLogout}
+                      onClick={
+                        handleLogout
+                      }
                     >
                       Se déconnecter
                     </button>

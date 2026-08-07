@@ -1,157 +1,305 @@
+/* =========================================================
+   NAVBAR - CONTENEUR PRINCIPAL
+   ========================================================= */
+
 .navbar {
-  width: 100%;
-  background: var(--background);
-  border-bottom: 1px solid #e8e8e8;
   position: sticky;
   top: 0;
+
   z-index: 5000;
+
+  width: 100%;
+
+  background: var(--background);
+
+  border-bottom: 1px solid #e8e8e8;
 }
 
+
+/* =========================================================
+   NAVBAR - STRUCTURE GÉNÉRALE
+   ========================================================= */
+
 .navbar-container {
-  width: 100%;
-  min-height: 110px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
+
+  width: 100%;
+  min-height: 110px;
+
   padding: 0 2rem;
+
   gap: 1rem;
 }
+
+
+/* =========================================================
+   NAVBAR - PARTIE GAUCHE
+   LOGO + NOM TRIP TOGETHER
+   ========================================================= */
 
 .navbar-left {
   display: flex;
   align-items: center;
+
   gap: 0.75rem;
 }
 
 .navbar-logo-link,
 .navbar-brand-link {
-  text-decoration: none;
   color: inherit;
+
+  text-decoration: none;
 }
 
 .navbar-logo {
   width: 5rem;
   height: 5rem;
+
   object-fit: contain;
 }
 
 .website-name {
-  font-weight: 800;
   font-family: var(--body-text);
   font-size: var(--font-size-M);
+  font-weight: 800;
+
   white-space: nowrap;
 }
 
+
+/* =========================================================
+   NAVBAR - PARTIE CENTRALE
+   TITRE DE PAGE
+   ========================================================= */
+
 .navbar-center {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .navbar-page-title {
   margin: 0;
-  font-weight: 500;
+
+  color: #8b8b8b;
+
   font-family: var(--body-text);
   font-size: var(--font-size-S);
-  color: #8b8b8b;
+  font-weight: 500;
+
   white-space: nowrap;
 }
+
+
+/* =========================================================
+   NAVBAR - PARTIE DROITE
+   CTA + NOTIFICATION + AVATAR
+   ========================================================= */
 
 .navbar-right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+
   gap: 1rem;
 }
 
+
+/* =========================================================
+   BOUTON "CRÉE TON VOYAGE"
+   ========================================================= */
+
 .navbar-cta {
-  background: #2f5d2f;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  font-family: var(--body-text);
-  font-size: var(--font-size-M);
-  padding: 0.85rem 1.4rem;
-  border-radius: 0.5rem;
-  line-height: 1;
-  white-space: nowrap;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  padding: 0.85rem 1.4rem;
+
+  color: #fff;
+  background: #2f5d2f;
+
+  border: none;
+  border-radius: 0.5rem;
+
+  font-family: var(--body-text);
+  font-size: var(--font-size-M);
+  font-weight: 600;
+  line-height: 1;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    filter 180ms ease,
+    transform 180ms ease;
 }
 
 .navbar-cta:hover {
   filter: brightness(0.95);
 }
 
-.navbar-profile {
-  position: relative;
+.navbar-cta:active {
+  transform: translateY(1px);
 }
 
+.navbar-cta:focus-visible {
+  outline: 2px solid #2f5d2f;
+  outline-offset: 3px;
+}
+
+
+/* =========================================================
+   PROFIL - CONTENEUR
+   ========================================================= */
+
+.navbar-profile {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* =========================================================
+   PROFIL - BOUTON AVATAR
+   ========================================================= */
+
 .navbar-profile-button {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 50%;
-  border: none;
-  background-color: rgba(153, 153, 153, 0.35);
-  cursor: pointer;
+  position: relative;
+
   display: grid;
   place-items: center;
+
+  width: 3.5rem;
+  height: 3.5rem;
+
   padding: 0;
+
   overflow: hidden;
-  transition: transform 220ms ease, border-radius 220ms ease;
+
+  background-color: rgba(153, 153, 153, 0.35);
+
+  border: none;
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  transition:
+    transform 220ms ease,
+    border-radius 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.navbar-profile-button:hover {
+  background-color: rgba(153, 153, 153, 0.45);
 }
 
 .navbar-profile-button.is-active {
-  transform: scale(1.15);
+  background-color: rgba(153, 153, 153, 0.42);
+
+  transform: scale(1.12);
+
   border-radius: 1rem;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+.navbar-profile-button:focus-visible {
+  outline: 2px solid #2f5d2f;
+  outline-offset: 2px;
+}
+
+
+/* =========================================================
+   PROFIL - IMAGE AVATAR
+   ========================================================= */
+
 .user-icon {
+  display: block;
+
   width: 3rem;
   height: 3rem;
+
   object-fit: cover;
+
   border-radius: 50%;
-  display: block;
 }
+
+
+/* =========================================================
+   PROFIL - PANNEAU
+   ========================================================= */
 
 .navbar-menu {
   display: none;
+
   position: absolute;
+
   top: calc(100% + 0.75rem);
   right: 0;
+
+  z-index: 50000;
+
   min-width: 12rem;
+
+  padding: 0.75rem;
+
   background: #fff;
+
   border: 1px solid #e8e8e8;
   border-radius: 0.75rem;
-  padding: 0.75rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  z-index: 50000;
-}
 
-.navbar-profile::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: 12rem;
-  height: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .navbar-menu.is-open {
   display: flex;
   flex-direction: column;
+
+  animation: navbar-menu-open 160ms ease;
 }
 
+@keyframes navbar-menu-open {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   PROFIL - MESSAGE BONJOUR / BONSOIR
+   ========================================================= */
+
 .navbar-greeting {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.5rem;
+
   padding: 0.25rem 0.5rem 0.75rem;
+
+  color: #111;
+
   border-bottom: 1px solid #e8e8e8;
-  font-weight: 600;
+
   font-family: var(--body-text);
   font-size: var(--font-size-S);
+  font-weight: 600;
 }
+
+
+/* =========================================================
+   PROFIL - LIENS DU MENU
+   ========================================================= */
 
 .navbar-menu-links {
   display: flex;
@@ -161,17 +309,27 @@
 .navbar-menu-link,
 .navbar-logout-btn {
   width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
+
   padding: 0.6rem 0.5rem;
+
+  color: #111;
+  background: none;
+
+  border: none;
   border-radius: 0.5rem;
-  cursor: pointer;
-  font-weight: 400;
+
   font-family: var(--body-text);
   font-size: var(--font-size-S);
-  color: #111;
+  font-weight: 400;
+
+  text-align: left;
   text-decoration: none;
+
+  cursor: pointer;
+
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 .navbar-menu-link:hover,
@@ -179,41 +337,75 @@
   background: #f3f3f3;
 }
 
+.navbar-menu-link:hover {
+  color: #2f5d2f;
+}
+
+.navbar-logout-btn:hover {
+  color: #b13a3a;
+}
+
+
+/* =========================================================
+   UTILISATEUR NON CONNECTÉ
+   ========================================================= */
+
 .navbar-auth-links {
   display: flex;
-  gap: 1.5rem;
   align-items: center;
+
+  gap: 1.5rem;
 }
 
 .navbar-auth-link {
-  text-decoration: none;
-  font-family: var(--body-text);
-  font-weight: 600;
-  font-size: 1rem;
   color: #111;
-  transition: color 0.2s;
+
+  font-family: var(--body-text);
+  font-size: 1rem;
+  font-weight: 600;
+
+  text-decoration: none;
+
   white-space: nowrap;
+
+  transition:
+    color 180ms ease,
+    opacity 180ms ease;
 }
 
 .navbar-auth-link:hover {
   color: #2f5d2f;
 }
 
+
+/* =========================================================
+   BOUTON CRÉER UN COMPTE
+   ========================================================= */
+
 .navbar-auth-register {
-  background-color: #2f5d2f;
-  color: white;
   padding: 0.7rem 1.2rem;
+
+  color: #fff;
+  background-color: #2f5d2f;
+
   border-radius: 0.5rem;
 }
 
 .navbar-auth-register:hover {
+  color: #fff;
+
   opacity: 0.9;
 }
 
-/* TABLETTE */
+
+/* =========================================================
+   TABLETTE
+   ========================================================= */
+
 @media (max-width: 900px) {
   .navbar-container {
     min-height: 95px;
+
     padding: 0 1.25rem;
   }
 
@@ -226,9 +418,14 @@
     font-size: 1.1rem;
   }
 
+  .navbar-right {
+    gap: 0.75rem;
+  }
+
   .navbar-cta {
-    font-size: 0.95rem;
     padding: 0.75rem 1rem;
+
+    font-size: 0.95rem;
   }
 
   .navbar-profile-button {
@@ -240,16 +437,36 @@
     width: 2.8rem;
     height: 2.8rem;
   }
+
+  .navbar-menu {
+    top: calc(100% + 0.65rem);
+  }
 }
 
-/* MOBILE */
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
 @media (max-width: 480px) {
+  /* ---------------------------------------------------------
+     STRUCTURE
+     --------------------------------------------------------- */
+
   .navbar-container {
-    min-height: 85px;
-    grid-template-columns: auto 1fr auto;
-    padding: 0 1rem;
     position: relative;
+
+    grid-template-columns: auto 1fr auto;
+
+    min-height: 85px;
+
+    padding: 0 1rem;
   }
+
+
+  /* ---------------------------------------------------------
+     PARTIE GAUCHE
+     --------------------------------------------------------- */
 
   .navbar-left {
     gap: 0.4rem;
@@ -262,29 +479,61 @@
 
   .website-name {
     position: absolute;
+
     top: 0.7rem;
     left: 50%;
+
     transform: translateX(-50%);
+
     font-size: 1rem;
   }
+
+
+  /* ---------------------------------------------------------
+     CENTRE
+     --------------------------------------------------------- */
 
   .navbar-center {
     display: none;
   }
 
+
+  /* ---------------------------------------------------------
+     PARTIE DROITE
+     --------------------------------------------------------- */
+
   .navbar-right {
     gap: 0.5rem;
   }
 
+
+  /* ---------------------------------------------------------
+     BOUTON CRÉER TON VOYAGE
+     --------------------------------------------------------- */
+
   .navbar-cta {
     position: absolute;
+
     top: 2.7rem;
     left: 50%;
+
     transform: translateX(-50%);
+
     padding: 0.55rem 0.9rem;
-    font-size: 0.85rem;
+
     border-radius: 0.6rem;
+
+    font-size: 0.85rem;
   }
+
+  .navbar-cta:active {
+    transform: translateX(-50%) translateY(1px);
+  }
+
+
+  /* ---------------------------------------------------------
+     AVATAR
+     --------------------------------------------------------- */
 
   .navbar-profile-button {
     width: 2.8rem;
@@ -296,10 +545,22 @@
     height: 2.45rem;
   }
 
+
+  /* ---------------------------------------------------------
+     PANNEAU PROFIL
+     --------------------------------------------------------- */
+
   .navbar-menu {
-    right: 0;
     top: calc(100% + 0.6rem);
+    right: 0;
+
+    min-width: 11rem;
   }
+
+
+  /* ---------------------------------------------------------
+     CONNEXION / INSCRIPTION
+     --------------------------------------------------------- */
 
   .navbar-auth-links {
     gap: 0.75rem;
