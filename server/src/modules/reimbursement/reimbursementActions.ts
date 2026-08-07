@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import type { ReimbursementPaymentMethod } from "../../types/reimbursement";
+import notificationService from "../notification/notificationService";
 import tripRepository from "../trip/tripRepository";
 import reimbursementRepository from "./reimbursementRepository";
 
@@ -9,9 +10,14 @@ const allowedPaymentMethods: ReimbursementPaymentMethod[] = [
   "other",
 ];
 
-const add: RequestHandler = async (req, res, next) => {
+const add: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    const fromUserId = Number(req.auth?.sub);
+    const fromUserId =
+      Number(req.auth?.sub);
 
     const {
       trip_id,
@@ -21,56 +27,91 @@ const add: RequestHandler = async (req, res, next) => {
       payment_method,
     } = req.body;
 
-    const tripId = Number(trip_id);
-    const toUserId = Number(to_user_id);
-    const reimbursementAmount = Number(amount);
+    const tripId =
+      Number(trip_id);
 
-    if (!Number.isInteger(fromUserId) || fromUserId <= 0) {
+    const toUserId =
+      Number(to_user_id);
+
+    const reimbursementAmount =
+      Number(amount);
+
+    if (
+      !Number.isInteger(fromUserId) ||
+      fromUserId <= 0
+    ) {
       res.status(401).json({
-        error: "Utilisateur non authentifié",
+        error:
+          "Utilisateur non authentifié",
       });
-      return;
-    }
 
-    if (!Number.isInteger(tripId) || tripId <= 0) {
-      res.status(400).json({
-        error: "Identifiant du voyage invalide",
-      });
-      return;
-    }
-
-    if (!Number.isInteger(toUserId) || toUserId <= 0) {
-      res.status(400).json({
-        error: "Identifiant du bénéficiaire invalide",
-      });
-      return;
-    }
-
-    if (fromUserId === toUserId) {
-      res.status(400).json({
-        error: "Vous ne pouvez pas vous rembourser vous-même",
-      });
       return;
     }
 
     if (
-      !Number.isFinite(reimbursementAmount) ||
-      reimbursementAmount <= 0
+      !Number.isInteger(tripId) ||
+      tripId <= 0
     ) {
       res.status(400).json({
-        error: "Le montant du remboursement est invalide",
+        error:
+          "Identifiant du voyage invalide",
       });
+
       return;
     }
 
-    const normalizedCurrency = String(
-      currency || "",
-    ).toUpperCase();
-
-    if (!/^[A-Z]{3}$/.test(normalizedCurrency)) {
+    if (
+      !Number.isInteger(toUserId) ||
+      toUserId <= 0
+    ) {
       res.status(400).json({
-        error: "La devise est invalide",
+        error:
+          "Identifiant du bénéficiaire invalide",
       });
+
+      return;
+    }
+
+    if (
+      fromUserId === toUserId
+    ) {
+      res.status(400).json({
+        error:
+          "Vous ne pouvez pas vous rembourser vous-même",
+      });
+
+      return;
+    }
+
+    if (
+      !Number.isFinite(
+        reimbursementAmount,
+      ) ||
+      reimbursementAmount <= 0
+    ) {
+      res.status(400).json({
+        error:
+          "Le montant du remboursement est invalide",
+      });
+
+      return;
+    }
+
+    const normalizedCurrency =
+      String(
+        currency || "",
+      ).toUpperCase();
+
+    if (
+      !/^[A-Z]{3}$/.test(
+        normalizedCurrency,
+      )
+    ) {
+      res.status(400).json({
+        error:
+          "La devise est invalide",
+      });
+
       return;
     }
 
@@ -85,8 +126,10 @@ const add: RequestHandler = async (req, res, next) => {
         )
       ) {
         res.status(400).json({
-          error: "Le moyen de paiement est invalide",
+          error:
+            "Le moyen de paiement est invalide",
         });
+
         return;
       }
 
@@ -102,8 +145,10 @@ const add: RequestHandler = async (req, res, next) => {
 
     if (!fromUserIsMember) {
       res.status(403).json({
-        error: "Vous ne participez pas à ce voyage",
+        error:
+          "Vous ne participez pas à ce voyage",
       });
+
       return;
     }
 
@@ -115,8 +160,10 @@ const add: RequestHandler = async (req, res, next) => {
 
     if (!toUserIsMember) {
       res.status(404).json({
-        error: "Le bénéficiaire ne participe pas à ce voyage",
+        error:
+          "Le bénéficiaire ne participe pas à ce voyage",
       });
+
       return;
     }
 
@@ -132,6 +179,7 @@ const add: RequestHandler = async (req, res, next) => {
         error:
           "Un remboursement est déjà en attente de confirmation pour ce participant",
       });
+
       return;
     }
 
@@ -142,37 +190,63 @@ const add: RequestHandler = async (req, res, next) => {
         toUserId,
       );
 
-    if (outstandingDebt < 0.01) {
+    if (
+      outstandingDebt < 0.01
+    ) {
       res.status(400).json({
         error:
           "Aucune dette ne doit actuellement être remboursée à ce participant",
       });
+
       return;
     }
 
-    if (reimbursementAmount > outstandingDebt + 0.01) {
+    if (
+      reimbursementAmount >
+      outstandingDebt + 0.01
+    ) {
       res.status(400).json({
-        error: `Le montant ne peut pas dépasser ${outstandingDebt.toFixed(
-          2,
-        )} ${normalizedCurrency}`,
+        error:
+          `Le montant ne peut pas dépasser ${outstandingDebt.toFixed(
+            2,
+          )} ${normalizedCurrency}`,
       });
+
       return;
     }
+
+    const finalAmount =
+      Number(
+        reimbursementAmount.toFixed(
+          2,
+        ),
+      );
 
     const reimbursementId =
       await reimbursementRepository.create({
         tripId,
         fromUserId,
         toUserId,
-        amount: Number(reimbursementAmount.toFixed(2)),
-        currency: normalizedCurrency,
-        paymentMethod: normalizedPaymentMethod,
+        amount: finalAmount,
+        currency:
+          normalizedCurrency,
+        paymentMethod:
+          normalizedPaymentMethod,
       });
 
     const reimbursement =
       await reimbursementRepository.findById(
         reimbursementId,
       );
+
+    await notificationService.notifyReimbursementPending(
+      tripId,
+      fromUserId,
+      toUserId,
+      reimbursementId,
+      finalAmount,
+      normalizedCurrency,
+    );
 
     res.status(201).json({
       message:
@@ -184,180 +258,311 @@ const add: RequestHandler = async (req, res, next) => {
   }
 };
 
-const browseByTrip: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
-  try {
-    const tripId = Number(req.params.tripId);
-    const userId = Number(req.auth?.sub);
+const browseByTrip: RequestHandler =
+  async (
+    req,
+    res,
+    next,
+  ) => {
+    try {
+      const tripId =
+        Number(
+          req.params.tripId,
+        );
 
-    if (!Number.isInteger(userId) || userId <= 0) {
-      res.status(401).json({
-        error: "Utilisateur non authentifié",
-      });
-      return;
+      const userId =
+        Number(req.auth?.sub);
+
+      if (
+        !Number.isInteger(
+          userId,
+        ) ||
+        userId <= 0
+      ) {
+        res.status(401).json({
+          error:
+            "Utilisateur non authentifié",
+        });
+
+        return;
+      }
+
+      if (
+        !Number.isInteger(
+          tripId,
+        ) ||
+        tripId <= 0
+      ) {
+        res.status(400).json({
+          error:
+            "Identifiant du voyage invalide",
+        });
+
+        return;
+      }
+
+      const userIsMember =
+        await tripRepository.isUserMemberOfTrip(
+          tripId,
+          userId,
+        );
+
+      if (!userIsMember) {
+        res.status(403).json({
+          error:
+            "Vous ne participez pas à ce voyage",
+        });
+
+        return;
+      }
+
+      const reimbursements =
+        await reimbursementRepository.findByTripAndUser(
+          tripId,
+          userId,
+        );
+
+      res.status(200).json(
+        reimbursements,
+      );
+    } catch (err) {
+      next(err);
     }
+  };
 
-    if (!Number.isInteger(tripId) || tripId <= 0) {
-      res.status(400).json({
-        error: "Identifiant du voyage invalide",
-      });
-      return;
-    }
+const confirm: RequestHandler =
+  async (
+    req,
+    res,
+    next,
+  ) => {
+    try {
+      const reimbursementId =
+        Number(req.params.id);
 
-    const userIsMember =
-      await tripRepository.isUserMemberOfTrip(
-        tripId,
+      const userId =
+        Number(req.auth?.sub);
+
+      if (
+        !Number.isInteger(
+          userId,
+        ) ||
+        userId <= 0
+      ) {
+        res.status(401).json({
+          error:
+            "Utilisateur non authentifié",
+        });
+
+        return;
+      }
+
+      if (
+        !Number.isInteger(
+          reimbursementId,
+        ) ||
+        reimbursementId <= 0
+      ) {
+        res.status(400).json({
+          error:
+            "Identifiant du remboursement invalide",
+        });
+
+        return;
+      }
+
+      const reimbursement =
+        await reimbursementRepository.findById(
+          reimbursementId,
+        );
+
+      if (!reimbursement) {
+        res.status(404).json({
+          error:
+            "Remboursement introuvable",
+        });
+
+        return;
+      }
+
+      if (
+        Number(
+          reimbursement.to_user_id,
+        ) !== userId
+      ) {
+        res.status(403).json({
+          error:
+            "Seul le bénéficiaire peut confirmer ce remboursement",
+        });
+
+        return;
+      }
+
+      if (
+        reimbursement.status !==
+        "pending"
+      ) {
+        res.status(409).json({
+          error:
+            "Ce remboursement n’est plus en attente de confirmation",
+        });
+
+        return;
+      }
+
+      await reimbursementRepository.confirm(
+        reimbursementId,
+      );
+
+      const updatedReimbursement =
+        await reimbursementRepository.findById(
+          reimbursementId,
+        );
+
+      await notificationService.notifyReimbursementConfirmed(
+        Number(
+          reimbursement.trip_id,
+        ),
+        Number(
+          reimbursement.from_user_id,
+        ),
         userId,
+        reimbursementId,
+        Number(
+          reimbursement.amount,
+        ),
+        String(
+          reimbursement.currency,
+        ).toUpperCase(),
       );
 
-    if (!userIsMember) {
-      res.status(403).json({
-        error: "Vous ne participez pas à ce voyage",
+      res.status(200).json({
+        message:
+          "Remboursement confirmé",
+        reimbursement:
+          updatedReimbursement,
       });
-      return;
+    } catch (err) {
+      next(err);
     }
+  };
 
-    const reimbursements =
-      await reimbursementRepository.findByTripAndUser(
-        tripId,
+const reject: RequestHandler =
+  async (
+    req,
+    res,
+    next,
+  ) => {
+    try {
+      const reimbursementId =
+        Number(req.params.id);
+
+      const userId =
+        Number(req.auth?.sub);
+
+      if (
+        !Number.isInteger(
+          userId,
+        ) ||
+        userId <= 0
+      ) {
+        res.status(401).json({
+          error:
+            "Utilisateur non authentifié",
+        });
+
+        return;
+      }
+
+      if (
+        !Number.isInteger(
+          reimbursementId,
+        ) ||
+        reimbursementId <= 0
+      ) {
+        res.status(400).json({
+          error:
+            "Identifiant du remboursement invalide",
+        });
+
+        return;
+      }
+
+      const reimbursement =
+        await reimbursementRepository.findById(
+          reimbursementId,
+        );
+
+      if (!reimbursement) {
+        res.status(404).json({
+          error:
+            "Remboursement introuvable",
+        });
+
+        return;
+      }
+
+      if (
+        Number(
+          reimbursement.to_user_id,
+        ) !== userId
+      ) {
+        res.status(403).json({
+          error:
+            "Seul le bénéficiaire peut refuser ce remboursement",
+        });
+
+        return;
+      }
+
+      if (
+        reimbursement.status !==
+        "pending"
+      ) {
+        res.status(409).json({
+          error:
+            "Ce remboursement n’est plus en attente de confirmation",
+        });
+
+        return;
+      }
+
+      await reimbursementRepository.reject(
+        reimbursementId,
+      );
+
+      const updatedReimbursement =
+        await reimbursementRepository.findById(
+          reimbursementId,
+        );
+
+      await notificationService.notifyReimbursementRejected(
+        Number(
+          reimbursement.trip_id,
+        ),
+        Number(
+          reimbursement.from_user_id,
+        ),
         userId,
-      );
-
-    res.status(200).json(reimbursements);
-  } catch (err) {
-    next(err);
-  }
-};
-
-const confirm: RequestHandler = async (req, res, next) => {
-  try {
-    const reimbursementId = Number(req.params.id);
-    const userId = Number(req.auth?.sub);
-
-    if (!Number.isInteger(userId) || userId <= 0) {
-      res.status(401).json({
-        error: "Utilisateur non authentifié",
-      });
-      return;
-    }
-
-    if (
-      !Number.isInteger(reimbursementId) ||
-      reimbursementId <= 0
-    ) {
-      res.status(400).json({
-        error: "Identifiant du remboursement invalide",
-      });
-      return;
-    }
-
-    const reimbursement =
-      await reimbursementRepository.findById(
         reimbursementId,
+        Number(
+          reimbursement.amount,
+        ),
+        String(
+          reimbursement.currency,
+        ).toUpperCase(),
       );
 
-    if (!reimbursement) {
-      res.status(404).json({
-        error: "Remboursement introuvable",
+      res.status(200).json({
+        message:
+          "Le remboursement a été signalé comme non reçu",
+        reimbursement:
+          updatedReimbursement,
       });
-      return;
+    } catch (err) {
+      next(err);
     }
-
-    if (Number(reimbursement.to_user_id) !== userId) {
-      res.status(403).json({
-        error:
-          "Seul le bénéficiaire peut confirmer ce remboursement",
-      });
-      return;
-    }
-
-    if (reimbursement.status !== "pending") {
-      res.status(409).json({
-        error:
-          "Ce remboursement n’est plus en attente de confirmation",
-      });
-      return;
-    }
-
-    await reimbursementRepository.confirm(
-      reimbursementId,
-    );
-
-    const updatedReimbursement =
-      await reimbursementRepository.findById(
-        reimbursementId,
-      );
-
-    res.status(200).json({
-      message: "Remboursement confirmé",
-      reimbursement: updatedReimbursement,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-const reject: RequestHandler = async (req, res, next) => {
-  try {
-    const reimbursementId = Number(req.params.id);
-    const userId = Number(req.auth?.sub);
-
-    if (!Number.isInteger(userId) || userId <= 0) {
-      res.status(401).json({
-        error: "Utilisateur non authentifié",
-      });
-      return;
-    }
-
-    const reimbursement =
-      await reimbursementRepository.findById(
-        reimbursementId,
-      );
-
-    if (!reimbursement) {
-      res.status(404).json({
-        error: "Remboursement introuvable",
-      });
-      return;
-    }
-
-    if (Number(reimbursement.to_user_id) !== userId) {
-      res.status(403).json({
-        error:
-          "Seul le bénéficiaire peut refuser ce remboursement",
-      });
-      return;
-    }
-
-    if (reimbursement.status !== "pending") {
-      res.status(409).json({
-        error:
-          "Ce remboursement n’est plus en attente de confirmation",
-      });
-      return;
-    }
-
-    await reimbursementRepository.reject(
-      reimbursementId,
-    );
-
-    const updatedReimbursement =
-      await reimbursementRepository.findById(
-        reimbursementId,
-      );
-
-    res.status(200).json({
-      message:
-        "Le remboursement a été signalé comme non reçu",
-      reimbursement: updatedReimbursement,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+  };
 
 export default {
   add,
