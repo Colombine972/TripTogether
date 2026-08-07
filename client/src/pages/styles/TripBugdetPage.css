@@ -1829,6 +1829,54 @@
 }
 
 /* =========================================================
+   ÉLÉMENT CIBLÉ DEPUIS UNE NOTIFICATION
+   ========================================================= */
+
+.notification-target-highlight {
+  position: relative;
+
+  z-index: 2;
+
+  animation:
+    notification-target-highlight-animation
+    2.5s ease;
+}
+
+@keyframes notification-target-highlight-animation {
+  0% {
+    background-color: #eaf3ea;
+
+    box-shadow:
+      0 0 0 4px
+      rgba(47, 93, 47, 0.28);
+  }
+
+  30% {
+    background-color: #f1f7f1;
+
+    box-shadow:
+      0 0 0 5px
+      rgba(47, 93, 47, 0.18);
+  }
+
+  70% {
+    background-color: #f7faf7;
+
+    box-shadow:
+      0 0 0 3px
+      rgba(47, 93, 47, 0.1);
+  }
+
+  100% {
+    background-color: transparent;
+
+    box-shadow:
+      0 0 0 0
+      rgba(47, 93, 47, 0);
+  }
+}
+
+/* =========================================================
    10. RESPONSIVE — PETIT ORDINATEUR / GRANDE TABLETTE
    3 cartes → 2 cartes
    ========================================================= */

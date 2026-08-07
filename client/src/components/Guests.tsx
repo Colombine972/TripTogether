@@ -19,14 +19,30 @@ function Guests(props: GuestsProps) {
   const { title, invited } = props;
 
   return (
-    <article className="guests-article">
-      <h3>
+    <article className="guests-card">
+      {/* =====================================================
+          TITRE
+          ===================================================== */}
+
+      <h3 className="guests-title">
         {title} ({invited.length})
       </h3>
 
+      {/* =====================================================
+          LISTE DES MEMBRES
+          ===================================================== */}
+
       <ul>
         {invited.map((invitation) => (
-          <li key={invitation.id} className="guest-row">
+          <li
+            key={invitation.id}
+            className="guest-row"
+            data-notification-ref={`participant-${invitation.id}`}
+          >
+            {/* =================================================
+                PARTIE GAUCHE
+                ================================================= */}
+
             <div className="guest-left-side">
               <div className="guest-avatar">
                 <img
@@ -58,6 +74,10 @@ function Guests(props: GuestsProps) {
                 )}
               </div>
             </div>
+
+            {/* =================================================
+                PARTIE DROITE
+                ================================================= */}
 
             <div className="guest-right-side">
               {props.type === "attendees" ? (

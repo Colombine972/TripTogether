@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 import { toast } from "react-toastify";
 import AddExpenseForm from "../components/AddExpenseForm";
 import BudgetSummary from "../components/BudgetSummary";
@@ -79,6 +79,12 @@ type Category = {
 function TripBudgetPage() {
   const { id } = useParams();
   const tripId = Number(id);
+
+  const [searchParams] = useSearchParams();
+
+  const notificationTarget = searchParams.get("target");
+
+  const notificationReferenceId = searchParams.get("ref");
 
   const { auth } = useAuth();
 
@@ -436,6 +442,81 @@ function TripBudgetPage() {
     getReimbursements,
   ]);
 
+  /* =========================================================
+   NAVIGATION DEPUIS UNE NOTIFICATION
+   ========================================================= */
+
+  useEffect(() => {
+    /*
+     * Cette page gère pour le moment
+     * les notifications liées aux dépenses.
+     */
+    if (notificationTarget !== "expense" || !notificationReferenceId) {
+      return;
+    }
+
+    /*
+     * On attend que le chargement du budget soit terminé.
+     */
+    if (isLoading) {
+      return;
+    }
+
+    const selector = `[data-notification-ref="expense-${notificationReferenceId}"]`;
+
+    let attempts = 0;
+
+    const maxAttempts = 20;
+
+    let timeoutId: number | undefined;
+
+    const scrollToExpense = () => {
+      const expenseElement = document.querySelector<HTMLElement>(selector);
+
+      /*
+       * La dépense est présente dans le DOM.
+       */
+      if (expenseElement) {
+        expenseElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        expenseElement.classList.add("notification-target-highlight");
+
+        window.setTimeout(() => {
+          expenseElement.classList.remove("notification-target-highlight");
+        }, 2500);
+
+        return;
+      }
+
+      /*
+       * La dépense n'est peut-être pas encore
+       * complètement rendue.
+       *
+       * On réessaie pendant quelques secondes.
+       */
+      attempts += 1;
+
+      if (attempts < maxAttempts) {
+        timeoutId = window.setTimeout(scrollToExpense, 150);
+      }
+    };
+
+    /*
+     * Petit délai pour laisser React terminer
+     * le rendu des cartes.
+     */
+    timeoutId = window.setTimeout(scrollToExpense, 150);
+
+    return () => {
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [notificationTarget, notificationReferenceId, isLoading]);
+
   /*
    * Devise utilisée pour l'affichage du budget.
    * La préférence utilisateur est prioritaire.
@@ -688,8 +769,7 @@ function TripBudgetPage() {
     return Number(
       balancesByParticipant
         .reduce(
-          (total, participantBalance) =>
-            total + participantBalance.netBalance,
+          (total, participantBalance) => total + participantBalance.netBalance,
           0,
         )
         .toFixed(2),
@@ -841,7 +921,11 @@ function TripBudgetPage() {
                           expense.converted_currency || displayCurrency;
 
                         return (
-                          <article key={expense.id} className="expense-card">
+                          <article
+                            key={expense.id}
+                            className="expense-card"
+                            data-notification-ref={`expense-${expense.id}`}
+                          >
                             <div className="expense-header-row">
                               <div className="expense-left">
                                 <div className="expense-icon">

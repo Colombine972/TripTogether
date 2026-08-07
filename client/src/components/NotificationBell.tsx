@@ -9,6 +9,10 @@ import { useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import "../pages/styles/NotificationBell.css";
 
+/* =========================================================
+   TYPES DE NOTIFICATIONS
+   ========================================================= */
+
 type NotificationType =
   | "reimbursement_pending"
   | "reimbursement_confirmed"
@@ -20,6 +24,10 @@ type NotificationType =
   | "trip_updated"
   | "vote_created"
   | "general";
+
+/* =========================================================
+   TYPE NOTIFICATION
+   ========================================================= */
 
 type Notification = {
   id: number;
@@ -43,6 +51,10 @@ type Notification = {
 
   created_at: string;
 };
+
+/* =========================================================
+   COMPOSANT
+   ========================================================= */
 
 export default function NotificationBell() {
   const navigate = useNavigate();
@@ -69,14 +81,13 @@ export default function NotificationBell() {
     "";
 
   /* =========================================================
-     COMPTEUR DES NOTIFICATIONS NON LUES
+     RÉCUPÉRER LE NOMBRE DE NOTIFICATIONS NON LUES
      ========================================================= */
 
   const fetchUnreadCount =
     useCallback(async () => {
       if (!token) {
         setUnreadCount(0);
-
         return;
       }
 
@@ -85,16 +96,14 @@ export default function NotificationBell() {
           `${import.meta.env.VITE_API_URL}/api/notifications/unread-count`,
           {
             headers: {
-              Authorization:
-                `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           },
         );
 
-        const data =
-          await response
-            .json()
-            .catch(() => null);
+        const data = await response
+          .json()
+          .catch(() => null);
 
         if (!response.ok) {
           throw new Error(
@@ -117,14 +126,13 @@ export default function NotificationBell() {
     }, [token]);
 
   /* =========================================================
-     LISTE DES NOTIFICATIONS
+     RÉCUPÉRER LES NOTIFICATIONS
      ========================================================= */
 
   const fetchNotifications =
     useCallback(async () => {
       if (!token) {
         setNotifications([]);
-
         return;
       }
 
@@ -135,16 +143,14 @@ export default function NotificationBell() {
           `${import.meta.env.VITE_API_URL}/api/notifications`,
           {
             headers: {
-              Authorization:
-                `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           },
         );
 
-        const data =
-          await response
-            .json()
-            .catch(() => null);
+        const data = await response
+          .json()
+          .catch(() => null);
 
         if (!response.ok) {
           throw new Error(
@@ -179,7 +185,7 @@ export default function NotificationBell() {
   }, [fetchUnreadCount]);
 
   /* =========================================================
-     FERMETURE DU PANNEAU AU CLIC EN DEHORS
+     FERMER LE PANNEAU AU CLIC EN DEHORS
      ========================================================= */
 
   useEffect(() => {
@@ -213,7 +219,7 @@ export default function NotificationBell() {
   }, []);
 
   /* =========================================================
-     OUVERTURE / FERMETURE DU PANNEAU
+     OUVRIR / FERMER LE PANNEAU
      ========================================================= */
 
   const togglePanel = () => {
@@ -233,7 +239,7 @@ export default function NotificationBell() {
 
   const markAsRead = async (
     notification: Notification,
-  ) => {
+  ): Promise<void> => {
     if (
       !token ||
       notification.is_read
@@ -248,19 +254,16 @@ export default function NotificationBell() {
           method: "PATCH",
 
           headers: {
-            Authorization:
-              `Bearer ${token}`,
-
+            Authorization: `Bearer ${token}`,
             "Content-Type":
               "application/json",
           },
         },
       );
 
-      const data =
-        await response
-          .json()
-          .catch(() => null);
+      const data = await response
+        .json()
+        .catch(() => null);
 
       if (!response.ok) {
         throw new Error(
@@ -269,10 +272,11 @@ export default function NotificationBell() {
         );
       }
 
+      /*
+       * Mise à jour immédiate du panneau.
+       */
       setNotifications(
-        (
-          currentNotifications,
-        ) =>
+        (currentNotifications) =>
           currentNotifications.map(
             (
               currentNotification,
@@ -287,6 +291,9 @@ export default function NotificationBell() {
           ),
       );
 
+      /*
+       * Mise à jour immédiate du badge.
+       */
       setUnreadCount(
         (currentCount) =>
           Math.max(
@@ -302,35 +309,144 @@ export default function NotificationBell() {
     }
   };
 
-  /* =========================================================
-     DESTINATION SELON LE TYPE DE NOTIFICATION
-     ========================================================= */
+/* =========================================================
+   CONSTRUIRE UNE URL AVEC UNE CIBLE PRÉCISE
+   ========================================================= */
 
-  const getNotificationTarget = (
+const buildTargetUrl = (
+  basePath: string,
+  referenceType?: string | null,
+  referenceId?: number | null,
+): string => {
+  const params = new URLSearchParams();
+
+  if (referenceType) {
+    params.set(
+      "target",
+      referenceType,
+    );
+  }
+
+  if (
+    referenceId !== null &&
+    referenceId !== undefined
+  ) {
+    params.set(
+      "ref",
+      String(referenceId),
+    );
+  }
+
+  const queryString =
+    params.toString();
+
+  if (!queryString) {
+    return basePath;
+  }
+
+  return `${basePath}?${queryString}`;
+};
+
+/* =========================================================
+   DÉTERMINER LA DESTINATION DE LA NOTIFICATION
+   ========================================================= */
+
+const getNotificationTarget = (
   notification: Notification,
 ): string | null => {
   if (!notification.trip_id) {
     return null;
   }
 
-  const tripId = notification.trip_id;
+  const tripId =
+    notification.trip_id;
+
+  const referenceType =
+    notification.reference_type;
+
+  const referenceId =
+    notification.reference_id;
 
   switch (notification.type) {
+    /* -----------------------------------------------------
+       NOUVEAU PARTICIPANT
+       ----------------------------------------------------- */
+
     case "participant_joined":
-      return `/trip/${tripId}?tab=participants`;
+      return buildTargetUrl(
+        `/trip/${tripId}/invitations`,
+        referenceType || "participant",
+        referenceId,
+      );
+
+    /* -----------------------------------------------------
+       VOTE
+       ----------------------------------------------------- */
 
     case "vote_created":
-      return `/trip/${tripId}?tab=steps`;
+      return buildTargetUrl(
+        `/trip/${tripId}/steps`,
+        referenceType || "vote",
+        referenceId,
+      );
+
+    /* -----------------------------------------------------
+       DÉPENSE
+       ----------------------------------------------------- */
 
     case "expense_created":
     case "expense_updated":
+      return buildTargetUrl(
+        `/trip/${tripId}/budget`,
+        referenceType || "expense",
+        referenceId,
+      );
+
+    /* -----------------------------------------------------
+       REMBOURSEMENT
+       ----------------------------------------------------- */
+
     case "reimbursement_pending":
     case "reimbursement_confirmed":
     case "reimbursement_rejected":
-      return `/trip/${tripId}?tab=budget`;
+      return buildTargetUrl(
+        `/trip/${tripId}/budget`,
+        referenceType || "reimbursement",
+        referenceId,
+      );
+
+    /* -----------------------------------------------------
+       INVITATION
+       ----------------------------------------------------- */
+
+    case "trip_invitation":
+      return buildTargetUrl(
+        `/trip/${tripId}/invitations`,
+        referenceType,
+        referenceId,
+      );
+
+    /* -----------------------------------------------------
+       VOYAGE MODIFIÉ
+       ----------------------------------------------------- */
+
+    case "trip_updated":
+      return buildTargetUrl(
+        `/trip/${tripId}`,
+        referenceType || "trip",
+        referenceId || tripId,
+      );
+
+    /* -----------------------------------------------------
+       AUTRES
+       ----------------------------------------------------- */
 
     default:
-      return `/trip/${tripId}?tab=summary`;
+      return buildTargetUrl(
+        `/trip/${tripId}`,
+        referenceType,
+        referenceId,
+      );
   }
 };
 
@@ -343,14 +459,14 @@ export default function NotificationBell() {
       notification: Notification,
     ) => {
       /*
-       * 1. La notification devient lue.
+       * 1. Marquer la notification comme lue.
        */
       await markAsRead(
         notification,
       );
 
       /*
-       * 2. On détermine sa destination.
+       * 2. Construire la destination.
        */
       const target =
         getNotificationTarget(
@@ -358,12 +474,14 @@ export default function NotificationBell() {
         );
 
       /*
-       * 3. On ferme le panneau.
+       * 3. Fermer le panneau.
        */
       setIsOpen(false);
 
       /*
-       * 4. On navigue vers la page concernée.
+       * 4. Naviguer vers le bon voyage,
+       *    le bon onglet et, plus tard,
+       *    le bon élément.
        */
       if (target) {
         navigate(target);
@@ -375,7 +493,7 @@ export default function NotificationBell() {
      ========================================================= */
 
   const markAllAsRead =
-    async () => {
+    async (): Promise<void> => {
       if (
         !token ||
         unreadCount === 0
@@ -419,7 +537,6 @@ export default function NotificationBell() {
             currentNotifications.map(
               (notification) => ({
                 ...notification,
-
                 is_read: true,
               }),
             ),
@@ -435,7 +552,7 @@ export default function NotificationBell() {
     };
 
   /* =========================================================
-     DATE RELATIVE
+     FORMATER LA DATE
      ========================================================= */
 
   const formatNotificationDate = (
@@ -585,7 +702,7 @@ export default function NotificationBell() {
         }`}
       >
         {/* ===================================================
-            HEADER
+            HEADER DU PANNEAU
             =================================================== */}
 
         <div className="notification-panel-header">
@@ -610,15 +727,13 @@ export default function NotificationBell() {
         </div>
 
         {/* ===================================================
-            LISTE
+            LISTE DES NOTIFICATIONS
             =================================================== */}
 
         <div className="notification-panel-content">
           {isLoading ? (
             <div className="notification-empty">
-              <span>
-                🔔
-              </span>
+              <span>🔔</span>
 
               <p>
                 Chargement...
@@ -627,9 +742,7 @@ export default function NotificationBell() {
           ) : visibleNotifications.length ===
             0 ? (
             <div className="notification-empty">
-              <span>
-                🔔
-              </span>
+              <span>🔔</span>
 
               <p>
                 Aucune notification pour le moment.
@@ -637,13 +750,9 @@ export default function NotificationBell() {
             </div>
           ) : (
             visibleNotifications.map(
-              (
-                notification,
-              ) => (
+              (notification) => (
                 <button
-                  key={
-                    notification.id
-                  }
+                  key={notification.id}
                   type="button"
                   className={`notification-item ${
                     !notification.is_read
@@ -672,9 +781,7 @@ export default function NotificationBell() {
                   <div className="notification-item-content">
                     <div className="notification-item-title-row">
                       <strong>
-                        {
-                          notification.title
-                        }
+                        {notification.title}
                       </strong>
 
                       {!notification.is_read && (
@@ -686,9 +793,7 @@ export default function NotificationBell() {
                     </div>
 
                     <p>
-                      {
-                        notification.message
-                      }
+                      {notification.message}
                     </p>
 
                     <div className="notification-item-meta">
@@ -738,9 +843,7 @@ export default function NotificationBell() {
                 markAllAsRead
               }
             >
-              <CheckCheck
-                size={17}
-              />
+              <CheckCheck size={17} />
 
               Tout marquer comme lu
             </button>

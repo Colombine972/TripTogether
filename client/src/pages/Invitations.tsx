@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { toast } from "react-toastify";
 import Guests from "../components/Guests";
 import NavTabs from "../components/NavTabs";
@@ -26,6 +26,12 @@ type InvitationsResponse =
 function Invitations() {
   const { id } = useParams<RouteParams>();
   const tripId = Number(id);
+
+  const [searchParams] = useSearchParams();
+
+  const notificationTarget = searchParams.get("target");
+
+  const notificationReferenceId = searchParams.get("ref");
 
   const [trip, setTrip] = useState<TheTrip | null>(null);
   const [attendees, setAttendees] = useState<Guest[]>([]);
@@ -165,6 +171,61 @@ function Invitations() {
         setLoading(false);
       });
   }, [tripId, navigate]);
+
+  /* =========================================================
+   NAVIGATION DEPUIS UNE NOTIFICATION PARTICIPANT
+   ========================================================= */
+
+  useEffect(() => {
+    if (notificationTarget !== "participant" || !notificationReferenceId) {
+      return;
+    }
+
+    if (loading) {
+      return;
+    }
+
+    const selector = `[data-notification-ref="participant-${notificationReferenceId}"]`;
+
+    let attempts = 0;
+
+    const maxAttempts = 20;
+
+    let timeoutId: number | undefined;
+
+    const scrollToParticipant = () => {
+      const participantElement = document.querySelector<HTMLElement>(selector);
+
+      if (participantElement) {
+        participantElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        participantElement.classList.add("notification-target-highlight");
+
+        window.setTimeout(() => {
+          participantElement.classList.remove("notification-target-highlight");
+        }, 2500);
+
+        return;
+      }
+
+      attempts += 1;
+
+      if (attempts < maxAttempts) {
+        timeoutId = window.setTimeout(scrollToParticipant, 150);
+      }
+    };
+
+    timeoutId = window.setTimeout(scrollToParticipant, 150);
+
+    return () => {
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [notificationTarget, notificationReferenceId, loading]);
 
   const removeParticipant = (userId: number) => {
     if (!tripId) return;

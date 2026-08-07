@@ -1,80 +1,198 @@
-#tabs {
+/* =========================================================
+   NAVIGATION DES ONGLETS
+   ========================================================= */
+
+.nav-tabs {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+  max-width: calc(100% - 2rem);
+
   gap: 12px;
+
+  margin: 50px auto 0;
   padding: 8px 16px;
+
   background-color: var(--white);
+
   border-bottom: 1px solid #e2e8f0;
-  margin-top: 50px;
   border-radius: 12px;
-  max-width: 1400px;
 }
+
+
+/* =========================================================
+   ONGLET
+   ========================================================= */
 
 .tab {
   display: inline-flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+
   gap: 6px;
-  padding: 10px 18px;
+
   min-width: 110px;
   height: 44px;
+
+  padding: 10px 18px;
+
+  color: #64748b;
+
   font-size: 14px;
   font-weight: 500;
-  color: #64748b;
+
   text-decoration: none;
+
+  border: 1px solid transparent;
   border-radius: 8px;
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease,
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
     border-color 0.2s ease;
 }
 
-.tab:hover {
+
+/* =========================================================
+   SURVOL
+   ========================================================= */
+
+.tab:hover:not(.inactive) {
   color: var(--button-hover);
-  border-color: var(--button-hover);
+
   background-color: var(--white);
+
+  border-color: var(--button-hover);
 }
+
+
+/* =========================================================
+   ONGLET ACTIF
+   ========================================================= */
 
 .tab.active {
   color: var(--white);
-  border-color: var(--primary-button);
+
   background-color: var(--primary-button);
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+
+  border-color: var(--primary-button);
+
+  box-shadow:
+    0 2px 6px
+    rgba(16, 185, 129, 0.25);
 }
+
+
+/* =========================================================
+   ICÔNES
+   ========================================================= */
 
 .tab svg,
 .tab-icon {
+  flex-shrink: 0;
+
   width: 18px;
   height: 18px;
-  flex-shrink: 0;
+
   fill: currentColor;
 }
+
+
+/* =========================================================
+   TEXTE DES ONGLETS
+   ========================================================= */
 
 .tab-label {
   white-space: nowrap;
 }
 
-@media (max-width: 640px) {
-  #tabs {
+
+/* =========================================================
+   ONGLETS À VENIR
+   MAPS / CHAT
+   ========================================================= */
+
+.tab.inactive {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   TABLETTE
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .nav-tabs {
+    width: calc(100% - 2rem);
+    max-width: 100%;
+
     justify-content: space-between;
-    padding: 8px 16px;
+
+    gap: 6px;
+
+    margin-top: 35px;
+    padding: 8px 12px;
+  }
+
+  .tab {
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 10px 12px;
+
+    font-size: 13px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .nav-tabs {
+    width: calc(100% - 1rem);
+
+    justify-content: space-between;
+
+    gap: 4px;
+
+    margin-top: 25px;
+    padding: 8px;
+
     border-radius: 12px;
   }
 
   .tab {
+    flex: 0 0 44px;
+
     width: 44px;
     min-width: 44px;
     height: 44px;
+
     padding: 0;
-    border-radius: 10px;
+
     gap: 0;
+
+    border-radius: 10px;
   }
 
   .tab-label {
     display: none;
   }
-}
-.tab.inactive {
-  opacity: 0.5;
-  cursor: not-allowed;
+
+  .tab svg,
+  .tab-icon {
+    width: 19px;
+    height: 19px;
+  }
 }
