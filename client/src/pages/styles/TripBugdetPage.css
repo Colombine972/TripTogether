@@ -12,29 +12,99 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+
   margin-bottom: 1.5rem;
   padding: 0.25rem 0;
 }
 
 .expenses-subtitle {
   margin: 0;
+
   color: #374151;
+
   font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.5;
 }
 
+.expenses-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+
+/* =========================================================
+   2. BOUTONS DU HEADER
+   ========================================================= */
+
+.export-budget-btn,
 .add-expense-btn {
-  flex-shrink: 0;
-  padding: 0.65rem 1.2rem;
-  color: #ffffff;
-  background-color: var(--primary-button);
-  border: none;
-  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 44px;
+
   font-family: inherit;
   font-weight: 600;
+
   cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+
+/* Export PDF */
+
+.export-budget-btn {
+  gap: 0.5rem;
+
+  padding: 0.75rem 1rem;
+
+  color: #2f5d2f;
+  background: #ffffff;
+
+  border: 1px solid #2f5d2f;
+  border-radius: 12px;
+}
+
+.export-budget-btn:hover:not(:disabled) {
+  color: #ffffff;
+  background: #2f5d2f;
+
+  transform: translateY(-1px);
+}
+
+.export-budget-btn:focus-visible {
+  outline: 3px solid rgba(47, 93, 47, 0.2);
+  outline-offset: 2px;
+}
+
+.export-budget-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* Ajouter une dépense */
+
+.add-expense-btn {
+  flex-shrink: 0;
+
+  padding: 0.65rem 1.2rem;
+
+  color: #ffffff;
+  background-color: var(--primary-button);
+
+  border: none;
+  border-radius: 8px;
 }
 
 .add-expense-btn:hover {
@@ -47,8 +117,9 @@
   outline-offset: 2px;
 }
 
+
 /* =========================================================
-   2. ÉTAT VIDE
+   3. ÉTAT VIDE
    ========================================================= */
 
 .empty-expenses {
@@ -56,20 +127,26 @@
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+
   padding: 2rem;
+
   text-align: center;
+
   background: #ffffff;
+
   border: 1px dashed #d1d5db;
   border-radius: 14px;
 }
 
 .empty-expenses p {
   margin: 0;
+
   color: #6b7280;
 }
 
+
 /* =========================================================
-   3. REGROUPEMENT DES DÉPENSES PAR DATE
+   4. REGROUPEMENT DES DÉPENSES PAR DATE
    ========================================================= */
 
 .expense-date-block {
@@ -80,8 +157,11 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+
   margin: 2rem 0 1rem;
+
   color: #374151;
+
   font-size: 0.95rem;
   font-weight: 700;
 }
@@ -89,12 +169,14 @@
 .expense-date-title::before,
 .expense-date-title::after {
   content: "";
+
   flex: 1;
+
   height: 1px;
+
   background: #d1d5db;
 }
 
-/* Grille des cartes : 3 colonnes sur ordinateur */
 .expense-date-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -102,19 +184,25 @@
   gap: 1rem;
 }
 
+
 /* =========================================================
-   4. CARTE D'UNE DÉPENSE
+   5. CARTE D'UNE DÉPENSE
    ========================================================= */
 
 .expense-card {
   display: flex;
   flex-direction: column;
+
   min-width: 0;
   height: 100%;
+
   padding: 1.1rem;
+
   background: #ffffff;
+
   border: 1px solid rgba(0, 0, 0, 0.18);
   border-radius: 12px;
+
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
 }
 
@@ -123,14 +211,20 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
-  min-width: 0;
+
   flex: 1;
+
+  min-width: 0;
 }
+
+
+/* Partie gauche */
 
 .expense-left {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
+
   min-width: 0;
 }
 
@@ -142,28 +236,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
   flex: 0 0 40px;
+
   width: 40px;
   height: 40px;
+
   background: #ffffff;
+
   border: 1px solid #cccccc;
   border-radius: 50%;
+
   font-weight: 700;
 }
 
 .expense-description {
   margin: 0;
   padding-bottom: 0.35rem;
+
   color: #1f2937;
+
   font-size: 1.1rem;
   line-height: 1.3;
+
   overflow-wrap: anywhere;
 }
 
 .expense-paid,
 .expense-category {
   margin: 0.15rem 0 0;
+
   color: #666666;
+
   font-size: 0.9rem;
   line-height: 1.35;
 }
@@ -172,41 +276,100 @@
   color: #76685f;
 }
 
-/* =========================================================
-   5. PARTIE DROITE : MONTANT, PARTICIPANTS ET SUPPRESSION
-   ========================================================= */
+
+/* Partie droite */
 
 .expense-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  flex-shrink: 0;
   gap: 0.35rem;
+
+  flex-shrink: 0;
+
   min-width: 0;
   margin-left: auto;
+
   text-align: right;
 }
 
 .expense-amount,
 .expense-right strong {
   display: block;
+
   color: #1f2937;
+
   font-size: 1.1rem;
   line-height: 1.3;
+
   white-space: nowrap;
 }
 
-.delete-expense-btn {
+
+/* =========================================================
+   6. ACTIONS MODIFIER / SUPPRIMER
+   ========================================================= */
+
+.expense-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.edit-expense-btn,
+.delete-expense-btn {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  align-self: flex-end;
-  padding: 0.3rem;
+
+  width: 36px;
+  height: 36px;
+  padding: 0;
+
   background: transparent;
+
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
+
   cursor: pointer;
 }
+
+
+/* Modifier */
+
+.edit-expense-btn {
+  color: #64748b;
+
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.edit-expense-btn:hover {
+  color: #2563eb;
+
+  transform: scale(1.1);
+}
+
+.edit-expense-btn:active {
+  transform: scale(0.95);
+}
+
+.edit-expense-btn:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+  outline-offset: 2px;
+}
+
+.edit-icon {
+  flex-shrink: 0;
+
+  width: 18px;
+  height: 18px;
+}
+
+
+/* Supprimer */
 
 .delete-expense-btn:focus-visible {
   outline: 3px solid rgba(220, 38, 38, 0.22);
@@ -216,23 +379,31 @@
 .trash-icon {
   width: 20px;
   height: 20px;
+
   color: #c0392b;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .delete-expense-btn:hover .trash-icon {
   opacity: 0.8;
+
   transform: scale(1.15);
 }
 
+
 /* =========================================================
-   6. PARTICIPANTS ET INFOBULLE
+   7. PARTICIPANTS ET INFOBULLE
    ========================================================= */
 
 .expense-participants-wrapper {
   position: relative;
+
   display: inline-flex;
   justify-content: flex-end;
+
   max-width: 100%;
 }
 
@@ -240,11 +411,16 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
+
   max-width: 100%;
+
   color: #76685f;
+
   font-size: 0.85rem;
   line-height: 1.3;
+
   white-space: nowrap;
+
   cursor: help;
 }
 
@@ -253,42 +429,59 @@
   right: 0;
   bottom: calc(100% + 0.5rem);
   z-index: 20;
+
   min-width: max-content;
   max-width: 260px;
+
   padding: 0.45rem 0.7rem;
+
   color: #ffffff;
   background: #2f2933;
+
   border-radius: 8px;
+
   font-size: 0.82rem;
   line-height: 1.3;
   text-align: left;
+
   opacity: 0;
   visibility: hidden;
+
   pointer-events: none;
+
   transform: translateY(4px);
-  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s ease;
 }
 
 .expense-participants-wrapper:hover .expense-participants-tooltip,
 .expense-participants-wrapper:focus-within .expense-participants-tooltip {
   opacity: 1;
   visibility: visible;
+
   transform: translateY(0);
 }
 
+
 /* =========================================================
-   7. RÉPARTITION ET DETTES DE LA DÉPENSE
+   8. RÉPARTITION ET DETTES
    ========================================================= */
 
 .expense-divider {
   width: 100%;
   height: 1px;
+
   margin: 1rem 0;
+
   background: #d1d5db;
 }
 
 .expense-debt {
   margin-top: 0;
+
   font-size: 0.9rem;
 }
 
@@ -297,8 +490,11 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+
   min-height: 100px;
+
   padding: 0.75rem;
+
   border-radius: 8px;
 }
 
@@ -315,26 +511,34 @@
 .debt-positive p,
 .debt-negative p {
   margin: 0;
+
   font-size: 0.95rem;
   line-height: 1.4;
 }
 
 .debt-positive div {
   padding-top: 0.25rem;
+
   font-size: 0.9rem;
   line-height: 1.35;
 }
 
+
 /* =========================================================
-   REMBOURSEMENTS À CONFIRMER
+   9. REMBOURSEMENTS À CONFIRMER
    ========================================================= */
 
 .pending-reimbursements {
   width: 100%;
+
   margin-top: 1.5rem;
   padding: 1.35rem;
 
-  background: linear-gradient(135deg, #fffaf0 0%, #fffdf8 100%);
+  background: linear-gradient(
+    135deg,
+    #fffaf0 0%,
+    #fffdf8 100%
+  );
 
   border: 1px solid #f1d697;
   border-radius: 18px;
@@ -344,7 +548,8 @@
   box-sizing: border-box;
 }
 
-/* En-tête de la section */
+
+/* En-tête */
 
 .pending-reimbursements-header {
   display: flex;
@@ -356,12 +561,14 @@
 
 .pending-reimbursements-header > svg {
   flex: 0 0 42px;
+
   width: 42px;
   height: 42px;
   padding: 0.55rem;
 
   color: #a86c08;
   background: #fff0c9;
+
   border-radius: 50%;
 
   box-sizing: border-box;
@@ -371,6 +578,7 @@
   margin: 0 0 0.25rem;
 
   color: #6f4809;
+
   font-size: 1.18rem;
   font-weight: 800;
   line-height: 1.25;
@@ -380,9 +588,11 @@
   margin: 0;
 
   color: #6e6252;
+
   font-size: 0.92rem;
   line-height: 1.45;
 }
+
 
 /* Liste */
 
@@ -392,20 +602,21 @@
   gap: 0.85rem;
 }
 
-/* Carte d’un remboursement */
+
+/* Carte */
 
 .pending-reimbursement-card {
   display: grid;
-  grid-template-columns:
-    minmax(220px, 1fr)
-    auto;
+  grid-template-columns: minmax(220px, 1fr) auto;
   align-items: center;
   gap: 1.25rem;
 
   min-height: 82px;
+
   padding: 1rem 1.15rem;
 
   background: #ffffff;
+
   border: 1px solid #e6e1d8;
   border-radius: 14px;
 
@@ -418,6 +629,7 @@
   display: flex;
   align-items: center;
   gap: 0.9rem;
+
   min-width: 0;
 }
 
@@ -427,11 +639,13 @@
   justify-content: center;
 
   flex: 0 0 44px;
+
   width: 44px;
   height: 44px;
 
   color: #64476d;
   background: #eee8ff;
+
   border-radius: 50%;
 
   font-size: 1rem;
@@ -444,9 +658,11 @@
 
 .pending-reimbursement-content > strong {
   display: block;
+
   margin-bottom: 0.2rem;
 
   color: #2e2930;
+
   font-size: 1rem;
   font-weight: 800;
 }
@@ -455,19 +671,24 @@
   margin: 0;
 
   color: #706873;
+
   font-size: 0.9rem;
   line-height: 1.4;
 }
 
 .pending-reimbursement-content p strong {
   display: inline-block;
+
   margin-left: 0.35rem;
 
   color: #237535;
+
   font-size: 1.05rem;
   font-weight: 800;
+
   white-space: nowrap;
 }
+
 
 /* Actions */
 
@@ -480,8 +701,6 @@
   flex-shrink: 0;
 }
 
-/* Boutons communs */
-
 .reimbursement-reject-btn,
 .reimbursement-confirm-btn {
   display: inline-flex;
@@ -490,6 +709,7 @@
   gap: 0.45rem;
 
   min-height: 40px;
+
   padding: 0.55rem 0.85rem;
 
   border-radius: 8px;
@@ -497,6 +717,7 @@
   font-family: inherit;
   font-size: 0.84rem;
   font-weight: 700;
+
   white-space: nowrap;
 
   cursor: pointer;
@@ -509,36 +730,36 @@
     opacity 0.2s ease;
 }
 
-/* Bouton Non reçu */
-
 .reimbursement-reject-btn {
   color: #c62828;
   background: #ffffff;
+
   border: 1px solid #ef5350;
 }
 
 .reimbursement-reject-btn:hover:not(:disabled) {
   color: #ffffff;
   background: #d73a35;
+
   border-color: #d73a35;
+
   transform: translateY(-1px);
 }
-
-/* Bouton confirmation */
 
 .reimbursement-confirm-btn {
   color: #ffffff;
   background: #237535;
+
   border: 1px solid #237535;
 }
 
 .reimbursement-confirm-btn:hover:not(:disabled) {
   background: #1b612b;
+
   border-color: #1b612b;
+
   transform: translateY(-1px);
 }
-
-/* Accessibilité */
 
 .reimbursement-reject-btn:focus-visible,
 .reimbursement-confirm-btn:focus-visible {
@@ -549,103 +770,26 @@
 .reimbursement-reject-btn:disabled,
 .reimbursement-confirm-btn:disabled {
   opacity: 0.55;
+
   cursor: not-allowed;
+
   transform: none;
 }
 
-/* =========================================================
-   RESPONSIVE TABLETTE
-   ========================================================= */
-
-@media (max-width: 768px) {
-  .pending-reimbursements {
-    padding: 1rem;
-  }
-
-  .pending-reimbursement-card {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .pending-reimbursement-actions {
-    width: 100%;
-  }
-
-  .reimbursement-reject-btn,
-  .reimbursement-confirm-btn {
-    flex: 1;
-  }
-}
 
 /* =========================================================
-   RESPONSIVE MOBILE
-   ========================================================= */
-
-@media (max-width: 640px) {
-  .pending-reimbursements {
-    margin-top: 1rem;
-    padding: 0.9rem;
-
-    border-radius: 15px;
-  }
-
-  .pending-reimbursements-header {
-    gap: 0.7rem;
-    margin-bottom: 0.85rem;
-  }
-
-  .pending-reimbursements-header > svg {
-    flex-basis: 36px;
-    width: 36px;
-    height: 36px;
-    padding: 0.45rem;
-  }
-
-  .pending-reimbursements-header h3 {
-    font-size: 1.05rem;
-  }
-
-  .pending-reimbursements-header p {
-    font-size: 0.84rem;
-  }
-
-  .pending-reimbursement-card {
-    min-height: auto;
-    padding: 0.9rem;
-  }
-
-  .pending-reimbursement-avatar {
-    width: 38px;
-    height: 38px;
-    flex-basis: 38px;
-  }
-
-  .pending-reimbursement-content p {
-    font-size: 0.84rem;
-  }
-
-  .pending-reimbursement-actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
-
-  .reimbursement-reject-btn,
-  .reimbursement-confirm-btn {
-    width: 100%;
-    min-height: 42px;
-  }
-}
-
-/* =========================================================
-   8. RÉSUMÉ DES REMBOURSEMENTS
+   10. RÉSUMÉ DES REMBOURSEMENTS
    ========================================================= */
 
 .reimbursement-summary {
   margin-top: 1.5rem;
   padding: 1.5rem;
+
   background: #ffffff;
+
   border: 1px solid #ece7ef;
   border-radius: 20px;
+
   box-shadow: 0 8px 24px rgba(47, 41, 51, 0.06);
 }
 
@@ -654,21 +798,30 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 2rem;
+
   margin-bottom: 1.25rem;
 }
 
 .reimbursement-summary-header h3 {
   margin: 0 0 0.35rem;
+
   color: #302735;
+
   font-size: 1.2rem;
 }
 
 .reimbursement-summary-header p {
   max-width: 720px;
+
   margin: 0;
+
   color: #766f79;
+
   line-height: 1.5;
 }
+
+
+/* Totaux */
 
 .participant-balances-totals {
   display: flex;
@@ -682,12 +835,15 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
+
   min-width: 0;
+
+  text-align: center;
 }
 
 .participant-balances-total span {
   color: #766f79;
+
   font-size: 0.82rem;
 }
 
@@ -705,8 +861,12 @@
 
 .participant-balances-total.net {
   padding-left: 1.5rem;
+
   border-left: 1px solid #e4dfe7;
 }
+
+
+/* Liste */
 
 .reimbursement-summary-list {
   display: flex;
@@ -724,9 +884,11 @@
   gap: 1.5rem;
 
   min-height: 82px;
+
   padding: 1rem 1.5rem;
 
   background: #faf8fb;
+
   border: 1px solid #eee8f0;
   border-radius: 14px;
 }
@@ -739,10 +901,14 @@
   border-left: 4px solid #dc493f;
 }
 
+
+/* Participant */
+
 .reimbursement-summary-person {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+
   min-width: 0;
 }
 
@@ -750,26 +916,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
   flex: 0 0 42px;
+
   width: 42px;
   height: 42px;
+
   color: #5d426a;
   background: #eee6f3;
+
   border-radius: 50%;
+
   font-weight: 700;
 }
 
 .reimbursement-summary-person h4 {
   margin: 0 0 0.2rem;
+
   color: #302735;
+
   font-size: 1rem;
 }
 
 .reimbursement-summary-person p {
   margin: 0;
+
   color: #847b87;
+
   font-size: 0.9rem;
 }
+
+
+/* Solde */
 
 .participant-net-balance {
   display: flex;
@@ -779,12 +957,15 @@
   gap: 0.25rem;
 
   min-width: 150px;
+
   text-align: center;
 }
 
 .participant-net-balance strong {
   color: #302735;
+
   font-size: 1.05rem;
+
   white-space: nowrap;
 }
 
@@ -801,10 +982,15 @@
   color: #d23b31;
 }
 
+
+/* État vide */
+
 .reimbursement-summary-empty {
   padding: 1rem;
+
   color: #39704b;
   background: #f1faf4;
+
   border: 1px solid #d9eee0;
   border-radius: 12px;
 }
@@ -813,34 +999,42 @@
   margin: 0;
 }
 
+
 /* =========================================================
-   9. BOUTON DE REMBOURSEMENT 
+   11. BOUTON REMBOURSER
    ========================================================= */
 
 .participant-reimburse-btn {
   justify-self: end;
 
   min-height: 38px;
+
   padding: 0.5rem 0.9rem;
 
   color: #2d7738;
   background: #ffffff;
+
   border: 1px solid #2d7738;
   border-radius: 8px;
 
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: 700;
+
   white-space: nowrap;
 
   cursor: pointer;
 
-  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .participant-reimburse-btn:hover {
   color: #ffffff;
   background: #2d7738;
+
   transform: translateY(-1px);
 }
 
@@ -849,8 +1043,9 @@
   outline-offset: 2px;
 }
 
+
 /* =========================================================
-   MODALE MOYENS DE REMBOURSEMENT
+   12. MODALE MOYENS DE REMBOURSEMENT
    ========================================================= */
 
 .payment-modal-backdrop {
@@ -863,23 +1058,22 @@
   justify-content: center;
 
   min-height: 100dvh;
+
   padding: 1rem;
 
   overflow-y: auto;
 
   background: rgba(31, 41, 55, 0.68);
+
   box-sizing: border-box;
 }
 
-/*
- * La modale reste entièrement dans la fenêtre.
- * Son contenu interne défile uniquement si nécessaire.
- */
 .payment-details-dialog {
   position: relative;
 
   width: min(660px, 100%);
   max-height: calc(100dvh - 2rem);
+
   margin: auto;
   padding: 1.5rem;
 
@@ -888,16 +1082,19 @@
 
   color: #27222a;
   background: #ffffff;
+
   border: none;
   border-radius: 22px;
 
-  box-shadow: 0 24px 65px rgba(15, 23, 42, 0.32), 0 8px 24px
-    rgba(15, 23, 42, 0.16);
+  box-shadow:
+    0 24px 65px rgba(15, 23, 42, 0.32),
+    0 8px 24px rgba(15, 23, 42, 0.16);
 
   box-sizing: border-box;
 }
 
-/* Barre de défilement plus discrète */
+
+/* Scrollbar */
 
 .payment-details-dialog::-webkit-scrollbar {
   width: 8px;
@@ -909,11 +1106,13 @@
 
 .payment-details-dialog::-webkit-scrollbar-thumb {
   background: #c7c7c7;
+
   border-radius: 999px;
 }
 
+
 /* =========================================================
-   BOUTON DE FERMETURE SUPÉRIEUR
+   13. MODALE — BOUTON FERMER SUPÉRIEUR
    ========================================================= */
 
 .payment-modal-close {
@@ -932,16 +1131,20 @@
 
   color: #444444;
   background: #f2f2f2;
+
   border: none;
   border-radius: 50%;
 
   cursor: pointer;
 
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .payment-modal-close:hover {
   background: #e5e5e5;
+
   transform: scale(1.04);
 }
 
@@ -950,8 +1153,9 @@
   outline-offset: 2px;
 }
 
+
 /* =========================================================
-   EN-TÊTE
+   14. MODALE — EN-TÊTE
    ========================================================= */
 
 .payment-modal-header {
@@ -959,8 +1163,8 @@
   align-items: flex-start;
   gap: 0.9rem;
 
-  padding-right: 3.5rem;
   margin-bottom: 1rem;
+  padding-right: 3.5rem;
 }
 
 .payment-modal-title-icon {
@@ -969,6 +1173,7 @@
   justify-content: center;
 
   flex: 0 0 42px;
+
   width: 42px;
   height: 42px;
 
@@ -979,6 +1184,7 @@
   margin: 0;
 
   color: #252126;
+
   font-size: 1.55rem;
   line-height: 1.2;
 }
@@ -987,6 +1193,7 @@
   margin: 0.25rem 0 0;
 
   color: #6f6871;
+
   font-size: 0.93rem;
 }
 
@@ -996,13 +1203,16 @@
   margin-top: 0.2rem;
 
   color: #237535;
+
   font-size: 1.9rem;
   line-height: 1.15;
+
   white-space: nowrap;
 }
 
+
 /* =========================================================
-   EXPLICATION DU REMBOURSEMENT
+   15. MODALE — INSTRUCTIONS
    ========================================================= */
 
 .payment-instructions {
@@ -1011,11 +1221,13 @@
   gap: 0.85rem;
 
   width: 100%;
+
   margin-bottom: 1rem;
   padding: 0.85rem 1rem;
 
   color: #17642a;
   background: #f1f8f2;
+
   border: 1px solid #dcecdf;
   border-radius: 13px;
 
@@ -1024,11 +1236,13 @@
 
 .payment-instructions > svg {
   flex: 0 0 25px;
+
   margin-top: 0.05rem;
 }
 
 .payment-instructions > div {
   flex: 1;
+
   min-width: 0;
   width: 100%;
 }
@@ -1037,14 +1251,17 @@
   margin: 0 0 0.3rem;
 
   color: #17642a;
+
   font-size: 1rem;
 }
 
 .payment-instructions p {
   width: 100%;
+
   margin: 0;
 
   color: #354b39;
+
   font-size: 0.9rem;
   line-height: 1.45;
 }
@@ -1057,8 +1274,9 @@
   display: none;
 }
 
+
 /* =========================================================
-   CHARGEMENT ET ÉTAT VIDE
+   16. MODALE — CHARGEMENT ET ÉTAT VIDE
    ========================================================= */
 
 .payment-modal-loading,
@@ -1067,6 +1285,7 @@
 
   color: #555555;
   background: #f7f7f7;
+
   border-radius: 12px;
 
   text-align: center;
@@ -1077,8 +1296,9 @@
   margin: 0;
 }
 
+
 /* =========================================================
-   MOYENS DE REMBOURSEMENT
+   17. MODALE — MOYENS DE REMBOURSEMENT
    ========================================================= */
 
 .payment-methods-list {
@@ -1091,12 +1311,14 @@
   padding: 1rem;
 
   background: #ffffff;
+
   border: 1px solid #dfdfe2;
   border-radius: 13px;
 }
 
 .payment-method-block.preferred {
   border-color: #91bd98;
+
   box-shadow: 0 0 0 2px rgba(45, 119, 56, 0.07);
 }
 
@@ -1126,6 +1348,7 @@
   margin: 0;
 
   color: #282329;
+
   font-size: 1rem;
 }
 
@@ -1133,6 +1356,7 @@
   margin: 0.2rem 0 0;
 
   color: #706a72;
+
   font-size: 0.86rem;
 }
 
@@ -1144,14 +1368,16 @@
 
   color: #17642a;
   background: #e7f4e9;
+
   border-radius: 7px;
 
   font-size: 0.73rem;
   font-weight: 700;
 }
 
+
 /* =========================================================
-   NUMÉRO WERO
+   18. MODALE — WERO
    ========================================================= */
 
 .payment-value-row {
@@ -1165,12 +1391,15 @@
 
 .payment-wero-value {
   color: #282329;
+
   font-size: 1.2rem;
+
   letter-spacing: 0.02em;
 }
 
+
 /* =========================================================
-   SÉPARATEUR
+   19. MODALE — SÉPARATEUR
    ========================================================= */
 
 .payment-method-divider {
@@ -1179,6 +1408,7 @@
   gap: 0.8rem;
 
   color: #79727c;
+
   font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -1189,13 +1419,15 @@
   content: "";
 
   flex: 1;
+
   height: 1px;
 
   background: #dedce0;
 }
 
+
 /* =========================================================
-   VIREMENT ET IBAN
+   20. MODALE — VIREMENT / IBAN
    ========================================================= */
 
 .payment-bank-details {
@@ -1217,18 +1449,22 @@
 
 .payment-bank-iban span {
   color: #777078;
+
   font-size: 0.8rem;
 }
 
 .payment-bank-iban strong {
   color: #282329;
+
   font-family: monospace;
   font-size: 0.94rem;
+
   overflow-wrap: anywhere;
 }
 
+
 /* =========================================================
-   BOUTONS COPIER ET AFFICHER
+   21. MODALE — BOUTONS COPIER / AFFICHER
    ========================================================= */
 
 .payment-value-actions {
@@ -1247,6 +1483,7 @@
   gap: 0.4rem;
 
   min-height: 37px;
+
   padding: 0.45rem 0.75rem;
 
   font-family: inherit;
@@ -1254,31 +1491,39 @@
   font-weight: 700;
 
   border-radius: 8px;
+
   cursor: pointer;
 
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .payment-copy-btn {
   color: #237535;
   background: #ffffff;
+
   border: 1px solid #2d7738;
 }
 
 .payment-copy-btn:hover {
   color: #ffffff;
   background: #2d7738;
+
   transform: translateY(-1px);
 }
 
 .payment-show-btn {
   color: #49434b;
   background: #ffffff;
+
   border: 1px solid #aaa5ab;
 }
 
 .payment-show-btn:hover {
   background: #f2f2f2;
+
   transform: translateY(-1px);
 }
 
@@ -1288,8 +1533,9 @@
   outline-offset: 2px;
 }
 
+
 /* =========================================================
-   DÉCLARATION DU REMBOURSEMENT
+   22. MODALE — DÉCLARATION DU REMBOURSEMENT
    ========================================================= */
 
 .payment-declaration-section {
@@ -1301,6 +1547,7 @@
   padding: 0.9rem 1rem;
 
   background: #fff8e8;
+
   border: 1px solid #f3e5bd;
   border-radius: 13px;
 }
@@ -1311,6 +1558,7 @@
   gap: 0.7rem;
 
   min-width: 0;
+
   color: #93631a;
 }
 
@@ -1322,6 +1570,7 @@
   margin: 0 0 0.2rem;
 
   color: #825719;
+
   font-size: 0.95rem;
 }
 
@@ -1329,6 +1578,7 @@
   margin: 0;
 
   color: #685a43;
+
   font-size: 0.82rem;
   line-height: 1.4;
 }
@@ -1340,26 +1590,33 @@
   gap: 0.5rem;
 
   flex-shrink: 0;
+
   min-height: 41px;
+
   padding: 0.6rem 0.85rem;
 
   color: #ffffff;
   background: #237535;
+
   border: none;
   border-radius: 8px;
 
   font-family: inherit;
   font-size: 0.84rem;
   font-weight: 700;
+
   white-space: nowrap;
 
   cursor: pointer;
 
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .payment-declaration-btn:hover {
   background: #1b612b;
+
   transform: translateY(-1px);
 }
 
@@ -1369,13 +1626,16 @@
 }
 
 .payment-declaration-btn:disabled {
-  cursor: not-allowed;
   opacity: 0.65;
+
+  cursor: not-allowed;
+
   transform: none;
 }
 
+
 /* =========================================================
-   AVERTISSEMENT
+   23. MODALE — AVERTISSEMENT
    ========================================================= */
 
 .payment-disclaimer {
@@ -1387,11 +1647,13 @@
 
   color: #555158;
   background: #f7f7f7;
+
   border-radius: 13px;
 }
 
 .payment-disclaimer > svg {
   flex: 0 0 24px;
+
   color: #666168;
 }
 
@@ -1406,8 +1668,9 @@
   color: #343035;
 }
 
+
 /* =========================================================
-   BOUTON FERMER
+   24. MODALE — BOUTON FERMER INFÉRIEUR
    ========================================================= */
 
 .payment-modal-close-bottom {
@@ -1419,6 +1682,7 @@
 
   color: #403b41;
   background: #ffffff;
+
   border: 1px solid #aaa5ab;
   border-radius: 8px;
 
@@ -1428,19 +1692,396 @@
 
   cursor: pointer;
 
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .payment-modal-close-bottom:hover {
   background: #f3f3f3;
+
   border-color: #7d787e;
 }
 
+
 /* =========================================================
-   RESPONSIVE TABLETTE
+   25. MODALE DE SUPPRESSION D'UNE DÉPENSE
+   ========================================================= */
+
+.modal-backdrop .modal {
+  position: relative;
+}
+
+.modal h4 {
+  margin: 0 0 8px;
+
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modal p {
+  margin: 0 0 16px;
+
+  color: #4b5563;
+
+  font-size: 14px;
+}
+
+.expense-delete-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 1rem;
+
+  background: rgba(15, 23, 42, 0.55);
+
+  backdrop-filter: blur(3px);
+}
+
+.expense-delete-dialog {
+  position: relative;
+
+  width: min(420px, 100%);
+
+  margin: 0;
+  padding: 1.5rem;
+
+  color: #1f2937;
+  background: #ffffff;
+
+  border: none;
+  border-radius: 18px;
+
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.3),
+    0 8px 20px rgba(15, 23, 42, 0.15);
+}
+
+.expense-delete-dialog::before {
+  content: "";
+
+  display: block;
+
+  width: 48px;
+  height: 48px;
+
+  margin-bottom: 1rem;
+
+  background:
+    #fee2e2
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23dc2626'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z'/%3E%3C/svg%3E")
+    center / 26px no-repeat;
+
+  border-radius: 50%;
+}
+
+.expense-delete-dialog h4 {
+  margin: 0 0 0.5rem;
+
+  color: #111827;
+
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.expense-delete-dialog p {
+  margin: 0 0 1.5rem;
+
+  color: #6b7280;
+
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.expense-delete-dialog p strong {
+  color: #374151;
+}
+
+.expense-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.expense-delete-cancel,
+.expense-delete-confirm {
+  min-height: 42px;
+
+  padding: 0.65rem 1rem;
+
+  border-radius: 9px;
+
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.expense-delete-cancel {
+  color: #374151;
+  background: #ffffff;
+
+  border: 1px solid #d1d5db;
+}
+
+.expense-delete-cancel:hover:not(:disabled) {
+  background: #f3f4f6;
+
+  border-color: #9ca3af;
+}
+
+.expense-delete-confirm {
+  color: #ffffff;
+  background: #dc2626;
+
+  border: 1px solid #dc2626;
+}
+
+.expense-delete-confirm:hover:not(:disabled) {
+  background: #b91c1c;
+
+  border-color: #b91c1c;
+
+  transform: translateY(-1px);
+}
+
+.expense-delete-cancel:focus-visible,
+.expense-delete-confirm:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.3);
+  outline-offset: 2px;
+}
+
+.expense-delete-cancel:disabled,
+.expense-delete-confirm:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+
+/* =========================================================
+   26. CIBLAGE DEPUIS UNE NOTIFICATION
+   ========================================================= */
+
+.notification-target-highlight {
+  position: relative;
+
+  z-index: 2;
+
+  animation:
+    notification-target-highlight-animation
+    2.5s ease;
+}
+
+@keyframes notification-target-highlight-animation {
+  0% {
+    background-color: #eaf3ea;
+
+    box-shadow:
+      0 0 0 4px
+      rgba(47, 93, 47, 0.28);
+  }
+
+  30% {
+    background-color: #f1f7f1;
+
+    box-shadow:
+      0 0 0 5px
+      rgba(47, 93, 47, 0.18);
+  }
+
+  70% {
+    background-color: #f7faf7;
+
+    box-shadow:
+      0 0 0 3px
+      rgba(47, 93, 47, 0.1);
+  }
+
+  100% {
+    background-color: transparent;
+
+    box-shadow:
+      0 0 0 0
+      rgba(47, 93, 47, 0);
+  }
+}
+
+
+/* =========================================================
+   27. RESPONSIVE — PETIT ORDINATEUR / GRANDE TABLETTE
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .expense-date-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .expenses-header-actions {
+    width: 100%;
+  }
+
+  .expenses-header-actions button {
+    flex: 1;
+  }
+
+  .reimbursement-summary-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .reimbursement-summary-header > div:first-child {
+    flex: 1;
+
+    min-width: 0;
+  }
+
+  .reimbursement-summary-header p {
+    max-width: none;
+  }
+
+  .participant-balances-totals {
+    flex-shrink: 0;
+
+    justify-content: flex-end;
+    gap: 1.5rem;
+  }
+}
+
+
+/* =========================================================
+   28. RESPONSIVE — TABLETTE
    ========================================================= */
 
 @media (max-width: 768px) {
+  .expenses-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .expenses-header-actions {
+    width: 100%;
+  }
+
+  .expenses-header-actions button {
+    flex: 1;
+  }
+
+  .add-expense-btn {
+    width: 100%;
+  }
+
+
+  /* Remboursements à confirmer */
+
+  .pending-reimbursements {
+    padding: 1rem;
+  }
+
+  .pending-reimbursement-card {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .pending-reimbursement-actions {
+    width: 100%;
+  }
+
+  .reimbursement-reject-btn,
+  .reimbursement-confirm-btn {
+    flex: 1;
+  }
+
+
+  /* Résumé remboursements */
+
+  .reimbursement-summary {
+    padding: 1rem;
+  }
+
+  .reimbursement-summary-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+  }
+
+  .reimbursement-summary-header > div:first-child {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+  .reimbursement-summary-header h3,
+  .reimbursement-summary-header p {
+    width: 100%;
+    max-width: none;
+  }
+
+  .participant-balances-totals {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    justify-items: center;
+    gap: 1rem;
+
+    width: 100%;
+  }
+
+  .participant-balances-total {
+    align-items: center;
+    justify-content: flex-start;
+
+    min-width: 0;
+
+    text-align: center;
+  }
+
+  .participant-balances-total.net {
+    grid-column: auto;
+
+    padding: 0;
+
+    border: 0;
+  }
+
+  .reimbursement-summary-card {
+    grid-template-columns:
+      minmax(200px, 1fr)
+      minmax(130px, 170px)
+      115px;
+
+    align-items: center;
+    gap: 1rem;
+
+    padding: 1rem;
+  }
+
+  .participant-reimburse-btn {
+    min-height: 36px;
+
+    padding: 0.45rem 0.75rem;
+
+    font-size: 0.8rem;
+  }
+
+
+  /* Modale paiement */
+
   .payment-modal-backdrop {
     padding: 0.75rem;
   }
@@ -1448,7 +2089,9 @@
   .payment-details-dialog {
     width: min(620px, 100%);
     max-height: calc(100dvh - 1.5rem);
+
     padding: 1.25rem;
+
     border-radius: 18px;
   }
 
@@ -1470,19 +2113,200 @@
   }
 }
 
+
 /* =========================================================
-   RESPONSIVE MOBILE
+   29. RESPONSIVE — MOBILE
    ========================================================= */
 
 @media (max-width: 640px) {
+  .expenses-header-actions {
+    flex-direction: column;
+  }
+
+  .expenses-header-actions button {
+    width: 100%;
+  }
+
+
+  /* Dépenses */
+
+  .expense-date-list {
+    grid-template-columns: 1fr;
+  }
+
+  .expense-card {
+    padding: 1rem;
+  }
+
+  .expense-header-row {
+    gap: 0.5rem;
+  }
+
+  .expense-description {
+    font-size: 1rem;
+  }
+
+  .expense-amount,
+  .expense-right strong {
+    font-size: 1rem;
+  }
+
+  .expense-participants {
+    font-size: 0.8rem;
+  }
+
+  .expense-participants-tooltip {
+    display: none;
+  }
+
+
+  /* Remboursements à confirmer */
+
+  .pending-reimbursements {
+    margin-top: 1rem;
+    padding: 0.9rem;
+
+    border-radius: 15px;
+  }
+
+  .pending-reimbursements-header {
+    gap: 0.7rem;
+
+    margin-bottom: 0.85rem;
+  }
+
+  .pending-reimbursements-header > svg {
+    flex-basis: 36px;
+
+    width: 36px;
+    height: 36px;
+    padding: 0.45rem;
+  }
+
+  .pending-reimbursements-header h3 {
+    font-size: 1.05rem;
+  }
+
+  .pending-reimbursements-header p {
+    font-size: 0.84rem;
+  }
+
+  .pending-reimbursement-card {
+    min-height: auto;
+
+    padding: 0.9rem;
+  }
+
+  .pending-reimbursement-avatar {
+    flex-basis: 38px;
+
+    width: 38px;
+    height: 38px;
+  }
+
+  .pending-reimbursement-content p {
+    font-size: 0.84rem;
+  }
+
+  .pending-reimbursement-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .reimbursement-reject-btn,
+  .reimbursement-confirm-btn {
+    width: 100%;
+    min-height: 42px;
+  }
+
+
+  /* Résumé remboursements */
+
+  .reimbursement-summary-header {
+    gap: 1rem;
+  }
+
+  .participant-balances-totals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .participant-balances-total {
+    align-items: center;
+
+    text-align: center;
+  }
+
+  .participant-balances-total span {
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1.25;
+
+    white-space: normal;
+  }
+
+  .participant-balances-total strong {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.2;
+
+    white-space: nowrap;
+  }
+
+  .participant-balances-total.net {
+    grid-column: auto;
+
+    padding: 0;
+
+    border: 0;
+  }
+
+  .reimbursement-summary-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.8rem;
+  }
+
+  .reimbursement-summary-person {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .participant-net-balance {
+    grid-column: 2;
+    grid-row: 1;
+
+    min-width: auto;
+
+    align-items: flex-end;
+
+    text-align: right;
+  }
+
+  .participant-reimburse-btn {
+    grid-column: 1 / -1;
+    grid-row: 2;
+
+    justify-self: stretch;
+
+    width: 100%;
+    min-height: 40px;
+
+    margin-top: 0.25rem;
+  }
+
+
+  /* Modale paiement */
+
   .payment-modal-backdrop {
     align-items: flex-end;
+
     padding: 0;
   }
 
   .payment-details-dialog {
     width: 100%;
     max-height: 92dvh;
+
     margin: 0;
     padding: 1rem;
 
@@ -1499,12 +2323,14 @@
 
   .payment-modal-header {
     gap: 0.65rem;
-    padding-right: 2.8rem;
+
     margin-bottom: 0.85rem;
+    padding-right: 2.8rem;
   }
 
   .payment-modal-title-icon {
     flex-basis: 36px;
+
     width: 36px;
     height: 36px;
   }
@@ -1523,6 +2349,7 @@
 
   .payment-instructions {
     gap: 0.65rem;
+
     margin-bottom: 0.85rem;
     padding: 0.75rem;
   }
@@ -1572,20 +2399,158 @@
 
   .payment-declaration-btn {
     width: 100%;
+
     white-space: normal;
   }
 
   .payment-disclaimer {
     gap: 0.65rem;
+
     padding: 0.75rem;
   }
 }
 
+
 /* =========================================================
-   RESPONSIVE PETIT MOBILE
+   30. RESPONSIVE — MOBILE 480 PX
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .expense-actions {
+    gap: 0.3rem;
+  }
+
+  .edit-expense-btn,
+  .delete-expense-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .edit-icon,
+  .trash-icon {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+
+/* =========================================================
+   31. RESPONSIVE — PETIT MOBILE
    ========================================================= */
 
 @media (max-width: 430px) {
+  /* Dépenses */
+
+  .expense-header-row {
+    flex-direction: column;
+  }
+
+  .expense-left,
+  .expense-right {
+    width: 100%;
+  }
+
+  .expense-right {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+
+    margin-left: 0;
+
+    text-align: left;
+  }
+
+  .expense-actions {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .expense-amount {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .expense-participants-wrapper {
+    grid-column: 1 / -1;
+
+    justify-content: flex-start;
+  }
+
+
+  /* Suppression */
+
+  .expense-delete-actions {
+    flex-direction: column-reverse;
+  }
+
+  .expense-delete-cancel,
+  .expense-delete-confirm {
+    width: 100%;
+  }
+
+
+  /* Résumé remboursements */
+
+  .reimbursement-summary-card {
+    grid-template-columns: 1fr;
+  }
+
+  .reimbursement-summary-person,
+  .participant-net-balance,
+  .participant-reimburse-btn {
+    grid-column: 1;
+  }
+
+  .reimbursement-summary-person {
+    grid-row: 1;
+  }
+
+  .participant-net-balance {
+    grid-row: 2;
+
+    width: 100%;
+
+    padding-top: 0.75rem;
+
+    border-top: 1px solid #ece6ee;
+
+    align-items: flex-start;
+
+    text-align: left;
+  }
+
+  .participant-reimburse-btn {
+    grid-row: 3;
+
+    justify-self: stretch;
+  }
+
+  .participant-balances-totals {
+    gap: 0.5rem;
+  }
+
+  .participant-balances-total span {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .participant-balances-total strong {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .participant-balances-total.net {
+    grid-column: auto;
+
+    padding: 0;
+
+    border: 0;
+  }
+
+
+  /* Modale paiement */
+
   .payment-modal-title-icon {
     display: none;
   }
@@ -1608,582 +2573,8 @@
   }
 
   .payment-method-label-row {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
     gap: 0.35rem;
-  }
-}
-
-/* =========================================================
-   9. MODALE DE SUPPRESSION
-   ========================================================= */
-
-.modal-backdrop .modal {
-  position: relative;
-}
-
-.modal h4 {
-  margin: 0 0 8px;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.modal p {
-  margin: 0 0 16px;
-  color: #4b5563;
-  font-size: 14px;
-}
-
-.expense-delete-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(3px);
-}
-
-.expense-delete-dialog {
-  position: relative;
-  width: min(420px, 100%);
-  margin: 0;
-  padding: 1.5rem;
-  color: #1f2937;
-  background: #ffffff;
-  border: none;
-  border-radius: 18px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3), 0 8px 20px
-    rgba(15, 23, 42, 0.15);
-}
-
-.expense-delete-dialog::before {
-  content: "";
-  display: block;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 1rem;
-  background: #fee2e2
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23dc2626'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z'/%3E%3C/svg%3E")
-    center / 26px no-repeat;
-  border-radius: 50%;
-}
-
-.expense-delete-dialog h4 {
-  margin: 0 0 0.5rem;
-  color: #111827;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-.expense-delete-dialog p {
-  margin: 0 0 1.5rem;
-  color: #6b7280;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.expense-delete-dialog p strong {
-  color: #374151;
-}
-
-.expense-delete-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-.expense-delete-cancel,
-.expense-delete-confirm {
-  min-height: 42px;
-  padding: 0.65rem 1rem;
-  border-radius: 9px;
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s
-    ease;
-}
-
-.expense-delete-cancel {
-  color: #374151;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-}
-
-.expense-delete-cancel:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #9ca3af;
-}
-
-.expense-delete-confirm {
-  color: #ffffff;
-  background: #dc2626;
-  border: 1px solid #dc2626;
-}
-
-.expense-delete-confirm:hover:not(:disabled) {
-  background: #b91c1c;
-  border-color: #b91c1c;
-  transform: translateY(-1px);
-}
-
-.expense-delete-cancel:focus-visible,
-.expense-delete-confirm:focus-visible {
-  outline: 3px solid rgba(59, 130, 246, 0.3);
-  outline-offset: 2px;
-}
-
-.expense-delete-cancel:disabled,
-.expense-delete-confirm:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Conteneur des boutons modifier et supprimer */
-
-.expense-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.4rem;
-}
-
-/* Bouton modifier */
-
-.edit-expense-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0;
-  margin: 0;
-
-  background: transparent;
-  border: none;
-  outline: none;
-
-  color: #64748b;
-  cursor: pointer;
-
-  transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.edit-expense-btn:hover {
-  color: #2563eb;
-  transform: scale(1.1);
-}
-
-.edit-expense-btn:active {
-  transform: scale(0.95);
-}
-
-.edit-expense-btn:focus-visible {
-  outline: none;
-}
-
-/* Icône crayon */
-
-.edit-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-/* Harmonisation avec le bouton supprimer */
-
-.delete-expense-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 36px;
-  height: 36px;
-  padding: 0;
-
-  border-radius: 10px;
-}
-
-/* Responsive mobile */
-
-@media (max-width: 480px) {
-  .expense-actions {
-    gap: 0.3rem;
-  }
-
-  .edit-expense-btn,
-  .delete-expense-btn {
-    width: 34px;
-    height: 34px;
-  }
-
-  .edit-icon,
-  .trash-icon {
-    width: 17px;
-    height: 17px;
-  }
-}
-
-/* =========================================================
-   ÉLÉMENT CIBLÉ DEPUIS UNE NOTIFICATION
-   ========================================================= */
-
-.notification-target-highlight {
-  position: relative;
-
-  z-index: 2;
-
-  animation:
-    notification-target-highlight-animation
-    2.5s ease;
-}
-
-@keyframes notification-target-highlight-animation {
-  0% {
-    background-color: #eaf3ea;
-
-    box-shadow:
-      0 0 0 4px
-      rgba(47, 93, 47, 0.28);
-  }
-
-  30% {
-    background-color: #f1f7f1;
-
-    box-shadow:
-      0 0 0 5px
-      rgba(47, 93, 47, 0.18);
-  }
-
-  70% {
-    background-color: #f7faf7;
-
-    box-shadow:
-      0 0 0 3px
-      rgba(47, 93, 47, 0.1);
-  }
-
-  100% {
-    background-color: transparent;
-
-    box-shadow:
-      0 0 0 0
-      rgba(47, 93, 47, 0);
-  }
-}
-
-/* =========================================================
-   10. RESPONSIVE — PETIT ORDINATEUR / GRANDE TABLETTE
-   3 cartes → 2 cartes
-   ========================================================= */
-
-@media (max-width: 1024px) {
-  .expense-date-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .reimbursement-summary-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2rem;
-  }
-
-  /* Le texte peut enfin se réduire */
-  .reimbursement-summary-header > div:first-child {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .reimbursement-summary-header p {
-    max-width: none;
-  }
-
-  /* Les totaux restent à droite */
-  .participant-balances-totals {
-    flex-shrink: 0;
-    display: flex;
-    gap: 1.5rem;
-    justify-content: flex-end;
-  }
-}
-
-/* =========================================================
-   11. RESPONSIVE — TABLETTE
-   Texte sur toute la largeur + totaux en dessous
-   ========================================================= */
-
-@media (max-width: 768px) {
-  .expenses-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .add-expense-btn {
-    width: 100%;
-  }
-
-  .reimbursement-summary {
-    padding: 1rem;
-  }
-
-  /*
-   * On annule la disposition en ligne définie à 1024 px.
-   * Le texte occupe toute la largeur et les totaux passent dessous.
-   */
-  .reimbursement-summary-header {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1.25rem;
-  }
-
-  .reimbursement-summary-header > div:first-child {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .reimbursement-summary-header h3,
-  .reimbursement-summary-header p {
-    width: 100%;
-    max-width: none;
-  }
-
-  .participant-balances-totals {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: start;
-    justify-items: center;
-    gap: 1rem;
-    width: 100%;
-  }
-
-  .participant-balances-total {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    min-width: 0;
-    text-align: center;
-  }
-
-  .participant-balances-total.net {
-    grid-column: auto;
-    padding: 0;
-    border: 0;
-  }
-
-  .reimbursement-summary-card {
-    grid-template-columns:
-      minmax(200px, 1fr)
-      minmax(130px, 170px)
-      115px;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-  }
-
-  .participant-reimburse-btn {
-    min-height: 36px;
-    padding: 0.45rem 0.75rem;
-    font-size: 0.8rem;
-  }
-}
-
-/* =========================================================
-   12. RESPONSIVE — MOBILE
-   2 cartes -> 1 carte
-   ========================================================= */
-
-@media (max-width: 640px) {
-  .expense-date-list {
-    grid-template-columns: 1fr;
-  }
-
-  .expense-card {
-    padding: 1rem;
-  }
-
-  .expense-header-row {
-    gap: 0.5rem;
-  }
-
-  .expense-description {
-    font-size: 1rem;
-  }
-
-  .expense-amount,
-  .expense-right strong {
-    font-size: 1rem;
-  }
-
-  .expense-participants {
-    font-size: 0.8rem;
-  }
-
-  .expense-participants-tooltip {
-    display: none;
-  }
-
-  .reimbursement-summary-header {
-    gap: 1rem;
-  }
-
-  .participant-balances-totals {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
-  }
-
-  .participant-balances-total {
-    align-items: center;
-    text-align: center;
-  }
-
-  .participant-balances-total span {
-    font-size: 0.8rem;
-    font-weight: 500;
-    line-height: 1.25;
-    white-space: normal;
-  }
-
-  .participant-balances-total strong {
-    font-size: 1.15rem;
-    font-weight: 700;
-    line-height: 1.2;
-    white-space: nowrap;
-  }
-
-  .participant-balances-total.net {
-    grid-column: auto;
-    padding: 0;
-    border: 0;
-  }
-
-  .reimbursement-summary-card {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 0.8rem;
-  }
-
-  .reimbursement-summary-person {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .participant-net-balance {
-    grid-column: 2;
-    grid-row: 1;
-    min-width: auto;
-    align-items: flex-end;
-    text-align: right;
-  }
-
-  .participant-reimburse-btn {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-self: stretch;
-    width: 100%;
-    min-height: 40px;
-    margin-top: 0.25rem;
-  }
-}
-
-/* =========================================================
-   13. RESPONSIVE — PETIT MOBILE
-   ========================================================= */
-
-@media (max-width: 430px) {
-  .expense-header-row {
-    flex-direction: column;
-  }
-
-  .expense-left,
-  .expense-right {
-    width: 100%;
-  }
-
-  .expense-right {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 0.5rem;
-    margin-left: 0;
-    text-align: left;
-  }
-
-  .delete-expense-btn {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .expense-amount {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .expense-participants-wrapper {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
-  }
-
-  .expense-delete-actions {
-    flex-direction: column-reverse;
-  }
-
-  .expense-delete-cancel,
-  .expense-delete-confirm {
-    width: 100%;
-  }
-
-  .reimbursement-summary-card {
-    grid-template-columns: 1fr;
-  }
-
-  .reimbursement-summary-person,
-  .participant-net-balance,
-  .participant-reimburse-btn {
-    grid-column: 1;
-  }
-
-  .reimbursement-summary-person {
-    grid-row: 1;
-  }
-
-  .participant-net-balance {
-    grid-row: 2;
-    width: 100%;
-    padding-top: 0.75rem;
-    border-top: 1px solid #ece6ee;
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .participant-reimburse-btn {
-    grid-row: 3;
-    justify-self: stretch;
-  }
-
-  .participant-balances-totals {
-    gap: 0.5rem;
-  }
-
-  .participant-balances-total span {
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
-
-  .participant-balances-total strong {
-    font-size: 1.05rem;
-    font-weight: 700;
-  }
-
-  .participant-balances-total.net {
-    grid-column: auto;
-    padding: 0;
-    border: 0;
   }
 }
