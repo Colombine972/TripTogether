@@ -1,11 +1,11 @@
+import buildExpenseNotificationTemplate from "../../utils/buildExpenseNotificationTemplate";
+import sendEmail from "../../utils/sendEmail";
 import preferencesRepository from "../preferences/preferencesRepository";
 import tripRepository from "../trip/tripRepository";
 import userRepository from "../user/userRepository";
 import notificationRepository, {
   type CreateNotificationPayload,
 } from "./notificationRepository";
-import buildExpenseNotificationTemplate from "../../utils/buildExpenseNotificationTemplate";
-import sendEmail from "../../utils/sendEmail";
 
 type TripMember = {
   id: number;
@@ -56,19 +56,14 @@ const getUnreadCount = async (
     throw new Error("Utilisateur invalide.");
   }
 
-  return notificationRepository.countUnreadByUserId(
-    userId,
-  );
+  return notificationRepository.countUnreadByUserId(userId);
 };
 
 const markAsRead = async (
   notificationId: number,
   userId: number,
 ): Promise<void> => {
-  if (
-    !notificationId ||
-    Number.isNaN(notificationId)
-  ) {
+  if (!notificationId || Number.isNaN(notificationId)) {
     throw new Error("Notification invalide.");
   }
 
@@ -94,9 +89,7 @@ const markAllAsRead = async (
     throw new Error("Utilisateur invalide.");
   }
 
-  return notificationRepository.markAllAsRead(
-    userId,
-  );
+  return notificationRepository.markAllAsRead(userId);
 };
 
 const notifyExpenseAdded = async (
@@ -106,15 +99,13 @@ const notifyExpenseAdded = async (
   expenseTitle: string,
   amount: number,
 ): Promise<void> => {
-  const trip =
-    await tripRepository.read(tripId);
+  const trip = await tripRepository.read(tripId);
 
   if (!trip) {
     return;
   }
 
-  const actor =
-    await userRepository.read(actorUserId);
+  const actor = await userRepository.read(actorUserId);
 
   const actorName = actor
     ? `${actor.firstname} ${actor.lastname}`.trim()
@@ -129,10 +120,7 @@ const notifyExpenseAdded = async (
     )) as TripMember[];
 
   for (const member of members) {
-    if (
-      Number(member.id) ===
-      Number(actorUserId)
-    ) {
+    if (Number(member.id) === Number(actorUserId)) {
       continue;
     }
 
@@ -147,8 +135,7 @@ const notifyExpenseAdded = async (
             2,
           )} €.`,
         emoji: "💰",
-        contextLabel:
-          `Voyage ${trip.title}`,
+        contextLabel: `Voyage ${trip.title}`,
         referenceType: "expense",
         referenceId: expenseId,
       });
@@ -168,9 +155,7 @@ const notifyExpenseAdded = async (
         member.id,
       );
 
-    if (
-      !preferences?.email_trip_notifications
-    ) {
+    if (!preferences?.email_trip_notifications) {
       continue;
     }
 
@@ -206,15 +191,13 @@ const notifyExpenseUpdated = async (
   expenseId: number,
   expenseTitle: string,
 ): Promise<void> => {
-  const trip =
-    await tripRepository.read(tripId);
+  const trip = await tripRepository.read(tripId);
 
   if (!trip) {
     return;
   }
 
-  const actor =
-    await userRepository.read(actorUserId);
+  const actor = await userRepository.read(actorUserId);
 
   const actorName = actor
     ? `${actor.firstname} ${actor.lastname}`.trim()
@@ -226,10 +209,7 @@ const notifyExpenseUpdated = async (
     )) as TripMember[];
 
   for (const member of members) {
-    if (
-      Number(member.id) ===
-      Number(actorUserId)
-    ) {
+    if (Number(member.id) === Number(actorUserId)) {
       continue;
     }
 
@@ -242,8 +222,7 @@ const notifyExpenseUpdated = async (
         message:
           `${actorName} a modifié « ${expenseTitle} ».`,
         emoji: "✏️",
-        contextLabel:
-          `Voyage ${trip.title}`,
+        contextLabel: `Voyage ${trip.title}`,
         referenceType: "expense",
         referenceId: expenseId,
       });
@@ -261,13 +240,10 @@ const formatCurrency = (
   currency: string,
 ): string => {
   try {
-    return new Intl.NumberFormat(
-      "fr-FR",
-      {
-        style: "currency",
-        currency,
-      },
-    ).format(amount);
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency,
+    }).format(amount);
   } catch {
     return `${amount.toFixed(2)} ${currency}`;
   }
@@ -281,8 +257,7 @@ const notifyReimbursementPending = async (
   amount: number,
   currency: string,
 ): Promise<void> => {
-  const trip =
-    await tripRepository.read(tripId);
+  const trip = await tripRepository.read(tripId);
 
   if (!trip) {
     return;
@@ -307,8 +282,7 @@ const notifyReimbursementPending = async (
       message:
         `${fromUserName} indique vous avoir remboursé ${formattedAmount}.`,
       emoji: "💸",
-      contextLabel:
-        `Voyage ${trip.title}`,
+      contextLabel: `Voyage ${trip.title}`,
       referenceType: "reimbursement",
       referenceId: reimbursementId,
     });
@@ -328,8 +302,7 @@ const notifyReimbursementConfirmed = async (
   amount: number,
   currency: string,
 ): Promise<void> => {
-  const trip =
-    await tripRepository.read(tripId);
+  const trip = await tripRepository.read(tripId);
 
   if (!trip) {
     return;
@@ -356,8 +329,7 @@ const notifyReimbursementConfirmed = async (
       message:
         `${confirmedByName} a confirmé la réception de votre remboursement de ${formattedAmount}.`,
       emoji: "✅",
-      contextLabel:
-        `Voyage ${trip.title}`,
+      contextLabel: `Voyage ${trip.title}`,
       referenceType: "reimbursement",
       referenceId: reimbursementId,
     });
@@ -377,8 +349,7 @@ const notifyReimbursementRejected = async (
   amount: number,
   currency: string,
 ): Promise<void> => {
-  const trip =
-    await tripRepository.read(tripId);
+  const trip = await tripRepository.read(tripId);
 
   if (!trip) {
     return;
@@ -405,8 +376,7 @@ const notifyReimbursementRejected = async (
       message:
         `${rejectedByName} indique ne pas avoir reçu votre remboursement de ${formattedAmount}.`,
       emoji: "❌",
-      contextLabel:
-        `Voyage ${trip.title}`,
+      contextLabel: `Voyage ${trip.title}`,
       referenceType: "reimbursement",
       referenceId: reimbursementId,
     });
@@ -415,6 +385,67 @@ const notifyReimbursementRejected = async (
       `Erreur création notification reimbursement_rejected pour l'utilisateur ${fromUserId} :`,
       error,
     );
+  }
+};
+
+const notifyParticipantJoined = async (
+  tripId: number,
+  joinedUserId: number,
+): Promise<void> => {
+  const trip =
+    await tripRepository.read(tripId);
+
+  if (!trip) {
+    return;
+  }
+
+  const joinedUser =
+    await userRepository.read(
+      joinedUserId,
+    );
+
+  if (!joinedUser) {
+    return;
+  }
+
+  const joinedUserName =
+    `${joinedUser.firstname} ${joinedUser.lastname}`.trim();
+
+  const members =
+    (await tripRepository.findMembersByTrip(
+      tripId,
+    )) as TripMember[];
+
+  for (const member of members) {
+    if (
+      Number(member.id) ===
+      Number(joinedUserId)
+    ) {
+      continue;
+    }
+
+    try {
+      await createNotification({
+        userId: member.id,
+        tripId,
+        type: "participant_joined",
+        title: "Nouveau participant",
+        message:
+          `${joinedUserName} a rejoint le voyage.`,
+        emoji: "👤",
+        contextLabel:
+          `Voyage ${trip.title}`,
+        referenceType:
+          "participant",
+        referenceId:
+          joinedUserId,
+      });
+    } catch (error) {
+      console.error(
+        `Erreur création notification participant_joined pour l'utilisateur ${member.id} :`,
+        error,
+      );
+    }
   }
 };
 
@@ -429,4 +460,5 @@ export default {
   notifyReimbursementPending,
   notifyReimbursementConfirmed,
   notifyReimbursementRejected,
+  notifyParticipantJoined,
 };
