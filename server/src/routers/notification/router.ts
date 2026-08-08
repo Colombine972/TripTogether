@@ -1,8 +1,9 @@
 import express from "express";
-import notificationActions from "../../modules/notification/notificationActions";
 import { verifyToken } from "../../modules/auth/authActions";
+import notificationActions from "../../modules/notification/notificationActions";
 
-const router = express.Router();
+const router =
+  express.Router();
 
 router.get(
   "/",
@@ -26,6 +27,12 @@ router.patch(
   "/:id/read",
   verifyToken,
   notificationActions.read,
+);
+
+router.delete(
+  "/:id",
+  verifyToken,
+  notificationActions.remove,
 );
 
 export default router;

@@ -18,7 +18,8 @@
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.16.0",
-    "react-toastify": "^11.0.5"
+    "react-toastify": "^11.0.5",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.6.0",

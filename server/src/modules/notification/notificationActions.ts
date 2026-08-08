@@ -1,16 +1,21 @@
-import type { NextFunction, Request, Response } from "express";
+import type {
+  NextFunction,
+  Request,
+  Response,
+} from "express";
 import notificationService from "./notificationService";
 
-type AuthenticatedRequest = Request & {
-  auth?: {
-    sub?: number | string;
-    id?: number | string;
-    userId?: number | string;
+type AuthenticatedRequest =
+  Request & {
+    auth?: {
+      sub?: number | string;
+      id?: number | string;
+      userId?: number | string;
+    };
+    user?: {
+      id?: number | string;
+    };
   };
-  user?: {
-    id?: number | string;
-  };
-};
 
 const getAuthenticatedUserId = (
   req: AuthenticatedRequest,
@@ -21,13 +26,22 @@ const getAuthenticatedUserId = (
     req.auth?.id ??
     req.user?.id;
 
-  if (rawUserId === undefined || rawUserId === null) {
+  if (
+    rawUserId === undefined ||
+    rawUserId === null
+  ) {
     return null;
   }
 
-  const userId = Number(rawUserId);
+  const userId =
+    Number(rawUserId);
 
-  if (!Number.isInteger(userId) || userId <= 0) {
+  if (
+    !Number.isInteger(
+      userId,
+    ) ||
+    userId <= 0
+  ) {
     return null;
   }
 
@@ -40,20 +54,28 @@ const browse = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = getAuthenticatedUserId(req);
+    const userId =
+      getAuthenticatedUserId(
+        req,
+      );
 
     if (!userId) {
       res.status(401).json({
-        message: "Utilisateur non authentifié.",
+        message:
+          "Utilisateur non authentifié.",
       });
 
       return;
     }
 
     const notifications =
-      await notificationService.getUserNotifications(userId);
+      await notificationService.getUserNotifications(
+        userId,
+      );
 
-    res.status(200).json(notifications);
+    res
+      .status(200)
+      .json(notifications);
   } catch (error) {
     next(error);
   }
@@ -65,17 +87,24 @@ const unreadCount = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = getAuthenticatedUserId(req);
+    const userId =
+      getAuthenticatedUserId(
+        req,
+      );
 
     if (!userId) {
       res.status(401).json({
-        message: "Utilisateur non authentifié.",
+        message:
+          "Utilisateur non authentifié.",
       });
 
       return;
     }
 
-    const count = await notificationService.getUnreadCount(userId);
+    const count =
+      await notificationService.getUnreadCount(
+        userId,
+      );
 
     res.status(200).json({
       count,
@@ -91,21 +120,32 @@ const read = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = getAuthenticatedUserId(req);
+    const userId =
+      getAuthenticatedUserId(
+        req,
+      );
 
     if (!userId) {
       res.status(401).json({
-        message: "Utilisateur non authentifié.",
+        message:
+          "Utilisateur non authentifié.",
       });
 
       return;
     }
 
-    const notificationId = Number(req.params.id);
+    const notificationId =
+      Number(req.params.id);
 
-    if (!Number.isInteger(notificationId) || notificationId <= 0) {
+    if (
+      !Number.isInteger(
+        notificationId,
+      ) ||
+      notificationId <= 0
+    ) {
       res.status(400).json({
-        message: "Identifiant de notification invalide.",
+        message:
+          "Identifiant de notification invalide.",
       });
 
       return;
@@ -117,7 +157,8 @@ const read = async (
     );
 
     res.status(200).json({
-      message: "Notification marquée comme lue.",
+      message:
+        "Notification marquée comme lue.",
     });
   } catch (error) {
     next(error);
@@ -130,22 +171,80 @@ const readAll = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = getAuthenticatedUserId(req);
+    const userId =
+      getAuthenticatedUserId(
+        req,
+      );
 
     if (!userId) {
       res.status(401).json({
-        message: "Utilisateur non authentifié.",
+        message:
+          "Utilisateur non authentifié.",
       });
 
       return;
     }
 
     const updatedCount =
-      await notificationService.markAllAsRead(userId);
+      await notificationService.markAllAsRead(
+        userId,
+      );
 
     res.status(200).json({
-      message: "Toutes les notifications ont été marquées comme lues.",
+      message:
+        "Toutes les notifications ont été marquées comme lues.",
       updatedCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const remove = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId =
+      getAuthenticatedUserId(
+        req,
+      );
+
+    if (!userId) {
+      res.status(401).json({
+        message:
+          "Utilisateur non authentifié.",
+      });
+
+      return;
+    }
+
+    const notificationId =
+      Number(req.params.id);
+
+    if (
+      !Number.isInteger(
+        notificationId,
+      ) ||
+      notificationId <= 0
+    ) {
+      res.status(400).json({
+        message:
+          "Identifiant de notification invalide.",
+      });
+
+      return;
+    }
+
+    await notificationService.deleteNotification(
+      notificationId,
+      userId,
+    );
+
+    res.status(200).json({
+      message:
+        "Notification supprimée.",
     });
   } catch (error) {
     next(error);
@@ -157,4 +256,5 @@ export default {
   unreadCount,
   read,
   readAll,
+  remove,
 };

@@ -1,12 +1,8 @@
-import { Bell, CheckCheck } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { Bell, CheckCheck, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
+import { useSocket } from "../contexts/SocketContext";
 import "../pages/styles/NotificationBell.css";
 
 type NotificationType =
@@ -38,190 +34,163 @@ type Notification = {
 
 export default function NotificationBell() {
   const navigate = useNavigate();
+
   const { auth } = useAuth();
 
-  const notificationRef =
-    useRef<HTMLDivElement>(null);
+  const { socket } = useSocket();
 
-  const [notifications, setNotifications] =
-    useState<Notification[]>([]);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
-  const [unreadCount, setUnreadCount] =
-    useState(0);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const [isOpen, setIsOpen] =
-    useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const [isLoading, setIsLoading] =
-    useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const token =
-    auth?.token ||
-    localStorage.getItem("token") ||
-    "";
+  const [isLoading, setIsLoading] = useState(false);
 
-  const fetchUnreadCount =
-    useCallback(async () => {
-      if (!token) {
-        setUnreadCount(0);
-        return;
-      }
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/notifications/unread-count`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+  const token = auth?.token || localStorage.getItem("token") || "";
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!token) {
+      setUnreadCount(0);
+
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/notifications/unread-count`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
+        },
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            "Impossible de récupérer le compteur des notifications.",
         );
-
-        const data = await response
-          .json()
-          .catch(() => null);
-
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              "Impossible de récupérer le compteur des notifications.",
-          );
-        }
-
-        setUnreadCount(
-          Number(data?.count || 0),
-        );
-      } catch (error) {
-        console.error(
-          "Erreur compteur notifications :",
-          error,
-        );
-
-        setUnreadCount(0);
-      }
-    }, [token]);
-
-  const fetchNotifications =
-    useCallback(async () => {
-      if (!token) {
-        setNotifications([]);
-        return;
       }
 
-      setIsLoading(true);
+      setUnreadCount(Number(data?.count || 0));
+    } catch (error) {
+      console.error("Erreur compteur notifications :", error);
 
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/notifications`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+      setUnreadCount(0);
+    }
+  }, [token]);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!token) {
+      setNotifications([]);
+
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/notifications`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
+        },
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message || "Impossible de récupérer les notifications.",
         );
-
-        const data = await response
-          .json()
-          .catch(() => null);
-
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              "Impossible de récupérer les notifications.",
-          );
-        }
-
-        const receivedNotifications: Notification[] =
-          Array.isArray(data)
-            ? data.map(
-                (
-                  notification: Notification,
-                ) => ({
-                  ...notification,
-                  is_read:
-                    notification.is_read ===
-                      true ||
-                    Number(
-                      notification.is_read,
-                    ) === 1,
-                }),
-              )
-            : [];
-
-        setNotifications(
-          receivedNotifications,
-        );
-
-        setUnreadCount(
-          receivedNotifications.filter(
-            (notification) =>
-              !notification.is_read,
-          ).length,
-        );
-      } catch (error) {
-        console.error(
-          "Erreur récupération notifications :",
-          error,
-        );
-
-        setNotifications([]);
-      } finally {
-        setIsLoading(false);
       }
-    }, [token]);
+
+      const receivedNotifications: Notification[] = Array.isArray(data)
+        ? data.map((notification: Notification) => ({
+            ...notification,
+            is_read:
+              notification.is_read === true ||
+              Number(notification.is_read) === 1,
+          }))
+        : [];
+
+      setNotifications(receivedNotifications);
+
+      setUnreadCount(
+        receivedNotifications.filter((notification) => !notification.is_read)
+          .length,
+      );
+    } catch (error) {
+      console.error("Erreur récupération notifications :", error);
+
+      setNotifications([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
-    fetchUnreadCount();
+    void fetchUnreadCount();
   }, [fetchUnreadCount]);
 
   useEffect(() => {
-    const handleClickOutside = (
-      event: MouseEvent,
-    ) => {
-      const target =
-        event.target as Node;
+    if (!socket) {
+      return;
+    }
+
+    const handleNotificationRefresh = () => {
+      void fetchUnreadCount();
+
+      if (isOpen) {
+        void fetchNotifications();
+      }
+    };
+
+    socket.on("notification:refresh", handleNotificationRefresh);
+
+    return () => {
+      socket.off("notification:refresh", handleNotificationRefresh);
+    };
+  }, [socket, fetchUnreadCount, fetchNotifications, isOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
 
       if (
         notificationRef.current &&
-        !notificationRef.current.contains(
-          target,
-        )
+        !notificationRef.current.contains(target)
       ) {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside,
-    );
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside,
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const togglePanel = () => {
     if (!isOpen) {
-      fetchNotifications();
+      void fetchNotifications();
     }
 
-    setIsOpen(
-      (currentValue) =>
-        !currentValue,
-    );
+    setIsOpen((currentValue) => !currentValue);
   };
 
-  const markAsRead = async (
-    notification: Notification,
-  ): Promise<void> => {
-    if (
-      !token ||
-      notification.is_read
-    ) {
+  const markAsRead = async (notification: Notification): Promise<void> => {
+    if (!token || notification.is_read) {
       return;
     }
 
@@ -232,15 +201,12 @@ export default function NotificationBell() {
           method: "PATCH",
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
         },
       );
 
-      const data = await response
-        .json()
-        .catch(() => null);
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
         throw new Error(
@@ -249,34 +215,64 @@ export default function NotificationBell() {
         );
       }
 
-      setNotifications(
-        (currentNotifications) =>
-          currentNotifications.map(
-            (
-              currentNotification,
-            ) =>
-              currentNotification.id ===
-              notification.id
-                ? {
-                    ...currentNotification,
-                    is_read: true,
-                  }
-                : currentNotification,
-          ),
+      setNotifications((currentNotifications) =>
+        currentNotifications.map((currentNotification) =>
+          currentNotification.id === notification.id
+            ? {
+                ...currentNotification,
+                is_read: true,
+              }
+            : currentNotification,
+        ),
       );
 
-      setUnreadCount(
-        (currentCount) =>
-          Math.max(
-            0,
-            currentCount - 1,
-          ),
-      );
+      setUnreadCount((currentCount) => Math.max(0, currentCount - 1));
     } catch (error) {
-      console.error(
-        "Erreur lecture notification :",
-        error,
+      console.error("Erreur lecture notification :", error);
+    }
+  };
+
+  const deleteNotification = async (
+    notification: Notification,
+  ): Promise<void> => {
+    if (!token) {
+      return;
+    }
+
+    setDeletingId(notification.id);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/notifications/${notification.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message || "Impossible de supprimer cette notification.",
+        );
+      }
+
+      setNotifications((currentNotifications) =>
+        currentNotifications.filter(
+          (currentNotification) => currentNotification.id !== notification.id,
+        ),
+      );
+
+      if (!notification.is_read) {
+        setUnreadCount((currentCount) => Math.max(0, currentCount - 1));
+      }
+    } catch (error) {
+      console.error("Erreur suppression notification :", error);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -285,28 +281,17 @@ export default function NotificationBell() {
     referenceType?: string | null,
     referenceId?: number | null,
   ): string => {
-    const params =
-      new URLSearchParams();
+    const params = new URLSearchParams();
 
     if (referenceType) {
-      params.set(
-        "target",
-        referenceType,
-      );
+      params.set("target", referenceType);
     }
 
-    if (
-      referenceId !== null &&
-      referenceId !== undefined
-    ) {
-      params.set(
-        "ref",
-        String(referenceId),
-      );
+    if (referenceId !== null && referenceId !== undefined) {
+      params.set("ref", String(referenceId));
     }
 
-    const queryString =
-      params.toString();
+    const queryString = params.toString();
 
     if (!queryString) {
       return basePath;
@@ -315,36 +300,29 @@ export default function NotificationBell() {
     return `${basePath}?${queryString}`;
   };
 
-  const getNotificationTarget = (
-    notification: Notification,
-  ): string | null => {
+  const getNotificationTarget = (notification: Notification): string | null => {
     if (!notification.trip_id) {
       return null;
     }
 
-    const tripId =
-      notification.trip_id;
+    const tripId = notification.trip_id;
 
-    const referenceType =
-      notification.reference_type;
+    const referenceType = notification.reference_type;
 
-    const referenceId =
-      notification.reference_id;
+    const referenceId = notification.reference_id;
 
     switch (notification.type) {
       case "participant_joined":
         return buildTargetUrl(
           `/trip/${tripId}/invitations`,
-          referenceType ||
-            "participant",
+          referenceType || "participant",
           referenceId,
         );
 
       case "vote_created":
         return buildTargetUrl(
           `/trip/${tripId}/steps`,
-          referenceType ||
-            "step",
+          referenceType || "step",
           referenceId,
         );
 
@@ -352,8 +330,7 @@ export default function NotificationBell() {
       case "expense_updated":
         return buildTargetUrl(
           `/trip/${tripId}/budget`,
-          referenceType ||
-            "expense",
+          referenceType || "expense",
           referenceId,
         );
 
@@ -362,8 +339,7 @@ export default function NotificationBell() {
       case "reimbursement_rejected":
         return buildTargetUrl(
           `/trip/${tripId}/budget`,
-          referenceType ||
-            "reimbursement",
+          referenceType || "reimbursement",
           referenceId,
         );
 
@@ -382,238 +358,142 @@ export default function NotificationBell() {
         );
 
       default:
-        return buildTargetUrl(
-          `/trip/${tripId}`,
-          referenceType,
-          referenceId,
-        );
+        return buildTargetUrl(`/trip/${tripId}`, referenceType, referenceId);
     }
   };
 
-  const handleNotificationClick =
-    async (
-      notification: Notification,
-    ) => {
-      await markAsRead(
-        notification,
+  const handleNotificationClick = async (notification: Notification) => {
+    await markAsRead(notification);
+
+    const target = getNotificationTarget(notification);
+
+    setIsOpen(false);
+
+    if (target) {
+      navigate(target);
+    }
+  };
+
+  const markAllAsRead = async (): Promise<void> => {
+    if (!token || unreadCount === 0) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/notifications/read-all`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
       );
 
-      const target =
-        getNotificationTarget(
-          notification,
-        );
+      const data = await response.json().catch(() => null);
 
-      setIsOpen(false);
-
-      if (target) {
-        navigate(target);
-      }
-    };
-
-  const markAllAsRead =
-    async (): Promise<void> => {
-      if (
-        !token ||
-        unreadCount === 0
-      ) {
-        return;
-      }
-
-      try {
-        const response =
-          await fetch(
-            `${import.meta.env.VITE_API_URL}/api/notifications/read-all`,
-            {
-              method: "PATCH",
-              headers: {
-                Authorization:
-                  `Bearer ${token}`,
-                "Content-Type":
-                  "application/json",
-              },
-            },
-          );
-
-        const data =
-          await response
-            .json()
-            .catch(() => null);
-
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              "Impossible de marquer toutes les notifications comme lues.",
-          );
-        }
-
-        setNotifications(
-          (
-            currentNotifications,
-          ) =>
-            currentNotifications.map(
-              (notification) => ({
-                ...notification,
-                is_read: true,
-              }),
-            ),
-        );
-
-        setUnreadCount(0);
-      } catch (error) {
-        console.error(
-          "Erreur lecture notifications :",
-          error,
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            "Impossible de marquer toutes les notifications comme lues.",
         );
       }
-    };
 
-  const formatNotificationDate = (
-    createdAt: string,
-  ): string => {
-    const notificationDate =
-      new Date(createdAt);
+      setNotifications((currentNotifications) =>
+        currentNotifications.map((notification) => ({
+          ...notification,
+          is_read: true,
+        })),
+      );
 
-    if (
-      Number.isNaN(
-        notificationDate.getTime(),
-      )
-    ) {
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Erreur lecture notifications :", error);
+    }
+  };
+
+  const formatNotificationDate = (createdAt: string): string => {
+    const notificationDate = new Date(createdAt);
+
+    if (Number.isNaN(notificationDate.getTime())) {
       return "";
     }
 
-    const now =
-      new Date();
+    const now = new Date();
 
-    const differenceMilliseconds =
-      now.getTime() -
-      notificationDate.getTime();
+    const differenceMilliseconds = now.getTime() - notificationDate.getTime();
 
-    const differenceMinutes =
-      Math.floor(
-        differenceMilliseconds /
-          60000,
-      );
+    const differenceMinutes = Math.floor(differenceMilliseconds / 60000);
 
-    if (
-      differenceMinutes < 1
-    ) {
+    if (differenceMinutes < 1) {
       return "À l’instant";
     }
 
-    if (
-      differenceMinutes < 60
-    ) {
+    if (differenceMinutes < 60) {
       return `Il y a ${differenceMinutes} min`;
     }
 
-    const differenceHours =
-      Math.floor(
-        differenceMinutes / 60,
-      );
+    const differenceHours = Math.floor(differenceMinutes / 60);
 
-    if (
-      differenceHours < 24
-    ) {
+    if (differenceHours < 24) {
       return `Il y a ${differenceHours} h`;
     }
 
-    const differenceDays =
-      Math.floor(
-        differenceHours / 24,
-      );
+    const differenceDays = Math.floor(differenceHours / 24);
 
-    if (
-      differenceDays === 1
-    ) {
+    if (differenceDays === 1) {
       return "Hier";
     }
 
-    if (
-      differenceDays < 7
-    ) {
+    if (differenceDays < 7) {
       return `Il y a ${differenceDays} jours`;
     }
 
-    return new Intl.DateTimeFormat(
-      "fr-FR",
-      {
-        day: "2-digit",
-        month: "short",
-      },
-    ).format(
-      notificationDate,
-    );
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "2-digit",
+      month: "short",
+    }).format(notificationDate);
   };
 
-  const visibleNotifications =
-    notifications.slice(0, 5);
+  const visibleNotifications = notifications.slice(0, 5);
 
   return (
-    <div
-      ref={notificationRef}
-      className="notification-center"
-    >
+    <div ref={notificationRef} className="notification-center">
       <button
         type="button"
-        className={`notification-bell-button ${
-          isOpen
-            ? "is-active"
-            : ""
-        }`}
+        className={`notification-bell-button ${isOpen ? "is-active" : ""}`}
         onClick={togglePanel}
         aria-label={
           unreadCount > 0
             ? `${unreadCount} notification${
-                unreadCount > 1
-                  ? "s"
-                  : ""
-              } non lue${
-                unreadCount > 1
-                  ? "s"
-                  : ""
-              }`
+                unreadCount > 1 ? "s" : ""
+              } non lue${unreadCount > 1 ? "s" : ""}`
             : "Notifications"
         }
         aria-expanded={isOpen}
       >
-        <Bell
-          size={25}
-          strokeWidth={2}
-        />
+        <Bell size={25} strokeWidth={2} />
 
         {unreadCount > 0 && (
           <span className="notification-badge">
-            {unreadCount > 99
-              ? "99+"
-              : unreadCount}
+            {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </button>
 
-      <div
-        className={`notification-panel ${
-          isOpen
-            ? "is-open"
-            : ""
-        }`}
-      >
+      <div className={`notification-panel ${isOpen ? "is-open" : ""}`}>
         <div className="notification-panel-header">
           <div>
-            <h3>
-              Notifications
-            </h3>
+            <h3>Notifications</h3>
 
             {unreadCount > 0 ? (
               <span>
                 {unreadCount} non lue
-                {unreadCount > 1
-                  ? "s"
-                  : ""}
+                {unreadCount > 1 ? "s" : ""}
               </span>
             ) : (
-              <span>
-                Tout est à jour
-              </span>
+              <span>Tout est à jour</span>
             )}
           </div>
         </div>
@@ -622,45 +502,35 @@ export default function NotificationBell() {
           {isLoading ? (
             <div className="notification-empty">
               <span>🔔</span>
-              <p>
-                Chargement...
-              </p>
+
+              <p>Chargement...</p>
             </div>
-          ) : visibleNotifications.length ===
-            0 ? (
+          ) : visibleNotifications.length === 0 ? (
             <div className="notification-empty">
               <span>🔔</span>
-              <p>
-                Aucune notification pour le moment.
-              </p>
+
+              <p>Aucune notification pour le moment.</p>
             </div>
           ) : (
-            visibleNotifications.map(
-              (notification) => (
+            visibleNotifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={`notification-item-wrapper ${
+                  !notification.is_read ? "notification-item-unread" : ""
+                }`}
+              >
                 <button
-                  key={notification.id}
                   type="button"
-                  className={`notification-item ${
-                    !notification.is_read
-                      ? "notification-item-unread"
-                      : ""
-                  }`}
-                  onClick={() =>
-                    handleNotificationClick(
-                      notification,
-                    )
-                  }
+                  className="notification-item"
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="notification-item-icon">
-                    {notification.emoji ||
-                      "🔔"}
+                    {notification.emoji || "🔔"}
                   </div>
 
                   <div className="notification-item-content">
                     <div className="notification-item-title-row">
-                      <strong>
-                        {notification.title}
-                      </strong>
+                      <strong>{notification.title}</strong>
 
                       {!notification.is_read && (
                         <span
@@ -670,69 +540,49 @@ export default function NotificationBell() {
                       )}
                     </div>
 
-                    <p>
-                      {notification.message}
-                    </p>
+                    <p>{notification.message}</p>
 
                     <div className="notification-item-meta">
                       {notification.context_label && (
                         <>
-                          <span>
-                            {
-                              notification.context_label
-                            }
-                          </span>
+                          <span>{notification.context_label}</span>
 
-                          <span
-                            aria-hidden="true"
-                          >
-                            ·
-                          </span>
+                          <span aria-hidden="true">·</span>
                         </>
                       )}
 
                       <span>
-                        {formatNotificationDate(
-                          notification.created_at,
-                        )}
+                        {formatNotificationDate(notification.created_at)}
                       </span>
                     </div>
                   </div>
                 </button>
-              ),
-            )
+
+                <button
+                  type="button"
+                  className="notification-delete-button"
+                  aria-label={`Supprimer la notification ${notification.title}`}
+                  title="Supprimer la notification"
+                  disabled={deletingId === notification.id}
+                  onClick={() => deleteNotification(notification)}
+                >
+                  <Trash2 size={17} />
+                </button>
+              </div>
+            ))
           )}
         </div>
 
-        {visibleNotifications.length >
-          0 && (
+        {visibleNotifications.length > 0 && (
           <div className="notification-panel-footer">
             <button
               type="button"
               className="notification-mark-all"
-              disabled={
-                unreadCount === 0
-              }
-              onClick={
-                markAllAsRead
-              }
+              disabled={unreadCount === 0}
+              onClick={markAllAsRead}
             >
-              <CheckCheck
-                size={17}
-              />
+              <CheckCheck size={17} />
               Tout marquer comme lu
-            </button>
-
-            <button
-              type="button"
-              className="notification-see-all"
-              onClick={() => {
-                console.log(
-                  "Page complète des notifications à venir.",
-                );
-              }}
-            >
-              Voir toutes les notifications
             </button>
           </div>
         )}

@@ -1,6 +1,6 @@
 /* =========================================================
-   CENTRE DE NOTIFICATIONS
-   ========================================================= */
+CENTRE DE NOTIFICATIONS
+========================================================= */
 
 .notification-center {
   position: relative;
@@ -10,11 +10,9 @@
   justify-content: center;
 }
 
-
-
 /* =========================================================
-   CLOCHE
-   ========================================================= */
+CLOCHE
+========================================================= */
 
 .notification-bell-button {
   position: relative;
@@ -62,8 +60,8 @@
 }
 
 /* =========================================================
-   BADGE
-   ========================================================= */
+BADGE
+========================================================= */
 
 .notification-badge {
   position: absolute;
@@ -94,8 +92,8 @@
 }
 
 /* =========================================================
-   PANNEAU
-   ========================================================= */
+PANNEAU
+========================================================= */
 
 .notification-panel {
   display: none;
@@ -139,8 +137,8 @@
 }
 
 /* =========================================================
-   HEADER
-   ========================================================= */
+HEADER
+========================================================= */
 
 .notification-panel-header {
   padding: 0.9rem 1rem;
@@ -172,8 +170,8 @@
 }
 
 /* =========================================================
-   CONTENU
-   ========================================================= */
+CONTENU
+========================================================= */
 
 .notification-panel-content {
   max-height: 25rem;
@@ -182,24 +180,60 @@
 }
 
 /* =========================================================
-   NOTIFICATION
-   ========================================================= */
+WRAPPER NOTIFICATION
+========================================================= */
+
+.notification-item-wrapper {
+  position: relative;
+
+  display: flex;
+  align-items: stretch;
+
+  width: 100%;
+
+  background: #fff;
+
+  border-bottom: 1px solid #eeeeee;
+
+  transition: background-color 180ms ease;
+}
+
+.notification-item-wrapper:hover {
+  background: #f3f3f3;
+}
+
+/* =========================================================
+NOTIFICATION NON LUE
+========================================================= */
+
+.notification-item-wrapper.notification-item-unread {
+  background: #f3f7f3;
+}
+
+.notification-item-wrapper.notification-item-unread:hover {
+  background: #e9f0e9;
+}
+
+/* =========================================================
+BOUTON PRINCIPAL NOTIFICATION
+========================================================= */
 
 .notification-item {
   display: flex;
   align-items: flex-start;
 
+  flex: 1;
+
   gap: 0.8rem;
 
-  width: 100%;
+  min-width: 0;
 
-  padding: 0.9rem 1rem;
+  padding: 0.9rem 3.25rem 0.9rem 1rem;
 
   color: #111;
-  background: #fff;
+  background: transparent;
 
   border: none;
-  border-bottom: 1px solid #eeeeee;
 
   font-family: var(--body-text);
   text-align: left;
@@ -210,24 +244,17 @@
 }
 
 .notification-item:hover {
-  background: #f3f3f3;
+  background: transparent;
+}
+
+.notification-item:focus-visible {
+  outline: 2px solid #2f5d2f;
+  outline-offset: -2px;
 }
 
 /* =========================================================
-   NOTIFICATION NON LUE
-   ========================================================= */
-
-.notification-item-unread {
-  background: #f3f7f3;
-}
-
-.notification-item-unread:hover {
-  background: #e9f0e9;
-}
-
-/* =========================================================
-   ICÔNE
-   ========================================================= */
+ICÔNE
+========================================================= */
 
 .notification-item-icon {
   display: flex;
@@ -248,8 +275,8 @@
 }
 
 /* =========================================================
-   CONTENU TEXTE
-   ========================================================= */
+CONTENU TEXTE
+========================================================= */
 
 .notification-item-content {
   flex: 1;
@@ -287,8 +314,8 @@
 }
 
 /* =========================================================
-   POINT NON LU
-   ========================================================= */
+POINT NON LU
+========================================================= */
 
 .notification-unread-dot {
   flex: 0 0 0.45rem;
@@ -302,8 +329,8 @@
 }
 
 /* =========================================================
-   MÉTA : VOYAGE + DATE
-   ========================================================= */
+MÉTA : VOYAGE + DATE
+========================================================= */
 
 .notification-item-meta {
   display: flex;
@@ -321,8 +348,66 @@
 }
 
 /* =========================================================
-   AUCUNE NOTIFICATION
-   ========================================================= */
+BOUTON SUPPRIMER
+========================================================= */
+
+.notification-delete-button {
+  position: absolute;
+
+  top: 50%;
+  right: 0.75rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2rem;
+  height: 2rem;
+
+  padding: 0;
+
+  color: #999;
+  background: transparent;
+
+  border: none;
+  border-radius: 0.5rem;
+
+  transform: translateY(-50%);
+
+  cursor: pointer;
+
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+.notification-delete-button:hover:not(:disabled) {
+  color: #c94b4b;
+  background: rgba(201, 75, 75, 0.1);
+}
+
+.notification-delete-button:focus-visible {
+  outline: 2px solid #c94b4b;
+  outline-offset: 2px;
+}
+
+.notification-delete-button:active:not(:disabled) {
+  transform:
+    translateY(-50%)
+    scale(0.92);
+}
+
+.notification-delete-button:disabled {
+  opacity: 0.4;
+
+  cursor: default;
+}
+
+/* =========================================================
+AUCUNE NOTIFICATION
+========================================================= */
 
 .notification-empty {
   display: flex;
@@ -353,8 +438,8 @@
 }
 
 /* =========================================================
-   FOOTER
-   ========================================================= */
+FOOTER
+========================================================= */
 
 .notification-panel-footer {
   padding: 0.75rem;
@@ -364,8 +449,11 @@
   border-top: 1px solid #e8e8e8;
 }
 
-.notification-mark-all,
-.notification-see-all {
+/* =========================================================
+TOUT MARQUER COMME LU
+========================================================= */
+
+.notification-mark-all {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -377,6 +465,9 @@
   min-height: 2.5rem;
 
   padding: 0.55rem 0.75rem;
+
+  color: #2f5d2f;
+  background: transparent;
 
   border: none;
   border-radius: 0.5rem;
@@ -392,15 +483,6 @@
     color 180ms ease;
 }
 
-/* =========================================================
-   TOUT MARQUER COMME LU
-   ========================================================= */
-
-.notification-mark-all {
-  color: #2f5d2f;
-  background: transparent;
-}
-
 .notification-mark-all:hover:not(:disabled) {
   background: #f3f3f3;
 }
@@ -412,24 +494,8 @@
 }
 
 /* =========================================================
-   VOIR TOUTES LES NOTIFICATIONS
-   ========================================================= */
-
-.notification-see-all {
-  margin-top: 0.25rem;
-
-  color: #111;
-  background: transparent;
-}
-
-.notification-see-all:hover {
-  color: #2f5d2f;
-  background: #f3f3f3;
-}
-
-/* =========================================================
-   SCROLLBAR
-   ========================================================= */
+SCROLLBAR
+========================================================= */
 
 .notification-panel-content::-webkit-scrollbar {
   width: 0.4rem;
@@ -441,6 +507,7 @@
 
 .notification-panel-content::-webkit-scrollbar-thumb {
   background: #d5d5d5;
+
   border-radius: 999px;
 }
 
@@ -449,8 +516,8 @@
 }
 
 /* =========================================================
-   TABLETTE
-   ========================================================= */
+TABLETTE
+========================================================= */
 
 @media (max-width: 900px) {
   .notification-bell-button {
@@ -460,19 +527,40 @@
 
   .notification-panel {
     right: -3rem;
+
+    width: 23rem;
   }
 
-  .notification-center::after {
-    right: -3rem;
+  .notification-item {
+    padding:
+      0.85rem
+      3rem
+      0.85rem
+      0.9rem;
+  }
+
+  .notification-item-icon {
+    flex-basis: 2.35rem;
+
+    width: 2.35rem;
+    height: 2.35rem;
+
+    font-size: 1.05rem;
+  }
+
+  .notification-delete-button {
+    right: 0.65rem;
+
+    width: 1.9rem;
+    height: 1.9rem;
   }
 }
 
 /* =========================================================
-   MOBILE
-   ========================================================= */
+MOBILE
+========================================================= */
 
 @media (max-width: 480px) {
-
   .notification-bell-button {
     width: 2.8rem;
     height: 2.8rem;
@@ -501,7 +589,116 @@
     max-height: calc(100vh - 6rem);
   }
 
+  .notification-panel-header {
+    padding: 0.8rem 0.85rem;
+  }
+
+  .notification-panel-header h3 {
+    font-size: 0.95rem;
+  }
+
   .notification-panel-content {
-    max-height: calc(100vh - 17rem);
+    max-height: calc(100vh - 13rem);
+  }
+
+  .notification-item {
+    gap: 0.65rem;
+
+    padding:
+      0.8rem
+      2.8rem
+      0.8rem
+      0.8rem;
+  }
+
+  .notification-item-icon {
+    flex: 0 0 2.15rem;
+
+    width: 2.15rem;
+    height: 2.15rem;
+
+    border-radius: 0.55rem;
+
+    font-size: 1rem;
+  }
+
+  .notification-item-title-row {
+    gap: 0.5rem;
+  }
+
+  .notification-item-title-row strong {
+    font-size: 0.8rem;
+  }
+
+  .notification-item-content p {
+    font-size: 0.74rem;
+
+    line-height: 1.35;
+  }
+
+  .notification-item-meta {
+    gap: 0.25rem;
+
+    margin-top: 0.3rem;
+
+    font-size: 0.66rem;
+  }
+
+  .notification-delete-button {
+    right: 0.55rem;
+
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+
+  .notification-delete-button svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .notification-panel-footer {
+    padding: 0.65rem;
+  }
+
+  .notification-mark-all {
+    min-height: 2.35rem;
+
+    padding: 0.5rem 0.65rem;
+
+    font-size: 0.76rem;
+  }
+}
+
+/* =========================================================
+PETITS MOBILES
+========================================================= */
+
+@media (max-width: 360px) {
+  .notification-panel {
+    right: 0.5rem;
+    left: 0.5rem;
+  }
+
+  .notification-item {
+    gap: 0.55rem;
+
+    padding:
+      0.75rem
+      2.6rem
+      0.75rem
+      0.65rem;
+  }
+
+  .notification-item-icon {
+    flex: 0 0 2rem;
+
+    width: 2rem;
+    height: 2rem;
+
+    font-size: 0.95rem;
+  }
+
+  .notification-delete-button {
+    right: 0.45rem;
   }
 }

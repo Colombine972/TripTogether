@@ -1,10 +1,14 @@
 import "dotenv/config";
+import { createServer } from "node:http";
+
 import app from "./app";
 import "../database/checkConnection";
 
 const port = process.env.APP_PORT;
 
-app
+const httpServer = createServer(app);
+
+httpServer
   .listen(port, () => {
     console.info(`Server is listening on port ${port}`);
   })
