@@ -9,10 +9,6 @@ import { useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import "../pages/styles/NotificationBell.css";
 
-/* =========================================================
-   TYPES DE NOTIFICATIONS
-   ========================================================= */
-
 type NotificationType =
   | "reimbursement_pending"
   | "reimbursement_confirmed"
@@ -25,36 +21,20 @@ type NotificationType =
   | "vote_created"
   | "general";
 
-/* =========================================================
-   TYPE NOTIFICATION
-   ========================================================= */
-
 type Notification = {
   id: number;
-
   user_id: number;
   trip_id: number | null;
-
   type: NotificationType;
-
   title: string;
   message: string;
-
   emoji: string | null;
-
   context_label: string | null;
-
   reference_type: string | null;
   reference_id: number | null;
-
   is_read: boolean;
-
   created_at: string;
 };
-
-/* =========================================================
-   COMPOSANT
-   ========================================================= */
 
 export default function NotificationBell() {
   const navigate = useNavigate();
@@ -79,10 +59,6 @@ export default function NotificationBell() {
     auth?.token ||
     localStorage.getItem("token") ||
     "";
-
-  /* =========================================================
-     RÉCUPÉRER LE NOMBRE DE NOTIFICATIONS NON LUES
-     ========================================================= */
 
   const fetchUnreadCount =
     useCallback(async () => {
@@ -125,10 +101,6 @@ export default function NotificationBell() {
       }
     }, [token]);
 
-  /* =========================================================
-     RÉCUPÉRER LES NOTIFICATIONS
-     ========================================================= */
-
   const fetchNotifications =
     useCallback(async () => {
       if (!token) {
@@ -159,10 +131,32 @@ export default function NotificationBell() {
           );
         }
 
-        setNotifications(
+        const receivedNotifications: Notification[] =
           Array.isArray(data)
-            ? data
-            : [],
+            ? data.map(
+                (
+                  notification: Notification,
+                ) => ({
+                  ...notification,
+                  is_read:
+                    notification.is_read ===
+                      true ||
+                    Number(
+                      notification.is_read,
+                    ) === 1,
+                }),
+              )
+            : [];
+
+        setNotifications(
+          receivedNotifications,
+        );
+
+        setUnreadCount(
+          receivedNotifications.filter(
+            (notification) =>
+              !notification.is_read,
+          ).length,
         );
       } catch (error) {
         console.error(
@@ -176,17 +170,9 @@ export default function NotificationBell() {
       }
     }, [token]);
 
-  /* =========================================================
-     CHARGEMENT INITIAL DU COMPTEUR
-     ========================================================= */
-
   useEffect(() => {
     fetchUnreadCount();
   }, [fetchUnreadCount]);
-
-  /* =========================================================
-     FERMER LE PANNEAU AU CLIC EN DEHORS
-     ========================================================= */
 
   useEffect(() => {
     const handleClickOutside = (
@@ -218,10 +204,6 @@ export default function NotificationBell() {
     };
   }, []);
 
-  /* =========================================================
-     OUVRIR / FERMER LE PANNEAU
-     ========================================================= */
-
   const togglePanel = () => {
     if (!isOpen) {
       fetchNotifications();
@@ -232,10 +214,6 @@ export default function NotificationBell() {
         !currentValue,
     );
   };
-
-  /* =========================================================
-     MARQUER UNE NOTIFICATION COMME LUE
-     ========================================================= */
 
   const markAsRead = async (
     notification: Notification,
@@ -252,7 +230,6 @@ export default function NotificationBell() {
         `${import.meta.env.VITE_API_URL}/api/notifications/${notification.id}/read`,
         {
           method: "PATCH",
-
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type":
@@ -272,9 +249,6 @@ export default function NotificationBell() {
         );
       }
 
-      /*
-       * Mise à jour immédiate du panneau.
-       */
       setNotifications(
         (currentNotifications) =>
           currentNotifications.map(
@@ -291,9 +265,6 @@ export default function NotificationBell() {
           ),
       );
 
-      /*
-       * Mise à jour immédiate du badge.
-       */
       setUnreadCount(
         (currentCount) =>
           Math.max(
@@ -309,188 +280,135 @@ export default function NotificationBell() {
     }
   };
 
-/* =========================================================
-   CONSTRUIRE UNE URL AVEC UNE CIBLE PRÉCISE
-   ========================================================= */
+  const buildTargetUrl = (
+    basePath: string,
+    referenceType?: string | null,
+    referenceId?: number | null,
+  ): string => {
+    const params =
+      new URLSearchParams();
 
-const buildTargetUrl = (
-  basePath: string,
-  referenceType?: string | null,
-  referenceId?: number | null,
-): string => {
-  const params = new URLSearchParams();
-
-  if (referenceType) {
-    params.set(
-      "target",
-      referenceType,
-    );
-  }
-
-  if (
-    referenceId !== null &&
-    referenceId !== undefined
-  ) {
-    params.set(
-      "ref",
-      String(referenceId),
-    );
-  }
-
-  const queryString =
-    params.toString();
-
-  if (!queryString) {
-    return basePath;
-  }
-
-  return `${basePath}?${queryString}`;
-};
-
-/* =========================================================
-   DÉTERMINER LA DESTINATION DE LA NOTIFICATION
-   ========================================================= */
-
-const getNotificationTarget = (
-  notification: Notification,
-): string | null => {
-  if (!notification.trip_id) {
-    return null;
-  }
-
-  const tripId =
-    notification.trip_id;
-
-  const referenceType =
-    notification.reference_type;
-
-  const referenceId =
-    notification.reference_id;
-
-  switch (notification.type) {
-    /* -----------------------------------------------------
-       NOUVEAU PARTICIPANT
-       ----------------------------------------------------- */
-
-    case "participant_joined":
-      return buildTargetUrl(
-        `/trip/${tripId}/invitations`,
-        referenceType || "participant",
-        referenceId,
-      );
-
-    /* -----------------------------------------------------
-       VOTE
-       ----------------------------------------------------- */
-
-    case "vote_created":
-      return buildTargetUrl(
-        `/trip/${tripId}/steps`,
-        referenceType || "vote",
-        referenceId,
-      );
-
-    /* -----------------------------------------------------
-       DÉPENSE
-       ----------------------------------------------------- */
-
-    case "expense_created":
-    case "expense_updated":
-      return buildTargetUrl(
-        `/trip/${tripId}/budget`,
-        referenceType || "expense",
-        referenceId,
-      );
-
-    /* -----------------------------------------------------
-       REMBOURSEMENT
-       ----------------------------------------------------- */
-
-    case "reimbursement_pending":
-    case "reimbursement_confirmed":
-    case "reimbursement_rejected":
-      return buildTargetUrl(
-        `/trip/${tripId}/budget`,
-        referenceType || "reimbursement",
-        referenceId,
-      );
-
-    /* -----------------------------------------------------
-       INVITATION
-       ----------------------------------------------------- */
-
-    case "trip_invitation":
-      return buildTargetUrl(
-        `/trip/${tripId}/invitations`,
+    if (referenceType) {
+      params.set(
+        "target",
         referenceType,
-        referenceId,
       );
+    }
 
-    /* -----------------------------------------------------
-       VOYAGE MODIFIÉ
-       ----------------------------------------------------- */
-
-    case "trip_updated":
-      return buildTargetUrl(
-        `/trip/${tripId}`,
-        referenceType || "trip",
-        referenceId || tripId,
+    if (
+      referenceId !== null &&
+      referenceId !== undefined
+    ) {
+      params.set(
+        "ref",
+        String(referenceId),
       );
+    }
 
-    /* -----------------------------------------------------
-       AUTRES
-       ----------------------------------------------------- */
+    const queryString =
+      params.toString();
 
-    default:
-      return buildTargetUrl(
-        `/trip/${tripId}`,
-        referenceType,
-        referenceId,
-      );
-  }
-};
+    if (!queryString) {
+      return basePath;
+    }
 
-  /* =========================================================
-     CLIC SUR UNE NOTIFICATION
-     ========================================================= */
+    return `${basePath}?${queryString}`;
+  };
+
+  const getNotificationTarget = (
+    notification: Notification,
+  ): string | null => {
+    if (!notification.trip_id) {
+      return null;
+    }
+
+    const tripId =
+      notification.trip_id;
+
+    const referenceType =
+      notification.reference_type;
+
+    const referenceId =
+      notification.reference_id;
+
+    switch (notification.type) {
+      case "participant_joined":
+        return buildTargetUrl(
+          `/trip/${tripId}/invitations`,
+          referenceType ||
+            "participant",
+          referenceId,
+        );
+
+      case "vote_created":
+        return buildTargetUrl(
+          `/trip/${tripId}/steps`,
+          referenceType ||
+            "step",
+          referenceId,
+        );
+
+      case "expense_created":
+      case "expense_updated":
+        return buildTargetUrl(
+          `/trip/${tripId}/budget`,
+          referenceType ||
+            "expense",
+          referenceId,
+        );
+
+      case "reimbursement_pending":
+      case "reimbursement_confirmed":
+      case "reimbursement_rejected":
+        return buildTargetUrl(
+          `/trip/${tripId}/budget`,
+          referenceType ||
+            "reimbursement",
+          referenceId,
+        );
+
+      case "trip_invitation":
+        return buildTargetUrl(
+          `/trip/${tripId}/invitations`,
+          referenceType,
+          referenceId,
+        );
+
+      case "trip_updated":
+        return buildTargetUrl(
+          `/trip/${tripId}`,
+          referenceType || "trip",
+          referenceId || tripId,
+        );
+
+      default:
+        return buildTargetUrl(
+          `/trip/${tripId}`,
+          referenceType,
+          referenceId,
+        );
+    }
+  };
 
   const handleNotificationClick =
     async (
       notification: Notification,
     ) => {
-      /*
-       * 1. Marquer la notification comme lue.
-       */
       await markAsRead(
         notification,
       );
 
-      /*
-       * 2. Construire la destination.
-       */
       const target =
         getNotificationTarget(
           notification,
         );
 
-      /*
-       * 3. Fermer le panneau.
-       */
       setIsOpen(false);
 
-      /*
-       * 4. Naviguer vers le bon voyage,
-       *    le bon onglet et, plus tard,
-       *    le bon élément.
-       */
       if (target) {
         navigate(target);
       }
     };
-
-  /* =========================================================
-     TOUT MARQUER COMME LU
-     ========================================================= */
 
   const markAllAsRead =
     async (): Promise<void> => {
@@ -507,11 +425,9 @@ const getNotificationTarget = (
             `${import.meta.env.VITE_API_URL}/api/notifications/read-all`,
             {
               method: "PATCH",
-
               headers: {
                 Authorization:
                   `Bearer ${token}`,
-
                 "Content-Type":
                   "application/json",
               },
@@ -550,10 +466,6 @@ const getNotificationTarget = (
         );
       }
     };
-
-  /* =========================================================
-     FORMATER LA DATE
-     ========================================================= */
 
   const formatNotificationDate = (
     createdAt: string,
@@ -633,26 +545,14 @@ const getNotificationTarget = (
     );
   };
 
-  /* =========================================================
-     CINQ DERNIÈRES NOTIFICATIONS
-     ========================================================= */
-
   const visibleNotifications =
     notifications.slice(0, 5);
-
-  /* =========================================================
-     RENDU
-     ========================================================= */
 
   return (
     <div
       ref={notificationRef}
       className="notification-center"
     >
-      {/* =====================================================
-          CLOCHE
-          ===================================================== */}
-
       <button
         type="button"
         className={`notification-bell-button ${
@@ -690,10 +590,6 @@ const getNotificationTarget = (
         )}
       </button>
 
-      {/* =====================================================
-          PANNEAU
-          ===================================================== */}
-
       <div
         className={`notification-panel ${
           isOpen
@@ -701,10 +597,6 @@ const getNotificationTarget = (
             : ""
         }`}
       >
-        {/* ===================================================
-            HEADER DU PANNEAU
-            =================================================== */}
-
         <div className="notification-panel-header">
           <div>
             <h3>
@@ -726,15 +618,10 @@ const getNotificationTarget = (
           </div>
         </div>
 
-        {/* ===================================================
-            LISTE DES NOTIFICATIONS
-            =================================================== */}
-
         <div className="notification-panel-content">
           {isLoading ? (
             <div className="notification-empty">
               <span>🔔</span>
-
               <p>
                 Chargement...
               </p>
@@ -743,7 +630,6 @@ const getNotificationTarget = (
             0 ? (
             <div className="notification-empty">
               <span>🔔</span>
-
               <p>
                 Aucune notification pour le moment.
               </p>
@@ -765,18 +651,10 @@ const getNotificationTarget = (
                     )
                   }
                 >
-                  {/* ===============================
-                      ICÔNE
-                      =============================== */}
-
                   <div className="notification-item-icon">
                     {notification.emoji ||
                       "🔔"}
                   </div>
-
-                  {/* ===============================
-                      CONTENU
-                      =============================== */}
 
                   <div className="notification-item-content">
                     <div className="notification-item-title-row">
@@ -826,10 +704,6 @@ const getNotificationTarget = (
           )}
         </div>
 
-        {/* ===================================================
-            FOOTER
-            =================================================== */}
-
         {visibleNotifications.length >
           0 && (
           <div className="notification-panel-footer">
@@ -843,8 +717,9 @@ const getNotificationTarget = (
                 markAllAsRead
               }
             >
-              <CheckCheck size={17} />
-
+              <CheckCheck
+                size={17}
+              />
               Tout marquer comme lu
             </button>
 

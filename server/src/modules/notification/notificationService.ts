@@ -449,6 +449,66 @@ const notifyParticipantJoined = async (
   }
 };
 
+const notifyVoteCreated = async (
+  tripId: number,
+  actorUserId: number,
+  stepId: number,
+  stepCity: string,
+): Promise<void> => {
+  const trip =
+    await tripRepository.read(
+      tripId,
+    );
+
+  if (!trip) {
+    return;
+  }
+
+  const actor =
+    await userRepository.read(
+      actorUserId,
+    );
+
+  const actorName = actor
+    ? `${actor.firstname} ${actor.lastname}`.trim()
+    : "Un participant";
+
+  const members =
+    (await tripRepository.findMembersByTrip(
+      tripId,
+    )) as TripMember[];
+
+  for (const member of members) {
+    if (
+      Number(member.id) ===
+      Number(actorUserId)
+    ) {
+      continue;
+    }
+
+    try {
+      await createNotification({
+        userId: member.id,
+        tripId,
+        type: "vote_created",
+        title: "Nouveau vote",
+        message:
+          `${actorName} a voté pour l’étape « ${stepCity} ».`,
+        emoji: "🗳️",
+        contextLabel:
+          `Voyage ${trip.title}`,
+        referenceType: "step",
+        referenceId: stepId,
+      });
+    } catch (error) {
+      console.error(
+        `Erreur création notification vote_created pour l'utilisateur ${member.id} :`,
+        error,
+      );
+    }
+  }
+};
+
 export default {
   createNotification,
   getUserNotifications,
@@ -461,4 +521,5 @@ export default {
   notifyReimbursementConfirmed,
   notifyReimbursementRejected,
   notifyParticipantJoined,
+  notifyVoteCreated,
 };
