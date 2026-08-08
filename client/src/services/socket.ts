@@ -9,46 +9,64 @@ export const connectSocket = (
     return socket;
   }
 
-  socket = io(import.meta.env.VITE_API_URL, {
-    auth: {
-      token,
+  socket = io(
+    import.meta.env.VITE_API_URL,
+    {
+      auth: {
+        token,
+      },
+      transports: [
+        "websocket",
+        "polling",
+      ],
     },
-    transports: ["websocket", "polling"],
-  });
+  );
 
-  socket.on("connect", () => {
-    console.log(
-      "🟢 Socket.IO connecté :",
-      socket?.id,
-    );
-  });
+  socket.on(
+    "connect",
+    () => {
+      console.log(
+        "🟢 Socket.IO connecté :",
+        socket?.id,
+      );
+    },
+  );
 
-  socket.on("connect_error", (error) => {
-    console.error(
-      "🔴 Erreur Socket.IO :",
-      error.message,
-    );
-  });
+  socket.on(
+    "connect_error",
+    (error) => {
+      console.error(
+        "🔴 Erreur Socket.IO :",
+        error.message,
+      );
+    },
+  );
 
-  socket.on("disconnect", (reason) => {
-    console.log(
-      "🟠 Socket.IO déconnecté :",
-      reason,
-    );
-  });
+  socket.on(
+    "disconnect",
+    (reason) => {
+      console.log(
+        "🟠 Socket.IO déconnecté :",
+        reason,
+      );
+    },
+  );
 
   return socket;
 };
 
-export const getSocket = (): Socket | null => {
-  return socket;
-};
+export const getSocket =
+  (): Socket | null => {
+    return socket;
+  };
 
-export const disconnectSocket = (): void => {
-  if (!socket) {
-    return;
-  }
+export const disconnectSocket =
+  (): void => {
+    if (!socket) {
+      return;
+    }
 
-  socket.disconnect();
-  socket = null;
-};
+    socket.disconnect();
+
+    socket = null;
+  };
