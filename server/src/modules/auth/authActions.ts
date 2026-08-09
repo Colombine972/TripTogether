@@ -6,8 +6,9 @@ import jwt, {
   type JwtPayload,
 } from "jsonwebtoken";
 
-import passwordResetService from "../auth/PasswordResetService";
+import sendPasswordResetEmail from "../../services/passwordResetEmail";
 import userRepository from "../user/userRepository";
+import passwordResetService from "./PasswordResetService";
 
 interface MyPayload extends JwtPayload {
   sub: string;
@@ -165,17 +166,18 @@ export const forgotPassword: RequestHandler = async (
 
     if (result) {
       const frontendUrl =
-        process.env.FRONTEND_URL ||
-        "http://localhost:5173";
+        process.env.CLIENT_URL ||
+        "http://localhost:3000";
 
       const resetUrl =
         `${frontendUrl}/reset-password` +
         `?token=${encodeURIComponent(result.token)}`;
 
-      console.info(
-        `Lien de réinitialisation pour ${result.user.email}:`,
+      await sendPasswordResetEmail({
+        email: result.user.email,
+        firstname: result.user.firstname,
         resetUrl,
-      );
+      });
     }
 
     res.status(200).json({
