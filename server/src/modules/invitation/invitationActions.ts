@@ -2,11 +2,18 @@ import type { RequestHandler } from "express";
 import notificationService from "../notification/notificationService";
 import tripRepository from "../trip/tripRepository";
 import userRepository from "../user/userRepository";
+import invitationEmailService from "./invitationEmailService";
 import invitationRepository from "./invitationRepository";
 
-const read: RequestHandler = async (req, res, next) => {
+const read: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    const invitationId = Number(req.params.id);
+    const invitationId = Number(
+      req.params.id,
+    );
 
     if (Number.isNaN(invitationId)) {
       res.status(400).json({
@@ -29,18 +36,25 @@ const read: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    if (invitation.status === "accepted") {
+    if (
+      invitation.status === "accepted"
+    ) {
       res.status(409).json({
-        message: "Invitation déjà acceptée",
-        trip_id: invitation.trip_id,
+        message:
+          "Invitation déjà acceptée",
+        trip_id:
+          invitation.trip_id,
       });
 
       return;
     }
 
-    if (invitation.status === "refused") {
+    if (
+      invitation.status === "refused"
+    ) {
       res.status(410).json({
-        message: "Invitation déjà refusée",
+        message:
+          "Invitation déjà refusée",
       });
 
       return;
@@ -52,14 +66,15 @@ const read: RequestHandler = async (req, res, next) => {
   }
 };
 
-const edit: RequestHandler = async (req, res, next) => {
+const edit: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    const invitationId = Number(req.params.id);
-
-    const updateInvitation =
-      await invitationRepository.select(
-        invitationId,
-      );
+    const invitationId = Number(
+      req.params.id,
+    );
 
     if (Number.isNaN(invitationId)) {
       res.status(400).json({
@@ -68,6 +83,11 @@ const edit: RequestHandler = async (req, res, next) => {
 
       return;
     }
+
+    const updateInvitation =
+      await invitationRepository.select(
+        invitationId,
+      );
 
     if (!updateInvitation) {
       res.status(404).json({
@@ -92,12 +112,17 @@ const edit: RequestHandler = async (req, res, next) => {
     }
 
     if (
-      req.body.status === "accepted" &&
+      req.body.status ===
+        "accepted" &&
       updateInvitation.user_id
     ) {
       await notificationService.notifyParticipantJoined(
-        Number(updateInvitation.trip_id),
-        Number(updateInvitation.user_id),
+        Number(
+          updateInvitation.trip_id,
+        ),
+        Number(
+          updateInvitation.user_id,
+        ),
       );
     }
 
@@ -107,24 +132,15 @@ const edit: RequestHandler = async (req, res, next) => {
   }
 };
 
-const add: RequestHandler = async (req, res, next) => {
+const add: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    const tripId = Number(req.params.id);
-
-    const {
-      email,
-      message,
-    } = req.body;
-
-    const existingUser =
-      await userRepository.findByEmail(
-        email,
-      );
-
-    const user_id =
-      existingUser
-        ? existingUser.id
-        : null;
+    const tripId = Number(
+      req.params.id,
+    );
 
     if (Number.isNaN(tripId)) {
       res.status(400).json({
@@ -135,10 +151,23 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    if (!email || !message) {
+    const email =
+      typeof req.body.email ===
+      "string"
+        ? req.body.email
+            .trim()
+            .toLowerCase()
+        : "";
+
+    const message =
+      typeof req.body.message ===
+      "string"
+        ? req.body.message.trim()
+        : "";
+
+    if (!email) {
       res.status(400).json({
-        error:
-          "Email et message requis",
+        error: "Email requis",
       });
 
       return;
@@ -156,19 +185,94 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    const trip =
+      await tripRepository.read(
+        tripId,
+      );
+
+    if (!trip) {
+      res.status(404).json({
+        error:
+          "Voyage introuvable",
+      });
+
+      return;
+    }
+
+    const existingUser =
+      await userRepository.findByEmail(
+        email,
+      );
+
+    const userId =
+      existingUser?.id ?? null;
+
     const invitationId =
       await invitationRepository.create(
         tripId,
         email,
         message,
-        user_id,
+        userId,
       );
 
+    const clientUrl =
+      process.env.CLIENT_URL ??
+      "http://localhost:3000";
+
     const invitationLink =
-      `http://localhost:3000/trip/${tripId}/invitation/${invitationId}`;
+      `${clientUrl}/trip/${tripId}/invitation/${invitationId}`;
+
+    let emailSent = false;
+
+    try {
+      await invitationEmailService.sendTripInvitationEmail(
+        {
+          recipientEmail: email,
+          invitedFirstname:
+            existingUser?.firstname ??
+            null,
+          organizerFirstname:
+            trip.owner_firstname ??
+            "Un organisateur",
+          organizerLastname:
+            trip.owner_lastname ??
+            null,
+          tripId,
+          invitationId,
+          tripTitle:
+            trip.title,
+          city:
+            trip.city,
+          country:
+            trip.country,
+          startAt:
+            trip.start_at,
+          endAt:
+            trip.end_at,
+          message:
+            message || null,
+        },
+      );
+
+      emailSent = true;
+
+      console.log(
+        `Email d'invitation envoyé à ${email}`,
+      );
+    } catch (emailError) {
+      console.error(
+        `Invitation ${invitationId} créée mais email non envoyé à ${email} :`,
+        emailError,
+      );
+    }
 
     res.status(201).json({
+      invitationId,
       invitationLink,
+      emailSent,
+      message: emailSent
+        ? "Invitation créée et email envoyé avec succès"
+        : "Invitation créée mais email non envoyé",
     });
   } catch (err) {
     next(err);
@@ -178,8 +282,9 @@ const add: RequestHandler = async (req, res, next) => {
 const selectInvitationsByTrip: RequestHandler =
   async (req, res, next) => {
     try {
-      const tripId =
-        Number(req.params.id);
+      const tripId = Number(
+        req.params.id,
+      );
 
       if (Number.isNaN(tripId)) {
         res.status(400).json({
@@ -243,11 +348,13 @@ const delate: RequestHandler = async (
   next,
 ) => {
   try {
-    const tripId =
-      Number(req.params.tripId);
+    const tripId = Number(
+      req.params.tripId,
+    );
 
-    const userId =
-      Number(req.params.userId);
+    const userId = Number(
+      req.params.userId,
+    );
 
     if (
       Number.isNaN(tripId) ||

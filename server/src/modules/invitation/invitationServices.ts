@@ -30,27 +30,45 @@ const checkExpirationDate: RequestHandler = async (
         invitationId,
       );
 
+    if (!invitation) {
+      next();
+      return;
+    }
+
     if (
-      invitation &&
       invitation.status === "pending" &&
       invitation.trip_end
     ) {
-      const tripEnd =
-        new Date(
-          invitation.trip_end,
+      const datePart =
+        String(invitation.trip_end).slice(
+          0,
+          10,
         );
 
-      if (
-        !Number.isNaN(
-          tripEnd.getTime(),
-        ) &&
-        new Date() > tripEnd
-      ) {
-        res.status(400).json({
-          error: "Invitation expirée",
-        });
+      const [year, month, day] =
+        datePart
+          .split("-")
+          .map(Number);
 
-        return;
+      if (year && month && day) {
+        const tripEnd = new Date(
+          year,
+          month - 1,
+          day,
+          23,
+          59,
+          59,
+          999,
+        );
+
+        if (new Date() > tripEnd) {
+          res.status(400).json({
+            error:
+              "Invitation expirée",
+          });
+
+          return;
+        }
       }
     }
 
