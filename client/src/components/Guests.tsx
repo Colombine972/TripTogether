@@ -29,6 +29,16 @@ function Guests(props: GuestsProps) {
       </h3>
 
       {/* =====================================================
+          MESSAGE SI AUCUNE INVITATION
+          ===================================================== */}
+
+      {props.type === "others" && invited.length === 0 && (
+        <p className="guests-empty-message">
+          Aucune invitation en attente
+        </p>
+      )}
+
+      {/* =====================================================
           LISTE DES MEMBRES
           ===================================================== */}
 

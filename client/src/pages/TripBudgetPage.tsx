@@ -731,7 +731,7 @@ function TripBudgetPage() {
     );
   }, [balancesByParticipant]);
 
-  const handleExportBudgetPdf = () => {
+  const handleExportBudgetPdf = async () => {
     if (!trip) {
       toast.error("Impossible d'exporter le budget : voyage introuvable.");
 
@@ -745,7 +745,7 @@ function TripBudgetPage() {
     }
 
     try {
-      exportBudgetToPdf({
+      await exportBudgetToPdf({
         tripTitle: trip.title || "Voyage TripTogether",
 
         destination:
@@ -768,6 +768,13 @@ function TripBudgetPage() {
         balances: balancesByParticipant,
 
         reimbursements,
+
+        members,
+
+        tripImageUrl:
+        trip.place_id
+          ? `${import.meta.env.VITE_API_URL}/api/places/photo/${trip.place_id}`
+          : null,
       });
 
       toast.success("Le PDF du budget a été généré.");

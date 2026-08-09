@@ -1,3 +1,4 @@
+import { Eye, EyeOff } from "lucide-react";
 import { useRef, useState } from "react";
 import type { FormEventHandler } from "react";
 import { Link, useNavigate } from "react-router";
@@ -8,11 +9,14 @@ import { useAuth } from "../contexts/AuthContext";
 function Login() {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+
   const { setAuth } = useAuth();
   const navigate = useNavigate();
-  const [error, setError] = useState<string>("");
 
-  const handleSubmit: FormEventHandler = async (event) => {
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
     setError("");
 
@@ -20,8 +24,10 @@ function Login() {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/auth/login`,
         {
-          method: "post",
-          headers: { "Content-Type": "application/json" },
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             email: emailRef.current?.value,
             password: passwordRef.current?.value,
@@ -31,9 +37,12 @@ function Login() {
 
       if (response.status === 200) {
         const data = await response.json();
+
         setAuth(data);
+
         localStorage.setItem("token", data.token);
         localStorage.setItem("auth", JSON.stringify(data));
+
         navigate("/", { replace: true });
         window.scrollTo({ top: 0 });
       } else if (response.status === 401) {
@@ -50,17 +59,25 @@ function Login() {
   };
 
   return (
-    <div className="auth auth-page">
+    <div className="auth-page">
       <div className="auth-card">
+
         <div className="logo-container">
-          <span className="logo-icon">🧳</span>
+          <div className="logo-icon">🧳</div>
+
           <h1 className="logo-text">Trip Together</h1>
         </div>
+
+
         <h2 className="title">Bon retour parmi nous</h2>
+
 
         {error && <div className="error-message">{error}</div>}
 
+
         <form className="auth-form" onSubmit={handleSubmit}>
+
+
           <div className="input-group">
             <input
               ref={emailRef}
@@ -68,26 +85,51 @@ function Login() {
               id="email"
               className="form-input"
               placeholder="Email"
-              required
-            />
-          </div>
-          <div className="input-group">
-            <input
-              ref={passwordRef}
-              type="password"
-              id="password"
-              className="form-input"
-              placeholder="Mot de passe"
+              autoComplete="email"
               required
             />
           </div>
 
+
+          <div className="input-group password-input-group">
+            <input
+              ref={passwordRef}
+              type={showPassword ? "text" : "password"}
+              id="password"
+              className="form-input password-input"
+              placeholder="Mot de passe"
+              autoComplete="current-password"
+              required
+            />
+
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((previous) => !previous)}
+              aria-label={
+                showPassword
+                  ? "Masquer le mot de passe"
+                  : "Afficher le mot de passe"
+              }
+              title={
+                showPassword
+                  ? "Masquer le mot de passe"
+                  : "Afficher le mot de passe"
+              }
+            >
+              {showPassword ? <EyeOff size={21} /> : <Eye size={21} />}
+            </button>
+          </div>
+
+          
           <button type="submit" className="submit-btn">
             SE CONNECTER
           </button>
         </form>
+
+
         <div className="footer-login">
-          Pas encore membre ?
+          Pas encore membre ?{" "}
           <Link to="/register" onClick={() => window.scrollTo({ top: 0 })}>
             S'inscrire
           </Link>
