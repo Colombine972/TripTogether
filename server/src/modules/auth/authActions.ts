@@ -5,6 +5,8 @@ import jwt, {
   TokenExpiredError,
   type JwtPayload,
 } from "jsonwebtoken";
+
+import passwordResetService from "../auth/PasswordResetService";
 import userRepository from "../user/userRepository";
 
 interface MyPayload extends JwtPayload {
@@ -18,12 +20,17 @@ type RequestWithAuth = Request & {
 export const login: RequestHandler = async (req, res, next) => {
   try {
     const user = await userRepository.readByEmail(req.body.email);
+
     if (!user) {
       res.sendStatus(403);
       return;
     }
 
-    const verified = await argon2.verify(user.password, req.body.password);
+    const verified = await argon2.verify(
+      user.password,
+      req.body.password,
+    );
+
     if (!verified) {
       res.sendStatus(401);
       return;
@@ -35,17 +42,28 @@ export const login: RequestHandler = async (req, res, next) => {
       sub: user.id.toString(),
     };
 
-    const token = jwt.sign(payload, process.env.APP_SECRET as string, {
-      expiresIn: "3h",
-    });
+    const token = jwt.sign(
+      payload,
+      process.env.APP_SECRET as string,
+      {
+        expiresIn: "3h",
+      },
+    );
 
-    res.json({ token, user: userWithoutHashedPassword });
+    res.json({
+      token,
+      user: userWithoutHashedPassword,
+    });
   } catch (err) {
     next(err);
   }
 };
 
-export const hashPassword: RequestHandler = async (req, _res, next) => {
+export const hashPassword: RequestHandler = async (
+  req,
+  _res,
+  next,
+) => {
   try {
     const { password, ...otherBodyProps } = req.body;
 
@@ -67,11 +85,18 @@ export const hashPassword: RequestHandler = async (req, _res, next) => {
   }
 };
 
-export const verifyToken: RequestHandler = (req, res, next) => {
+export const verifyToken: RequestHandler = (
+  req,
+  res,
+  next,
+) => {
   try {
     const authHeader = req.get("Authorization");
+
     if (!authHeader) {
-      return res.status(401).json({ error: "Authorization header is missing" });
+      return res.status(401).json({
+        error: "Authorization header is missing",
+      });
     }
 
     const [type, token] = authHeader.split(" ");
@@ -82,9 +107,9 @@ export const verifyToken: RequestHandler = (req, res, next) => {
       token === "null" ||
       token === "undefined"
     ) {
-      return res
-        .status(401)
-        .json({ error: "Authorization header must be a valid Bearer token" });
+      return res.status(401).json({
+        error: "Authorization header must be a valid Bearer token",
+      });
     }
 
     const decoded = jwt.verify(
@@ -93,18 +118,129 @@ export const verifyToken: RequestHandler = (req, res, next) => {
     ) as MyPayload;
 
     (req as RequestWithAuth).auth = decoded;
+
     next();
   } catch (err) {
     console.error("JWT Verification Error:", err);
 
     if (err instanceof TokenExpiredError) {
-      return res.status(401).json({ error: "Token expired" });
+      return res.status(401).json({
+        error: "Token expired",
+      });
     }
 
     if (err instanceof JsonWebTokenError) {
-      return res.status(401).json({ error: "Invalid token" });
+      return res.status(401).json({
+        error: "Invalid token",
+      });
     }
 
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
+};
+
+export const forgotPassword: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
+  try {
+    const email =
+      typeof req.body.email === "string"
+        ? req.body.email.trim().toLowerCase()
+        : "";
+
+    if (!email) {
+      res.status(400).json({
+        message: "L'adresse e-mail est obligatoire",
+      });
+
+      return;
+    }
+
+    const result =
+      await passwordResetService.createPasswordReset(email);
+
+    if (result) {
+      const frontendUrl =
+        process.env.FRONTEND_URL ||
+        "http://localhost:5173";
+
+      const resetUrl =
+        `${frontendUrl}/reset-password` +
+        `?token=${encodeURIComponent(result.token)}`;
+
+      console.info(
+        `Lien de réinitialisation pour ${result.user.email}:`,
+        resetUrl,
+      );
+    }
+
+    res.status(200).json({
+      message:
+        "Si un compte est associé à cette adresse, " +
+        "un e-mail de réinitialisation vous a été envoyé.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resetPassword: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
+  try {
+    const token =
+      typeof req.body.token === "string"
+        ? req.body.token.trim()
+        : "";
+
+    const password =
+      typeof req.body.password === "string"
+        ? req.body.password
+        : "";
+
+    if (!token || !password) {
+      res.status(400).json({
+        message: "Token et mot de passe obligatoires",
+      });
+
+      return;
+    }
+
+    if (password.length < 8) {
+      res.status(400).json({
+        message:
+          "Le mot de passe doit contenir au moins 8 caractères",
+      });
+
+      return;
+    }
+
+    const success =
+      await passwordResetService.resetPassword(
+        token,
+        password,
+      );
+
+    if (!success) {
+      res.status(400).json({
+        message:
+          "Ce lien de réinitialisation est invalide ou a expiré.",
+      });
+
+      return;
+    }
+
+    res.status(200).json({
+      message:
+        "Votre mot de passe a été modifié avec succès.",
+    });
+  } catch (error) {
+    next(error);
   }
 };

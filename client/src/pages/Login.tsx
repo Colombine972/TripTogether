@@ -61,23 +61,17 @@ function Login() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-
         <div className="logo-container">
           <div className="logo-icon">🧳</div>
 
           <h1 className="logo-text">Trip Together</h1>
         </div>
 
-
         <h2 className="title">Bon retour parmi nous</h2>
-
 
         {error && <div className="error-message">{error}</div>}
 
-
         <form className="auth-form" onSubmit={handleSubmit}>
-
-
           <div className="input-group">
             <input
               ref={emailRef}
@@ -89,7 +83,6 @@ function Login() {
               required
             />
           </div>
-
 
           <div className="input-group password-input-group">
             <input
@@ -121,12 +114,16 @@ function Login() {
             </button>
           </div>
 
-          
+          <div className="forgot-password-container">
+            <Link to="/forgot-password" className="forgot-password-link">
+              Mot de passe oublié ?
+            </Link>
+          </div>
+
           <button type="submit" className="submit-btn">
             SE CONNECTER
           </button>
         </form>
-
 
         <div className="footer-login">
           Pas encore membre ?{" "}

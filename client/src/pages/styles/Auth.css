@@ -183,6 +183,32 @@
 }
 
 /* =========================================================
+   MOT DE PASSE OUBLIÉ
+   ========================================================= */
+
+.forgot-password-container {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: -5px;
+  padding-right: 8px;
+}
+
+.forgot-password-link {
+  color: #555;
+
+  font-size: 13px;
+  text-decoration: none;
+
+  transition: color 0.2s ease;
+}
+
+.forgot-password-link:hover {
+  color: #2e5c46;
+  text-decoration: underline;
+}
+
+/* =========================================================
    ICÔNE DE VALIDATION
    ========================================================= */
 
@@ -324,4 +350,40 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+/* =========================================================
+   DESCRIPTION AUTHENTIFICATION
+   ========================================================= */
+
+.auth-description {
+  max-width: 400px;
+  margin: -10px auto 25px;
+
+  color: #555;
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   MESSAGE DE SUCCÈS
+   ========================================================= */
+
+.success-message {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+
+  color: #245c3b;
+  background-color: #ecfdf3;
+
+  border-left: 4px solid #2e7d4f;
+  border-radius: 8px;
+
+  font-size: 14px;
+  line-height: 1.4;
+
+  animation: slideDown 0.3s ease-out;
 }
