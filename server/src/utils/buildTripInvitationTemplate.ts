@@ -28,11 +28,7 @@ const formatDate = (
   if (value instanceof Date) {
     date = value;
   } else {
-    const datePart = String(value).slice(
-      0,
-      10,
-    );
-
+    const datePart = String(value).slice(0, 10);
     const [year, month, day] =
       datePart.split("-").map(Number);
 
@@ -73,8 +69,18 @@ const buildTripInvitationTemplate = ({
   invitationUrl,
   message,
 }: BuildTripInvitationTemplateParams): string => {
+  const logoUrl =
+    process.env.EMAIL_LOGO_URL;
+
   const organizerName =
-    `${organizerFirstname} ${organizerLastname ?? ""}`.trim();
+    `${organizerFirstname} ${organizerLastname ?? ""}`
+      .trim();
+
+  const safeOrganizerName =
+    escapeHtml(
+      organizerName ||
+        "Un organisateur",
+    );
 
   const safeInvitedFirstname =
     invitedFirstname?.trim()
@@ -83,32 +89,16 @@ const buildTripInvitationTemplate = ({
         )
       : null;
 
-  const safeOrganizerName =
-    escapeHtml(
-      organizerName ||
-        "Un organisateur",
-    );
-
   const safeTripTitle =
     escapeHtml(
-      tripTitle || "un voyage",
+      tripTitle || "Voyage",
     );
 
-  const destination = [
-    city,
-    country,
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const safeCity =
+    escapeHtml(city || "");
 
-  const safeDestination =
-    escapeHtml(destination);
-
-  const formattedStartAt =
-    formatDate(startAt);
-
-  const formattedEndAt =
-    formatDate(endAt);
+  const safeCountry =
+    escapeHtml(country || "");
 
   const safeInvitationUrl =
     escapeHtml(invitationUrl);
@@ -117,6 +107,12 @@ const buildTripInvitationTemplate = ({
     message?.trim()
       ? escapeHtml(message.trim())
       : null;
+
+  const formattedStartAt =
+    formatDate(startAt);
+
+  const formattedEndAt =
+    formatDate(endAt);
 
   return `
 <!DOCTYPE html>
@@ -127,16 +123,19 @@ const buildTripInvitationTemplate = ({
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>Invitation TripTogether</title>
+
+    <title>
+      Invitation - TripTogether
+    </title>
   </head>
 
   <body
     style="
-      margin: 0;
-      padding: 0;
-      background-color: #f7f4f8;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #2d2d2d;
+      margin:0;
+      padding:0;
+      background-color:#f7f7f7;
+      font-family:Arial, Helvetica, sans-serif;
+      color:#222222;
     "
   >
     <table
@@ -146,13 +145,14 @@ const buildTripInvitationTemplate = ({
       cellpadding="0"
       border="0"
       style="
-        width: 100%;
-        background-color: #f7f4f8;
-        padding: 32px 16px;
+        width:100%;
+        background-color:#f7f7f7;
+        padding:32px 16px;
       "
     >
       <tr>
         <td align="center">
+
           <table
             role="presentation"
             width="100%"
@@ -160,100 +160,124 @@ const buildTripInvitationTemplate = ({
             cellpadding="0"
             border="0"
             style="
-              width: 100%;
-              max-width: 620px;
-              background-color: #ffffff;
-              border-radius: 20px;
-              overflow: hidden;
-              box-shadow: 0 12px 35px rgba(60, 35, 65, 0.08);
+              width:100%;
+              max-width:620px;
+              background-color:#ffffff;
+              border-radius:24px;
+              overflow:hidden;
+              box-shadow:0 12px 35px rgba(0, 0, 0, 0.08);
             "
           >
+
             <tr>
               <td
                 style="
-                  padding: 30px 32px;
-                  background-color: #64476d;
-                  text-align: center;
+                  background:linear-gradient(
+                    135deg,
+                    #2d7738 0%,
+                    #25642f 100%
+                  );
+                  padding:32px 24px 28px;
+                  text-align:center;
                 "
               >
-                <div
-                  style="
-                    font-size: 34px;
-                    line-height: 1;
-                    margin-bottom: 10px;
-                  "
-                >
-                  ✈️
-                </div>
+                ${
+                  logoUrl
+                    ? `
+                      <img
+                        src="${logoUrl}"
+                        alt="TripTogether"
+                        width="76"
+                        style="
+                          display:block;
+                          margin:0 auto 16px;
+                          border-radius:18px;
+                          background:#ffffff;
+                          padding:8px;
+                        "
+                      />
+                    `
+                    : `
+                      <div
+                        style="
+                          font-size:34px;
+                          line-height:1;
+                          margin-bottom:16px;
+                        "
+                      >
+                        🧳
+                      </div>
+                    `
+                }
 
-                <div
+                <h1
                   style="
-                    color: #ffffff;
-                    font-size: 25px;
-                    font-weight: 700;
-                    letter-spacing: -0.5px;
+                    margin:0;
+                    font-size:32px;
+                    line-height:1.2;
+                    color:#ffffff;
+                    font-weight:700;
                   "
                 >
                   TripTogether
-                </div>
+                </h1>
 
-                <div
+                <p
                   style="
-                    margin-top: 6px;
-                    color: #eee5f1;
-                    font-size: 14px;
+                    margin:10px 0 0;
+                    font-size:16px;
+                    line-height:1.5;
+                    color:#e9f4eb;
                   "
                 >
-                  Voyagez ensemble, simplement.
-                </div>
+                  Une invitation au voyage vient d'arriver
+                </p>
               </td>
             </tr>
 
             <tr>
               <td
                 style="
-                  padding: 38px 36px 24px;
+                  padding:36px 32px 16px;
                 "
               >
                 <p
                   style="
-                    margin: 0 0 16px;
-                    font-size: 16px;
-                    line-height: 1.6;
+                    margin:0 0 18px;
+                    font-size:18px;
+                    line-height:1.5;
+                    color:#222222;
                   "
                 >
                   ${
                     safeInvitedFirstname
-                      ? `Bonjour ${safeInvitedFirstname},`
+                      ? `Bonjour <strong>${safeInvitedFirstname}</strong>,`
                       : "Bonjour,"
                   }
                 </p>
 
-                <h1
-                  style="
-                    margin: 0 0 18px;
-                    color: #3f2847;
-                    font-size: 27px;
-                    line-height: 1.3;
-                  "
-                >
-                  Vous êtes invité(e) à un voyage 🎉
-                </h1>
-
                 <p
                   style="
-                    margin: 0 0 28px;
-                    color: #55505a;
-                    font-size: 16px;
-                    line-height: 1.65;
+                    margin:0 0 24px;
+                    font-size:17px;
+                    line-height:1.7;
+                    color:#444444;
                   "
                 >
-                  <strong>
+                  <strong
+                    style="
+                      color:#111111;
+                    "
+                  >
                     ${safeOrganizerName}
                   </strong>
                   vous invite à rejoindre son voyage
-                  <strong>
-                    ${safeTripTitle}
+                  <strong
+                    style="
+                      color:#111111;
+                    "
+                  >
+                    "${safeTripTitle}"
                   </strong>.
                 </p>
 
@@ -264,58 +288,96 @@ const buildTripInvitationTemplate = ({
                   cellpadding="0"
                   border="0"
                   style="
-                    margin-bottom: 26px;
-                    background-color: #faf7fb;
-                    border: 1px solid #eee7f0;
-                    border-radius: 16px;
+                    background:linear-gradient(
+                      180deg,
+                      #f6fbf7 0%,
+                      #ffffff 100%
+                    );
+                    border:1px solid #d8eadb;
+                    border-radius:20px;
+                    margin-bottom:28px;
                   "
                 >
                   <tr>
                     <td
                       style="
-                        padding: 24px;
+                        padding:24px;
                       "
                     >
-                      <div
+                      <p
                         style="
-                          margin-bottom: 16px;
-                          color: #64476d;
-                          font-size: 20px;
-                          font-weight: 700;
+                          margin:0 0 14px;
+                          font-size:13px;
+                          font-weight:700;
+                          letter-spacing:0.08em;
+                          text-transform:uppercase;
+                          color:#2d7738;
+                        "
+                      >
+                        Votre prochain voyage
+                      </p>
+
+                      <p
+                        style="
+                          margin:0 0 18px;
+                          font-size:24px;
+                          line-height:1.3;
+                          font-weight:700;
+                          color:#111111;
                         "
                       >
                         ${safeTripTitle}
-                      </div>
+                      </p>
 
-                      <div
-                        style="
-                          margin-bottom: 10px;
-                          color: #55505a;
-                          font-size: 15px;
-                          line-height: 1.5;
-                        "
+                      <table
+                        role="presentation"
+                        width="100%"
+                        cellspacing="0"
+                        cellpadding="0"
+                        border="0"
                       >
-                        📍
-                        <strong>
-                          Destination :
-                        </strong>
-                        ${safeDestination}
-                      </div>
+                        <tr>
+                          <td
+                            style="
+                              padding:0 0 12px;
+                              font-size:15px;
+                              line-height:1.6;
+                              color:#666666;
+                            "
+                          >
+                            <strong
+                              style="
+                                color:#222222;
+                              "
+                            >
+                              📍 Destination :
+                            </strong>
 
-                      <div
-                        style="
-                          color: #55505a;
-                          font-size: 15px;
-                          line-height: 1.5;
-                        "
-                      >
-                        📅
-                        <strong>
-                          Dates :
-                        </strong>
-                        du ${formattedStartAt}
-                        au ${formattedEndAt}
-                      </div>
+                            ${safeCity}, ${safeCountry}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td
+                            style="
+                              font-size:15px;
+                              line-height:1.6;
+                              color:#666666;
+                            "
+                          >
+                            <strong
+                              style="
+                                color:#222222;
+                              "
+                            >
+                              📅 Dates :
+                            </strong>
+
+                            du ${formattedStartAt}
+                            au ${formattedEndAt}
+                          </td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
                 </table>
@@ -330,40 +392,41 @@ const buildTripInvitationTemplate = ({
                         cellpadding="0"
                         border="0"
                         style="
-                          margin-bottom: 28px;
-                          background-color: #f3edf5;
-                          border-radius: 14px;
+                          margin-bottom:28px;
                         "
                       >
                         <tr>
                           <td
                             style="
-                              padding: 20px 22px;
+                              background-color:#f7f7f7;
+                              border-radius:16px;
+                              padding:18px 20px;
                             "
                           >
-                            <div
+                            <p
                               style="
-                                margin-bottom: 8px;
-                                color: #64476d;
-                                font-size: 13px;
-                                font-weight: 700;
-                                text-transform: uppercase;
-                                letter-spacing: 0.5px;
+                                margin:0 0 10px;
+                                font-size:13px;
+                                font-weight:700;
+                                letter-spacing:0.06em;
+                                text-transform:uppercase;
+                                color:#2d7738;
                               "
                             >
                               Petit mot de ${safeOrganizerName}
-                            </div>
+                            </p>
 
-                            <div
+                            <p
                               style="
-                                color: #493f4c;
-                                font-size: 15px;
-                                font-style: italic;
-                                line-height: 1.6;
+                                margin:0;
+                                font-size:15px;
+                                font-style:italic;
+                                line-height:1.7;
+                                color:#555555;
                               "
                             >
                               « ${safeMessage} »
-                            </div>
+                            </p>
                           </td>
                         </tr>
                       </table>
@@ -377,25 +440,54 @@ const buildTripInvitationTemplate = ({
                   cellspacing="0"
                   cellpadding="0"
                   border="0"
+                  style="
+                    margin-bottom:28px;
+                  "
+                >
+                  <tr>
+                    <td
+                      style="
+                        background-color:#f7f7f7;
+                        border-radius:16px;
+                        padding:18px 20px;
+                        font-size:15px;
+                        line-height:1.7;
+                        color:#555555;
+                      "
+                    >
+                      Consultez les informations du voyage puis acceptez ou refusez directement l'invitation depuis TripTogether.
+                    </td>
+                  </tr>
+                </table>
+
+                <table
+                  role="presentation"
+                  cellspacing="0"
+                  cellpadding="0"
+                  border="0"
+                  style="
+                    margin:0 auto 20px;
+                  "
                 >
                   <tr>
                     <td
                       align="center"
                       style="
-                        padding: 4px 0 28px;
+                        border-radius:14px;
+                        background-color:#ff385c;
                       "
                     >
                       <a
                         href="${safeInvitationUrl}"
+                        target="_blank"
                         style="
-                          display: inline-block;
-                          padding: 15px 30px;
-                          background-color: #64476d;
-                          color: #ffffff;
-                          font-size: 16px;
-                          font-weight: 700;
-                          text-decoration: none;
-                          border-radius: 12px;
+                          display:inline-block;
+                          padding:16px 28px;
+                          font-size:16px;
+                          font-weight:700;
+                          color:#ffffff;
+                          text-decoration:none;
+                          border-radius:14px;
                         "
                       >
                         Voir l'invitation
@@ -406,16 +498,14 @@ const buildTripInvitationTemplate = ({
 
                 <p
                   style="
-                    margin: 0;
-                    color: #77717a;
-                    font-size: 13px;
-                    line-height: 1.6;
-                    text-align: center;
+                    margin:0 0 8px;
+                    text-align:center;
+                    font-size:13px;
+                    line-height:1.6;
+                    color:#8a8a8a;
                   "
                 >
-                  Vous pourrez consulter toutes les informations du voyage,
-                  puis accepter ou refuser l'invitation directement depuis
-                  TripTogether.
+                  Ce lien vous redirige directement vers votre invitation TripTogether.
                 </p>
               </td>
             </tr>
@@ -423,24 +513,74 @@ const buildTripInvitationTemplate = ({
             <tr>
               <td
                 style="
-                  padding: 22px 30px;
-                  background-color: #faf8fa;
-                  border-top: 1px solid #eee9ef;
-                  color: #928a95;
-                  font-size: 12px;
-                  line-height: 1.5;
-                  text-align: center;
+                  padding:20px 32px 28px;
+                  text-align:center;
                 "
               >
-                Cet email vous a été envoyé automatiquement par
-                <strong>TripTogether</strong>.
+                <div
+                  style="
+                    height:1px;
+                    background-color:#eeeeee;
+                    margin-bottom:20px;
+                  "
+                ></div>
 
-                <br />
+                <p
+                  style="
+                    margin:0 0 8px;
+                    font-size:14px;
+                    color:#6b6b6b;
+                  "
+                >
+                  À bientôt ✈️
+                </p>
 
-                Organisez, partagez et profitez du voyage ensemble.
+                <p
+                  style="
+                    margin:0;
+                    font-size:14px;
+                    font-weight:700;
+                    color:#222222;
+                  "
+                >
+                  L'équipe TripTogether
+                </p>
+              </td>
+            </tr>
+
+          </table>
+
+          <table
+            role="presentation"
+            width="100%"
+            cellspacing="0"
+            cellpadding="0"
+            border="0"
+            style="
+              max-width:620px;
+            "
+          >
+            <tr>
+              <td
+                style="
+                  padding:16px 24px 0;
+                  text-align:center;
+                "
+              >
+                <p
+                  style="
+                    margin:0;
+                    font-size:12px;
+                    line-height:1.6;
+                    color:#9a9a9a;
+                  "
+                >
+                  Vous recevez cet email car ${safeOrganizerName} vous a invité(e) à rejoindre un voyage sur TripTogether.
+                </p>
               </td>
             </tr>
           </table>
+
         </td>
       </tr>
     </table>
