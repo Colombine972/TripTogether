@@ -258,35 +258,85 @@ function HomePage() {
                 <strong>1 248,00 €</strong>
               </div>
 
-              <div className="fake-chart">
-                <span className="chart-line chart-line-1" />
-                <span className="chart-line chart-line-2" />
-                <span className="chart-line chart-line-3" />
-                <span className="chart-line chart-line-4" />
-                <span className="chart-line chart-line-5" />
-                <span className="chart-line chart-line-6" />
-              </div>
+              <div className="budget-visuals">
+                <div className="budget-line-chart">
+                  <svg
+                    viewBox="0 0 180 85"
+                    role="img"
+                    aria-label="Évolution du budget"
+                  >
+                    <defs>
+                      <linearGradient
+                        id="budgetAreaGradient"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor="#dcefdc"
+                          stopOpacity="0.8"
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor="#dcefdc"
+                          stopOpacity="0.15"
+                        />
+                      </linearGradient>
+                    </defs>
 
-              <div className="budget-categories">
-                <span>
-                  <i className="category-dot logement" />
-                  Logement
-                </span>
+                    <path
+                      className="budget-chart-area"
+                      d="M5 65
+             L28 45
+             L52 56
+             L78 43
+             L105 56
+             L135 39
+             L175 20
+             L175 80
+             L5 80 Z"
+                    />
 
-                <span>
-                  <i className="category-dot transport" />
-                  Transport
-                </span>
+                    <path
+                      className="budget-chart-line"
+                      d="M5 65
+             L28 45
+             L52 56
+             L78 43
+             L105 56
+             L135 39
+             L175 20"
+                    />
+                  </svg>
+                </div>
 
-                <span>
-                  <i className="category-dot activities" />
-                  Activités
-                </span>
+                <div className="budget-category-chart">
+                  <div className="budget-donut" />
 
-                <span>
-                  <i className="category-dot others" />
-                  Autres
-                </span>
+                  <div className="budget-categories">
+                    <span>
+                      <i className="category-dot logement" />
+                      Logement
+                    </span>
+
+                    <span>
+                      <i className="category-dot transport" />
+                      Transport
+                    </span>
+
+                    <span>
+                      <i className="category-dot activities" />
+                      Activités
+                    </span>
+
+                    <span>
+                      <i className="category-dot others" />
+                      Autres
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </article>
@@ -309,25 +359,39 @@ function HomePage() {
 
             <div className="feature-demo reimbursement-demo">
               <div className="reimbursement-row">
-                <span className="small-avatar">A</span>
+                <img
+                  src="avatar2.png"
+                  alt="Anthony"
+                  className="reimbursement-avatar"
+                />
 
-                <span>Anthony doit à Cindy</span>
+                <span className="reimbursement-text">Anthony doit à Cindy</span>
 
                 <strong className="amount-positive">+42,50 €</strong>
               </div>
 
               <div className="reimbursement-row">
-                <span className="small-avatar">C</span>
+                <img
+                  src="avatar1.png"
+                  alt="Cindy"
+                  className="reimbursement-avatar"
+                />
 
-                <span>Cindy doit à Marie</span>
+                <span className="reimbursement-text">Cindy doit à Marie</span>
 
                 <strong className="amount-negative">-18,20 €</strong>
               </div>
 
               <div className="reimbursement-row">
-                <span className="small-avatar">T</span>
+                <img
+                  src="avatar4.png"
+                  alt="Thomas"
+                  className="reimbursement-avatar"
+                />
 
-                <span>Thomas doit à Anthony</span>
+                <span className="reimbursement-text">
+                  Thomas doit à Anthony
+                </span>
 
                 <strong className="amount-positive">+60,70 €</strong>
               </div>
@@ -350,7 +414,7 @@ function HomePage() {
             <div className="feature-demo notifications-demo">
               <div className="notification-demo-row">
                 <span className="notification-demo-icon">
-                  <WalletCards size={14} />
+                  <WalletCards size={20} />
                 </span>
 
                 <div>
@@ -361,7 +425,7 @@ function HomePage() {
 
               <div className="notification-demo-row">
                 <span className="notification-demo-icon destination">
-                  <MapPin size={14} />
+                  <MapPin size={20} />
                 </span>
 
                 <div>
@@ -372,7 +436,7 @@ function HomePage() {
 
               <div className="notification-demo-row">
                 <span className="notification-demo-icon repayment">
-                  <CircleDollarSign size={14} />
+                  <CircleDollarSign size={20} />
                 </span>
 
                 <div>
@@ -399,8 +463,14 @@ function HomePage() {
             </p>
 
             <div className="feature-demo recap-demo">
-              <strong>Road trip Portugal 🇵🇹</strong>
-
+              <div className="recap-trip-title">
+                <strong>Road trip Portugal</strong>
+                <img
+                  src="portugal.png"
+                  alt="Drapeau du Portugal"
+                  className="recap-country-flag"
+                />
+              </div>
               <span>17 – 22 août 2026</span>
 
               <span>👥 5 participants</span>

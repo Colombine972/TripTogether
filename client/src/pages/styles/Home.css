@@ -115,7 +115,7 @@ padding-bottom: 1rem;
 
   border-radius: 11px;
 
-  font-family: inherit;
+  font-family: var(--body-text);
   font-size: 1.1rem;
   font-weight: 700;
 
@@ -544,7 +544,8 @@ padding-bottom: 1rem;
 }
 
 .destination-content strong {
-  font-size: 0.8rem;
+  font-size: 1rem;
+  font-family: var(--body-text);
 }
 
 .destination-content span {
@@ -637,94 +638,102 @@ padding-bottom: 1rem;
   font-size: 1.2rem;
 }
 
-.fake-chart {
-  position: absolute;
+.budget-visuals {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  align-items: end;
 
-  left: 1rem;
-  bottom: 1.1rem;
+  gap: 1rem;
 
-  width: 45%;
-  height: 55px;
+  margin-top: 1rem;
 }
 
-.chart-line {
-  position: absolute;
+/* =========================================================
+   COURBE
+========================================================= */
 
+.budget-line-chart {
+  display: flex;
+  align-items: flex-end;
+
+  min-width: 0;
+}
+
+.budget-line-chart svg {
   display: block;
 
-  height: 2px;
+  width: 100%;
+  height: auto;
 
-  background: #2c8a3b;
-
-  border-radius: 20px;
-
-  transform-origin: left center;
+  overflow: visible;
 }
 
-.chart-line-1 {
-  left: 0;
-  bottom: 7px;
-
-  width: 22px;
-
-  transform: rotate(-40deg);
+.budget-chart-area {
+  fill: url("#budgetAreaGradient");
 }
 
-.chart-line-2 {
-  left: 17px;
-  bottom: 21px;
+.budget-chart-line {
+  fill: none;
 
-  width: 25px;
+  stroke: #2f9344;
+  stroke-width: 3;
 
-  transform: rotate(25deg);
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.chart-line-3 {
-  left: 39px;
-  bottom: 11px;
+/* =========================================================
+   DIAGRAMME
+========================================================= */
 
-  width: 25px;
+.budget-category-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  transform: rotate(-22deg);
+  gap: 0.8rem;
 }
 
-.chart-line-4 {
-  left: 62px;
-  bottom: 20px;
+.budget-donut {
+  flex: 0 0 76px;
 
-  width: 26px;
+  width: 76px;
+  height: 76px;
 
-  transform: rotate(24deg);
+  border-radius: 50%;
+
+  background: conic-gradient(
+    #2f8a3e 0deg 82deg,
+    #e99a22 82deg 150deg,
+    #e5483f 150deg 205deg,
+    #4f93c3 205deg 300deg,
+    #aac7aa 300deg 360deg
+  );
+
+  position: relative;
 }
 
-.chart-line-5 {
-  left: 85px;
-  bottom: 10px;
-
-  width: 28px;
-
-  transform: rotate(-25deg);
-}
-
-.chart-line-6 {
-  left: 110px;
-  bottom: 22px;
-
-  width: 30px;
-
-  transform: rotate(-25deg);
-}
-
-.budget-categories {
+.budget-donut::after {
   position: absolute;
 
-  right: 0.8rem;
-  bottom: 1rem;
+  inset: 15px;
 
+  content: "";
+
+  background: #ffffff;
+
+  border-radius: 50%;
+}
+
+/* =========================================================
+   LÉGENDE
+========================================================= */
+
+.budget-categories {
   display: flex;
   flex-direction: column;
 
-  gap: 0.35rem;
+  gap: 0.4rem;
 }
 
 .budget-categories span {
@@ -735,11 +744,15 @@ padding-bottom: 1rem;
 
   color: #626963;
 
-  font-size: 0.64rem;
+  font-size: 0.63rem;
+
+  white-space: nowrap;
 }
 
 .category-dot {
   display: inline-block;
+
+  flex: 0 0 7px;
 
   width: 7px;
   height: 7px;
@@ -747,20 +760,20 @@ padding-bottom: 1rem;
   border-radius: 2px;
 }
 
-.logement {
-  background: #298b41;
+.category-dot.logement {
+  background: #2f8a3e;
 }
 
-.transport {
-  background: #4798bd;
+.category-dot.transport {
+  background: #4f93c3;
 }
 
-.activities {
-  background: #ed9b27;
+.category-dot.activities {
+  background: #e99a22;
 }
 
-.others {
-  background: #a66266;
+.category-dot.others {
+  background: #9d6868;
 }
 
 /* =========================================================
@@ -781,10 +794,10 @@ padding-bottom: 1rem;
 
 .reimbursement-row {
   display: grid;
-  grid-template-columns: 30px 1fr auto;
+  grid-template-columns: 40px 1fr auto;
   align-items: center;
 
-  gap: 0.5rem;
+  gap: 0.75rem;
 
   padding: 0.7rem;
 
@@ -795,30 +808,33 @@ padding-bottom: 1rem;
   border-top: 1px solid #ecefec;
 }
 
-.small-avatar {
-  display: grid;
-  place-items: center;
+.reimbursement-avatar {
+  display: block;
 
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
 
-  color: #744130;
-  background: #eec0a9;
+  object-fit: cover;
 
+  border: 2px solid #ffffff;
   border-radius: 50%;
 
-  font-size: 0.65rem;
-  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(30, 45, 34, 0.1);
 }
 
-.reimbursement-row > span:nth-child(2) {
-  color: #424942;
+.reimbursement-text {
+  color: #343a35;
 
-  font-size: 0.67rem;
+  font-size: 1rem;
+  font-weight: 800;
+
+  white-space: nowrap;
 }
+
 
 .reimbursement-row strong {
-  font-size: 0.68rem;
+  font-size: 0.88rem;
+  font-weight: 750;
 }
 
 .amount-positive {
@@ -833,6 +849,10 @@ padding-bottom: 1rem;
    NOTIFICATIONS
 ========================================================= */
 
+.notifications-demo{
+margin-bottom: 1.5rem;
+
+}
 .notification-demo-row {
   display: grid;
   grid-template-columns: 30px 1fr;
@@ -880,15 +900,20 @@ padding-bottom: 1rem;
 }
 
 .notification-demo-row strong {
-  color: #383f39;
+  
+  color: #343a35;
 
-  font-size: 0.67rem;
+  font-size: 1rem;
+  font-weight: 800;
+
+  white-space: nowrap;
 }
+
 
 .notification-demo-row span {
   color: #909691;
 
-  font-size: 0.6rem;
+  font-size: 0.8rem;
 }
 
 /* =========================================================
@@ -902,6 +927,7 @@ padding-bottom: 1rem;
   gap: 0.55rem;
 
   padding: 1rem;
+  margin-bottom: 1.5rem;
 
   text-align: left;
 
@@ -913,16 +939,41 @@ padding-bottom: 1rem;
   box-shadow: 0 5px 16px rgba(25, 38, 29, 0.06);
 }
 
-.recap-demo strong {
+.recap-trip-title {
+  display: flex;
+  align-items: center;
+
+  gap: 0.4rem;
+}
+
+.recap-trip-title strong {
   color: #19201a;
 
   font-size: 0.9rem;
 }
 
+.recap-country-flag {
+  display: block;
+
+  width: 32px;
+  height: 24px;
+
+  object-fit: cover;
+
+  border-radius: 2px;
+}
+
+.recap-demo strong {
+  color: #19201a;
+
+  font-size: 1rem;
+  font-weight: 800;
+}
+
 .recap-demo span {
   color: #555e57;
 
-  font-size: 0.72rem;
+  font-size: 1rem;
 }
 
 .recap-demo button {
@@ -942,9 +993,9 @@ padding-bottom: 1rem;
   border: none;
   border-radius: 7px;
 
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-family: var(--body-text);
+  font-size: 1rem;
+  
 
   cursor: pointer;
 }
