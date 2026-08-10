@@ -122,21 +122,28 @@ export default function DeleteAccountCard({
         </p>
 
         <div className="account-user-actions">
-        <button
-          type="button"
-          className="delete-btn"
-          onClick={handleOpenDeleteModal}
-        >
-          <Trash2 size={18} />
-          Supprimer mon compte
-        </button>
+          <button
+            type="button"
+            className="delete-btn"
+            onClick={handleOpenDeleteModal}
+          >
+            <Trash2 size={18} />
+            Supprimer mon compte
+          </button>
         </div>
       </div>
 
       {showDeleteModal && (
         <div className="modal-backdrop">
           <div className="modal delete-account-modal">
-            <h4>Confirmer la suppression du compte</h4>
+            <div className="account-modal-header">
+              <h4>Confirmer la suppression du compte</h4>
+              <p>
+                La suppression de votre compte est définitive. Après validation,
+                vous n’aurez plus accès à votre espace et votre session sera
+                immédiatement invalidée.
+              </p>
+            </div>
 
             <p className="delete-account-warning-text">
               La suppression de votre compte est définitive.
@@ -181,19 +188,21 @@ export default function DeleteAccountCard({
               </p>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="deleteConfirm">
-                Pour confirmer, saisissez{" "}
-                <strong>{expectedConfirmation}</strong>
-              </label>
-              <input
-                id="deleteConfirm"
-                type="text"
-                value={confirmText}
-                onChange={(e) => setConfirmText(e.target.value)}
-                placeholder={`Tapez ${expectedConfirmation}`}
-                disabled={isSubmitting}
-              />
+            <div className="account-modal-form">
+              <div className="form-group">
+                <label htmlFor="deleteConfirm">
+                  Pour confirmer, saisissez{" "}
+                  <strong>{expectedConfirmation}</strong>
+                </label>
+                <input
+                  id="deleteConfirm"
+                  type="text"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder={`Tapez ${expectedConfirmation}`}
+                  disabled={isSubmitting}
+                />
+              </div>
             </div>
 
             {errorMessage && (
@@ -202,10 +211,10 @@ export default function DeleteAccountCard({
               </p>
             )}
 
-            <div className="modal-actions">
+            <div className="account-modal-actions">
               <button
                 type="button"
-                className="btn-role"
+                className="account-modal-cancel"
                 onClick={handleCloseDeleteModal}
                 disabled={isSubmitting}
               >
@@ -214,7 +223,7 @@ export default function DeleteAccountCard({
 
               <button
                 type="button"
-                className="btn-danger"
+                className="account-modal-danger"
                 onClick={handleDeleteAccount}
                 disabled={
                   isSubmitting || confirmText.trim() !== expectedConfirmation

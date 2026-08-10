@@ -22,6 +22,7 @@ export default function CreateTrip() {
   const [localCurrency, setLocalCurrency] = useState("");
 
   const inputRef = useRef<HTMLDivElement>(null);
+
   // biome-ignore lint/suspicious/noExplicitAny: Google Places web component
   const placeAutocompleteRef = useRef<any>(null);
 
@@ -31,6 +32,7 @@ export default function CreateTrip() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
   const todayString = today.toLocaleDateString("fr-CA");
 
   const hasDestination = city.trim() !== "";
@@ -81,6 +83,7 @@ export default function CreateTrip() {
           // biome-ignore lint/suspicious/noExplicitAny: Google Maps event type
           async (event: any) => {
             const placePrediction = event.placePrediction;
+
             if (!placePrediction) return;
 
             const place = placePrediction.toPlace();
@@ -133,10 +136,13 @@ export default function CreateTrip() {
 
   const capitalize = (text: string) => {
     if (!text) return text;
+
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
   };
 
-  const submitCreateTrip = async (event: React.FormEvent<HTMLFormElement>) => {
+  const submitCreateTrip = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
 
     const token = localStorage.getItem("token") || auth?.token;
@@ -187,7 +193,6 @@ export default function CreateTrip() {
       return;
     }
 
-
     const newTrip = {
       title: capitalize(titleRef.current.value),
       description: capitalize(descriptionRef.current.value),
@@ -223,112 +228,161 @@ export default function CreateTrip() {
 
       toast.success("Voyage créé avec succès !");
       navigate(`/trip/${result.insertId}`);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       toast.error("Impossible de créer le voyage.");
     }
   };
 
   return (
-    <div className="create-trip-page">
-      <img src="/logos/logo-airplane.png" alt="logo-avion" />
+    <main className="create-trip-page">
+      <div className="create-trip-content">
+        {/* =====================================================
+            HEADER
+        ====================================================== */}
 
-      <h1>
-        Créer un nouveau <span>voyage</span>
-      </h1>
-
-      <p>Commencez par définir les bases de votre aventure</p>
-
-      <form className="create-trip-form" onSubmit={submitCreateTrip}>
-        <div className="form-group">
-          <label htmlFor="trip-name">Nom du voyage *</label>
-          <input
-            type="text"
-            id="trip-name"
-            ref={titleRef}
-            placeholder="Entrez le nom du voyage"
-            required
+        <header className="create-trip-header">
+          <img
+            src="/logos/logo-airplane.png"
+            alt=""
+            className="create-trip-airplane"
           />
-        </div>
 
-        <div className="form-group">
-          <label htmlFor="description">Description *</label>
-          <input
-            type="text"
-            id="description"
-            ref={descriptionRef}
-            placeholder="Entrez la description"
-            required
-          />
-        </div>
+          <h1>
+            Créer un nouveau <span>voyage</span>
+          </h1>
 
-        <div className="form-group">
-          <span className="form-label">Lieu *</span>
-          <div ref={inputRef} style={{ width: "100%" }} aria-label="Lieu" />
+          <p>Commencez par définir les bases de votre aventure</p>
+        </header>
 
-          {localCurrency ? (
-            <p className="currency-info">
-              💱 Devise locale détectée : <strong>{localCurrency}</strong>
-            </p>
-          ) : (
-            hasDestination && (
-              <p className="currency-warning">
-                ⚠️ Devise non disponible pour cette destination.
+        {/* =====================================================
+            FORMULAIRE
+        ====================================================== */}
+
+        <form className="create-trip-form" onSubmit={submitCreateTrip}>
+          <div className="create-trip-form-group">
+            <label htmlFor="trip-name">Nom du voyage *</label>
+
+            <input
+              type="text"
+              id="trip-name"
+              ref={titleRef}
+              placeholder="Entrez le nom du voyage"
+              required
+            />
+          </div>
+
+          <div className="create-trip-form-group">
+            <label htmlFor="description">Description *</label>
+
+            <input
+              type="text"
+              id="description"
+              ref={descriptionRef}
+              placeholder="Entrez la description"
+              required
+            />
+          </div>
+
+          <div className="create-trip-form-group">
+            <span className="create-trip-form-label">Lieu *</span>
+
+            <div
+              ref={inputRef}
+              className="create-trip-place-container"
+              aria-label="Lieu"
+            />
+
+            {localCurrency ? (
+              <p className="currency-info">
+                💱 Devise locale détectée : <strong>{localCurrency}</strong>
               </p>
-            )
-          )}
-        </div>
-
-        <div className="date-container">
-          <div className="form-group">
-            <label htmlFor="start-date">Date de début *</label>
-            <input
-              type="date"
-              id="start-date"
-              ref={startAtRef}
-              value={startDate}
-              onChange={(event) => setStartDate(event.target.value)}
-              min={todayString}
-              required
-              className={!endOfTrip.end_at ? "date-empty" : ""}
-            />
+            ) : (
+              hasDestination && (
+                <p className="currency-warning">
+                  ⚠️ Devise non disponible pour cette destination.
+                </p>
+              )
+            )}
           </div>
 
-          <div className="form-group">
-            <label htmlFor="end-date">Date de fin *</label>
-            <input
-              type="date"
-              id="end-date"
-              value={endOfTrip.end_at}
-              onChange={(event) => setEndOfTrip({ end_at: event.target.value })}
-              min={startDate || todayString}
-              required
-              className={!endOfTrip.end_at ? "date-empty" : ""}
-            />
+          {/* =================================================
+              DATES
+          ================================================== */}
+
+          <div className="create-trip-date-container">
+            <div className="create-trip-form-group">
+              <label htmlFor="start-date">Date de début *</label>
+
+              <input
+                type="date"
+                id="start-date"
+                ref={startAtRef}
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+                min={todayString}
+                required
+                className={!startDate ? "date-empty" : ""}
+              />
+            </div>
+
+            <div className="create-trip-form-group">
+              <label htmlFor="end-date">Date de fin *</label>
+
+              <input
+                type="date"
+                id="end-date"
+                value={endOfTrip.end_at}
+                onChange={(event) =>
+                  setEndOfTrip({
+                    end_at: event.target.value,
+                  })
+                }
+                min={startDate || todayString}
+                required
+                className={!endOfTrip.end_at ? "date-empty" : ""}
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="astuces-container">
-          <p>
-            💡 Vous pourrez inviter des membres et ajouter des destinations une
-            fois le voyage créé. Un voyage nécessite au minimum 2 participants.
-          </p>
-        </div>
+          {/* =================================================
+              ASTUCE
+          ================================================== */}
 
-        <div className="button-container">
-          <button
-            type="button"
-            className="cancel-button"
-            onClick={() => navigate(-1)}
-          >
-            Annuler
-          </button>
+          <div className="create-trip-tip">
+            <span className="create-trip-tip-icon" aria-hidden="true">
+              💡
+            </span>
 
-          <button type="submit" className="create-trip-button">
-            Créer le voyage
-          </button>
-        </div>
-      </form>
-    </div>
+            <p>
+              Vous pourrez inviter des membres et ajouter des destinations une
+              fois le voyage créé. Un voyage nécessite au minimum 2
+              participants.
+            </p>
+          </div>
+
+          {/* =================================================
+              BOUTONS
+          ================================================== */}
+
+          <div className="create-trip-buttons">
+            <button
+              type="button"
+              className="create-trip-cancel-button"
+              onClick={() => navigate(-1)}
+            >
+              Annuler
+            </button>
+
+            <button
+              type="submit"
+              className="create-trip-submit-button"
+            >
+              Créer le voyage
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
   );
 }

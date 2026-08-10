@@ -168,8 +168,12 @@ export default function ProfileCard() {
       {showProfileModal && (
         <div className="modal-backdrop">
           <div className="modal">
-            <h4>Modifier mes informations</h4>
-
+            <div className="account-modal-header">
+              <h4>Modifier mes informations</h4>
+              <p>
+                Mets à jour tes informations personnelles et ta photo de profil.
+              </p>
+            </div>
             <div className="form-group">
               <label htmlFor="avatar">Photo</label>
               <input id="avatar" type="file" onChange={handleFileChange} />
@@ -217,10 +221,10 @@ export default function ProfileCard() {
               />
             </div>
 
-            <div className="modal-actions">
+            <div className="account-modal-actions">
               <button
                 type="button"
-                className="btn-role"
+                className="account-modal-cancel"
                 onClick={() => setShowProfileModal(false)}
               >
                 Annuler
@@ -228,7 +232,7 @@ export default function ProfileCard() {
 
               <button
                 type="button"
-                className="btn-primary"
+                className="account-modal-save"
                 onClick={handleSave}
               >
                 Sauvegarder

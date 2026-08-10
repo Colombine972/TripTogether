@@ -83,30 +83,35 @@ export default function Account() {
           compte.
         </p>
         <div className="account-user-actions">
-        <button
-          type="button"
-          className="security-btn"
-          onClick={() => setShowPasswordModal(true)}
-        >
-          <LockKeyhole size={18} />
-          Changer le mot de passe
-        </button>
+          <button
+            type="button"
+            className="security-btn"
+            onClick={() => setShowPasswordModal(true)}
+          >
+            <LockKeyhole size={18} />
+            Changer le mot de passe
+          </button>
 
-        <button
-          type="button"
-          className="logout-btn"
-          onClick={() => setShowLogoutModal(true)}
-        >
-          <LogOut size={18} />
-          Se déconnecter
-        </button>
+          <button
+            type="button"
+            className="logout-btn"
+            onClick={() => setShowLogoutModal(true)}
+          >
+            <LogOut size={18} />
+            Se déconnecter
+          </button>
         </div>
       </div>
 
       {showPasswordModal && (
         <div className="modal-backdrop">
           <div className="modal">
-            <h4>Changer le mot de passe</h4>
+            <div className="account-modal-header">
+              <h4>Changer le mot de passe</h4>
+              <p>
+                Modifie ton mot de passe afin de sécuriser l'accès à ton compte.
+              </p>
+            </div>
 
             <div className="form-group">
               <label htmlFor="currentPassword">Mot de passe actuel</label>
@@ -153,10 +158,10 @@ export default function Account() {
               />
             </div>
 
-            <div className="modal-actions">
+            <div className="account-modal-actions">
               <button
                 type="button"
-                className="btn-role"
+                className="account-modal-cancel"
                 onClick={() => {
                   setShowPasswordModal(false);
                   setPasswordData({
@@ -171,7 +176,7 @@ export default function Account() {
 
               <button
                 type="button"
-                className="btn-primary"
+                className="account-modal-save"
                 onClick={handleChangePassword}
               >
                 Enregistrer
