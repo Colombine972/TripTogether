@@ -57,8 +57,8 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <div className="auth-page auth-page-forgot-password">
+      <div className="auth-card auth-card-forgot-password">
         <div className="logo-container">
           <div className="logo-icon">🧳</div>
 
