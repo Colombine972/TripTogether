@@ -1,13 +1,6 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-} from "react-router";
+import { ArrowLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationBell from "../components/NotificationBell";
 import "../pages/styles/Navbar.css";
@@ -19,16 +12,16 @@ export default function Navbar() {
 
   const profileRef = useRef<HTMLDivElement>(null);
 
-  const [openNavBar, setOpenNavBar] =
-    useState(false);
+  const [openNavBar, setOpenNavBar] = useState(false);
 
   const pageTitles: Record<string, string> = {
     "/account": "Mon compte",
     "/my-trips": "Mes voyages",
   };
 
-  const pageTitle =
-    pageTitles[location.pathname] || "";
+  const isTripPage = /^\/trip\/\d+/.test(location.pathname);
+
+  const pageTitle = pageTitles[location.pathname] || "";
 
   /*
    * =========================================================
@@ -36,32 +29,18 @@ export default function Navbar() {
    * =========================================================
    */
   useEffect(() => {
-    const handleClickOutside = (
-      event: MouseEvent,
-    ) => {
-      const target =
-        event.target as Node;
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
 
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(
-          target,
-        )
-      ) {
+      if (profileRef.current && !profileRef.current.contains(target)) {
         setOpenNavBar(false);
       }
     };
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside,
-    );
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside,
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -80,10 +59,7 @@ export default function Navbar() {
    * =========================================================
    */
   function toggleMenu() {
-    setOpenNavBar(
-      (currentValue) =>
-        !currentValue,
-    );
+    setOpenNavBar((currentValue) => !currentValue);
   }
 
   /*
@@ -103,12 +79,9 @@ export default function Navbar() {
    * =========================================================
    */
   function getGreeting() {
-    const hour =
-      new Date().getHours();
+    const hour = new Date().getHours();
 
-    return hour < 17
-      ? "Bonjour"
-      : "Bonsoir";
+    return hour < 17 ? "Bonjour" : "Bonsoir";
   }
 
   /*
@@ -130,11 +103,7 @@ export default function Navbar() {
         ========================== */}
 
         <div className="navbar-left">
-          <Link
-            to="/"
-            onClick={closeMenu}
-            className="navbar-logo-link"
-          >
+          <Link to="/" onClick={closeMenu} className="navbar-logo-link">
             <img
               src="/logos/logo.png"
               className="navbar-logo"
@@ -142,14 +111,8 @@ export default function Navbar() {
             />
           </Link>
 
-          <Link
-            to="/"
-            onClick={closeMenu}
-            className="navbar-brand-link"
-          >
-            <span className="website-name">
-              Trip Together
-            </span>
+          <Link to="/" onClick={closeMenu} className="navbar-brand-link">
+            <span className="website-name">Trip Together</span>
           </Link>
         </div>
 
@@ -158,10 +121,17 @@ export default function Navbar() {
         ========================== */}
 
         <div className="navbar-center">
-          {pageTitle && (
-            <p className="navbar-page-title">
-              {pageTitle}
-            </p>
+          {isTripPage ? (
+            <Link
+              to="/my-trips"
+              className="navbar-back-to-trips"
+              onClick={closeMenu}
+            >
+              <ArrowLeft size={18} />
+              Mes voyages
+            </Link>
+          ) : (
+            pageTitle && <p className="navbar-page-title">{pageTitle}</p>
           )}
         </div>
 
@@ -175,9 +145,7 @@ export default function Navbar() {
               <button
                 type="button"
                 className="navbar-cta"
-                onClick={
-                  navigateToCreateTrip
-                }
+                onClick={navigateToCreateTrip}
               >
                 Crée ton voyage !
               </button>
@@ -190,59 +158,38 @@ export default function Navbar() {
               PROFIL
           ========================== */}
 
-          <div
-            ref={profileRef}
-            className="navbar-profile"
-          >
+          <div ref={profileRef} className="navbar-profile">
             {auth ? (
               <>
                 <button
                   type="button"
                   className={`navbar-profile-button ${
-                    openNavBar
-                      ? "is-active"
-                      : ""
+                    openNavBar ? "is-active" : ""
                   }`}
                   aria-label="Ouvrir le menu profil"
-                  aria-expanded={
-                    openNavBar
-                  }
+                  aria-expanded={openNavBar}
                   onClick={toggleMenu}
                 >
                   <img
-                    src={
-                      auth.user
-                        .avatar_url ||
-                      "/images/utilisateur.png"
-                    }
+                    src={auth.user.avatar_url || "/images/utilisateur.png"}
                     className="user-icon"
                     alt="Avatar utilisateur"
                   />
                 </button>
 
                 <div
-                  className={`navbar-menu ${
-                    openNavBar
-                      ? "is-open"
-                      : ""
-                  }`}
+                  className={`navbar-menu ${openNavBar ? "is-open" : ""}`}
                   role="menu"
                 >
                   <p className="navbar-greeting">
-                    {getGreeting()}{" "}
-                    {
-                      auth.user
-                        .firstname
-                    }
+                    {getGreeting()} {auth.user.firstname}
                   </p>
 
                   <div className="navbar-menu-links">
                     <Link
                       className="navbar-menu-link"
                       to="/account"
-                      onClick={
-                        closeMenu
-                      }
+                      onClick={closeMenu}
                     >
                       Mon compte
                     </Link>
@@ -250,9 +197,7 @@ export default function Navbar() {
                     <button
                       type="button"
                       className="navbar-logout-btn"
-                      onClick={
-                        handleLogout
-                      }
+                      onClick={handleLogout}
                     >
                       Se déconnecter
                     </button>
@@ -261,10 +206,7 @@ export default function Navbar() {
               </>
             ) : (
               <div className="navbar-auth-links">
-                <Link
-                  to="/login"
-                  className="navbar-auth-link"
-                >
+                <Link to="/login" className="navbar-auth-link">
                   Se connecter
                 </Link>
 

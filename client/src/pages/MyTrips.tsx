@@ -1,9 +1,16 @@
-import { useEffect, useState } from "react";
-import "./styles/MyTrips.css";
-import "./styles/StepCard.css";
+import { CalendarDays, MapPin, MoreHorizontal, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { useAuth } from "../contexts/AuthContext";
+import "./styles/MyTrips.css";
+
+interface TripParticipant {
+  id: number;
+  firstname: string;
+  lastname?: string;
+  avatar_url?: string | null;
+}
 
 interface TheTrip {
   id: number;
@@ -14,49 +21,37 @@ interface TheTrip {
   city: string;
   country: string;
   end_at: string;
+
+  participants?: TripParticipant[];
 }
+
+type TripStatus = "futur" | "current" | "past" | "all";
 
 export default function MyTrips() {
   const { auth } = useAuth();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<
-    "futur" | "current" | "past" | "all"
-  >("all");
-
+  const [activeTab, setActiveTab] = useState<TripStatus>("all");
   const [trips, setTrips] = useState<TheTrip[]>([]);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  /* =========================================================
+     IMAGE GOOGLE PLACES
+  ========================================================= */
 
   const getPlaceImageUrl = (placeId?: string | null) => {
-    if (!placeId) return "/images/default-city.jpg";
+    if (!placeId) {
+      return "/images/default-city.jpg";
+    }
 
     return `${import.meta.env.VITE_API_URL}/api/places/photo/${placeId}`;
   };
 
-  const handleDeleteTrip = async (e: React.MouseEvent, tripId: number) => {
-    e.preventDefault();
-    if (!window.confirm("Voulez-vous vraiment supprimer ce voyage ?")) return;
-
-    try {
-      const token = localStorage.getItem("token") || auth?.token;
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/trips/${tripId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-
-      if (response.ok) {
-        setTrips((prev) => prev.filter((t) => t.id !== tripId));
-        toast.success("Voyage supprimé");
-      } else {
-        toast.error("Erreur lors de la suppression");
-      }
-    } catch {
-      toast.error("Erreur réseau");
-    }
-  };
+  /* =========================================================
+     CHARGEMENT DES VOYAGES
+  ========================================================= */
 
   useEffect(() => {
     const token = localStorage.getItem("token") || auth?.token;
@@ -77,34 +72,140 @@ export default function MyTrips() {
         },
       },
     )
-      .then((res) => {
-        if (!res.ok) throw new Error("Erreur lors de la récupération");
-        return res.json();
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erreur lors de la récupération");
+        }
+
+        return response.json();
       })
-      .then((data) => setTrips(data))
-      .catch((err) => console.error("Error fetching trips:", err));
+      .then((data: TheTrip[]) => {
+        setTrips(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching trips:", error);
+      });
   }, [activeTab, auth?.token, navigate]);
 
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+  /* =========================================================
+     FERMETURE DU MENU AU CLIC EXTÉRIEUR
+  ========================================================= */
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenuId(null);
+      }
     };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
+
+  /* =========================================================
+     SUPPRESSION
+  ========================================================= */
+
+  const handleDeleteTrip = async (event: React.MouseEvent, tripId: number) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    setOpenMenuId(null);
+
+    if (!window.confirm("Voulez-vous vraiment supprimer ce voyage ?")) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token") || auth?.token;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/trips/${tripId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        toast.error("Erreur lors de la suppression");
+        return;
+      }
+
+      setTrips((currentTrips) =>
+        currentTrips.filter((trip) => trip.id !== tripId),
+      );
+
+      toast.success("Voyage supprimé");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erreur réseau");
+    }
   };
 
-  const formatDateStart = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = {
-      month: "short",
+  /* =========================================================
+     DATES
+  ========================================================= */
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("fr-FR", {
       day: "numeric",
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+      month: "short",
+      year: "numeric",
+    });
   };
+
+  /* =========================================================
+     STATUT DU VOYAGE
+  ========================================================= */
+
+  const getTripStatus = (trip: TheTrip) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startDate = new Date(trip.start_at);
+    const endDate = new Date(trip.end_at);
+
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    if (today < startDate) {
+      return {
+        label: "À venir",
+        className: "upcoming",
+      };
+    }
+
+    if (today > endDate) {
+      return {
+        label: "Terminé",
+        className: "past",
+      };
+    }
+
+    return {
+      label: "En cours",
+      className: "current",
+    };
+  };
+
 
   return (
     <>
-       <header className="mytripsheader" />
+      {/* =====================================================
+          HERO
+      ====================================================== */}
+
+      <header className="mytripsheader" />
+
+      {/* =====================================================
+          FILTRES
+      ====================================================== */}
 
       <div className="tripstate">
         <button
@@ -114,6 +215,7 @@ export default function MyTrips() {
         >
           Tous mes voyages
         </button>
+
         <button
           type="button"
           className={activeTab === "current" ? "active" : ""}
@@ -121,6 +223,7 @@ export default function MyTrips() {
         >
           En cours
         </button>
+
         <button
           type="button"
           className={activeTab === "futur" ? "active" : ""}
@@ -128,6 +231,7 @@ export default function MyTrips() {
         >
           À venir
         </button>
+
         <button
           type="button"
           className={activeTab === "past" ? "active" : ""}
@@ -137,73 +241,153 @@ export default function MyTrips() {
         </button>
       </div>
 
-      <div className="tripcards">
+      {/* =====================================================
+          VOYAGES
+      ====================================================== */}
+
+      <section className="tripcards">
         {trips.length > 0 ? (
-          trips.map((trip) => (
-            <Link
-              to={`/trip/${trip.id}`}
-              key={trip.id}
-              className="tripcard-link"
-            >
-              <div className="tripcard">
-                <div
-                  className="tripcard-image"
-                  style={{ position: "relative" }}
-                >
+          trips.map((trip) => {
+            const status = getTripStatus(trip);
+
+            const participants = trip.participants ?? [];
+
+            const visibleParticipants = participants.slice(0, 3);
+
+            const remainingParticipants = Math.max(
+              participants.length - visibleParticipants.length,
+              0,
+            );
+
+            return (
+              <article className="tripcard" key={trip.id}>
+                {/* =================================================
+                    LIEN PRINCIPAL
+                ================================================== */}
+
+                <Link to={`/trip/${trip.id}`} className="tripcard-main">
                   <img
                     src={getPlaceImageUrl(trip.place_id)}
                     alt={trip.title}
                     className="trip-bg-img"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = "/images/default-city.jpg";
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = "/images/default-city.jpg";
                     }}
                   />
 
-                  <h2>{trip.title}</h2>
+                  <div className="tripcard-overlay" />
 
+                  {/* STATUT */}
+
+                  <span className={`trip-status ${status.className}`}>
+                    {status.label}
+                  </span>
+
+                  {/* INFORMATIONS */}
+
+                  <div className="tripcard-content">
+                    <h2>{trip.country}</h2>
+
+                    <p className="tripcard-location">
+                      <MapPin size={15} />
+                      {trip.city}
+                    </p>
+
+                    <p className="tripcard-date">
+                      <CalendarDays size={15} />
+                      {formatDate(trip.start_at)} - {formatDate(trip.end_at)}
+                    </p>
+
+                    {/* PARTICIPANTS */}
+
+                    {participants.length > 0 && (
+                      <div className="tripcard-participants">
+                        <div className="tripcard-avatars">
+                          {visibleParticipants.map((participant) => {
+                            const initials =
+                              `${participant.firstname?.[0] ?? ""}${
+                                participant.lastname?.[0] ?? ""
+                              }`.toUpperCase();
+
+                            return participant.avatar_url ? (
+                              <img
+                                key={participant.id}
+                                src={participant.avatar_url}
+                                alt={`${participant.firstname} ${
+                                  participant.lastname ?? ""
+                                }`}
+                                className="tripcard-avatar"
+                              />
+                            ) : (
+                              <div
+                                key={participant.id}
+                                className="tripcard-avatar tripcard-avatar-initials"
+                                title={`${participant.firstname} ${
+                                  participant.lastname ?? ""
+                                }`}
+                              >
+                                {initials}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {remainingParticipants > 0 && (
+                          <span className="tripcard-more-participants">
+                            +{remainingParticipants}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+
+                {/* =================================================
+                    MENU ACTIONS
+                ================================================== */}
+
+                <div
+                  className="tripcard-actions"
+                  ref={openMenuId === trip.id ? menuRef : null}
+                >
                   <button
                     type="button"
-                    className="delete-trip-btn"
-                    onClick={(e) => handleDeleteTrip(e, trip.id)}
-                    title="Supprimer ce voyage"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="size-6"
-                    >
-                      <title>Poubelle</title>
-                      <path
-                        fillRule="evenodd"
-                        d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-3.536 4.569a.75.75 0 0 0-1.44.32l.5 10a.75.75 0 0 0 1.498-.06l-.558-10.26Zm4.5 0a.75.75 0 0 0-1.5 0v10.26a.75.75 0 0 0 1.5 0v-10.26Zm3.536.26a.75.75 0 0 0-1.44-.32l-.558 10.26a.75.75 0 0 0 1.498.06l.5-10Z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </div>
+                    className="tripcard-menu-button"
+                    aria-label={`Actions pour ${trip.title}`}
+                    aria-expanded={openMenuId === trip.id}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
 
-                <div>
-                  <div className="trip-info">
-                    <p>
-                      <img src="/images/location-icon.png" alt="" />
-                      {trip.city}, {trip.country}
-                    </p>
-                    <p>
-                      <img src="/images/calendar-icon.png" alt="" />
-                      {formatDateStart(trip.start_at)} -{" "}
-                      {formatDate(trip.end_at)}
-                    </p>
-                  </div>
+                      setOpenMenuId((currentId) =>
+                        currentId === trip.id ? null : trip.id,
+                      );
+                    }}
+                  >
+                    <MoreHorizontal size={22} />
+                  </button>
+
+                  {openMenuId === trip.id && (
+                    <div className="tripcard-menu">
+                      <button
+                        type="button"
+                        className="tripcard-delete-action"
+                        onClick={(event) => handleDeleteTrip(event, trip.id)}
+                      >
+                        <Trash2 size={17} />
+                        Supprimer le voyage
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </Link>
-          ))
+              </article>
+            );
+          })
         ) : (
           <p className="no-trips">Aucun voyage trouvé pour cette catégorie.</p>
         )}
-      </div>
+      </section>
     </>
   );
 }

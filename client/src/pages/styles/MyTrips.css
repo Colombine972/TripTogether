@@ -1,290 +1,585 @@
-/* ================= HEADER ================= *
-
-.mytripsheader {
-  width: 100%;
-  height: min(80vh, 600px);
-  padding: 0 1rem;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 3rem;
-
-  text-align: center;
-  color: white;
-
-  background-image: url("/images/default-landscape.jpg");
-  background-size: cover;
-  background-position: top;
-}
-.no-trips {
-  display: fixed;
-  text-align: center;
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.mytripsheader h1 {
-  font-size: clamp(2.2rem, 5vw, 4rem);
-  text-shadow: 2px 2px 4px rgb(0 0 0 / 70%);
-}
-
-.mytripsheader p {
-  font-size: clamp(1rem, 2.5vw, 1.5rem);
-  text-shadow: 1px 1px 3px rgb(0 0 0 / 70%);
-}
-
-.mytripsheader input {
-  width: min(90%, 350px);
-  padding: 0.7rem 1.2rem;
-
-  font-size: 1rem;
-  border-radius: 20px;
-  border: none;
-  outline: none;
-
-  background-color: white;
-}
-
 /* =========================================================
    HEADER MES VOYAGES
 ========================================================= */
 
 .mytripsheader {
-  position: relative;
-
-  display: flex;
-  align-items: center;
-
   width: 100%;
-  min-height: 520px;
-
-  padding: 0 clamp(2rem, 5vw, 6rem) 5rem;
-
-  box-sizing: border-box;
-
-  color: #ffffff;
+  height: min(50vh, 500px);
 
   background-image: url("mesvoyages.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-
-  overflow: hidden;
 }
 
-
- 
-
-/* ================= FILTER BUTTONS ================= */
+/* =========================================================
+   FILTRES
+========================================================= */
 
 .tripstate {
-  margin: 2.5rem 0;
-
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
+
   gap: 1rem;
+
+  margin: 3.2rem 0 3rem;
 }
 
 .tripstate button {
-  padding: 0.6rem 1.4rem;
+  padding: 0.65rem 1.4rem;
 
+  color: #323732;
+  background: #dedada;
+
+  border: none;
+  border-radius: 12px;
+
+  font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
 
-  border-radius: 12px;
-  border: none;
   cursor: pointer;
 
-  color: black;
-  background-color: rgb(203 197 197);
-
-  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .tripstate button:hover {
-  color: white;
-  background-color: black;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgb(0 0 0 / 25%);
+  color: #277532;
+  background: #eef7ef;
+
+  transform: translateY(-1px);
 }
 
 .tripstate button.active {
-  color: white;
-  background-color: #4caf50;
-  box-shadow: 0 6px 15px rgb(76 175 80 / 40%);
+  color: #ffffff;
+  background: #4caf50;
+
+  box-shadow: 0 5px 14px rgba(76, 175, 80, 0.28);
 }
 
 .tripstate button:active {
   transform: scale(0.97);
 }
 
-/* ================= CARDS GRID ================= */
+/* =========================================================
+   GRILLE DES VOYAGES
+========================================================= */
 
 .tripcards {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem 3rem;
-
   display: grid;
-  grid-template-columns: repeat(4, minmax(180px, 1fr));
-  gap: 2rem;
-  justify-content: center;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 1.8rem;
+
+  width: min(1400px, calc(100% - 3rem));
+
+  margin: 0 auto;
+
+  padding-bottom: 4rem;
 }
 
-/* ================= CARD ================= */
+/* =========================================================
+   CARD
+========================================================= */
 
 .tripcard {
-  min-height: 320px;
-
-  display: flex;
-  flex-direction: column;
-
-  background-color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative; /* Ajouté pour positionner le bouton à l'intérieur */
-
-  font-size: 0.95rem;
-  cursor: pointer;
-
-  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.tripcard:hover .delete-trip-btn {
-  transform: translateY(-5px);
-  box-shadow: 0 14px 28px rgb(0 0 0 / 25%);
-}
-
-/* ================= IMAGE ================= */
-
-.tripcard-image {
-  height: 180px;
   position: relative;
-  display: flex;
-  flex-direction: column-reverse;
-  color: rgb(216, 216, 216);
+
+  min-width: 0;
+  height: 285px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border-radius: 16px;
+
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.11),
+    0 2px 7px rgba(15, 23, 42, 0.05);
+
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
 }
+
+.tripcard:hover {
+  transform: translateY(-5px);
+
+  box-shadow:
+    0 16px 35px rgba(15, 23, 42, 0.18),
+    0 4px 10px rgba(15, 23, 42, 0.08);
+}
+
+/* =========================================================
+   LIEN
+========================================================= */
+
+.tripcard-main {
+  position: relative;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  color: inherit;
+
+  text-decoration: none;
+}
+
+/* =========================================================
+   IMAGE GOOGLE PLACES
+========================================================= */
 
 .trip-bg-img {
   position: absolute;
-  top: 0;
-  left: 0;
+
+  inset: 0;
+
+  display: block;
+
   width: 100%;
   height: 100%;
+
   object-fit: cover;
+
+  transition: transform 450ms ease;
 }
 
-.tripcard-image h2 {
-  padding: 0.3rem 0.6rem;
-  font-size: 1.1rem;
-  line-height: 1.3;
-  position: relative;
-  z-index: 1;
-  background-color: rgb(0 0 0 / 70%);
-  border-radius: 6px;
+.tripcard:hover .trip-bg-img {
+  transform: scale(1.04);
 }
 
-.trip-info p {
+/* =========================================================
+   DÉGRADÉ
+========================================================= */
+
+.tripcard-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(5, 15, 10, 0.03) 15%,
+      rgba(5, 15, 10, 0.08) 42%,
+      rgba(5, 15, 10, 0.78) 100%
+    );
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   STATUT
+========================================================= */
+
+.trip-status {
+  position: absolute;
+
+  top: 14px;
+  left: 14px;
+
+  z-index: 3;
+
+  padding: 0.32rem 0.7rem;
+
+  color: #ffffff;
+
+  border-radius: 50px;
+
+  font-size: 0.72rem;
+  font-weight: 700;
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.trip-status.upcoming {
+  background: rgba(41, 108, 145, 0.9);
+}
+
+.trip-status.current {
+  background: rgba(39, 117, 50, 0.92);
+}
+
+.trip-status.past {
+  background: rgba(95, 95, 95, 0.82);
+}
+
+/* =========================================================
+   CONTENU
+========================================================= */
+
+.tripcard-content {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 2;
+
+  padding: 1.2rem;
+
+  color: #ffffff;
+}
+
+/* TITRE */
+
+.tripcard-content h2 {
+  margin: 0 0 0.45rem;
+
+  color: #ffffff;
+
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1.15;
+
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+
+/* =========================================================
+   VILLE
+========================================================= */
+
+.tripcard-location {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 5px;
+
+  gap: 0.4rem;
+
+  margin: 0 0 0.3rem;
+
+  color: rgba(255, 255, 255, 0.94);
+
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
-.trip-info img {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-}
-/* ================= INFO ================= */
 
-.trip-info {
-  margin-top: 10px;
-  padding: 1rem;
+/* =========================================================
+   DATE
+========================================================= */
 
+.tripcard-date {
   display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  align-items: center;
+
+  gap: 0.5rem;
+
+  margin: 0;
+  padding-top: 0.5rem;
+
+  color: #ffffff;
+
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
-.trip-info img {
-  width: 16px;
-  height: 16px;
-  margin-right: 6px;
-  vertical-align: middle;
+.tripcard-location svg,
+.tripcard-date svg {
+  flex-shrink: 0;
 }
-/* Bouton supprimer (corbeille) sur la carte voyage */
-.delete-trip-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 36px;
-  height: 36px;
+
+
+/* =========================================================
+   PARTICIPANTS
+========================================================= */
+
+.tripcard-participants {
+  display: flex;
+  align-items: center;
+
+  gap: 0.4rem;
+
+  margin-top: 0.85rem;
+}
+
+.tripcard-avatars {
+  display: flex;
+  align-items: center;
+}
+
+.tripcard-avatar {
+  display: block;
+
+  width: 32px;
+  height: 32px;
+
+  margin-left: -7px;
+
+  object-fit: cover;
+
+  background: #eeeeee;
+
+  border: 2px solid #ffffff;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(0, 0, 0, 0.05); /* Bordure subtile */
+
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.tripcard-avatar:first-child {
+  margin-left: 0;
+}
+
+.tripcard-avatar-initials {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Ombre plus douce */
+
+  flex-shrink: 0;
+
+  background: #e8f3ea;
+  color: #245c32;
+
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.tripcard-more-participants {
+  color: #ffffff;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* =========================================================
+   MENU •••
+========================================================= */
+
+.tripcard-actions {
+  position: absolute;
+
+  right: 14px;
+  bottom: 14px;
+
+  z-index: 10;
+}
+
+.tripcard-menu-button {
+  display: grid;
+  place-items: center;
+
+  width: 40px;
+  height: 40px;
+
+  padding: 0;
+
+  color: #313731;
+  background: rgba(255, 255, 255, 0.96);
+
+  border: none;
+  border-radius: 50%;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+
   cursor: pointer;
-  opacity: 0; /* Caché par défaut */
-  transform: translateY(-5px); /* Petite animation d'arrivée */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 20; /* Toujours au-dessus */
+
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
 }
 
-.tripcard:hover .delete-trip-btn {
-  opacity: 1;
-  transform: translateY(0);
+.tripcard-menu-button:hover {
+  background: #ffffff;
+
+  transform: scale(1.07);
 }
 
-.delete-trip-btn:hover {
-  background-color: #ff3b30; /* Rouge iOS */
-  border-color: #ff3b30;
-  transform: scale(1.1);
-  box-shadow: 0 6px 12px rgba(255, 59, 48, 0.3);
+/* =========================================================
+   MENU DÉROULANT
+========================================================= */
+
+.tripcard-menu {
+  position: absolute;
+
+  right: 0;
+  bottom: calc(100% + 0.6rem);
+
+  width: max-content;
+  min-width: 190px;
+
+  padding: 0.4rem;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 11px;
+
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
 }
 
-.delete-trip-btn svg,
-.delete-step-btn svg {
-  width: 20px;
-  height: 20px;
-  fill: #666;
-  transition: fill 0.2s ease;
+.tripcard-delete-action {
+  display: flex;
+  align-items: center;
+
+  gap: 0.55rem;
+
+  width: 100%;
+
+  padding: 0.65rem 0.75rem;
+
+  color: #c0392b;
+  background: transparent;
+
+  border: none;
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    color 180ms ease,
+    background-color 180ms ease;
 }
 
-.delete-trip-btn:hover svg,
-.delete-step-btn:hover svg {
-  fill: white;
+.tripcard-delete-action:hover {
+  color: #9f2d22;
+  background: #fff1f0;
 }
 
-/* ================= RESPONSIVE ================= */
+/* =========================================================
+   AUCUN VOYAGE
+========================================================= */
 
-@media (max-width: 1024px) {
+.no-trips {
+  grid-column: 1 / -1;
+
+  margin: 3rem 0;
+
+  color: #777777;
+
+  font-size: 1rem;
+
+  text-align: center;
+}
+
+/* =========================================================
+   GRAND ÉCRAN
+========================================================= */
+
+@media (min-width: 1600px) {
   .tripcards {
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
-    gap: 1.75rem;
+    width: min(1500px, calc(100% - 6rem));
+  }
+
+  .tripcard {
+    height: 300px;
   }
 }
 
-@media (max-width: 768px) {
+/* =========================================================
+   LAPTOP
+========================================================= */
+
+@media (max-width: 1200px) {
+  .mytripsheader {
+    height: 420px;
+  }
+
   .tripcards {
-    grid-template-columns: repeat(2, minmax(160px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    width: min(1100px, calc(100% - 2rem));
+
+    gap: 1.4rem;
+  }
+
+  .tripcard {
+    height: 260px;
+  }
+
+  .tripcard-content h2 {
+    font-size: 1.35rem;
   }
 }
 
-@media (max-width: 480px) {
+/* =========================================================
+   TABLETTE
+========================================================= */
+
+@media (max-width: 900px) {
+  .mytripsheader {
+    height: 420px;
+
+    background-position: center;
+  }
+
+  .tripcards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 1.3rem;
+  }
+
+  .tripcard {
+    height: 270px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+  .mytripsheader {
+    height: 320px;
+
+    background-position: center;
+  }
+
+  .tripstate {
+    gap: 0.6rem;
+
+    margin: 1.5rem 0 2rem;
+
+    padding: 0 0.75rem;
+  }
+
+  .tripstate button {
+    padding: 0.55rem 0.9rem;
+
+    font-size: 0.82rem;
+  }
+
   .tripcards {
     grid-template-columns: 1fr;
-    gap: 1.25rem;
+
+    width: calc(100% - 1.5rem);
+
+    gap: 1.2rem;
+  }
+
+  .tripcard {
+    height: 270px;
+  }
+
+  .tripcard-content {
+    padding: 1rem;
+  }
+
+  .tripcard-content h2 {
+    font-size: 1.35rem;
+  }
+
+  .tripcard-menu-button {
+    width: 38px;
+    height: 38px;
   }
 }

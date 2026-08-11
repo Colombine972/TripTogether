@@ -24,8 +24,12 @@ function TripCard({
 }: TripCardProps) {
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
+
     const date = new Date(dateString);
-    if (Number.isNaN(date.getTime())) return dateString;
+
+    if (Number.isNaN(date.getTime())) {
+      return dateString;
+    }
 
     return new Intl.DateTimeFormat("fr-FR", {
       day: "2-digit",
@@ -39,13 +43,22 @@ function TripCard({
       <p className="tripcard-overlay-location">
         {city}, {country}
       </p>
-      <h2 className="tripcard-overlay-title">{title}</h2>
+
+      {title && (
+        <h1 className="tripcard-overlay-title">
+          {title}
+        </h1>
+      )}
 
       <div className="tripcard-overlay-meta">
         <span className="tripcard-pill">
           🗓️ {formatDate(startAt)} - {formatDate(endAt)}
         </span>
-        <span className="tripcard-pill">👥 {participants} participant(s)</span>
+
+        <span className="tripcard-pill">
+          👥 {participants} participant(s)
+        </span>
+
         {localCurrency && (
           <span className="tripcard-pill">
             <CurrencyBadge currencyCode={localCurrency} />

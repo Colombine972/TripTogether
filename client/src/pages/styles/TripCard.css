@@ -1,48 +1,66 @@
 .tripcard-overlay-card {
-  color: white;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  color: white;
 }
 
 .tripcard-overlay-location {
   margin: 0;
+
+  color: rgba(255, 255, 255, 0.92);
+
   font-size: clamp(1.1rem, 2vw, 1.45rem);
   line-height: 1.35;
-  color: rgba(255, 255, 255, 0.92);
+
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
 .tripcard-overlay-title {
-  margin: 0;
-  font-size: clamp(2.3rem, 5vw, 3.6rem);
-  line-height: 1.05;
-  font-weight: 700;
   max-width: 20ch;
+
+  margin: 0;
+
+  color: white;
+
+  font-size: clamp(2.3rem, 5vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.05;
+
   text-shadow: 0 8px 28px rgba(0, 0, 0, 0.46);
 }
 
 .tripcard-overlay-meta {
   display: flex;
   flex-wrap: wrap;
+
   gap: 0.9rem;
+
   margin-top: 0.6rem;
 }
 
 .tripcard-pill {
   display: inline-flex;
   align-items: center;
+
   gap: 0.5rem;
+
   padding: 0.88rem 1.2rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+
   color: white;
+  background: rgba(255, 255, 255, 0.16);
+
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+
   font-size: 0.98rem;
   font-weight: 500;
+
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 @media (max-width: 768px) {

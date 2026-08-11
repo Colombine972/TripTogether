@@ -92,6 +92,32 @@
   white-space: nowrap;
 }
 
+.navbar-back-to-trips {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.45rem;
+
+  color: #8b8b8b;
+
+  font-family: var(--body-text);
+  font-size: var(--font-size-S);
+  font-weight: 500;
+
+  text-decoration: none;
+
+  transition:
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.navbar-back-to-trips:hover {
+  color: var(--primary-button);
+
+  transform: translateX(-2px);
+}
+
 
 /* =========================================================
    NAVBAR - PARTIE DROITE

@@ -204,7 +204,28 @@ const browseTheTrip: RequestHandler = async (req, res, next) => {
 
     const trips = await tripRepository.readByUser(userId, status);
 
-    res.json(trips);
+    const tripsWithParticipants = await Promise.all(
+      trips.map(async (trip) => {
+        const tripId = Number(trip.id);
+
+        if (!Number.isInteger(tripId) || tripId <= 0) {
+          return {
+            ...trip,
+            participants: [],
+          };
+        }
+
+        const participants =
+          await tripRepository.findMembersByTrip(tripId);
+
+        return {
+          ...trip,
+          participants,
+        };
+      }),
+    );
+
+    res.json(tripsWithParticipants);
   } catch (err) {
     next(err);
   }
