@@ -104,9 +104,7 @@ export default function MyTrips() {
 
   return (
     <>
-      <div className="mytripsheader">
-        <h1>Mes voyages</h1>
-      </div>
+       <header className="mytripsheader" />
 
       <div className="tripstate">
         <button

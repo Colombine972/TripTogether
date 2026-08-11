@@ -1,4 +1,4 @@
-/* ================= HEADER ================= */
+/* ================= HEADER ================= *
 
 .mytripsheader {
   width: 100%;
@@ -47,6 +47,36 @@
 
   background-color: white;
 }
+
+/* =========================================================
+   HEADER MES VOYAGES
+========================================================= */
+
+.mytripsheader {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-height: 520px;
+
+  padding: 0 clamp(2rem, 5vw, 6rem) 5rem;
+
+  box-sizing: border-box;
+
+  color: #ffffff;
+
+  background-image: url("mesvoyages.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+
+  overflow: hidden;
+}
+
+
+ 
 
 /* ================= FILTER BUTTONS ================= */
 
