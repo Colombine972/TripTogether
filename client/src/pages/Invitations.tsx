@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { toast } from "react-toastify";
 import Guests from "../components/Guests";
-import NavTabs from "../components/NavTabs";
 import TripInfos from "../components/TripInfos";
 import type { Guest, invitationType } from "../types/invitationType";
 import type { TheTrip } from "../types/tripType";
@@ -278,7 +277,6 @@ function Invitations() {
     <>
       {!loading && trip && <TripInfos trip={trip} onTripUpdated={setTrip} />}
       <div className="page-membre">
-        <NavTabs />
         <section id="member-list">
           {loading && <p className="loading-text">Chargement des membres</p>}
           {error && <p className="error">{error}</p>}

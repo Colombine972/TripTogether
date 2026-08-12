@@ -1,10 +1,21 @@
-import { useState } from "react";
+import { Link, useLocation } from "react-router";
+import {
+  ArrowRight,
+  CalendarDays,
+  Coins,
+  MapPin,
+  Pencil,
+  Plus,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import type { TheTrip } from "../types/tripType";
+import NavTabs from "./NavTabs";
+import Modal from "./Modal";
+import TripActions from "../pages/TripActions";
 import TripCard from "../pages/TripCard";
 import TripInvitation from "../pages/TripInvitation";
-import TripActions from "../pages/TripActions";
-import type { TheTrip } from "../types/tripType";
-import Modal from "./Modal";
 import "../pages/styles/TripInfos.css";
 
 type TripInfosProps = {
@@ -12,57 +23,128 @@ type TripInfosProps = {
   onTripUpdated: (updatedTrip: TheTrip) => void;
 };
 
+type TripMember = {
+  id: number;
+  firstname: string;
+  lastname?: string;
+  avatar_url?: string | null;
+};
+
 function TripInfos({ trip, onTripUpdated }: TripInfosProps) {
   const { auth } = useAuth();
+
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const [members, setMembers] = useState<TripMember[]>([]);
+
+  /* =========================================================
+     CHARGEMENT DES MEMBRES
+  ========================================================= */
+
+  useEffect(() => {
+    if (!trip?.id) return;
+
+    const fetchMembers = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/trips/${trip.id}/members`,
+        );
+
+        if (!response.ok) {
+          throw new Error("Impossible de récupérer les membres");
+        }
+
+        const data = await response.json();
+
+        const tripMembers = Array.isArray(data) ? data : (data.members ?? []);
+
+        setMembers(tripMembers);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchMembers();
+  }, [trip?.id]);
 
   if (!trip) return null;
 
   const tripId = trip.id;
+
+  const location = useLocation();
+
+  const isRecapPage =
+    location.pathname === `/trip/${tripId}` ||
+    location.pathname === `/trip/${tripId}/`;
+
   const isOrganizer = Number(auth?.user?.id) === Number(trip.user_id);
 
   const getPlaceImageUrl = (placeId?: string | null) => {
-    if (!placeId) return "/images/default-city.jpg";
+    if (!placeId) {
+      return "/images/default-city.jpg";
+    }
 
     return `${import.meta.env.VITE_API_URL}/api/places/photo/${placeId}`;
   };
 
   const headerImage = getPlaceImageUrl(trip.place_id);
 
+  const getStaticMapUrl = (city: string, country: string) => {
+    const apiKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+
+    const location = `${city}, ${country}`;
+
+    const params = new URLSearchParams({
+      center: location,
+      zoom: "11",
+      size: "600x300",
+      scale: "2",
+      maptype: "roadmap",
+      markers: `color:green|${location}`,
+      key: apiKey,
+    });
+
+    const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?${params.toString()}`;
+
+    console.log("STATIC MAP URL :", mapUrl);
+
+    return mapUrl;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+      return dateString;
+    }
+
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(date);
+  };
+
   return (
     <>
+      {/* =====================================================
+          HERO
+      ====================================================== */}
+
       <section className="trip-stage">
         <div className="trip-stage-glow trip-stage-glow-left" />
         <div className="trip-stage-glow trip-stage-glow-right" />
         <div className="trip-stage-grid" />
-        <div className="trip-stage-line" />
 
         <div className="trip-stage-center">
           <div
             className="trip-hero-card"
-            style={{ backgroundImage: `url(${headerImage})` }}
+            style={{
+              backgroundImage: `url(${headerImage})`,
+            }}
           >
-            {isOrganizer && (
-              <div className="trip-hero-actions">
-                <button
-                  type="button"
-                  className="trip-hero-btn trip-hero-btn-primary"
-                  onClick={() => setIsInviteModalOpen(true)}
-                >
-                  Inviter
-                </button>
-
-                <button
-                  type="button"
-                  className="trip-hero-btn trip-hero-btn-secondary"
-                  onClick={() => setIsEditModalOpen(true)}
-                >
-                  Modifier
-                </button>
-              </div>
-            )}
-
             <div className="trip-hero-overlay">
               <TripCard
                 title={trip.title}
@@ -70,15 +152,178 @@ function TripInfos({ trip, onTripUpdated }: TripInfosProps) {
                 country={trip.country}
                 startAt={trip.start_at}
                 endAt={trip.end_at}
-                participants={trip.participants}
+                participants={members.length || trip.participants}
                 role={isOrganizer ? "organizer" : "participant"}
-                localCurrency={trip.local_currency}
+                localCurrency={null}
                 baseCurrency={trip.base_currency}
               />
             </div>
           </div>
         </div>
       </section>
+
+      {/* =====================================================
+          NAVIGATION DU VOYAGE
+      ====================================================== */}
+
+      <div className="trip-infos-navigation">
+        <NavTabs />
+      </div>
+
+      {/* =====================================================
+          CARTES RÉCAPITULATIVES
+      ====================================================== */}
+
+      {isRecapPage && (
+        <section className="trip-overview">
+          {/* =================================================
+            À PROPOS
+        ================================================== */}
+
+          <article className="trip-overview-card trip-about-overview">
+            <div className="trip-overview-header">
+              <div className="trip-overview-heading">
+                <span className="trip-overview-icon">✦</span>
+
+                <h2>À propos du voyage</h2>
+              </div>
+
+              {isOrganizer && (
+                <button
+                  type="button"
+                  className="trip-overview-action"
+                  onClick={() => setIsEditModalOpen(true)}
+                >
+                  <Pencil size={17} />
+                  Modifier
+                </button>
+              )}
+            </div>
+
+            {trip.description && (
+              <p className="trip-overview-description">{trip.description}</p>
+            )}
+
+            <div className="trip-about-content">
+              <div className="trip-overview-details">
+                <div className="trip-overview-detail">
+                  <MapPin size={19} />
+
+                  <span className="trip-detail-label">Destination</span>
+
+                  <strong>
+                    {trip.city}, {trip.country}
+                  </strong>
+                </div>
+
+                <div className="trip-overview-detail">
+                  <CalendarDays size={19} />
+
+                  <span className="trip-detail-label">Dates</span>
+
+                  <strong>
+                    {formatDate(trip.start_at)}
+                    {" - "}
+                    {formatDate(trip.end_at)}
+                  </strong>
+                </div>
+
+                <div className="trip-overview-detail">
+                  <Coins size={19} />
+
+                  <span className="trip-detail-label">Devise du voyage</span>
+
+                  <strong>
+                    {trip.local_currency || trip.base_currency || "EUR"}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="trip-about-map">
+                <img
+                  src={getStaticMapUrl(trip.city, trip.country)}
+                  alt={`Carte de ${trip.city}`}
+                />
+
+                <span className="trip-about-map-label">{trip.city}</span>
+              </div>
+            </div>
+          </article>
+
+          {/* =================================================
+    PARTICIPANTS
+================================================== */}
+
+          <article className="trip-overview-card trip-members-overview">
+            <div className="trip-overview-header">
+              <div className="trip-overview-heading">
+                <span className="trip-members-icon">
+                  <Users size={20} />
+                </span>
+
+                <h2>Participants</h2>
+              </div>
+
+              <Link
+                to={`/trip/${tripId}/invitations`}
+                className="trip-members-see-all"
+              >
+                Voir tous
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            <p className="trip-members-count">
+              {members.length}{" "}
+              {members.length > 1 ? "participants" : "participant"}
+            </p>
+
+            <div className="trip-members-content">
+              <div className="trip-members-avatars">
+                {members.map((member) => {
+                  const initials = `${member.firstname?.[0] ?? ""}${
+                    member.lastname?.[0] ?? ""
+                  }`.toUpperCase();
+
+                  return member.avatar_url ? (
+                    <img
+                      key={member.id}
+                      src={member.avatar_url}
+                      alt={`${member.firstname} ${member.lastname ?? ""}`}
+                      className="trip-member-avatar"
+                    />
+                  ) : (
+                    <div
+                      key={member.id}
+                      className="trip-member-avatar trip-member-avatar-fallback"
+                      title={`${member.firstname} ${member.lastname ?? ""}`}
+                    >
+                      {initials}
+                    </div>
+                  );
+                })}
+
+                {isOrganizer && (
+                  <div className="trip-member-invite">
+                    <button
+                      type="button"
+                      className="trip-member-add"
+                      aria-label="Inviter un participant"
+                      onClick={() => setIsInviteModalOpen(true)}
+                    >
+                      <Plus size={24} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </article>
+        </section>
+      )}
+
+      {/* =====================================================
+          MODALE INVITATION
+      ====================================================== */}
 
       <Modal
         isOpen={isInviteModalOpen}
@@ -96,6 +341,10 @@ function TripInfos({ trip, onTripUpdated }: TripInfosProps) {
           onClose={() => setIsInviteModalOpen(false)}
         />
       </Modal>
+
+      {/* =====================================================
+          MODALE MODIFICATION
+      ====================================================== */}
 
       <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
         <TripActions

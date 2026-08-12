@@ -1,4 +1,3 @@
-import NavTabs from "../components/NavTabs";
 import TripInfos from "../components/TripInfos";
 import { useAuth } from "../contexts/AuthContext";
 import "./styles/Trip.css";
@@ -149,20 +148,7 @@ return (
     )}
 
     <main className="trip-page">
-      {!loading && myTrip?.description && (
-        <section className="trip-about-card">
-          <div className="trip-about-header">
-            <span className="trip-about-icon">✦</span>
-            <h2>À propos du voyage</h2>
-          </div>
-
-          <p>{myTrip.description}</p>
-        </section>
-      )}
-
-      <NavTabs />
-
-      <section className="steps-section">
+       <section className="steps-section">
         <h2 className="section-title">Récapitulatif du voyage</h2>
         <p className="section-subtitle">
           Voici les étapes validées par les membres
