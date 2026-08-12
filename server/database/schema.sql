@@ -29,6 +29,8 @@ CREATE TABLE step (
   id INT PRIMARY KEY AUTO_INCREMENT,
   city VARCHAR(255) NOT NULL,
   country VARCHAR(255) NOT NULL,
+  start_at DATE NULL,
+  end_at DATE NULL,
   trip_id INT NOT NULL,
   user_id INT NOT NULL,
   is_initial BOOLEAN DEFAULT false,

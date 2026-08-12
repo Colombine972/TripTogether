@@ -14,6 +14,8 @@ export type Step = {
     no: number;
     total: number;
   };
+  start_at?: string | null;
+  end_at?: string | null;
 };
 
 export type StepCardProps = {

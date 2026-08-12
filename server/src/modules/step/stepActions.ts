@@ -16,11 +16,19 @@ const createVoteSchema = Joi.object({
   comment: Joi.string().max(500).allow(null, "").optional(),
 });
 
-const selectStepsByTrip: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const createStepSchema = Joi.object({
+  city: Joi.string().trim().min(1).required(),
+
+  country: Joi.string().trim().min(1).required(),
+
+  place_id: Joi.string().trim().allow(null, "").optional(),
+
+  start_at: Joi.date().iso().required(),
+
+  end_at: Joi.date().iso().required(),
+});
+
+const selectStepsByTrip: RequestHandler = async (req, res, next) => {
   try {
     const tripId = Number(req.params.tripId);
 
@@ -47,95 +55,79 @@ const selectStepsByTrip: RequestHandler = async (
       });
     }
 
-    const isMemberOfTrip =
-      await tripRepository.isUserMemberOfTrip(
-        tripId,
-        userId,
-      );
+    const isMemberOfTrip = await tripRepository.isUserMemberOfTrip(
+      tripId,
+      userId,
+    );
 
     if (!isMemberOfTrip) {
       return res.status(403).json({
-        error:
-          "Vous devez être membre du voyage pour voir les étapes",
+        error: "Vous devez être membre du voyage pour voir les étapes",
       });
     }
 
-    const steps =
-      await stepRepository.getStepsWithVotes(
-        tripId,
-      );
+    const steps = await stepRepository.getStepsWithVotes(tripId);
 
-    const stepsWithStatus: StepWithStatus[] =
-      steps.map((step) => {
-        if (step.is_initial) {
-          return {
-            id: step.id,
-            city: step.city,
-            country: step.country,
-            creator_name: step.creator_name,
-            trip_id: step.trip_id,
-            place_id: step.place_id,
-            is_initial: step.is_initial,
-            status: "validated" as const,
-            voteStats: {
-              yes: step.total_members,
-              no:
-                step.total_votes -
-                step.yes_votes,
-              total: step.total_votes,
-            },
-          };
-        }
-
-        const yesVotes = step.yes_votes;
-        const totalVotes = step.total_votes;
-        const memberCount =
-          step.total_members;
-
-        const everyoneVoted =
-          totalVotes === memberCount;
-
-        const majorityYes =
-          yesVotes > memberCount / 2;
-
-        let status:
-          | "pending"
-          | "validated"
-          | "rejected" = "pending";
-
-        if (everyoneVoted) {
-          status = majorityYes
-            ? "validated"
-            : "rejected";
-        }
-
+    const stepsWithStatus: StepWithStatus[] = steps.map((step) => {
+      if (step.is_initial) {
         return {
           id: step.id,
           city: step.city,
           country: step.country,
-          place_id: step.place_id,
-          creator_name:
-            step.creator_name,
+          start_at: step.start_at,
+          end_at: step.end_at,
+          creator_name: step.creator_name,
           trip_id: step.trip_id,
+          place_id: step.place_id,
           is_initial: step.is_initial,
-          status,
+          status: "validated" as const,
           voteStats: {
-            yes: yesVotes,
-            no:
-              totalVotes -
-              yesVotes,
-            total: totalVotes,
+            yes: step.total_members,
+            no: step.total_votes - step.yes_votes,
+            total: step.total_votes,
           },
         };
-      });
+      }
+
+      const yesVotes = step.yes_votes;
+      const totalVotes = step.total_votes;
+      const memberCount = step.total_members;
+
+      const everyoneVoted = totalVotes === memberCount;
+
+      const majorityYes = yesVotes > memberCount / 2;
+
+      let status: "pending" | "validated" | "rejected" = "pending";
+
+      if (everyoneVoted) {
+        status = majorityYes ? "validated" : "rejected";
+      }
+
+      return {
+        id: step.id,
+        city: step.city,
+        country: step.country,
+        start_at: step.start_at,
+        end_at: step.end_at,
+        place_id: step.place_id,
+        creator_name: step.creator_name,
+        trip_id: step.trip_id,
+        is_initial: step.is_initial,
+        status,
+        voteStats: {
+          yes: yesVotes,
+          no: totalVotes - yesVotes,
+          total: totalVotes,
+        },
+      };
+    });
 
     return res.status(200).json({
       trip: {
         id: trip.id,
         title: trip.title,
         description: trip.description,
-        memberCount:
-          steps[0]?.total_members ?? 0,
+        memberCount: steps[0]?.total_members ?? 0,
       },
       steps: stepsWithStatus,
     });
@@ -144,11 +136,7 @@ const selectStepsByTrip: RequestHandler = async (
   }
 };
 
-const addVote: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const addVote: RequestHandler = async (req, res, next) => {
   try {
     const stepId = Number(req.params.id);
 
@@ -158,30 +146,19 @@ const addVote: RequestHandler = async (
       });
     }
 
-    const {
-      error,
-      value,
-    } = createVoteSchema.validate(
-      req.body,
-    );
+    const { error, value } = createVoteSchema.validate(req.body);
 
     if (error) {
       return res.status(400).json({
-        error:
-          error.details[0].message,
+        error: error.details[0].message,
       });
     }
 
-    const {
-      vote,
-      comment,
-    } = value;
+    const { vote, comment } = value;
 
-    const authReq =
-      req as RequestWithAuth;
+    const authReq = req as RequestWithAuth;
 
-    const userId =
-      Number(authReq.auth.sub);
+    const userId = Number(authReq.auth.sub);
 
     if (!userId) {
       return res.status(403).json({
@@ -189,10 +166,7 @@ const addVote: RequestHandler = async (
       });
     }
 
-    const step =
-      await stepRepository.getStepWithTrip(
-        stepId,
-      );
+    const step = await stepRepository.getStepWithTrip(stepId);
 
     if (!step) {
       return res.status(404).json({
@@ -200,44 +174,33 @@ const addVote: RequestHandler = async (
       });
     }
 
-    const isMemberOfTrip =
-      await tripRepository.isUserMemberOfTrip(
-        step.trip_id,
-        userId,
-      );
+    const isMemberOfTrip = await tripRepository.isUserMemberOfTrip(
+      step.trip_id,
+      userId,
+    );
 
     if (!isMemberOfTrip) {
       return res.status(403).json({
-        error:
-          "Vous devez être membre du voyage pour voter",
+        error: "Vous devez être membre du voyage pour voter",
       });
     }
 
-    const hasVoted =
-      await stepRepository.hasUserVoted(
-        userId,
-        stepId,
-      );
+    const hasVoted = await stepRepository.hasUserVoted(userId, stepId);
 
     if (hasVoted) {
       return res.status(409).json({
-        error:
-          "Vous avez déjà voté pour cette étape",
+        error: "Vous avez déjà voté pour cette étape",
       });
     }
 
-    const voteId =
-      await stepRepository.create(
-        userId,
-        stepId,
-        vote,
-        comment || null,
-      );
+    const voteId = await stepRepository.create(
+      userId,
+      stepId,
+      vote,
+      comment || null,
+    );
 
-    const createdVote =
-      await stepRepository.selectByIdWithUser(
-        voteId,
-      );
+    const createdVote = await stepRepository.selectByIdWithUser(voteId);
 
     await notificationService.notifyVoteCreated(
       step.trip_id,
@@ -246,28 +209,19 @@ const addVote: RequestHandler = async (
       step.city,
     );
 
-    return res.status(201).json(
-      createdVote,
-    );
+    return res.status(201).json(createdVote);
   } catch (err) {
     next(err);
   }
 };
 
-const browseVote: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const browseVote: RequestHandler = async (req, res, next) => {
   try {
-    const stepId =
-      Number(req.params.id);
+    const stepId = Number(req.params.id);
 
-    const authReq =
-      req as RequestWithAuth;
+    const authReq = req as RequestWithAuth;
 
-    const userId =
-      Number(authReq.auth.sub);
+    const userId = Number(authReq.auth.sub);
 
     if (!userId) {
       return res.status(403).json({
@@ -281,10 +235,7 @@ const browseVote: RequestHandler = async (
       });
     }
 
-    const step =
-      await stepRepository.getStepWithTrip(
-        stepId,
-      );
+    const step = await stepRepository.getStepWithTrip(stepId);
 
     if (!step) {
       return res.status(404).json({
@@ -292,35 +243,22 @@ const browseVote: RequestHandler = async (
       });
     }
 
-    const isMemberOfTrip =
-      await tripRepository.isUserMemberOfTrip(
-        step.trip_id,
-        userId,
-      );
+    const isMemberOfTrip = await tripRepository.isUserMemberOfTrip(
+      step.trip_id,
+      userId,
+    );
 
     if (!isMemberOfTrip) {
       return res.status(403).json({
-        error:
-          "Vous devez être membre du voyage pour voir les votes",
+        error: "Vous devez être membre du voyage pour voir les votes",
       });
     }
 
-    const allVotes =
-      await stepRepository.selectByStep(
-        stepId,
-      );
+    const allVotes = await stepRepository.selectByStep(stepId);
 
-    const yes =
-      allVotes.filter(
-        (currentVote) =>
-          currentVote.vote,
-      ).length;
+    const yes = allVotes.filter((currentVote) => currentVote.vote).length;
 
-    const no =
-      allVotes.filter(
-        (currentVote) =>
-          !currentVote.vote,
-      ).length;
+    const no = allVotes.filter((currentVote) => !currentVote.vote).length;
 
     const showVoteStats: VotesStats = {
       step_id: stepId,
@@ -332,49 +270,31 @@ const browseVote: RequestHandler = async (
       },
     };
 
-    return res.status(200).json(
-      showVoteStats,
-    );
+    return res.status(200).json(showVoteStats);
   } catch (err) {
     next(err);
   }
 };
 
-const deleteStep: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const deleteStep: RequestHandler = async (req, res, next) => {
   try {
-    const stepId =
-      Number(req.params.stepId);
+    const stepId = Number(req.params.stepId);
 
-    const tripId =
-      Number(req.params.tripId);
+    const tripId = Number(req.params.tripId);
 
-    const authReq =
-      req as RequestWithAuth;
+    const authReq = req as RequestWithAuth;
 
-    const userId =
-      Number(authReq.auth.sub);
+    const userId = Number(authReq.auth.sub);
 
-    const step =
-      await stepRepository.getStepWithTrip(
-        stepId,
-      );
+    const step = await stepRepository.getStepWithTrip(stepId);
 
     if (!step) {
       return res.status(404).json({
-        error:
-          "Étape introuvable",
+        error: "Étape introuvable",
       });
     }
 
-    const isOwner =
-      await tripRepository.isOwner(
-        tripId,
-        userId,
-      );
+    const isOwner = await tripRepository.isOwner(tripId, userId);
 
     if (!isOwner) {
       return res.status(403).json({
@@ -382,9 +302,7 @@ const deleteStep: RequestHandler = async (
       });
     }
 
-    await stepRepository.delete(
-      stepId,
-    );
+    await stepRepository.delete(stepId);
 
     return res.sendStatus(204);
   } catch (err) {
@@ -401,7 +319,9 @@ const addStepCity: RequestHandler = async (
     const tripId =
       Number(req.params.tripId);
 
-    if (Number.isNaN(tripId)) {
+    if (
+      Number.isNaN(tripId)
+    ) {
       return res.status(400).json({
         error:
           "ID de voyage invalide",
@@ -416,7 +336,8 @@ const addStepCity: RequestHandler = async (
 
     if (!userId) {
       return res.status(403).json({
-        error: "Non authentifié",
+        error:
+          "Non authentifié",
       });
     }
 
@@ -446,53 +367,163 @@ const addStepCity: RequestHandler = async (
     }
 
     const {
-      city,
-      country,
-      place_id,
-    } = req.body;
+      error,
+      value,
+    } =
+      createStepSchema.validate(
+        req.body,
+      );
 
-    if (
-      typeof city !== "string" ||
-      typeof country !== "string"
-    ) {
+    if (error) {
       return res.status(400).json({
         error:
-          "La ville et le pays sont requis.",
+          error.details[0]
+            .message,
       });
     }
 
-    const stepId =
-      await stepRepository.createStepCity({
-        trip_id: tripId,
-        city,
-        country,
-        place_id:
-          place_id || null,
-        user_id: userId,
+    const {
+      city,
+      country,
+      place_id,
+      start_at,
+      end_at,
+    } = value;
+
+    /*
+     * Joi transforme les dates ISO
+     * en objets Date.
+     */
+    const stepStartDate =
+      new Date(start_at);
+
+    const stepEndDate =
+      new Date(end_at);
+
+    const tripStartDate =
+      new Date(trip.start_at);
+
+    const tripEndDate =
+      new Date(trip.end_at);
+
+    /* =====================================================
+       DATE DE FIN >= DATE DE DÉBUT
+    ====================================================== */
+
+    if (
+      stepEndDate <
+      stepStartDate
+    ) {
+      return res.status(400).json({
+        error:
+          "La date de fin de l'étape doit être postérieure ou égale à la date de début.",
       });
+    }
+
+    /* =====================================================
+       ÉTAPE COMPRISE DANS LE VOYAGE
+    ====================================================== */
+
+    if (
+      stepStartDate <
+        tripStartDate ||
+      stepEndDate >
+        tripEndDate
+    ) {
+      return res.status(400).json({
+        error:
+          "Les dates de l'étape doivent être comprises dans les dates du voyage.",
+      });
+    }
+
+    const formatSqlDate = (
+      date: Date,
+    ) =>
+      date
+        .toISOString()
+        .slice(0, 10);
+
+    const formattedStartAt =
+      formatSqlDate(
+        stepStartDate,
+      );
+
+    const formattedEndAt =
+      formatSqlDate(
+        stepEndDate,
+      );
+
+    const stepId =
+      await stepRepository.createStepCity(
+        {
+          trip_id: tripId,
+
+          city,
+
+          country,
+
+          start_at:
+            formattedStartAt,
+
+          end_at:
+            formattedEndAt,
+
+          place_id:
+            place_id || null,
+
+          user_id:
+            userId,
+        },
+      );
 
     return res.status(201).json({
       trip: {
         id: trip.id,
-        title: trip.title,
+
+        title:
+          trip.title,
+
         description:
           trip.description,
-        city: trip.city,
-        country: trip.country,
+
+        city:
+          trip.city,
+
+        country:
+          trip.country,
+
         place_id:
           trip.place_id,
       },
+
       step: {
         id: stepId,
+
         city,
+
         country,
+
+        start_at:
+          formattedStartAt,
+
+        end_at:
+          formattedEndAt,
+
         place_id:
           place_id || null,
-        trip_id: tripId,
+
+        trip_id:
+          tripId,
+
         creator_name:
           "Vous",
-        is_initial: false,
-        status: "pending",
+
+        is_initial:
+          false,
+
+        status:
+          "pending",
+
         voteStats: {
           yes: 0,
           no: 0,
