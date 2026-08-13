@@ -32,6 +32,47 @@ function StepCard({
 
   const stepImage = getPlaceImageUrl(step.place_id);
 
+  const formatStepDate = (dateString?: string | null) => {
+    if (!dateString) {
+      return "";
+    }
+
+    const datePart = dateString.slice(0, 10);
+    const [year, month, day] = datePart.split("-").map(Number);
+
+    if (!year || !month || !day) {
+      return dateString;
+    }
+
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(new Date(year, month - 1, day));
+  };
+
+  const getStepDuration = (
+    startDateString?: string | null,
+    endDateString?: string | null,
+  ) => {
+    if (!startDateString || !endDateString) {
+      return null;
+    }
+
+    const startDate = new Date(`${startDateString.slice(0, 10)}T00:00:00`);
+    const endDate = new Date(`${endDateString.slice(0, 10)}T00:00:00`);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      return null;
+    }
+
+    const differenceInMilliseconds = endDate.getTime() - startDate.getTime();
+
+    return Math.floor(differenceInMilliseconds / (1000 * 60 * 60 * 24)) + 1;
+  };
+
+  const stepDuration = getStepDuration(step.start_at, step.end_at);
+
   const thumbsUpLogo = (
     <img src="/logos/green-thumb.png" className="green-thumb" alt="Oui" />
   );
@@ -199,8 +240,26 @@ function StepCard({
         )}
 
         <h2>{step.city}</h2>
+
         <h3>{step.country}</h3>
-        <h3 id="step-header-end">Proposée par {step.creator_name} </h3>
+
+        {step.start_at && step.end_at && (
+          <div className="step-dates">
+            <span className="step-dates-main">
+              📅 {formatStepDate(step.start_at)}
+              {" - "}
+              {formatStepDate(step.end_at)}
+            </span>
+
+            {stepDuration && (
+              <span className="step-duration">
+                {stepDuration} {stepDuration > 1 ? "jours" : "jour"}
+              </span>
+            )}
+          </div>
+        )}
+
+        <h3 id="step-header-end">Proposée par {step.creator_name}</h3>
       </article>
       {step.is_initial ? (
         <div className="step-initial">

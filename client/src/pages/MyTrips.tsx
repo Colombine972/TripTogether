@@ -194,14 +194,21 @@ export default function MyTrips() {
     };
   };
 
-
   return (
     <>
       {/* =====================================================
           HERO
       ====================================================== */}
 
-      <header className="mytripsheader" />
+      <section className="mytripsheader">
+        <img
+          src="mesvoyages.png"
+          alt=""
+          className="mytripsheader-image"
+          loading="eager"
+          fetchPriority="high"
+        />
+      </section>
 
       {/* =====================================================
           FILTRES

@@ -29,12 +29,150 @@
   height: 50px;
 }
 
+/* =========================================================
+   PROGRESSION DES ÉTAPES
+========================================================= */
 
+.trip-progress-card {
+  width: min(900px, 100%);
+
+  margin: 2rem auto;
+
+  padding: 1.5rem 1.7rem;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.trip-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 1.3rem;
+}
+
+.trip-progress-title {
+  display: flex;
+  align-items: center;
+
+  gap: 0.65rem;
+}
+
+.trip-progress-icon {
+  display: grid;
+  place-items: center;
+
+  width: 38px;
+  height: 38px;
+
+  background: #eaf5eb;
+
+  border-radius: 50%;
+
+  font-size: 1rem;
+}
+
+.trip-progress-title h2 {
+  margin: 0;
+
+  color: #111827;
+
+  font-family: var(--body-text);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.trip-progress-link {
+  padding: 0;
+
+  color: var(--primary-button);
+  background: transparent;
+
+  border: none;
+
+  font-family: var(--body-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.trip-progress-link:hover {
+  text-decoration: underline;
+}
+
+.trip-progress-bar {
+  width: 100%;
+  height: 10px;
+
+  overflow: hidden;
+
+  background: #e5e7eb;
+
+  border-radius: 999px;
+}
+
+.trip-progress-bar-value {
+  height: 100%;
+
+  background: var(--primary-button);
+
+  border-radius: inherit;
+
+  transition: width 300ms ease;
+}
+
+.trip-progress-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 0.9rem;
+
+  color: #6b7280;
+
+  font-family: var(--body-text);
+  font-size: 0.9rem;
+}
+
+.trip-progress-footer strong {
+  color: var(--primary-button);
+
+  font-size: 1rem;
+}
 
 
 @media (max-width: 768px) {
   .trip-page {
     padding: 0 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .trip-progress-card {
+    padding: 1.2rem;
+  }
+
+  .trip-progress-header {
+    align-items: flex-start;
+  }
+
+  .trip-progress-title h2 {
+    font-size: 1.05rem;
+  }
+
+  .trip-progress-footer {
+    font-size: 0.85rem;
   }
 }
 

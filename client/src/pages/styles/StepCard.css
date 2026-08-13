@@ -40,6 +40,44 @@
   padding: 8px 0 12px;
 }
 
+/* =========================================================
+   DATES DE L'ÉTAPE
+========================================================= */
+
+.step-dates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  gap: 0.6rem;
+
+  margin: 0.35rem 0 0.75rem;
+}
+
+.step-dates-main {
+  color: #374151;
+
+  font-family: var(--body-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.step-duration {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0.25rem 0.6rem;
+
+  color: var(--primary-button);
+  background: rgba(36, 124, 40, 0.08);
+
+  border-radius: 999px;
+
+  font-family: var(--body-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 #step-header-end {
   border-bottom: 1px solid black;
   padding: 12px 0;

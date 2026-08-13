@@ -205,6 +205,8 @@
     minmax(0, 1.6fr)
     minmax(300px, 0.9fr);
 
+  align-items: start;
+
   gap: 1.5rem;
 
   width: min(1400px, calc(100% - 4rem));
@@ -388,6 +390,8 @@
 
   gap: 1.5rem;
 }
+
+
 
 /* =========================================================
    MINI MAP
@@ -613,6 +617,26 @@
 }
 
 /* =========================================================
+   LIEN "VOIR TOUTES"
+========================================================= */
+
+.trip-progress-link,
+.trip-members-see-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.35rem;
+
+  white-space: nowrap;
+}
+
+.trip-progress-link svg,
+.trip-members-see-all svg {
+  flex-shrink: 0;
+}
+
+/* =========================================================
    TABLETTE
 ========================================================= */
 
@@ -637,6 +661,8 @@
     width: calc(100% - 2rem);
   }
 }
+
+
 
 /* =========================================================
    MOBILE
