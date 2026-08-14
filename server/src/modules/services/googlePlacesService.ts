@@ -1,35 +1,86 @@
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const GOOGLE_API_KEY =
+  process.env.GOOGLE_API_KEY;
+
+interface GooglePlacePhoto {
+  name: string;
+}
 
 interface GooglePlaceDetailsResponse {
-  photos?: {
-    name: string;
-  }[];
+  photos?: GooglePlacePhoto[];
 }
 
 export const getPlacePhotoUrl = async (
   placeId: string,
+  photoIndex = 0,
 ): Promise<string | null> => {
-  if (!GOOGLE_API_KEY) return null;
+  if (!GOOGLE_API_KEY) {
+    return null;
+  }
 
   try {
+    /* =====================================================
+       RÉCUPÉRATION DES PHOTOS DU LIEU
+    ====================================================== */
+
     const detailsUrl = `https://places.googleapis.com/v1/places/${placeId}?fields=photos&key=${GOOGLE_API_KEY}`;
 
-    const response = await fetch(detailsUrl);
+    const response =
+      await fetch(detailsUrl);
 
     if (!response.ok) {
-      console.error("Erreur Google Places Details:", response.status);
+      console.error(
+        "Erreur Google Places Details :",
+        response.status,
+      );
+
       return null;
     }
 
-    const data = (await response.json()) as GooglePlaceDetailsResponse;
+    const data =
+      (await response.json()) as GooglePlaceDetailsResponse;
 
-    const photoName = data.photos?.[0]?.name;
+    const photos =
+      data.photos ?? [];
 
-    if (!photoName) return null;
+    if (photos.length === 0) {
+      return null;
+    }
 
-    return `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=1200&key=${GOOGLE_API_KEY}`;
+    /* =====================================================
+       INDEX DE PHOTO SÉCURISÉ
+    ====================================================== */
+
+    const safePhotoIndex =
+      Number.isInteger(
+        photoIndex,
+      ) &&
+      photoIndex >= 0
+        ? photoIndex
+        : 0;
+
+    /* =====================================================
+       SÉLECTION DE LA PHOTO
+    ====================================================== */
+
+    const selectedPhoto =
+      photos[safePhotoIndex] ??
+      photos[0];
+
+    if (!selectedPhoto?.name) {
+      return null;
+    }
+
+    /* =====================================================
+       URL DE LA PHOTO
+    ====================================================== */
+
+    return `https://places.googleapis.com/v1/${selectedPhoto.name}/media?maxWidthPx=1600&key=${GOOGLE_API_KEY}`;
   } catch (error) {
-    console.error("Erreur Google Places Photo:", error);
+    console.error(
+      "Erreur Google Places Photo :",
+      error,
+    );
+
     return null;
   }
 };

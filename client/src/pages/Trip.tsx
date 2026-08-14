@@ -357,6 +357,7 @@ function Trip() {
             validatedStepsCount={
               validatedStepsCount
             }
+            steps={steps}
           />
         )}
 

@@ -1,0 +1,394 @@
+/* =========================================================
+   PROCHAINE ÉTAPE
+========================================================= */
+
+.next-step-card {
+  width: 100%;
+
+  padding: 1.4rem;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #e3e8e4;
+  border-radius: 18px;
+
+  box-shadow:
+    0 8px 26px
+    rgba(35, 52, 39, 0.06);
+
+  font-family: var(--body-text);
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.next-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+}
+
+.next-step-title {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.next-step-title-icon {
+  display: grid;
+  place-items: center;
+
+  width: 34px;
+  height: 34px;
+
+  color: #138045;
+
+  background: #eaf5ed;
+
+  border-radius: 10px;
+}
+
+.next-step-title h3 {
+  margin: 0;
+
+  color: #111827;
+
+  font-family: var(--body-text);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+/* =========================================================
+   VOIR LES ÉTAPES
+========================================================= */
+
+.next-step-see-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  padding: 0;
+
+    color: var(--primary-button);
+
+  font-family: var(--body-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  white-space: nowrap;
+
+  background: transparent;
+
+  border: none;
+
+  cursor: pointer;
+}
+
+.next-step-see-all svg {
+  transition:
+    transform 180ms ease;
+}
+
+.next-step-see-all:hover svg {
+  transform:
+    translateX(
+      2px
+    );
+}
+
+/* =========================================================
+   CONTENU
+========================================================= */
+
+.next-step-content {
+  display: grid;
+  grid-template-columns:
+    minmax(
+      0,
+      1fr
+    )
+    150px;
+
+  gap: 1rem;
+
+  min-height: 165px;
+}
+
+/* =========================================================
+   INFORMATIONS
+========================================================= */
+
+.next-step-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  min-width: 0;
+
+  padding-top: 1.4rem;
+}
+
+.next-step-eyebrow {
+  display: block;
+
+  margin-bottom: 0.4rem;
+
+  color: #7c867f;
+
+  font-size: 0.72rem;
+  font-weight: 650;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.next-step-info h4 {
+  margin: 0;
+  margin-top: 1rem;
+
+  color: #202823;
+
+  font-family: var(--title-font);
+  font-size: 1.45rem;
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+.next-step-country {
+  margin:
+    0.8rem
+    0
+    0;
+
+  color: #747d77;
+
+  font-size: 0.82rem;
+}
+
+/* =========================================================
+   BADGE EN COURS
+========================================================= */
+
+.next-step-current-badge {
+  display: inline-flex;
+  align-items: center;
+
+  margin-bottom: 0.7rem;
+
+  padding:
+    0.3rem
+    0.65rem;
+
+  color: #17683a;
+
+  font-size: 0.72rem;
+  font-weight: 700;
+
+  background: #eaf6ed;
+
+  border: 1px solid #cde5d4;
+  border-radius: 999px;
+}
+
+/* =========================================================
+   DATE
+========================================================= */
+
+.next-step-date {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  margin-top: 0.9rem;
+
+  color: #626d65;
+
+  font-size: 0.9rem;
+}
+
+.next-step-date svg {
+  color: #218149;
+}
+
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.next-step-image-wrapper {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-height: 165px;
+
+  overflow: hidden;
+
+  background: #e9edea;
+
+  border-radius: 14px;
+}
+
+.next-step-image {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transition:
+    transform 350ms ease;
+}
+
+.next-step-card:hover
+.next-step-image {
+  transform:
+    scale(
+      1.035
+    );
+}
+
+.next-step-image-overlay {
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(
+        20,
+        30,
+        23,
+        0.02
+      )
+      45%,
+      rgba(
+        20,
+        30,
+        23,
+        0.58
+      )
+      100%
+    );
+}
+
+
+/* =========================================================
+   AUCUNE PROCHAINE ÉTAPE
+========================================================= */
+
+.next-step-card-empty {
+  min-height: 180px;
+}
+
+.next-step-empty-content {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+
+  min-height: 105px;
+
+  padding: 1rem;
+
+  color: #69736c;
+
+  background: #f8faf8;
+
+  border: 1px dashed #dce4de;
+  border-radius: 13px;
+}
+
+.next-step-empty-icon {
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 44px;
+
+  width: 44px;
+  height: 44px;
+
+  color: #59906a;
+
+  background: #edf5ef;
+
+  border-radius: 12px;
+}
+
+.next-step-empty-content div {
+  min-width: 0;
+}
+
+.next-step-empty-content strong {
+  display: block;
+
+  margin-bottom: 0.2rem;
+
+  color: #3e4942;
+
+  font-size: 0.84rem;
+}
+
+.next-step-empty-content p {
+  margin: 0;
+
+  color: #818a84;
+
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   TABLETTE
+========================================================= */
+
+@media (max-width: 900px) {
+  .next-step-content {
+    grid-template-columns:
+      minmax(
+        0,
+        1fr
+      )
+      135px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+  .next-step-card {
+    padding: 1.1rem;
+  }
+
+  .next-step-header {
+    align-items: flex-start;
+  }
+
+  .next-step-content {
+    grid-template-columns:
+      1fr;
+  }
+
+  .next-step-image-wrapper {
+    order: -1;
+
+    height: 170px;
+  }
+
+  .next-step-info h4 {
+    font-size: 1.3rem;
+  }
+
+
+}

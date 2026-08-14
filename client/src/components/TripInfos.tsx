@@ -1,4 +1,3 @@
-import { Link, useLocation } from "react-router";
 import {
   ArrowRight,
   CalendarDays,
@@ -10,25 +9,42 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import {
+  Link,
+  useLocation,
+} from "react-router";
 
 import { useAuth } from "../contexts/AuthContext";
-import type { TheTrip } from "../types/tripType";
 
-import NavTabs from "./NavTabs";
+import type {
+  Step,
+  TheTrip,
+} from "../types/tripType";
+
 import Modal from "./Modal";
+import NavTabs from "./NavTabs";
+import NextStepCard from "./NextStepCard";
 
 import TripActions from "../pages/TripActions";
-import TripCard from "../pages/TripCard";
 import TripInvitation from "../pages/TripInvitation";
 
 import "../pages/styles/TripInfos.css";
 
+/* =========================================================
+   TYPES
+========================================================= */
+
 type TripInfosProps = {
   trip: TheTrip | null;
-  onTripUpdated: (updatedTrip: TheTrip) => void;
+
+  onTripUpdated: (
+    updatedTrip: TheTrip,
+  ) => void;
 
   totalSteps?: number;
   validatedStepsCount?: number;
+
+  steps?: Step[];
 };
 
 type TripMember = {
@@ -38,197 +54,425 @@ type TripMember = {
   avatar_url?: string | null;
 };
 
+/* =========================================================
+   COMPOSANT
+========================================================= */
+
 function TripInfos({
   trip,
   onTripUpdated,
   totalSteps = 0,
   validatedStepsCount = 0,
+  steps = [],
 }: TripInfosProps) {
-  const { auth } = useAuth();
-  const location = useLocation();
+  const { auth } =
+    useAuth();
 
-  const [isInviteModalOpen, setIsInviteModalOpen] =
+  const location =
+    useLocation();
+
+  /* =======================================================
+     MODALES
+  ======================================================= */
+
+  const [
+    isInviteModalOpen,
+    setIsInviteModalOpen,
+  ] =
     useState(false);
 
-  const [isEditModalOpen, setIsEditModalOpen] =
+  const [
+    isEditModalOpen,
+    setIsEditModalOpen,
+  ] =
     useState(false);
 
-  const [members, setMembers] =
-    useState<TripMember[]>([]);
+  /* =======================================================
+     MEMBRES
+  ======================================================= */
 
-  /* =========================================================
+  const [
+    members,
+    setMembers,
+  ] =
+    useState<TripMember[]>(
+      [],
+    );
+
+  /* =======================================================
      CHARGEMENT DES MEMBRES
-  ========================================================= */
+  ======================================================= */
 
   useEffect(() => {
     if (!trip?.id) {
       return;
     }
 
-    const fetchMembers = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/trips/${trip.id}/members`,
-        );
+    const fetchMembers =
+      async () => {
+        try {
+          const response =
+            await fetch(
+              `${import.meta.env.VITE_API_URL}/api/trips/${trip.id}/members`,
+            );
 
-        if (!response.ok) {
-          throw new Error(
-            "Impossible de récupérer les membres",
+          if (
+            !response.ok
+          ) {
+            throw new Error(
+              "Impossible de récupérer les membres",
+            );
+          }
+
+          const data =
+            await response.json();
+
+          const tripMembers =
+            Array.isArray(
+              data,
+            )
+              ? data
+              : (data.members ??
+                []);
+
+          setMembers(
+            tripMembers,
+          );
+        } catch (error) {
+          console.error(
+            "Erreur récupération membres :",
+            error,
           );
         }
-
-        const data = await response.json();
-
-        const tripMembers = Array.isArray(data)
-          ? data
-          : (data.members ?? []);
-
-        setMembers(tripMembers);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      };
 
     void fetchMembers();
-  }, [trip?.id]);
+  }, [
+    trip?.id,
+  ]);
+
+  /* =======================================================
+     VOYAGE ABSENT
+  ======================================================= */
 
   if (!trip) {
     return null;
   }
 
-  const tripId = trip.id;
+  /* =======================================================
+     DONNÉES DU VOYAGE
+  ======================================================= */
+
+  const tripId =
+    trip.id;
 
   const isRecapPage =
-    location.pathname === `/trip/${tripId}` ||
-    location.pathname === `/trip/${tripId}/`;
+    location.pathname ===
+      `/trip/${tripId}` ||
+    location.pathname ===
+      `/trip/${tripId}/`;
 
   const isOrganizer =
-    Number(auth?.user?.id) ===
-    Number(trip.user_id);
+    Number(
+      auth?.user?.id,
+    ) ===
+    Number(
+      trip.user_id,
+    );
+
+  const participantCount =
+    members.length ||
+    trip.participants ||
+    0;
+
+  /* =======================================================
+     PROGRESSION
+  ======================================================= */
 
   const stepsProgress =
     totalSteps === 0
       ? 0
       : Math.round(
-          (validatedStepsCount / totalSteps) * 100,
+          (validatedStepsCount /
+            totalSteps) *
+            100,
         );
 
-  /* =========================================================
-     IMAGE GOOGLE PLACES
-  ========================================================= */
+  /* =======================================================
+     PHOTOS GOOGLE PLACES
+  ======================================================= */
 
-  const getPlaceImageUrl = (
-    placeId?: string | null,
-  ) => {
-    if (!placeId) {
-      return "/images/default-city.jpg";
-    }
+  const getPlaceImageUrl =
+    (
+      placeId?: string | null,
+      photoIndex = 0,
+    ) => {
+      if (!placeId) {
+        return "/images/default-city.jpg";
+      }
 
-    return `${import.meta.env.VITE_API_URL}/api/places/photo/${placeId}`;
-  };
+      return `${
+        import.meta.env
+          .VITE_API_URL
+      }/api/places/photo/${placeId}?photoIndex=${photoIndex}`;
+    };
 
-  const headerImage =
-    getPlaceImageUrl(trip.place_id);
+  const headerPhotos = [
+    getPlaceImageUrl(
+      trip.place_id,
+      0,
+    ),
+    getPlaceImageUrl(
+      trip.place_id,
+      1,
+    ),
+    getPlaceImageUrl(
+      trip.place_id,
+      2,
+    ),
+  ];
 
-  /* =========================================================
+  /* =======================================================
      MINI MAP GOOGLE
-  ========================================================= */
+     UTILISÉE UNIQUEMENT DANS "À PROPOS DU VOYAGE"
+  ======================================================= */
 
-  const getStaticMapUrl = (
-    city: string,
-    country: string,
-  ) => {
-    const apiKey =
-      import.meta.env
-        .VITE_APP_GOOGLE_MAPS_API_KEY;
+  const getStaticMapUrl =
+    (
+      city: string,
+      country: string,
+    ) => {
+      const apiKey =
+        import.meta.env
+          .VITE_APP_GOOGLE_MAPS_API_KEY;
 
-    const mapLocation =
-      `${city}, ${country}`;
+      const mapLocation =
+        `${city}, ${country}`;
 
-    const params =
-      new URLSearchParams({
-        center: mapLocation,
-        zoom: "11",
-        size: "600x300",
-        scale: "2",
-        maptype: "roadmap",
-        markers: `color:green|${mapLocation}`,
-        key: apiKey,
-      });
+      const params =
+        new URLSearchParams(
+          {
+            center:
+              mapLocation,
 
-    return `https://maps.googleapis.com/maps/api/staticmap?${params.toString()}`;
-  };
+            zoom:
+              "11",
 
-  /* =========================================================
+            size:
+              "600x300",
+
+            scale:
+              "2",
+
+            maptype:
+              "roadmap",
+
+            markers:
+              `color:green|${mapLocation}`,
+
+            key:
+              apiKey,
+          },
+        );
+
+      return `https://maps.googleapis.com/maps/api/staticmap?${params.toString()}`;
+    };
+
+  /* =======================================================
      FORMATAGE DATE
-  ========================================================= */
+  ======================================================= */
 
-  const formatDate = (
-    dateString: string,
+  const formatDate =
+    (
+      dateString: string,
+    ) => {
+      const date =
+        new Date(
+          dateString,
+        );
+
+      if (
+        Number.isNaN(
+          date.getTime(),
+        )
+      ) {
+        return dateString;
+      }
+
+      return new Intl.DateTimeFormat(
+        "fr-FR",
+        {
+          day:
+            "numeric",
+
+          month:
+            "long",
+
+          year:
+            "numeric",
+        },
+      ).format(
+        date,
+      );
+    };
+
+  /* =======================================================
+     FALLBACK IMAGE
+  ======================================================= */
+
+  const handleImageError = (
+    event: React.SyntheticEvent<
+      HTMLImageElement
+    >,
   ) => {
-    const date =
-      new Date(dateString);
-
-    if (
-      Number.isNaN(
-        date.getTime(),
-      )
-    ) {
-      return dateString;
-    }
-
-    return new Intl.DateTimeFormat(
-      "fr-FR",
-      {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      },
-    ).format(date);
+    event.currentTarget.src =
+      "/images/default-city.jpg";
   };
+
+  /* =======================================================
+     RENDU
+  ======================================================= */
 
   return (
     <>
       {/* =====================================================
-          HERO
+          HEADER DU VOYAGE
       ====================================================== */}
 
       <section className="trip-stage">
         <div className="trip-stage-glow trip-stage-glow-left" />
+
         <div className="trip-stage-glow trip-stage-glow-right" />
+
         <div className="trip-stage-grid" />
 
         <div className="trip-stage-center">
-          <div
-            className="trip-hero-card"
-            style={{
-              backgroundImage:
-                `url(${headerImage})`,
-            }}
-          >
-            <div className="trip-hero-overlay">
-              <TripCard
-                title={trip.title}
-                city={trip.city}
-                country={trip.country}
-                startAt={trip.start_at}
-                endAt={trip.end_at}
-                participants={
-                  members.length ||
-                  trip.participants
-                }
-                role={
-                  isOrganizer
-                    ? "organizer"
-                    : "participant"
-                }
-                localCurrency={null}
-                baseCurrency={
-                  trip.base_currency
-                }
-              />
+          <article className="trip-header-modern">
+            {/* ===============================================
+                INFORMATIONS DU VOYAGE
+            ================================================ */}
+
+            <div className="trip-header-modern-info">
+              <div className="trip-header-location">
+                <MapPin
+                  size={18}
+                />
+
+                <span>
+                  {trip.city},{" "}
+                  {trip.country}
+                </span>
+              </div>
+
+              <h1>
+                {trip.title}
+              </h1>
+
+              {trip.description && (
+                <p className="trip-header-description">
+                  {
+                    trip.description
+                  }
+                </p>
+              )}
+
+              <div className="trip-header-meta">
+                <div className="trip-header-meta-item">
+                  <CalendarDays
+                    size={18}
+                  />
+
+                  <span>
+                    {formatDate(
+                      trip.start_at,
+                    )}
+
+                    {" – "}
+
+                    {formatDate(
+                      trip.end_at,
+                    )}
+                  </span>
+                </div>
+
+                <div className="trip-header-meta-item">
+                  <Users
+                    size={18}
+                  />
+
+                  <span>
+                    {
+                      participantCount
+                    }{" "}
+                    {participantCount >
+                    1
+                      ? "participants"
+                      : "participant"}
+                  </span>
+                </div>
+              </div>
+
+              {isOrganizer && (
+                <button
+                  type="button"
+                  className="trip-header-edit"
+                  onClick={() =>
+                    setIsEditModalOpen(
+                      true,
+                    )
+                  }
+                >
+                  <Pencil
+                    size={16}
+                  />
+
+                  Modifier le voyage
+                </button>
+              )}
             </div>
-          </div>
+
+            {/* ===============================================
+                GALERIE DE 3 PHOTOS
+            ================================================ */}
+
+            <div className="trip-header-gallery">
+              <div className="trip-header-photo trip-header-photo-main">
+                <img
+                  src={
+                    headerPhotos[0]
+                  }
+                  alt={`${trip.city}, ${trip.country}`}
+                  onError={
+                    handleImageError
+                  }
+                />
+              </div>
+
+              <div className="trip-header-photo trip-header-photo-secondary">
+                <img
+                  src={
+                    headerPhotos[1]
+                  }
+                  alt={`Vue de ${trip.city}`}
+                  onError={
+                    handleImageError
+                  }
+                />
+              </div>
+
+              <div className="trip-header-photo trip-header-photo-third">
+                <img
+                  src={
+                    headerPhotos[2]
+                  }
+                  alt={`Découverte de ${trip.city}`}
+                  onError={
+                    handleImageError
+                  }
+                />
+              </div>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -247,7 +491,7 @@ function TripInfos({
       {isRecapPage && (
         <section className="trip-overview">
           {/* =================================================
-              COLONNE GAUCHE : À PROPOS
+              À PROPOS DU VOYAGE
           ================================================== */}
 
           <article className="trip-overview-card trip-about-overview">
@@ -272,7 +516,10 @@ function TripInfos({
                     )
                   }
                 >
-                  <Pencil size={17} />
+                  <Pencil
+                    size={17}
+                  />
+
                   Modifier
                 </button>
               )}
@@ -280,14 +527,18 @@ function TripInfos({
 
             {trip.description && (
               <p className="trip-overview-description">
-                {trip.description}
+                {
+                  trip.description
+                }
               </p>
             )}
 
             <div className="trip-about-content">
               <div className="trip-overview-details">
                 <div className="trip-overview-detail">
-                  <MapPin size={19} />
+                  <MapPin
+                    size={19}
+                  />
 
                   <span className="trip-detail-label">
                     Destination
@@ -300,7 +551,9 @@ function TripInfos({
                 </div>
 
                 <div className="trip-overview-detail">
-                  <CalendarDays size={19} />
+                  <CalendarDays
+                    size={19}
+                  />
 
                   <span className="trip-detail-label">
                     Dates
@@ -310,7 +563,9 @@ function TripInfos({
                     {formatDate(
                       trip.start_at,
                     )}
+
                     {" - "}
+
                     {formatDate(
                       trip.end_at,
                     )}
@@ -318,7 +573,9 @@ function TripInfos({
                 </div>
 
                 <div className="trip-overview-detail">
-                  <Coins size={19} />
+                  <Coins
+                    size={19}
+                  />
 
                   <span className="trip-detail-label">
                     Devise du voyage
@@ -332,6 +589,10 @@ function TripInfos({
                 </div>
               </div>
 
+              {/* =============================================
+                  MAP UNIQUEMENT ICI
+              ============================================== */}
+
               <div className="trip-about-map">
                 <img
                   src={getStaticMapUrl(
@@ -342,7 +603,9 @@ function TripInfos({
                 />
 
                 <span className="trip-about-map-label">
-                  {trip.city}
+                  {
+                    trip.city
+                  }
                 </span>
               </div>
             </div>
@@ -361,7 +624,9 @@ function TripInfos({
               <div className="trip-overview-header">
                 <div className="trip-overview-heading">
                   <span className="trip-members-icon">
-                    <Users size={20} />
+                    <Users
+                      size={20}
+                    />
                   </span>
 
                   <h2>
@@ -374,6 +639,7 @@ function TripInfos({
                   className="trip-members-see-all"
                 >
                   Voir tous
+
                   <ArrowRight
                     size={16}
                   />
@@ -381,8 +647,11 @@ function TripInfos({
               </div>
 
               <p className="trip-members-count">
-                {members.length}{" "}
-                {members.length > 1
+                {
+                  members.length
+                }{" "}
+                {members.length >
+                1
                   ? "participants"
                   : "participant"}
               </p>
@@ -390,10 +659,13 @@ function TripInfos({
               <div className="trip-members-content">
                 <div className="trip-members-avatars">
                   {members.map(
-                    (member) => {
+                    (
+                      member,
+                    ) => {
                       const initials =
                         `${member.firstname?.[0] ?? ""}${
-                          member.lastname?.[0] ?? ""
+                          member.lastname?.[0] ??
+                          ""
                         }`.toUpperCase();
 
                       return member.avatar_url ? (
@@ -459,7 +731,9 @@ function TripInfos({
               <div className="trip-progress-header">
                 <div className="trip-progress-title">
                   <span className="trip-progress-icon">
-                    <Flag size={19} />
+                    <Flag
+                      size={19}
+                    />
                   </span>
 
                   <h2>
@@ -472,6 +746,7 @@ function TripInfos({
                   className="trip-progress-link"
                 >
                   Voir toutes
+
                   <ArrowRight
                     size={16}
                   />
@@ -493,15 +768,34 @@ function TripInfos({
                   {
                     validatedStepsCount
                   }{" "}
-                  / {totalSteps}{" "}
+                  /{" "}
+                  {
+                    totalSteps
+                  }{" "}
                   étapes validées
                 </span>
 
                 <strong>
-                  {stepsProgress}%
+                  {
+                    stepsProgress
+                  }
+                  %
                 </strong>
               </div>
             </article>
+
+            {/* ===============================================
+                PROCHAINE ÉTAPE
+            ================================================ */}
+
+            <NextStepCard
+              tripId={
+                tripId
+              }
+              steps={
+                steps
+              }
+            />
           </div>
         </section>
       )}
@@ -521,12 +815,18 @@ function TripInfos({
         }
       >
         <TripInvitation
-          tripId={tripId}
-          title={trip.title}
+          tripId={
+            tripId
+          }
+          title={
+            trip.title
+          }
           description={
             trip.description
           }
-          city={trip.city}
+          city={
+            trip.city
+          }
           country={
             trip.country
           }
@@ -562,7 +862,9 @@ function TripInfos({
         }
       >
         <TripActions
-          trip={trip}
+          trip={
+            trip
+          }
           onClose={() =>
             setIsEditModalOpen(
               false,
