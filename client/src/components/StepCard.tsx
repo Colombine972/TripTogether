@@ -1,9 +1,70 @@
-import { useEffect, useState } from "react";
+import {
+  CalendarDays,
+  CheckCircle2,
+  ChevronDown,
+  Clock3,
+  Trash2,
+  UserRound,
+  XCircle,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+
 import { useAuth } from "../contexts/AuthContext";
 import type { StepCardProps } from "../types/tripType";
 import type { CreateVotePayload, Vote, VotesStats } from "../types/voteType";
+
 import "../pages/styles/StepCard.css";
-import { toast } from "react-toastify";
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function getPlaceImageUrl(placeId?: string | null) {
+  if (!placeId) {
+    return "/images/default-city.jpg";
+  }
+
+  return `${import.meta.env.VITE_API_URL}/api/places/photo/${placeId}`;
+}
+
+function formatStepDate(value?: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatStepPeriod(startAt?: string | null, endAt?: string | null) {
+  const formattedStart = formatStepDate(startAt);
+
+  const formattedEnd = formatStepDate(endAt);
+
+  if (formattedStart && formattedEnd) {
+    if (formattedStart === formattedEnd) {
+      return formattedStart;
+    }
+
+    return `${formattedStart} – ${formattedEnd}`;
+  }
+
+  return formattedStart || formattedEnd;
+}
+
+/* =========================================================
+   COMPOSANT
+========================================================= */
 
 function StepCard({
   step,
@@ -12,374 +73,618 @@ function StepCard({
   memberCount,
   onVoteSuccess,
 }: StepCardProps) {
+  /* =======================================================
+     STATES
+  ======================================================= */
+
   const [allVotes, setAllVotes] = useState<Vote[]>([]);
+
   const [loading, setLoading] = useState(true);
+
   const [alreadyVoted, setAlreadyVoted] = useState(false);
+
   const [comment, setComment] = useState("");
+
   const [error, setError] = useState<string | null>(null);
+
   const [showVotes, setShowVotes] = useState(false);
 
+  /* =======================================================
+     AUTH
+  ======================================================= */
+
   const { auth, logout } = useAuth();
-  const token = auth?.token;
 
-  const getPlaceImageUrl = (placeId?: string | null) => {
-    if (!placeId) {
-      return "/images/default-city.jpg";
-    }
+  const token = auth?.token || localStorage.getItem("token") || "";
 
-    return `${import.meta.env.VITE_API_URL}/api/places/photo/${placeId}`;
-  };
+  /* =======================================================
+     DONNÉES DE LA CARTE
+  ======================================================= */
 
   const stepImage = getPlaceImageUrl(step.place_id);
 
-  const formatStepDate = (dateString?: string | null) => {
-    if (!dateString) {
-      return "";
-    }
+  const status = step.status ?? (step.is_initial ? "validated" : "pending");
 
-    const datePart = dateString.slice(0, 10);
-    const [year, month, day] = datePart.split("-").map(Number);
+  const stepPeriod = formatStepPeriod(step.start_at, step.end_at);
 
-    if (!year || !month || !day) {
-      return dateString;
-    }
-
-    return new Intl.DateTimeFormat("fr-FR", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).format(new Date(year, month - 1, day));
-  };
-
-  const getStepDuration = (
-    startDateString?: string | null,
-    endDateString?: string | null,
-  ) => {
-    if (!startDateString || !endDateString) {
-      return null;
-    }
-
-    const startDate = new Date(`${startDateString.slice(0, 10)}T00:00:00`);
-    const endDate = new Date(`${endDateString.slice(0, 10)}T00:00:00`);
-
-    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
-      return null;
-    }
-
-    const differenceInMilliseconds = endDate.getTime() - startDate.getTime();
-
-    return Math.floor(differenceInMilliseconds / (1000 * 60 * 60 * 24)) + 1;
-  };
-
-  const stepDuration = getStepDuration(step.start_at, step.end_at);
+  /* =======================================================
+     ICÔNES DE VOTE
+  ======================================================= */
 
   const thumbsUpLogo = (
-    <img src="/logos/green-thumb.png" className="green-thumb" alt="Oui" />
+    <img
+      src="/logos/green-thumb.png"
+      className="step-vote-thumb"
+      alt=""
+      aria-hidden="true"
+    />
   );
+
   const thumbsDownLogo = (
-    <img src="/logos/brown-thumb.png" className="brown-thumb" alt="Non" />
+    <img
+      src="/logos/brown-thumb.png"
+      className="step-vote-thumb"
+      alt=""
+      aria-hidden="true"
+    />
   );
 
-  useEffect(() => {
-    loadVotes();
-  }, []);
+  /* =======================================================
+     CHARGEMENT DES VOTES
+  ======================================================= */
 
-  const loadVotes = () => {
+  const loadVotes = useCallback(async () => {
+    if (!token) {
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
-    fetch(
-      `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/steps/${step.id}/votes`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/steps/${step.id}/votes`,
+        {
+          method: "GET",
+
+          headers: {
+            "Content-Type": "application/json",
+
+            Authorization: `Bearer ${token}`,
+          },
         },
-      },
-    )
-      .then(async (response) => {
-        if (response.status === 401) {
-          logout();
-          window.location.href = "/login";
-          return;
-        }
+      );
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.error || "Erreur lors de la récupération des votes",
-          );
-        }
-        const data: VotesStats = await response.json();
+      if (response.status === 401) {
+        logout();
 
-        setAllVotes(data.allVotes);
-        setError(null);
-      })
-      .catch((err) => {
-        console.error("Erreur fetch votes:", err);
-        setError(err instanceof Error ? err.message : "Erreur de chargement");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+        window.location.href = "/login";
 
-  const handleVote = (voteValue: boolean) => {
+        return;
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Erreur lors de la récupération des votes",
+        );
+      }
+
+      const votesData = data as VotesStats;
+
+      setAllVotes(votesData.allVotes);
+
+      setError(null);
+    } catch (error) {
+      console.error("Erreur fetch votes :", error);
+
+      setError(error instanceof Error ? error.message : "Erreur de chargement");
+    } finally {
+      setLoading(false);
+    }
+  }, [token, tripId, step.id, logout]);
+
+  useEffect(() => {
+    void loadVotes();
+  }, [loadVotes]);
+
+  /* =======================================================
+     VOTE UTILISATEUR
+  ======================================================= */
+
+  const handleVote = async (voteValue: boolean) => {
+    if (!token || alreadyVoted) {
+      return;
+    }
+
     setAlreadyVoted(true);
+
     setError(null);
 
     const createVoteData: CreateVotePayload = {
       vote: voteValue,
+
       comment: comment.trim() || undefined,
     };
 
-    fetch(
-      `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/steps/${step.id}/votes`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/steps/${step.id}/votes`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify(createVoteData),
         },
-        body: JSON.stringify(createVoteData),
-      },
-    )
-      .then(async (response) => {
-        if (response.status === 401) {
-          logout();
-          window.location.href = "/login";
-          return;
-        }
+      );
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Erreur lors du vote");
-        }
+      if (response.status === 401) {
+        logout();
 
-        loadVotes();
+        window.location.href = "/login";
 
-        if (onVoteSuccess) {
-          onVoteSuccess();
-        }
-      })
-      .catch((err) => {
-        console.error("Erreur lors du vote:", err);
-        setError(err instanceof Error ? err.message : "Erreur lors du vote");
-      })
-      .finally(() => {
-        setAlreadyVoted(false);
-      });
+        return;
+      }
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Erreur lors du vote");
+      }
+
+      setComment("");
+
+      await loadVotes();
+
+      if (onVoteSuccess) {
+        await onVoteSuccess();
+      }
+    } catch (error) {
+      console.error("Erreur lors du vote :", error);
+
+      setError(error instanceof Error ? error.message : "Erreur lors du vote");
+    } finally {
+      setAlreadyVoted(false);
+    }
   };
 
-  const userVote = allVotes.find((v) => v.user_id === currentUserId);
-  const hasVoted = Boolean(userVote);
-  const yesVotes = step.voteStats?.yes ?? 0;
-  const noVotes = step.voteStats?.no ?? 0;
-  const totalVotes = yesVotes + noVotes;
-  const yesPercentage = totalVotes === 0 ? 0 : (yesVotes / totalVotes) * 100;
+  /* =======================================================
+     SUPPRESSION DE L'ÉTAPE
+  ======================================================= */
+
   const handleDeleteStep = async () => {
-    if (!window.confirm("Supprimer cette étape ?")) return;
+    if (!window.confirm("Supprimer cette étape ?")) {
+      return;
+    }
+
+    if (!token) {
+      toast.error("Vous devez être connecté.");
+
+      return;
+    }
 
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/steps/${step.id}`,
         {
           method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
       );
 
-      if (response.ok) {
-        if (onVoteSuccess) onVoteSuccess(); // Rafraîchit la liste
-        toast.success("Étape supprimée");
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+
+        throw new Error(data?.error || "Impossible de supprimer l'étape");
       }
-    } catch {
-      toast.error("Erreur lors de la suppression");
+
+      toast.success("Étape supprimée");
+
+      if (onVoteSuccess) {
+        await onVoteSuccess();
+      }
+    } catch (error) {
+      console.error("Erreur suppression étape :", error);
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Erreur lors de la suppression",
+      );
     }
   };
 
+  /* =======================================================
+     STATISTIQUES
+  ======================================================= */
+
+  const userVote = allVotes.find((vote) => vote.user_id === currentUserId);
+
+  const hasVoted = Boolean(userVote);
+
+  const yesVotes =
+    step.voteStats?.yes ?? allVotes.filter((vote) => vote.vote).length;
+
+  const noVotes =
+    step.voteStats?.no ?? allVotes.filter((vote) => !vote.vote).length;
+
+  const totalVotes = yesVotes + noVotes;
+
+  const safeMemberCount = memberCount || 0;
+
+  const voteProgress =
+    safeMemberCount > 0
+      ? Math.min(100, (totalVotes / safeMemberCount) * 100)
+      : 0;
+
+  const yesPercentage = totalVotes > 0 ? (yesVotes / totalVotes) * 100 : 0;
+
+  /* =======================================================
+     RENDU DU STATUT
+  ======================================================= */
+
+  const renderStatusBadge = () => {
+    if (step.is_initial) {
+      return (
+        <span className="step-status-badge step-status-initial">
+          <CheckCircle2 size={15} />
+          Destination principale
+        </span>
+      );
+    }
+
+    if (status === "validated") {
+      return (
+        <span className="step-status-badge step-status-validated">
+          <CheckCircle2 size={15} />
+          Étape validée
+        </span>
+      );
+    }
+
+    if (status === "rejected") {
+      return (
+        <span className="step-status-badge step-status-rejected">
+          <XCircle size={15} />
+          Étape rejetée
+        </span>
+      );
+    }
+
+    return (
+      <span className="step-status-badge step-status-pending">
+        <Clock3 size={15} />
+        Vote en cours
+      </span>
+    );
+  };
+
+  /* =======================================================
+     RENDU
+  ======================================================= */
+
   return (
-    <div className="step-card">
-      <img
-        src={stepImage}
-        alt={`Vue de ${step.city}`}
-        className="step-bg-img"
-        onError={(e) => {
-          e.currentTarget.src = "/images/default-city.jpg";
-        }}
-        style={{
-          minHeight: "180px",
-          display: "block",
-          backgroundColor: "#f0f0f0",
-          objectFit: "cover",
-        }}
-      />{" "}
-      <article className="step-header">
+    <article
+      className={`step-card step-card-${status} ${
+        step.is_initial ? "step-card-initial" : ""
+      }`}
+    >
+      {/* ===================================================
+          PHOTO
+      =================================================== */}
+
+      <div className="step-card-image-wrapper">
+        <img
+          src={stepImage}
+          alt={`Vue de ${step.city}`}
+          className="step-card-image"
+          onError={(event) => {
+            event.currentTarget.src = "/images/default-city.jpg";
+          }}
+        />
+
+        <div className="step-card-image-overlay" />
+
+        <div className="step-card-status">{renderStatusBadge()}</div>
+
         {!step.is_initial && (
           <button
             type="button"
+            className="step-delete-button"
             onClick={handleDeleteStep}
-            className="delete-step-btn"
+            aria-label={`Supprimer l'étape ${step.city}`}
             title="Supprimer cette étape"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="size-6"
-            >
-              <title>Poubelle</title>
-              <path
-                fillRule="evenodd"
-                d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-3.536 4.569a.75.75 0 0 0-1.44.32l.5 10a.75.75 0 0 0 1.498-.06l-.558-10.26Zm4.5 0a.75.75 0 0 0-1.5 0v10.26a.75.75 0 0 0 1.5 0v-10.26Zm3.536.26a.75.75 0 0 0-1.44-.32l-.558 10.26a.75.75 0 0 0 1.498.06l.5-10Z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <Trash2 size={18} />
           </button>
         )}
 
-        <h2>{step.city}</h2>
+        <div className="step-card-image-title">
+          <h3>{step.city}</h3>
 
-        <h3>{step.country}</h3>
+          <span>{step.country}</span>
+        </div>
+      </div>
 
-        {step.start_at && step.end_at && (
-          <div className="step-dates">
-            <span className="step-dates-main">
-              📅 {formatStepDate(step.start_at)}
-              {" - "}
-              {formatStepDate(step.end_at)}
+      {/* ===================================================
+          INFORMATIONS
+      =================================================== */}
+
+      <div className="step-card-content">
+        <div className="step-card-infos">
+          {stepPeriod && (
+            <div className="step-info-row">
+              <span className="step-info-icon">
+                <CalendarDays size={17} />
+              </span>
+
+              <span>{stepPeriod}</span>
+            </div>
+          )}
+
+          <div className="step-info-row">
+            <span className="step-info-icon">
+              <UserRound size={17} />
             </span>
 
-            {stepDuration && (
-              <span className="step-duration">
-                {stepDuration} {stepDuration > 1 ? "jours" : "jour"}
-              </span>
-            )}
+            <span>
+              Proposée par <strong>{step.creator_name}</strong>
+            </span>
           </div>
-        )}
-
-        <h3 id="step-header-end">Proposée par {step.creator_name}</h3>
-      </article>
-      {step.is_initial ? (
-        <div className="step-initial">
-          <p className="step-initial-msg">Destination initiale</p>
         </div>
-      ) : (
-        <article className="step-body">
-          <div className="vote-progress">
-            <div className="vote-stats">
-              <span className="stat-value yes">
-                {thumbsUpLogo} {yesVotes}
-              </span>
-              <span className="stat-value no">
-                {thumbsDownLogo} {noVotes}
-              </span>
-            </div>
-            <div className="vote-bar">
-              <div
-                className="vote-bar-yes"
-                style={{ width: `${yesPercentage}%` }}
-              />
+
+        {/* =================================================
+            DESTINATION INITIALE
+        ================================================= */}
+
+        {step.is_initial ? (
+          <div className="step-initial-message">
+            <CheckCircle2 size={19} />
+
+            <div>
+              <strong>Destination du voyage</strong>
+
+              <span>Cette destination est automatiquement validée.</span>
             </div>
           </div>
-          {allVotes && allVotes.length > 0 ? (
-            <div className="all-votes-section">
-              <button
-                type="button"
-                onClick={() => setShowVotes(!showVotes)}
-                className="toggle-votes-btn"
-              >
-                {showVotes ? "▲ Masquer" : "▼ Voir"} tous les votes (
-                {allVotes.length} / {memberCount})
-              </button>
-              {showVotes && (
-                <div className="votes-list">
-                  {allVotes.map((vote) => (
-                    <div
-                      key={vote.id}
-                      className={`vote-item ${vote.vote ? "vote-yes-item" : "vote-no-item"}`}
-                    >
-                      <div className="vote-content">
-                        <p className="vote-user">
-                          {vote.user_name}
-                          <span className="vote-value">
-                            {vote.vote ? thumbsUpLogo : thumbsDownLogo}
-                          </span>
-                        </p>
-                        {vote.comment && (
-                          <p className="vote-comment-text">"{vote.comment}"</p>
-                        )}
-                      </div>
-                      <span className="vote-date">
-                        {new Date(vote.created_at).toLocaleDateString("fr-FR")}
-                      </span>
-                    </div>
-                  ))}
+        ) : (
+          <>
+            {/* ===============================================
+                PROGRESSION DU VOTE
+            =============================================== */}
+
+            <div className="step-vote-summary">
+              <div className="step-vote-summary-header">
+                <div>
+                  <span className="step-vote-summary-label">
+                    Progression du vote
+                  </span>
+
+                  <strong>
+                    {totalVotes}
+                    {" / "}
+                    {safeMemberCount} votes
+                  </strong>
+                </div>
+
+                <span className="step-vote-percentage">
+                  {Math.round(voteProgress)}%
+                </span>
+              </div>
+
+              <div className="step-vote-progress-bar">
+                <div
+                  className="step-vote-progress-value"
+                  style={{
+                    width: `${voteProgress}%`,
+                  }}
+                />
+              </div>
+
+              <div className="step-vote-results">
+                <span className="step-vote-result step-vote-result-yes">
+                  {thumbsUpLogo}
+                  <strong>{yesVotes}</strong>
+                  Oui
+                </span>
+
+                <span className="step-vote-result step-vote-result-no">
+                  {thumbsDownLogo}
+                  <strong>{noVotes}</strong>
+                  Non
+                </span>
+              </div>
+
+              {totalVotes > 0 && (
+                <div
+                  className="step-vote-balance"
+                  aria-label={`${Math.round(
+                    yesPercentage,
+                  )}% de votes favorables`}
+                >
+                  <div
+                    className="step-vote-balance-yes"
+                    style={{
+                      width: `${yesPercentage}%`,
+                    }}
+                  />
                 </div>
               )}
             </div>
-          ) : (
-            <div className="no-votes-placeholder">
-              <p className="toggle-votes-btn">En attente de vote</p>
-            </div>
-          )}
-          {error && <p className="error">{error}</p>}
-          {loading ? (
-            <p className="loading-text">Chargement</p>
-          ) : !hasVoted ? (
-            <div className="vote-section">
-              <div className="vote-buttons">
+
+            {/* ===============================================
+                DÉTAIL DES VOTES
+            =============================================== */}
+
+            {allVotes.length > 0 ? (
+              <div className="step-all-votes">
                 <button
                   type="button"
-                  onClick={() => handleVote(true)}
-                  disabled={alreadyVoted}
-                  className="vote-btn vote-yes"
+                  className="step-toggle-votes"
+                  onClick={() => setShowVotes((current) => !current)}
+                  aria-expanded={showVotes}
                 >
-                  {alreadyVoted ? (
-                    "Envoi..."
-                  ) : (
-                    <span className="vote-yes-btn">{thumbsUpLogo} OUI</span>
-                  )}
+                  <span>
+                    Voir les votes ({allVotes.length}
+                    {" / "}
+                    {safeMemberCount})
+                  </span>
+
+                  <ChevronDown
+                    size={18}
+                    className={showVotes ? "is-open" : ""}
+                  />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleVote(false)}
-                  disabled={alreadyVoted}
-                  className="vote-btn vote-no"
-                >
-                  {alreadyVoted ? (
-                    "Envoi..."
-                  ) : (
-                    <span className="vote-no-btn">{thumbsDownLogo} NON</span>
-                  )}
-                </button>
-              </div>
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Commentaire (optionnel)"
-                maxLength={500}
-                disabled={alreadyVoted}
-                className="vote-comment"
-                rows={3}
-              />
-              <p className="comment-counter">{comment.length}/500 caractères</p>
-            </div>
-          ) : (
-            <div className="voted-message">
-              <p className="voted-text">
-                {userVote?.vote ? (
-                  <span className="voted-yes">{thumbsUpLogo} Voté OUI</span>
-                ) : (
-                  <span className="voted-no">{thumbsDownLogo} Voté NON</span>
+
+                {showVotes && (
+                  <div className="step-votes-list">
+                    {allVotes.map((vote) => (
+                      <div
+                        key={vote.id}
+                        className={`step-vote-item ${
+                          vote.vote ? "is-yes" : "is-no"
+                        }`}
+                      >
+                        <div className="step-vote-user">
+                          <div className="step-vote-user-line">
+                            <strong>{vote.user_name}</strong>
+
+                            <span className="step-vote-choice">
+                              {vote.vote ? thumbsUpLogo : thumbsDownLogo}
+                            </span>
+                          </div>
+
+                          {vote.comment && <p>« {vote.comment} »</p>}
+                        </div>
+
+                        <time className="step-vote-date">
+                          {new Date(vote.created_at).toLocaleDateString(
+                            "fr-FR",
+                          )}
+                        </time>
+                      </div>
+                    ))}
+                  </div>
                 )}
-              </p>
-            </div>
-          )}
-        </article>
-      )}
-    </div>
+              </div>
+            ) : (
+              <div className="step-no-votes">
+                <Clock3 size={17} />
+                En attente des premiers votes
+              </div>
+            )}
+
+            {/* ===============================================
+                ERREUR
+            =============================================== */}
+
+            {error && <p className="step-vote-error">{error}</p>}
+
+            {/* ===============================================
+                VOTE UTILISATEUR
+            =============================================== */}
+
+            {status === "pending" &&
+              (loading ? (
+                <div className="step-vote-loading">Chargement des votes...</div>
+              ) : !hasVoted ? (
+                <div className="step-vote-form">
+                  <p className="step-vote-question">
+                    Souhaitez-vous ajouter cette étape au voyage ?
+                  </p>
+
+                  <div className="step-vote-buttons">
+                    <button
+                      type="button"
+                      className="step-vote-button step-vote-button-yes"
+                      onClick={() => void handleVote(true)}
+                      disabled={alreadyVoted}
+                    >
+                      {thumbsUpLogo}
+
+                      {alreadyVoted ? "Envoi..." : "Oui"}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="step-vote-button step-vote-button-no"
+                      onClick={() => void handleVote(false)}
+                      disabled={alreadyVoted}
+                    >
+                      {thumbsDownLogo}
+
+                      {alreadyVoted ? "Envoi..." : "Non"}
+                    </button>
+                  </div>
+
+                  <div className="step-comment-field">
+                    <textarea
+                      value={comment}
+                      onChange={(event) => setComment(event.target.value)}
+                      placeholder="Ajouter un commentaire (optionnel)"
+                      maxLength={500}
+                      disabled={alreadyVoted}
+                      rows={2}
+                    />
+
+                    <span>
+                      {comment.length}
+                      /500
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className={`step-my-vote ${
+                    userVote?.vote ? "is-yes" : "is-no"
+                  }`}
+                >
+                  <span>Votre vote</span>
+
+                  <strong>{userVote?.vote ? "👍 Oui" : "👎 Non"}</strong>
+                </div>
+              ))}
+
+            {/* ===============================================
+                STATUT FINAL
+            =============================================== */}
+
+            {status === "validated" && (
+              <div className="step-final-status step-final-status-validated">
+                <CheckCircle2 size={20} />
+
+                <div>
+                  <strong>Étape validée</strong>
+
+                  <span>Cette destination fait partie du voyage.</span>
+                </div>
+              </div>
+            )}
+
+            {status === "rejected" && (
+              <div className="step-final-status step-final-status-rejected">
+                <XCircle size={20} />
+
+                <div>
+                  <strong>Étape rejetée</strong>
+
+                  <span>Cette proposition n'a pas obtenu la majorité.</span>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </article>
   );
 }
 

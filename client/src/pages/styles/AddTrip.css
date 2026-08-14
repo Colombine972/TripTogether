@@ -1,80 +1,902 @@
-.add-step-form-container {
-  display: flex;
-  padding-top: 3rem;
-  justify-content: center;
-  margin-bottom: 3rem;
+/* =========================================================
+   AJOUT D'UNE ÉTAPE
+========================================================= */
+
+.add-step-panel {
+  width: 100%;
+  margin: 1.8rem auto 2rem;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #e7e9e7;
+  border-radius: 20px;
+
+  box-shadow:
+    0 10px 35px rgba(35, 52, 39, 0.06);
 }
 
-.add-step-form {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+/* =========================================================
+   HEADER
+========================================================= */
+
+.add-step-panel-header {
   display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 1rem;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  max-width: 800px;
+
+  padding: 2rem 2.2rem 1.4rem;
+}
+
+.add-step-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.add-step-title-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 56px;
+
+  width: 56px;
+  height: 56px;
+
+  color: #12743b;
+
+  background: #e8f3ec;
+
+  border-radius: 50%;
+}
+
+.add-step-title-wrapper h2 {
+  margin: 0 0 0.3rem;
+
+  color: #1d2520;
+
+  font-family: var(--title-font);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.add-step-title-wrapper p {
+  margin: 0;
+
+  color: #667069;
+
+  font-family: var(--body-text);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.add-step-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 42px;
+
+  width: 42px;
+  height: 42px;
+
+  padding: 0;
+
+  color: #323a35;
+
+  background: #ffffff;
+
+  border: 1px solid #dde1de;
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.add-step-close:hover {
+  background: #f5f7f5;
+
+  border-color: #cbd1cc;
+
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   FORMULAIRE
+========================================================= */
+
+.add-step-form {
+  padding: 0 2.2rem 2rem;
+}
+
+.add-step-main-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(330px, 1fr);
+  gap: 2rem;
+}
+
+.add-step-destination-column,
+.add-step-date-column {
+  min-width: 0;
+}
+
+.add-step-label {
+  display: block;
+
+  margin-bottom: 0.55rem;
+
+  color: #252d28;
+
+  font-family: var(--body-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* =========================================================
+   GOOGLE PLACE AUTOCOMPLETE
+========================================================= */
+
+.step-place-autocomplete {
   width: 100%;
+
+  color-scheme: light;
+}
+
+.step-place-autocomplete gmp-place-autocomplete {
+  display: block;
+
+  width: 100%;
+
+  color-scheme: light;
+}
+
+/*
+ * Permet d'éviter le rendu sombre automatique
+ * du composant Google Places.
+ */
+
+gmp-place-autocomplete {
+  color-scheme: light;
+}
+
+/* =========================================================
+   DESTINATION SÉLECTIONNÉE
+========================================================= */
+
+.selected-step-place {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+
+  margin-top: 0.6rem;
+
+  padding: 1rem 1.1rem;
+
+  color: #26322a;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f4faf6,
+      #edf7f0
+    );
+
+  border: 1px solid #cce4d3;
+  border-radius: 14px;
+}
+
+.selected-step-place-icon {
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 38px;
+
+  width: 38px;
+  height: 38px;
+
+  color: #138045;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.8
+    );
+
+  border-radius: 11px;
+}
+
+.selected-step-place > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.selected-step-place strong {
+  color: #243128;
+}
+
+.selected-step-place span {
+  color: #68716b;
+
+  font-family: var(--body-text);
+  font-size: 0.88rem;
+}
+
+/* =========================================================
+   DATES
+========================================================= */
+
+.add-step-date-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .add-step-form-group {
+  width: 100%;
+}
+
+.step-date-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+
+  width: 100%;
+  min-height: 54px;
+
+  padding: 0 1rem;
+
+  color: #454e48;
+
+  background: #ffffff;
+
+  border: 1px solid #dce1dd;
+  border-radius: 14px;
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.step-date-input-wrapper:focus-within {
+  border-color: #4a9a63;
+
+  box-shadow:
+    0 0 0 4px
+      rgba(
+        25,
+        120,
+        59,
+        0.09
+      );
+}
+
+.step-date-input-wrapper input {
+  flex: 1;
+
+  min-width: 0;
+
+  padding: 0;
+
+  color: #252d28;
+
+  font-family: var(--body-text);
+  font-size: 0.96rem;
+
+  background: transparent;
+
+  border: none;
+  outline: none;
+}
+
+/* =========================================================
+   BOUTON AJOUTER CETTE ÉTAPE
+========================================================= */
+
+.add-step-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+
+  width: 100%;
+  min-height: 54px;
+
+  margin-top: 0.1rem;
+
+  padding: 0.8rem 1.2rem;
+
+  color: #ffffff;
+
+  font-family: var(--body-text);
+  font-size: 0.94rem;
+  font-weight: 700;
+
+  background: var(--primary-button);
+
+  border: none;
+  border-radius: 14px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 7px 17px
+      rgba(
+        18,
+        107,
+        54,
+        0.16
+      );
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    opacity 180ms ease;
+}
+
+.add-step-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 10px 22px
+      rgba(
+        18,
+        107,
+        54,
+        0.22
+      );
+}
+
+.add-step-submit:disabled {
+  opacity: 0.48;
+
+  cursor: not-allowed;
+
+  box-shadow: none;
+}
+
+/* =========================================================
+   SUGGESTIONS
+========================================================= */
+
+.step-suggestions {
+  padding: 1.6rem 2.2rem 2rem;
+
+  background:
+    linear-gradient(
+      180deg,
+      #fbfdfb 0%,
+      #f7faf8 100%
+    );
+
+  border-top: 1px solid #edf0ed;
+}
+
+/* =========================================================
+   HEADER DES SUGGESTIONS
+========================================================= */
+
+.step-suggestions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+
+  margin-bottom: 1.1rem;
+}
+
+.step-suggestions-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+
+  min-width: 0;
+
+  color: #16743b;
+}
+
+.step-suggestions-title svg {
+  flex: 0 0 auto;
+}
+
+.step-suggestions-title h3 {
+  margin: 0;
+
+  color: #202823;
+
+  font-family: var(--title-font);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* =========================================================
+   VOIR TOUTES LES SUGGESTIONS
+========================================================= */
+
+.step-suggestions-see-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+
+  flex: 0 0 auto;
+
+  padding: 0;
+
+  color: #16743b;
+
+  font-family: var(--body-text);
+  font-size: 0.88rem;
+  font-weight: 650;
+
+  white-space: nowrap;
+
+  background: transparent;
+
+  border: none;
+
+  cursor: pointer;
+
+  transition:
+    color 180ms ease;
+}
+
+.step-suggestions-see-all:hover {
+  color: #0f5d2e;
+}
+
+.step-suggestions-see-all svg {
+  transition:
+    transform 180ms ease;
+}
+
+.step-suggestions-see-all:hover svg {
+  transform:
+    translateX(
+      2px
+    );
+}
+
+.step-suggestions-see-all svg.is-open {
+  transform:
+    rotate(
+      90deg
+    );
+}
+
+.step-suggestions-see-all:hover svg.is-open {
+  transform:
+    rotate(
+      90deg
+    );
+}
+
+/* =========================================================
+   GRILLE DES SUGGESTIONS
+========================================================= */
+
+.step-suggestions-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(
+        0,
+        1fr
+      )
+    );
+  gap: 1rem;
+}
+
+/* =========================================================
+   OUVERTURE DES SUGGESTIONS
+========================================================= */
+
+.step-suggestions-grid.is-expanded {
+  animation:
+    suggestions-expand
+    220ms ease;
+}
+
+@keyframes suggestions-expand {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(
+        -6px
+      );
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(
+        0
+      );
+  }
+}
+
+/* =========================================================
+   CARTE DE SUGGESTION
+========================================================= */
+
+.step-suggestion-card {
+  display: grid;
+  grid-template-columns:
+    145px
+    minmax(
+      0,
+      1fr
+    );
+
+  min-width: 0;
+
+  padding: 0;
+
+  overflow: hidden;
+
+  color: inherit;
+  text-align: left;
+
+  background: #ffffff;
+
+  border: 1px solid #e0e4e1;
+  border-radius: 15px;
+
+  cursor: pointer;
+
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.step-suggestion-card:hover {
+  border-color: #b9d8c2;
+
+  transform:
+    translateY(
+      -2px
+    );
+
+  box-shadow:
+    0 10px 24px
+      rgba(
+        28,
+        61,
+        37,
+        0.08
+      );
+}
+
+/* =========================================================
+   IMAGE SUGGESTION
+========================================================= */
+
+.step-suggestion-image-wrapper {
+  position: relative;
+
+  min-height: 118px;
+
+  overflow: hidden;
+
+  background: #e7ebe8;
+}
+
+.step-suggestion-image {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  min-height: 118px;
+
+  object-fit: cover;
+}
+
+.step-photo-attribution {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.35rem;
+
+  max-width:
+    calc(
+      100% - 0.7rem
+    );
+
+  padding:
+    0.18rem
+    0.32rem;
+
+  overflow: hidden;
+
+  color: #ffffff;
+
+  font-size: 0.55rem;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  background:
+    rgba(
+      0,
+      0,
+      0,
+      0.55
+    );
+
+  border-radius: 4px;
+}
+
+/* =========================================================
+   CONTENU SUGGESTION
+========================================================= */
+
+.step-suggestion-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+
+  min-width: 0;
+
+  padding: 1rem;
+}
+
+.step-suggestion-content > div {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  flex: 1;
-  min-width: 200px;
+  align-items: flex-start;
+  gap: 0.35rem;
+
+  min-width: 0;
 }
 
-.add-step-form-group label {
-  font-weight: 600;
-  color: #333;
-  margin-left: 0.5rem;
-}
+.step-suggestion-content strong {
+  color: #232c26;
 
-/* Style des inputs standards */
-.add-step-form-group input {
-  width: 100%;
-  padding: 0.8rem 1.2rem;
+  font-family: var(--title-font);
   font-size: 1rem;
-  border-radius: 20px;
-  border: 1px solid #ddd;
-  outline: none;
-  background-color: #f9f9f9;
-  transition: border-color 0.3s;
 }
 
-.add-step-form-group input:focus {
-  border-color: #4caf50;
-  background-color: white;
+.step-suggestion-content span {
+  color: #68716b;
+
+  font-family: var(--body-text);
+  font-size: 0.82rem;
 }
 
-.add-btn {
-  padding: 0.8rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  color: white;
-  background-color: #4caf50;
-  transition: transform 0.2s, background-color 0.2s;
-  height: 48px;
-  margin-bottom: 1px;
+.step-suggestion-content small {
+  margin-top: 0.2rem;
+
+  padding:
+    0.22rem
+    0.55rem;
+
+  color: #237345;
+
+  font-family: var(--body-text);
+  font-size: 0.72rem;
+  font-weight: 650;
+
+  background: #edf6ef;
+
+  border: 1px solid #d5e9da;
+  border-radius: 7px;
 }
 
-.add-btn:hover {
-  background-color: #43a047;
-  transform: translateY(-2px);
+.step-suggestion-content > svg {
+  flex: 0 0 auto;
+
+  color: #7b847e;
 }
 
-.add-btn:active {
-  transform: scale(0.98);
+/* =========================================================
+   CHARGEMENT / AUCUN RÉSULTAT
+========================================================= */
+
+.step-suggestions-loading,
+.step-suggestions-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+
+  min-height: 100px;
+
+  margin: 0;
+
+  color: #747d77;
+
+  font-family: var(--body-text);
+  font-size: 0.9rem;
 }
 
-gmp-place-autocomplete {
-  background-color: rgb(218, 222, 218);
-  color-scheme: light;
-  border-radius: 9px;
-  border: 0px solid rgb(209, 213, 219);
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+.button-loader {
+  animation:
+    step-spin
+    0.8s
+    linear
+    infinite;
+}
+
+@keyframes step-spin {
+  from {
+    transform:
+      rotate(
+        0deg
+      );
+  }
+
+  to {
+    transform:
+      rotate(
+        360deg
+      );
+  }
+}
+
+/* =========================================================
+   TABLETTE
+========================================================= */
+
+@media (max-width: 1050px) {
+  .add-step-main-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .step-suggestions-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      );
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+  .add-step-panel {
+    margin:
+      1rem
+      auto
+      1.5rem;
+
+    border-radius: 16px;
+  }
+
+  .add-step-panel-header {
+    padding:
+      1.3rem
+      1.15rem
+      1rem;
+  }
+
+  .add-step-title-wrapper {
+    align-items: flex-start;
+
+    gap: 0.75rem;
+  }
+
+  .add-step-title-icon {
+    flex-basis: 44px;
+
+    width: 44px;
+    height: 44px;
+  }
+
+  .add-step-title-wrapper h2 {
+    font-size: 1.15rem;
+  }
+
+  .add-step-title-wrapper p {
+    font-size: 0.84rem;
+  }
+
+  .add-step-close {
+    flex-basis: 38px;
+
+    width: 38px;
+    height: 38px;
+  }
+
+  .add-step-form {
+    padding:
+      0
+      1.15rem
+      1.4rem;
+  }
+
+  .add-step-main-grid {
+    gap: 1.3rem;
+  }
+
+  .step-suggestions {
+    padding:
+      1.3rem
+      1.15rem
+      1.5rem;
+  }
+
+  .step-suggestions-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .step-suggestions-see-all {
+    align-self: flex-end;
+
+    font-size: 0.82rem;
+  }
+
+  .step-suggestions-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .step-suggestion-card {
+    grid-template-columns:
+      115px
+      minmax(
+        0,
+        1fr
+      );
+  }
+
+  .step-suggestion-image-wrapper,
+  .step-suggestion-image {
+    min-height: 110px;
+  }
+}
+
+/* =========================================================
+   PETIT MOBILE
+========================================================= */
+
+@media (max-width: 430px) {
+  .step-suggestion-card {
+    grid-template-columns:
+      95px
+      minmax(
+        0,
+        1fr
+      );
+  }
+
+  .step-suggestion-content {
+    padding: 0.8rem;
+  }
+
+  .step-suggestion-content span {
+    font-size: 0.75rem;
+  }
+
+  .step-suggestions-title h3 {
+    font-size: 0.92rem;
+  }
 }

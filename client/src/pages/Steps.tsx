@@ -1,15 +1,20 @@
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { toast } from "react-toastify";
+
 import AddStep from "../components/AddTrip";
 import StepCard from "../components/StepCard";
 import TripInfos from "../components/TripInfos";
 import { useAuth } from "../contexts/AuthContext";
+
 import type { Step, StepsResponse, TheTrip } from "../types/tripType";
+
 import "./styles/Steps.css";
 
 function Steps() {
   const { id } = useParams();
+
   const tripId = Number(id);
 
   const [searchParams] = useSearchParams();
@@ -19,6 +24,10 @@ function Steps() {
   const notificationReferenceId = searchParams.get("ref");
 
   const navigate = useNavigate();
+
+  /* =========================================================
+     STATES
+  ========================================================= */
 
   const [trip, setTrip] = useState<TheTrip | null>(null);
 
@@ -30,13 +39,23 @@ function Steps() {
 
   const [loadingSteps, setLoadingSteps] = useState(true);
 
+  const [isAddStepOpen, setIsAddStepOpen] = useState(false);
+
   const loading = loadingTrip || loadingSteps;
+
+  /* =========================================================
+     AUTH
+  ========================================================= */
 
   const { auth, logout } = useAuth();
 
   const currentUserId = auth?.user?.id || 0;
 
   const token = auth?.token;
+
+  /* =========================================================
+     CHARGEMENT DU VOYAGE
+  ========================================================= */
 
   const fetchTrip = useCallback(async () => {
     try {
@@ -46,8 +65,10 @@ function Steps() {
         `${import.meta.env.VITE_API_URL}/api/trips/${tripId}`,
         {
           method: "GET",
+
           headers: {
             "Content-Type": "application/json",
+
             Authorization: token ? `Bearer ${token}` : "",
           },
         },
@@ -80,14 +101,18 @@ function Steps() {
       }
 
       setTrip(data);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error("Erreur fetchTrip :", error);
 
       toast.error("Impossible de charger le voyage");
     } finally {
       setLoadingTrip(false);
     }
   }, [tripId, token, logout, navigate]);
+
+  /* =========================================================
+     CHARGEMENT DES ÉTAPES
+  ========================================================= */
 
   const fetchSteps = useCallback(async () => {
     try {
@@ -97,8 +122,10 @@ function Steps() {
         `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/steps`,
         {
           method: "GET",
+
           headers: {
             "Content-Type": "application/json",
+
             Authorization: token ? `Bearer ${token}` : "",
           },
         },
@@ -143,14 +170,18 @@ function Steps() {
       setSteps(result.steps);
 
       setMemberCount(result.trip.memberCount);
-    } catch (err) {
-      console.error("Erreur fetch steps:", err);
+    } catch (error) {
+      console.error("Erreur fetchSteps :", error);
 
       toast.error("Impossible de charger les étapes");
     } finally {
       setLoadingSteps(false);
     }
   }, [tripId, token, logout, navigate]);
+
+  /* =========================================================
+     CHARGEMENT INITIAL
+  ========================================================= */
 
   useEffect(() => {
     if (!id || Number.isNaN(tripId)) {
@@ -161,9 +192,13 @@ function Steps() {
       return;
     }
 
-    fetchTrip();
-    fetchSteps();
+    void fetchTrip();
+    void fetchSteps();
   }, [id, tripId, fetchTrip, fetchSteps, navigate]);
+
+  /* =========================================================
+     SCROLL DEPUIS LES NOTIFICATIONS
+  ========================================================= */
 
   useEffect(() => {
     if (notificationTarget !== "step" || !notificationReferenceId || loading) {
@@ -184,6 +219,7 @@ function Steps() {
       if (targetElement) {
         targetElement.scrollIntoView({
           behavior: "smooth",
+
           block: "center",
         });
 
@@ -212,23 +248,73 @@ function Steps() {
     };
   }, [notificationTarget, notificationReferenceId, loading]);
 
+  /* =========================================================
+     CLASSEMENT DES ÉTAPES
+  ========================================================= */
+
   const pendingSteps = steps.filter((step) => step.status === "pending");
 
   const validatedSteps = steps.filter((step) => step.status === "validated");
 
   const rejectedSteps = steps.filter((step) => step.status === "rejected");
 
+  /* =========================================================
+     AJOUT RÉUSSI
+  ========================================================= */
+
+  const handleStepAdded = async () => {
+    await fetchSteps();
+
+    setIsAddStepOpen(false);
+  };
+
+  /* =========================================================
+     RENDU
+  ========================================================= */
+
   return (
     <>
       {!loading && trip && <TripInfos trip={trip} onTripUpdated={setTrip} />}
 
       <main className="page-membre steps-page">
-        {trip && (
-          <AddStep
-            onStepAdded={fetchSteps}
-            tripStartAt={trip.start_at}
-            tripEndAt={trip.end_at}
-          />
+
+        {!loading && trip && (
+          <>
+            <section className="steps-page-heading">
+              <div>
+                <h1>Étapes du voyage</h1>
+
+                <p>
+                  Organisez votre itinéraire et votez ensemble pour les
+                  prochaines étapes.
+                </p>
+              </div>
+
+              {!isAddStepOpen && (
+                <button
+                  type="button"
+                  className="open-add-step-btn"
+                  onClick={() => setIsAddStepOpen(true)}
+                >
+                  <Plus size={19} />
+                  Ajouter une étape
+                </button>
+              )}
+            </section>
+
+            {isAddStepOpen && (
+              <AddStep
+                onStepAdded={handleStepAdded}
+                onClose={() => setIsAddStepOpen(false)}
+                tripStartAt={trip.start_at}
+                tripEndAt={trip.end_at}
+                tripCity={trip.city}
+                tripCountry={trip.country}
+                tripCountryCode={trip.country_code}
+                tripPlaceId={trip.place_id}
+              />
+            )}
+          </>
         )}
 
         <section className="steps-list">
