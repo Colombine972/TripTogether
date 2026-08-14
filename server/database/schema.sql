@@ -282,3 +282,35 @@ CREATE TABLE password_reset_token (
     REFERENCES user(id)
     ON DELETE CASCADE
 );
+
+CREATE TABLE activity (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+  trip_id INT NOT NULL,
+  user_id INT NULL,
+
+  type VARCHAR(50) NOT NULL,
+
+  title VARCHAR(150) NOT NULL,
+  message VARCHAR(500) NOT NULL,
+
+  reference_type VARCHAR(50) NULL,
+  reference_id INT NULL,
+
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX idx_activity_trip_created_at (
+    trip_id,
+    created_at
+  ),
+
+  CONSTRAINT fk_activity_trip
+    FOREIGN KEY (trip_id)
+    REFERENCES trip(id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_activity_user
+    FOREIGN KEY (user_id)
+    REFERENCES user(id)
+    ON DELETE SET NULL
+);

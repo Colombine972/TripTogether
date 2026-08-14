@@ -4,6 +4,7 @@ import type { StepWithStatus, VotesStats } from "../../types/voteType";
 import notificationService from "../notification/notificationService";
 import tripRepository from "../trip/tripRepository";
 import stepRepository from "./stepRepository";
+import activityService from "../activity/activityService";
 
 type RequestWithAuth = import("express").Request & {
   auth: {
@@ -209,6 +210,24 @@ const addVote: RequestHandler = async (req, res, next) => {
       step.city,
     );
 
+    await activityService.createActivity({
+      tripId: step.trip_id,
+
+      userId,
+
+      type: "vote_created",
+
+      title: "Nouveau vote",
+
+      message: vote
+        ? `a voté Oui pour l'étape ${step.city}.`
+        : `a voté Non pour l'étape ${step.city}.`,
+
+      referenceType: "step",
+
+      referenceId: stepId,
+    });
+
     return res.status(201).json(createdVote);
   } catch (err) {
     next(err);
@@ -310,110 +329,72 @@ const deleteStep: RequestHandler = async (req, res, next) => {
   }
 };
 
-const addStepCity: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const addStepCity: RequestHandler = async (req, res, next) => {
   try {
-    const tripId =
-      Number(req.params.tripId);
+    const tripId = Number(req.params.tripId);
 
-    if (
-      Number.isNaN(tripId)
-    ) {
+    if (Number.isNaN(tripId)) {
       return res.status(400).json({
-        error:
-          "ID de voyage invalide",
+        error: "ID de voyage invalide",
       });
     }
 
-    const authReq =
-      req as RequestWithAuth;
+    const authReq = req as RequestWithAuth;
 
-    const userId =
-      Number(authReq.auth.sub);
+    const userId = Number(authReq.auth.sub);
 
     if (!userId) {
       return res.status(403).json({
-        error:
-          "Non authentifié",
+        error: "Non authentifié",
       });
     }
 
-    const trip =
-      await tripRepository.read(
-        tripId,
-      );
+    const trip = await tripRepository.read(tripId);
 
     if (!trip) {
       return res.status(404).json({
-        error:
-          "Voyage introuvable",
+        error: "Voyage introuvable",
       });
     }
 
-    const isMemberOfTrip =
-      await tripRepository.isUserMemberOfTrip(
-        tripId,
-        userId,
-      );
+    const isMemberOfTrip = await tripRepository.isUserMemberOfTrip(
+      tripId,
+      userId,
+    );
 
     if (!isMemberOfTrip) {
       return res.status(403).json({
-        error:
-          "Vous devez être membre du voyage pour ajouter une étape",
+        error: "Vous devez être membre du voyage pour ajouter une étape",
       });
     }
 
-    const {
-      error,
-      value,
-    } =
-      createStepSchema.validate(
-        req.body,
-      );
+    const { error, value } = createStepSchema.validate(req.body);
 
     if (error) {
       return res.status(400).json({
-        error:
-          error.details[0]
-            .message,
+        error: error.details[0].message,
       });
     }
 
-    const {
-      city,
-      country,
-      place_id,
-      start_at,
-      end_at,
-    } = value;
+    const { city, country, place_id, start_at, end_at } = value;
 
     /*
      * Joi transforme les dates ISO
      * en objets Date.
      */
-    const stepStartDate =
-      new Date(start_at);
+    const stepStartDate = new Date(start_at);
 
-    const stepEndDate =
-      new Date(end_at);
+    const stepEndDate = new Date(end_at);
 
-    const tripStartDate =
-      new Date(trip.start_at);
+    const tripStartDate = new Date(trip.start_at);
 
-    const tripEndDate =
-      new Date(trip.end_at);
+    const tripEndDate = new Date(trip.end_at);
 
     /* =====================================================
        DATE DE FIN >= DATE DE DÉBUT
     ====================================================== */
 
-    if (
-      stepEndDate <
-      stepStartDate
-    ) {
+    if (stepEndDate < stepStartDate) {
       return res.status(400).json({
         error:
           "La date de fin de l'étape doit être postérieure ou égale à la date de début.",
@@ -424,76 +405,64 @@ const addStepCity: RequestHandler = async (
        ÉTAPE COMPRISE DANS LE VOYAGE
     ====================================================== */
 
-    if (
-      stepStartDate <
-        tripStartDate ||
-      stepEndDate >
-        tripEndDate
-    ) {
+    if (stepStartDate < tripStartDate || stepEndDate > tripEndDate) {
       return res.status(400).json({
         error:
           "Les dates de l'étape doivent être comprises dans les dates du voyage.",
       });
     }
 
-    const formatSqlDate = (
-      date: Date,
-    ) =>
-      date
-        .toISOString()
-        .slice(0, 10);
+    const formatSqlDate = (date: Date) => date.toISOString().slice(0, 10);
 
-    const formattedStartAt =
-      formatSqlDate(
-        stepStartDate,
-      );
+    const formattedStartAt = formatSqlDate(stepStartDate);
 
-    const formattedEndAt =
-      formatSqlDate(
-        stepEndDate,
-      );
+    const formattedEndAt = formatSqlDate(stepEndDate);
 
-    const stepId =
-      await stepRepository.createStepCity(
-        {
-          trip_id: tripId,
+    const stepId = await stepRepository.createStepCity({
+      trip_id: tripId,
 
-          city,
+      city,
 
-          country,
+      country,
 
-          start_at:
-            formattedStartAt,
+      start_at: formattedStartAt,
 
-          end_at:
-            formattedEndAt,
+      end_at: formattedEndAt,
 
-          place_id:
-            place_id || null,
+      place_id: place_id || null,
 
-          user_id:
-            userId,
-        },
-      );
+      user_id: userId,
+    });
+
+    await activityService.createActivity({
+      tripId,
+
+      userId,
+
+      type: "step_created",
+
+      title: "Nouvelle étape proposée",
+
+      message: `a proposé ${city} comme nouvelle étape.`,
+
+      referenceType: "step",
+
+      referenceId: stepId,
+    });
 
     return res.status(201).json({
       trip: {
         id: trip.id,
 
-        title:
-          trip.title,
+        title: trip.title,
 
-        description:
-          trip.description,
+        description: trip.description,
 
-        city:
-          trip.city,
+        city: trip.city,
 
-        country:
-          trip.country,
+        country: trip.country,
 
-        place_id:
-          trip.place_id,
+        place_id: trip.place_id,
       },
 
       step: {
@@ -503,26 +472,19 @@ const addStepCity: RequestHandler = async (
 
         country,
 
-        start_at:
-          formattedStartAt,
+        start_at: formattedStartAt,
 
-        end_at:
-          formattedEndAt,
+        end_at: formattedEndAt,
 
-        place_id:
-          place_id || null,
+        place_id: place_id || null,
 
-        trip_id:
-          tripId,
+        trip_id: tripId,
 
-        creator_name:
-          "Vous",
+        creator_name: "Vous",
 
-        is_initial:
-          false,
+        is_initial: false,
 
-        status:
-          "pending",
+        status: "pending",
 
         voteStats: {
           yes: 0,
