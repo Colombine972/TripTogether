@@ -9,10 +9,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import {
-  Link,
-  useLocation,
-} from "react-router";
+import { Link, useLocation } from "react-router";
 
 import { useAuth } from "../contexts/AuthContext";
 
@@ -21,12 +18,13 @@ import type {
   TheTrip,
 } from "../types/tripType";
 
+import TripActions from "../pages/TripActions";
+import TripInvitation from "../pages/TripInvitation";
+
 import Modal from "./Modal";
 import NavTabs from "./NavTabs";
 import NextStepCard from "./NextStepCard";
-
-import TripActions from "../pages/TripActions";
-import TripInvitation from "../pages/TripInvitation";
+import RecentActivitiesCard from "./RecentActivitiesCard";
 
 import "../pages/styles/TripInfos.css";
 
@@ -78,14 +76,12 @@ function TripInfos({
   const [
     isInviteModalOpen,
     setIsInviteModalOpen,
-  ] =
-    useState(false);
+  ] = useState(false);
 
   const [
     isEditModalOpen,
     setIsEditModalOpen,
-  ] =
-    useState(false);
+  ] = useState(false);
 
   /* =======================================================
      MEMBRES
@@ -234,7 +230,7 @@ function TripInfos({
 
   /* =======================================================
      MINI MAP GOOGLE
-     UTILISÉE UNIQUEMENT DANS "À PROPOS DU VOYAGE"
+     UNIQUEMENT DANS "À PROPOS DU VOYAGE"
   ======================================================= */
 
   const getStaticMapUrl =
@@ -485,131 +481,149 @@ function TripInfos({
       </div>
 
       {/* =====================================================
-          CARTES DU RÉCAPITULATIF
+          RÉCAPITULATIF
       ====================================================== */}
 
       {isRecapPage && (
         <section className="trip-overview">
           {/* =================================================
-              À PROPOS DU VOYAGE
+              COLONNE GAUCHE
           ================================================== */}
 
-          <article className="trip-overview-card trip-about-overview">
-            <div className="trip-overview-header">
-              <div className="trip-overview-heading">
-                <span className="trip-overview-icon">
-                  ✦
-                </span>
+          <div className="trip-overview-left">
+            {/* ===============================================
+                À PROPOS DU VOYAGE
+            ================================================ */}
 
-                <h2>
-                  À propos du voyage
-                </h2>
+            <article className="trip-overview-card trip-about-overview">
+              <div className="trip-overview-header">
+                <div className="trip-overview-heading">
+                  <span className="trip-overview-icon">
+                    ✦
+                  </span>
+
+                  <h2>
+                    À propos du voyage
+                  </h2>
+                </div>
+
+                {isOrganizer && (
+                  <button
+                    type="button"
+                    className="trip-overview-action"
+                    onClick={() =>
+                      setIsEditModalOpen(
+                        true,
+                      )
+                    }
+                  >
+                    <Pencil
+                      size={17}
+                    />
+
+                    Modifier
+                  </button>
+                )}
               </div>
 
-              {isOrganizer && (
-                <button
-                  type="button"
-                  className="trip-overview-action"
-                  onClick={() =>
-                    setIsEditModalOpen(
-                      true,
-                    )
-                  }
-                >
-                  <Pencil
-                    size={17}
-                  />
-
-                  Modifier
-                </button>
-              )}
-            </div>
-
-            {trip.description && (
-              <p className="trip-overview-description">
-                {
-                  trip.description
-                }
-              </p>
-            )}
-
-            <div className="trip-about-content">
-              <div className="trip-overview-details">
-                <div className="trip-overview-detail">
-                  <MapPin
-                    size={19}
-                  />
-
-                  <span className="trip-detail-label">
-                    Destination
-                  </span>
-
-                  <strong>
-                    {trip.city},{" "}
-                    {trip.country}
-                  </strong>
-                </div>
-
-                <div className="trip-overview-detail">
-                  <CalendarDays
-                    size={19}
-                  />
-
-                  <span className="trip-detail-label">
-                    Dates
-                  </span>
-
-                  <strong>
-                    {formatDate(
-                      trip.start_at,
-                    )}
-
-                    {" - "}
-
-                    {formatDate(
-                      trip.end_at,
-                    )}
-                  </strong>
-                </div>
-
-                <div className="trip-overview-detail">
-                  <Coins
-                    size={19}
-                  />
-
-                  <span className="trip-detail-label">
-                    Devise du voyage
-                  </span>
-
-                  <strong>
-                    {trip.local_currency ||
-                      trip.base_currency ||
-                      "EUR"}
-                  </strong>
-                </div>
-              </div>
-
-              {/* =============================================
-                  MAP UNIQUEMENT ICI
-              ============================================== */}
-
-              <div className="trip-about-map">
-                <img
-                  src={getStaticMapUrl(
-                    trip.city,
-                    trip.country,
-                  )}
-                  alt={`Carte de ${trip.city}`}
-                />
-
-                <span className="trip-about-map-label">
+              {trip.description && (
+                <p className="trip-overview-description">
                   {
-                    trip.city
+                    trip.description
                   }
-                </span>
+                </p>
+              )}
+
+              <div className="trip-about-content">
+                <div className="trip-overview-details">
+                  <div className="trip-overview-detail">
+                    <MapPin
+                      size={19}
+                    />
+
+                    <span className="trip-detail-label">
+                      Destination
+                    </span>
+
+                    <strong>
+                      {trip.city},{" "}
+                      {
+                        trip.country
+                      }
+                    </strong>
+                  </div>
+
+                  <div className="trip-overview-detail">
+                    <CalendarDays
+                      size={19}
+                    />
+
+                    <span className="trip-detail-label">
+                      Dates
+                    </span>
+
+                    <strong>
+                      {formatDate(
+                        trip.start_at,
+                      )}
+
+                      {" - "}
+
+                      {formatDate(
+                        trip.end_at,
+                      )}
+                    </strong>
+                  </div>
+
+                  <div className="trip-overview-detail">
+                    <Coins
+                      size={19}
+                    />
+
+                    <span className="trip-detail-label">
+                      Devise du voyage
+                    </span>
+
+                    <strong>
+                      {trip.local_currency ||
+                        trip.base_currency ||
+                        "EUR"}
+                    </strong>
+                  </div>
+                </div>
+
+                {/* =============================================
+                    MAP
+                ============================================== */}
+
+                <div className="trip-about-map">
+                  <img
+                    src={getStaticMapUrl(
+                      trip.city,
+                      trip.country,
+                    )}
+                    alt={`Carte de ${trip.city}`}
+                  />
+
+                  <span className="trip-about-map-label">
+                    {
+                      trip.city
+                    }
+                  </span>
+                </div>
               </div>
-            </div>
-          </article>
+            </article>
+
+            {/* ===============================================
+                DERNIÈRES ACTIVITÉS
+            ================================================ */}
+
+            <RecentActivitiesCard
+              tripId={
+                tripId
+              }
+            />
+          </div>
 
           {/* =================================================
               COLONNE DROITE
