@@ -184,15 +184,6 @@ function TripInvitation({
     }
   };
 
-  /* =======================================================
-     FERMETURE OVERLAY
-  ======================================================= */
-
-  const closeModalOverlay = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget && onClose) {
-      onClose(e);
-    }
-  };
 
   /* =======================================================
      COPIER LIEN
