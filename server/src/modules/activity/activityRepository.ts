@@ -11,6 +11,8 @@ export type ActivityType =
   | "participant_joined"
   | "step_created"
   | "vote_created"
+  | "step_validated"
+  | "step_rejected"
   | "trip_updated"
   | "reimbursement_pending"
   | "reimbursement_confirmed"

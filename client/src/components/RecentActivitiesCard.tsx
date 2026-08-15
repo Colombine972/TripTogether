@@ -1,6 +1,7 @@
 import {
   Activity as ActivityIcon,
   ArrowRight,
+  CheckCircle2,
   CircleDollarSign,
   MapPin,
   Pencil,
@@ -8,6 +9,7 @@ import {
   UserPlus,
   Vote,
   WalletCards,
+  XCircle,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -26,6 +28,8 @@ type ActivityType =
   | "participant_joined"
   | "step_created"
   | "vote_created"
+  | "step_validated"
+  | "step_rejected"
   | "trip_updated"
   | "reimbursement_pending"
   | "reimbursement_confirmed"
@@ -210,6 +214,12 @@ function RecentActivitiesCard({ tripId }: RecentActivitiesCardProps) {
       case "vote_created":
         return <Vote size={18} />;
 
+      case "step_validated":
+        return <CheckCircle2 size={18} />;
+
+      case "step_rejected":
+        return <XCircle size={18} />;
+
       case "participant_joined":
         return <UserPlus size={18} />;
 
@@ -306,6 +316,10 @@ function RecentActivitiesCard({ tripId }: RecentActivitiesCardProps) {
 
             const isLast = index === activities.length - 1;
 
+            const isSystemActivity =
+              activity.type === "step_validated" ||
+              activity.type === "step_rejected";
+
             return (
               <button
                 key={activity.id}
@@ -326,7 +340,13 @@ function RecentActivitiesCard({ tripId }: RecentActivitiesCardProps) {
                 <div className="recent-activity-content">
                   <div className="recent-activity-main">
                     <p>
-                      <strong>{author}</strong> {activity.message}
+                      {isSystemActivity ? (
+                        <strong>{activity.message}</strong>
+                      ) : (
+                        <>
+                          <strong>{author}</strong> {activity.message}
+                        </>
+                      )}
                     </p>
 
                     <time dateTime={activity.created_at}>

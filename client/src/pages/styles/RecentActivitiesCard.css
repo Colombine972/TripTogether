@@ -179,6 +179,22 @@
   border-color: #dceade;
 }
 
+.recent-activity-icon-step_validated {
+  color: #19713e;
+
+  background: #eaf6ed;
+
+  border-color: #cfe7d5;
+}
+
+.recent-activity-icon-step_rejected {
+  color: #a45252;
+
+  background: #faeeee;
+
+  border-color: #efd2d2;
+}
+
 .recent-activity-icon-participant_joined {
   color: #48678a;
 

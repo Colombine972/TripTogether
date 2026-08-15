@@ -1,10 +1,13 @@
 import type { RequestHandler } from "express";
 import Joi from "joi";
+
 import type { StepWithStatus, VotesStats } from "../../types/voteType";
+
+import activityService from "../activity/activityService";
 import notificationService from "../notification/notificationService";
 import tripRepository from "../trip/tripRepository";
+
 import stepRepository from "./stepRepository";
-import activityService from "../activity/activityService";
 
 type RequestWithAuth = import("express").Request & {
   auth: {
@@ -12,10 +15,19 @@ type RequestWithAuth = import("express").Request & {
   };
 };
 
+/* =========================================================
+   VALIDATION VOTE
+========================================================= */
+
 const createVoteSchema = Joi.object({
   vote: Joi.boolean().required(),
+
   comment: Joi.string().max(500).allow(null, "").optional(),
 });
+
+/* =========================================================
+   VALIDATION ÉTAPE
+========================================================= */
 
 const createStepSchema = Joi.object({
   city: Joi.string().trim().min(1).required(),
@@ -29,6 +41,10 @@ const createStepSchema = Joi.object({
   end_at: Joi.date().iso().required(),
 });
 
+/* =========================================================
+   RÉCUPÉRER LES ÉTAPES DU VOYAGE
+========================================================= */
+
 const selectStepsByTrip: RequestHandler = async (req, res, next) => {
   try {
     const tripId = Number(req.params.tripId);
@@ -40,6 +56,7 @@ const selectStepsByTrip: RequestHandler = async (req, res, next) => {
     }
 
     const authReq = req as RequestWithAuth;
+
     const userId = Number(authReq.auth.sub);
 
     if (!userId) {
@@ -70,28 +87,50 @@ const selectStepsByTrip: RequestHandler = async (req, res, next) => {
     const steps = await stepRepository.getStepsWithVotes(tripId);
 
     const stepsWithStatus: StepWithStatus[] = steps.map((step) => {
+      /* =============================================
+               DESTINATION PRINCIPALE
+            ============================================== */
+
       if (step.is_initial) {
         return {
           id: step.id,
+
           city: step.city,
+
           country: step.country,
+
           start_at: step.start_at,
+
           end_at: step.end_at,
+
           creator_name: step.creator_name,
+
           trip_id: step.trip_id,
+
           place_id: step.place_id,
+
           is_initial: step.is_initial,
+
           status: "validated" as const,
+
           voteStats: {
             yes: step.total_members,
+
             no: step.total_votes - step.yes_votes,
+
             total: step.total_votes,
           },
         };
       }
 
+      /* =============================================
+               CALCUL DU STATUT
+            ============================================== */
+
       const yesVotes = step.yes_votes;
+
       const totalVotes = step.total_votes;
+
       const memberCount = step.total_members;
 
       const everyoneVoted = totalVotes === memberCount;
@@ -106,18 +145,30 @@ const selectStepsByTrip: RequestHandler = async (req, res, next) => {
 
       return {
         id: step.id,
+
         city: step.city,
+
         country: step.country,
+
         start_at: step.start_at,
+
         end_at: step.end_at,
+
         place_id: step.place_id,
+
         creator_name: step.creator_name,
+
         trip_id: step.trip_id,
+
         is_initial: step.is_initial,
+
         status,
+
         voteStats: {
           yes: yesVotes,
+
           no: totalVotes - yesVotes,
+
           total: totalVotes,
         },
       };
@@ -126,16 +177,24 @@ const selectStepsByTrip: RequestHandler = async (req, res, next) => {
     return res.status(200).json({
       trip: {
         id: trip.id,
+
         title: trip.title,
+
         description: trip.description,
+
         memberCount: steps[0]?.total_members ?? 0,
       },
+
       steps: stepsWithStatus,
     });
   } catch (err) {
     next(err);
   }
 };
+
+/* =========================================================
+   AJOUTER UN VOTE
+========================================================= */
 
 const addVote: RequestHandler = async (req, res, next) => {
   try {
@@ -147,6 +206,10 @@ const addVote: RequestHandler = async (req, res, next) => {
       });
     }
 
+    /* =====================================================
+         VALIDATION DU BODY
+      ====================================================== */
+
     const { error, value } = createVoteSchema.validate(req.body);
 
     if (error) {
@@ -156,6 +219,10 @@ const addVote: RequestHandler = async (req, res, next) => {
     }
 
     const { vote, comment } = value;
+
+    /* =====================================================
+         UTILISATEUR
+      ====================================================== */
 
     const authReq = req as RequestWithAuth;
 
@@ -167,6 +234,10 @@ const addVote: RequestHandler = async (req, res, next) => {
       });
     }
 
+    /* =====================================================
+         ÉTAPE
+      ====================================================== */
+
     const step = await stepRepository.getStepWithTrip(stepId);
 
     if (!step) {
@@ -174,6 +245,10 @@ const addVote: RequestHandler = async (req, res, next) => {
         error: "Etape non trouvée",
       });
     }
+
+    /* =====================================================
+         MEMBRE DU VOYAGE
+      ====================================================== */
 
     const isMemberOfTrip = await tripRepository.isUserMemberOfTrip(
       step.trip_id,
@@ -186,6 +261,10 @@ const addVote: RequestHandler = async (req, res, next) => {
       });
     }
 
+    /* =====================================================
+         VOTE DÉJÀ EFFECTUÉ
+      ====================================================== */
+
     const hasVoted = await stepRepository.hasUserVoted(userId, stepId);
 
     if (hasVoted) {
@@ -193,6 +272,10 @@ const addVote: RequestHandler = async (req, res, next) => {
         error: "Vous avez déjà voté pour cette étape",
       });
     }
+
+    /* =====================================================
+         ENREGISTREMENT DU VOTE
+      ====================================================== */
 
     const voteId = await stepRepository.create(
       userId,
@@ -203,12 +286,20 @@ const addVote: RequestHandler = async (req, res, next) => {
 
     const createdVote = await stepRepository.selectByIdWithUser(voteId);
 
+    /* =====================================================
+         NOTIFICATION DU VOTE
+      ====================================================== */
+
     await notificationService.notifyVoteCreated(
       step.trip_id,
       userId,
       stepId,
       step.city,
     );
+
+    /* =====================================================
+         ACTIVITÉ DU VOTE
+      ====================================================== */
 
     await activityService.createActivity({
       tripId: step.trip_id,
@@ -228,11 +319,94 @@ const addVote: RequestHandler = async (req, res, next) => {
       referenceId: stepId,
     });
 
+    /* =====================================================
+         VÉRIFIER SI LE VOTE TERMINE LE SCRUTIN
+      ====================================================== */
+
+    const updatedSteps = await stepRepository.getStepsWithVotes(step.trip_id);
+
+    const updatedStep = updatedSteps.find(
+      (currentStep) => Number(currentStep.id) === stepId,
+    );
+
+    if (updatedStep && !updatedStep.is_initial) {
+      const yesVotes = Number(updatedStep.yes_votes);
+
+      const totalVotes = Number(updatedStep.total_votes);
+
+      const memberCount = Number(updatedStep.total_members);
+
+      /*
+       * L'activité de décision n'est créée
+       * que lorsque tous les membres ont voté.
+       *
+       * Comme un utilisateur ne peut voter
+       * qu'une seule fois, ce bloc ne peut
+       * s'exécuter qu'une seule fois pour
+       * cette étape.
+       */
+      const everyoneVoted = memberCount > 0 && totalVotes === memberCount;
+
+      if (everyoneVoted) {
+        const majorityYes = yesVotes > memberCount / 2;
+
+        /* ===============================================
+             ÉTAPE VALIDÉE
+          ================================================ */
+
+        if (majorityYes) {
+          await activityService.createActivity({
+            tripId: step.trip_id,
+
+            /*
+             * Pas d'utilisateur :
+             * c'est une décision collective.
+             */
+            userId: null,
+
+            type: "step_validated",
+
+            title: "Étape validée",
+
+            message: `L'étape « ${step.city} » a été validée.`,
+
+            referenceType: "step",
+
+            referenceId: stepId,
+          });
+        } else {
+
+        /* ===============================================
+             ÉTAPE REJETÉE
+          ================================================ */
+          await activityService.createActivity({
+            tripId: step.trip_id,
+
+            userId: null,
+
+            type: "step_rejected",
+
+            title: "Étape rejetée",
+
+            message: `L'étape « ${step.city} » a été rejetée.`,
+
+            referenceType: "step",
+
+            referenceId: stepId,
+          });
+        }
+      }
+    }
+
     return res.status(201).json(createdVote);
   } catch (err) {
     next(err);
   }
 };
+
+/* =========================================================
+   RÉCUPÉRER LES VOTES
+========================================================= */
 
 const browseVote: RequestHandler = async (req, res, next) => {
   try {
@@ -281,10 +455,14 @@ const browseVote: RequestHandler = async (req, res, next) => {
 
     const showVoteStats: VotesStats = {
       step_id: stepId,
+
       allVotes,
+
       summary: {
         yes,
+
         no,
+
         total: allVotes.length,
       },
     };
@@ -294,6 +472,10 @@ const browseVote: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+/* =========================================================
+   SUPPRIMER UNE ÉTAPE
+========================================================= */
 
 const deleteStep: RequestHandler = async (req, res, next) => {
   try {
@@ -328,6 +510,10 @@ const deleteStep: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+/* =========================================================
+   AJOUTER UNE ÉTAPE
+========================================================= */
 
 const addStepCity: RequestHandler = async (req, res, next) => {
   try {
@@ -368,6 +554,10 @@ const addStepCity: RequestHandler = async (req, res, next) => {
       });
     }
 
+    /* =====================================================
+         VALIDATION
+      ====================================================== */
+
     const { error, value } = createStepSchema.validate(req.body);
 
     if (error) {
@@ -391,8 +581,8 @@ const addStepCity: RequestHandler = async (req, res, next) => {
     const tripEndDate = new Date(trip.end_at);
 
     /* =====================================================
-       DATE DE FIN >= DATE DE DÉBUT
-    ====================================================== */
+         DATE DE FIN >= DATE DE DÉBUT
+      ====================================================== */
 
     if (stepEndDate < stepStartDate) {
       return res.status(400).json({
@@ -402,8 +592,8 @@ const addStepCity: RequestHandler = async (req, res, next) => {
     }
 
     /* =====================================================
-       ÉTAPE COMPRISE DANS LE VOYAGE
-    ====================================================== */
+         ÉTAPE COMPRISE DANS LE VOYAGE
+      ====================================================== */
 
     if (stepStartDate < tripStartDate || stepEndDate > tripEndDate) {
       return res.status(400).json({
@@ -417,6 +607,10 @@ const addStepCity: RequestHandler = async (req, res, next) => {
     const formattedStartAt = formatSqlDate(stepStartDate);
 
     const formattedEndAt = formatSqlDate(stepEndDate);
+
+    /* =====================================================
+         CRÉATION
+      ====================================================== */
 
     const stepId = await stepRepository.createStepCity({
       trip_id: tripId,
@@ -433,6 +627,10 @@ const addStepCity: RequestHandler = async (req, res, next) => {
 
       user_id: userId,
     });
+
+    /* =====================================================
+         ACTIVITÉ
+      ====================================================== */
 
     await activityService.createActivity({
       tripId,
@@ -488,7 +686,9 @@ const addStepCity: RequestHandler = async (req, res, next) => {
 
         voteStats: {
           yes: 0,
+
           no: 0,
+
           total: 0,
         },
       },
@@ -497,6 +697,10 @@ const addStepCity: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+/* =========================================================
+   EXPORT
+========================================================= */
 
 export default {
   selectStepsByTrip,
