@@ -1,5 +1,6 @@
 import buildTripInvitationTemplate from "../../utils/buildTripInvitationTemplate";
 import sendEmail from "../../utils/sendEmail";
+import { getPlacePhotoUrl } from "../services/googlePlacesService";
 
 type SendTripInvitationEmailParams = {
   recipientEmail: string;
@@ -14,6 +15,7 @@ type SendTripInvitationEmailParams = {
   startAt: string | Date;
   endAt: string | Date;
   message?: string | null;
+  placeId?: string | null;
 };
 
 const sendTripInvitationEmail = async ({
@@ -29,6 +31,7 @@ const sendTripInvitationEmail = async ({
   startAt,
   endAt,
   message,
+  placeId,
 }: SendTripInvitationEmailParams): Promise<void> => {
   const clientUrl =
     process.env.CLIENT_URL ??
@@ -38,7 +41,9 @@ const sendTripInvitationEmail = async ({
     `${clientUrl}/trip/${tripId}/invitation/${invitationId}`;
 
   const organizerName =
-    `${organizerFirstname} ${organizerLastname ?? ""}`.trim();
+    `${organizerFirstname} ${
+      organizerLastname ?? ""
+    }`.trim();
 
   const subject =
     `${organizerFirstname} vous invite à rejoindre son voyage à ${city}`;
@@ -49,6 +54,50 @@ Destination : ${city}, ${country}
 
 ${message?.trim() ? `Message : ${message.trim()}\n\n` : ""}Voir l'invitation :
 ${invitationUrl}`;
+
+  /* =====================================================
+     RÉCUPÉRATION DE LA PHOTO DU VOYAGE
+  ====================================================== */
+
+  let imageBuffer: Buffer | null = null;
+
+  if (placeId) {
+    try {
+      const photoUrl =
+        await getPlacePhotoUrl(
+          placeId,
+        );
+
+      if (photoUrl) {
+        const photoResponse =
+          await fetch(photoUrl);
+
+        if (photoResponse.ok) {
+          const arrayBuffer =
+            await photoResponse.arrayBuffer();
+
+          imageBuffer =
+            Buffer.from(
+              arrayBuffer,
+            );
+        } else {
+          console.error(
+            "Erreur récupération photo invitation :",
+            photoResponse.status,
+          );
+        }
+      }
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération de la photo pour l'email :",
+        error,
+      );
+    }
+  }
+
+  /* =====================================================
+     CONSTRUCTION DU TEMPLATE HTML
+  ====================================================== */
 
   const html =
     buildTripInvitationTemplate({
@@ -62,13 +111,40 @@ ${invitationUrl}`;
       endAt,
       invitationUrl,
       message,
+
+      tripImageUrl:
+        imageBuffer
+          ? "cid:trip-destination"
+          : null,
     });
+
+  /* =====================================================
+     ENVOI DE L'EMAIL
+  ====================================================== */
 
   await sendEmail(
     recipientEmail,
     subject,
     text,
     html,
+
+    imageBuffer
+      ? [
+          {
+            filename:
+              "trip-destination.jpg",
+
+            content:
+              imageBuffer,
+
+            cid:
+              "trip-destination",
+
+            contentType:
+              "image/jpeg",
+          },
+        ]
+      : undefined,
   );
 };
 

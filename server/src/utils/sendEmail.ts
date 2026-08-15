@@ -10,11 +10,20 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+type EmailAttachment = {
+  filename: string;
+  path?: string;
+  content?: Buffer;
+  cid?: string;
+  contentType?: string;
+};
+
 const sendEmail = async (
   to: string,
   subject: string,
   text: string,
   html?: string,
+  attachments?: EmailAttachment[],
 ) => {
   await transporter.sendMail({
     from: process.env.SMTP_FROM,
@@ -22,6 +31,7 @@ const sendEmail = async (
     subject,
     text,
     html,
+    attachments,
   });
 };
 

@@ -195,6 +195,7 @@ const add: RequestHandler = async (req, res, next) => {
         startAt: trip.start_at,
         endAt: trip.end_at,
         message: message || null,
+        placeId: trip.place_id ?? null,
       });
 
       emailSent = true;
