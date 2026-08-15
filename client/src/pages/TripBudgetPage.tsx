@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import AddExpenseForm from "../components/AddExpenseForm";
 import BudgetSummary from "../components/BudgetSummary";
 import Modal from "../components/Modal";
-import NavTabs from "../components/NavTabs";
 import PaymentDetailsModal from "../components/PaymentDetailsModal";
 import PendingReimbursements from "../components/PendingReimbursements";
 import RemboursementSummary from "../components/RemboursementSummary";
@@ -853,7 +852,6 @@ function TripBudgetPage() {
       {trip && <TripInfos trip={trip} onTripUpdated={setTrip} />}
 
       <main className="page-membre trip-budget-page">
-        <NavTabs />
 
         {isLoading ? (
           <p className="loading-text">Chargement du budget...</p>

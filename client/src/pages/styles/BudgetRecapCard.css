@@ -1,0 +1,393 @@
+/* =========================================================
+   BUDGET RECAP CARD
+========================================================= */
+
+.budget-recap-card {
+  width: 100%;
+  min-width: 0;
+
+  padding: 1.6rem 1.8rem;
+  margin-top: 1rem;
+
+  background: #ffffff;
+
+  border: 1px solid rgba(47, 93, 47, 0.08);
+  border-radius: 1.5rem;
+
+  box-shadow: 0 12px 32px rgba(35, 53, 40, 0.06), 0 3px 10px
+    rgba(35, 53, 40, 0.035);
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.budget-recap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+
+  margin-bottom: 1.4rem;
+}
+
+.budget-recap-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+
+  min-width: 0;
+}
+
+.budget-recap-main-icon {
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 44px;
+
+  width: 44px;
+  height: 44px;
+
+  color: #2f5d2f;
+  background: #edf5ee;
+
+  border-radius: 0.85rem;
+}
+
+.budget-recap-main-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.budget-recap-heading h2 {
+  margin: 0;
+
+  color: #111827;
+
+  font-family: var(--body-text);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+/* =========================================================
+   VOIR LE BUDGET
+========================================================= */
+
+.budget-recap-link {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  flex-shrink: 0;
+
+  padding: 0.35rem 0;
+
+  color: #2f5d2f;
+  background: transparent;
+
+  border: none;
+
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition: gap 180ms ease, color 180ms ease;
+}
+
+.budget-recap-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+.budget-recap-link:hover {
+  gap: 0.7rem;
+  color: #1f4825;
+}
+
+/* =========================================================
+   RÉSUMÉ
+========================================================= */
+
+.budget-recap-summary {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr)
+    minmax(0, 1.15fr);
+
+  gap: 1rem;
+}
+
+/* =========================================================
+   CARTES DE STATISTIQUES
+========================================================= */
+
+.budget-recap-stat-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  min-width: 0;
+  min-height: 96px;
+
+  padding: 1.05rem 1.15rem;
+
+  background: #ffffff;
+
+  border: 1px solid #e4e9e4;
+  border-radius: 1rem;
+
+  box-shadow: 0 3px 9px rgba(30, 50, 35, 0.04);
+
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms
+    ease;
+}
+
+.budget-recap-stat-card:hover {
+  transform: translateY(-2px);
+
+  border-color: rgba(47, 93, 47, 0.15);
+
+  box-shadow: 0 7px 18px rgba(30, 50, 35, 0.07);
+}
+
+/* =========================================================
+   CONTENU DES CARTES
+========================================================= */
+
+.budget-recap-stat-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.4rem;
+
+  min-width: 0;
+}
+
+.budget-recap-stat-label {
+  color: #667069;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.budget-recap-stat-value {
+  color: #2f5d2f;
+
+  font-size: 1.35rem;
+  font-weight: 750;
+  line-height: 1.15;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   ICÔNES DES CARTES
+========================================================= */
+
+.budget-recap-stat-icon {
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 46px;
+
+  width: 46px;
+  height: 46px;
+
+  color: #657068;
+  background: #f0f3f0;
+
+  border-radius: 0.85rem;
+}
+
+.budget-recap-stat-icon svg {
+  width: 23px;
+  height: 23px;
+}
+
+.budget-recap-stat-icon.is-total {
+  color: #397347;
+  background: #edf6ef;
+}
+
+.budget-recap-stat-icon.is-paid {
+  color: #496c8f;
+  background: #edf4fa;
+}
+
+/* =========================================================
+   SOLDE
+========================================================= */
+
+.budget-recap-balance-value {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.budget-recap-balance-value span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.budget-recap-balance-value strong {
+  font-size: 1.35rem;
+  font-weight: 750;
+  line-height: 1.15;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   SOLDE POSITIF
+========================================================= */
+
+.budget-recap-balance.is-positive .budget-recap-balance-value {
+  color: #287044;
+}
+
+.budget-recap-balance.is-positive .budget-recap-stat-icon {
+  color: #287044;
+  background: #edf7f0;
+}
+
+/* =========================================================
+   SOLDE NÉGATIF
+========================================================= */
+
+.budget-recap-balance.is-negative .budget-recap-balance-value {
+  color: #a55a42;
+}
+
+.budget-recap-balance.is-negative .budget-recap-stat-icon {
+  color: #a55a42;
+  background: #fff1ec;
+}
+
+/* =========================================================
+   SOLDE ÉQUILIBRÉ
+========================================================= */
+
+.budget-recap-balance.is-settled .budget-recap-balance-value {
+  color: #657068;
+}
+
+.budget-recap-balance.is-settled .budget-recap-stat-icon {
+  color: #657068;
+  background: #f0f3f0;
+}
+
+/* =========================================================
+   ÉCRANS INTERMÉDIAIRES
+========================================================= */
+
+@media screen and (max-width: 1100px) {
+  .budget-recap-card {
+    padding: 1.4rem;
+  }
+
+  .budget-recap-summary {
+    gap: 0.8rem;
+  }
+
+  .budget-recap-stat-card {
+    min-height: 90px;
+
+    padding: 0.95rem;
+  }
+
+  .budget-recap-stat-value,
+  .budget-recap-balance-value strong {
+    font-size: 1.2rem;
+  }
+
+  .budget-recap-stat-icon {
+    flex-basis: 42px;
+
+    width: 42px;
+    height: 42px;
+  }
+}
+
+/* =========================================================
+   TABLETTE
+========================================================= */
+
+@media screen and (max-width: 900px) {
+  .budget-recap-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .budget-recap-balance {
+    grid-column: 1 / -1;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media screen and (max-width: 600px) {
+  .budget-recap-card {
+    padding: 1.15rem;
+
+    border-radius: 1.25rem;
+  }
+
+  .budget-recap-header {
+    margin-bottom: 1.1rem;
+  }
+
+  .budget-recap-main-icon {
+    flex-basis: 40px;
+
+    width: 40px;
+    height: 40px;
+  }
+
+  .budget-recap-heading h2 {
+    font-size: 1.05rem;
+  }
+
+  .budget-recap-link {
+    font-size: 0.78rem;
+  }
+
+  .budget-recap-summary {
+    grid-template-columns: 1fr;
+
+    gap: 0.75rem;
+  }
+
+  .budget-recap-balance {
+    grid-column: auto;
+  }
+
+  .budget-recap-stat-card {
+    min-height: 82px;
+
+    padding: 0.9rem 1rem;
+  }
+
+  .budget-recap-stat-label {
+    font-size: 0.78rem;
+  }
+
+  .budget-recap-stat-value,
+  .budget-recap-balance-value strong {
+    font-size: 1.2rem;
+  }
+
+  .budget-recap-stat-icon {
+    flex-basis: 42px;
+
+    width: 42px;
+    height: 42px;
+  }
+}
