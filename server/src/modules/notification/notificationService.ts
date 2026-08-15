@@ -1,7 +1,4 @@
-import buildExpenseNotificationTemplate from "../../utils/buildExpenseNotificationTemplate";
-import sendEmail from "../../utils/sendEmail";
 import realtimeNotificationService from "../../services/realtimeNotificationService";
-import preferencesRepository from "../preferences/preferencesRepository";
 import tripRepository from "../trip/tripRepository";
 import userRepository from "../user/userRepository";
 import notificationRepository, {
@@ -10,8 +7,6 @@ import notificationRepository, {
 
 type TripMember = {
   id: number;
-  firstname: string;
-  email: string;
 };
 
 type TripChange = {
@@ -203,8 +198,6 @@ const notifyExpenseAdded = async (
     ? `${actor.firstname} ${actor.lastname}`.trim()
     : "Un participant";
 
-  const tripLink =
-    `${process.env.CLIENT_URL}/trip/${tripId}`;
 
   const members =
     (await tripRepository.findMembersByTrip(
@@ -244,47 +237,6 @@ const notifyExpenseAdded = async (
       );
     }
 
-    if (!member.email) {
-      continue;
-    }
-
-    const preferences =
-      await preferencesRepository.readByUserId(
-        member.id,
-      );
-
-    if (
-      !preferences?.email_trip_notifications
-    ) {
-      continue;
-    }
-
-    const html =
-      buildExpenseNotificationTemplate({
-        firstname:
-          member.firstname,
-        tripTitle:
-          trip.title,
-        payerName:
-          actorName,
-        expenseTitle,
-        amount,
-        tripLink,
-      });
-
-    try {
-      await sendEmail(
-        member.email,
-        `Nouvelle dépense sur "${trip.title}"`,
-        `Une nouvelle dépense a été ajoutée au voyage "${trip.title}".`,
-        html,
-      );
-    } catch (error) {
-      console.error(
-        `Erreur envoi email à ${member.email} :`,
-        error,
-      );
-    }
   }
 };
 
