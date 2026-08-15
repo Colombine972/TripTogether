@@ -1,8 +1,16 @@
 import type { Request, RequestHandler } from "express";
+
 import type { Trip, TripStatus } from "../../types/tripType";
+
+import activityService from "../activity/activityService";
 import invitationRepository from "../invitation/invitationRepository";
 import notificationService from "../notification/notificationService";
+
 import tripRepository from "./tripRepository";
+
+/* =========================================================
+   TYPES
+========================================================= */
 
 type AuthRequest = Request & {
   auth: {
@@ -25,10 +33,16 @@ type TripChange = {
     | "end_at"
     | "local_currency"
     | "base_currency";
+
   label: string;
+
   oldValue?: string | null;
   newValue?: string | null;
 };
+
+/* =========================================================
+   NORMALISATION
+========================================================= */
 
 const normalizeValue = (value: unknown): string => {
   if (value === undefined || value === null) {
@@ -76,11 +90,19 @@ const normalizeDate = (value: unknown): string => {
   return `${year}-${month}-${day}`;
 };
 
+/* =========================================================
+   CONSTRUIRE LA LISTE DES MODIFICATIONS
+========================================================= */
+
 const buildTripChanges = (
   previousTrip: Trip,
   updatedTrip: Trip,
 ): TripChange[] => {
   const changes: TripChange[] = [];
+
+  /* =====================================================
+     TITRE
+  ====================================================== */
 
   const previousTitle = normalizeValue(previousTrip.title);
 
@@ -89,11 +111,18 @@ const buildTripChanges = (
   if (previousTitle !== updatedTitle) {
     changes.push({
       field: "title",
+
       label: "le titre",
+
       oldValue: previousTitle,
+
       newValue: updatedTitle,
     });
   }
+
+  /* =====================================================
+     DESCRIPTION
+  ====================================================== */
 
   const previousDescription = normalizeValue(previousTrip.description);
 
@@ -102,9 +131,14 @@ const buildTripChanges = (
   if (previousDescription !== updatedDescription) {
     changes.push({
       field: "description",
+
       label: "la description",
     });
   }
+
+  /* =====================================================
+     DESTINATION
+  ====================================================== */
 
   const previousDestination = [
     normalizeValue(previousTrip.city),
@@ -123,11 +157,18 @@ const buildTripChanges = (
   if (previousDestination !== updatedDestination) {
     changes.push({
       field: "destination",
+
       label: "la destination",
+
       oldValue: previousDestination,
+
       newValue: updatedDestination,
     });
   }
+
+  /* =====================================================
+     DATE DE DÉPART
+  ====================================================== */
 
   const previousStart = normalizeDate(previousTrip.start_at);
 
@@ -136,11 +177,18 @@ const buildTripChanges = (
   if (previousStart !== updatedStart) {
     changes.push({
       field: "start_at",
+
       label: "la date de départ",
+
       oldValue: previousStart,
+
       newValue: updatedStart,
     });
   }
+
+  /* =====================================================
+     DATE DE RETOUR
+  ====================================================== */
 
   const previousEnd = normalizeDate(previousTrip.end_at);
 
@@ -149,11 +197,18 @@ const buildTripChanges = (
   if (previousEnd !== updatedEnd) {
     changes.push({
       field: "end_at",
+
       label: "la date de retour",
+
       oldValue: previousEnd,
+
       newValue: updatedEnd,
     });
   }
+
+  /* =====================================================
+     DEVISE LOCALE
+  ====================================================== */
 
   const previousLocalCurrency = normalizeValue(previousTrip.local_currency);
 
@@ -162,11 +217,18 @@ const buildTripChanges = (
   if (previousLocalCurrency !== updatedLocalCurrency) {
     changes.push({
       field: "local_currency",
+
       label: "la devise locale",
+
       oldValue: previousLocalCurrency,
+
       newValue: updatedLocalCurrency,
     });
   }
+
+  /* =====================================================
+     DEVISE DU BUDGET
+  ====================================================== */
 
   const previousBaseCurrency = normalizeValue(previousTrip.base_currency);
 
@@ -175,14 +237,37 @@ const buildTripChanges = (
   if (previousBaseCurrency !== updatedBaseCurrency) {
     changes.push({
       field: "base_currency",
+
       label: "la devise du budget",
+
       oldValue: previousBaseCurrency,
+
       newValue: updatedBaseCurrency,
     });
   }
 
   return changes;
 };
+
+/* =========================================================
+   MESSAGE D'ACTIVITÉ
+========================================================= */
+
+const buildTripActivityMessage = (changes: TripChange[]): string => {
+  if (changes.length === 1) {
+    return `a modifié ${changes[0].label}.`;
+  }
+
+  if (changes.length === 2) {
+    return `a modifié ${changes[0].label} et ${changes[1].label}.`;
+  }
+
+  return "a modifié plusieurs informations du voyage.";
+};
+
+/* =========================================================
+   LISTER TOUS LES VOYAGES
+========================================================= */
 
 const browse: RequestHandler = async (_req, res, next) => {
   try {
@@ -193,6 +278,10 @@ const browse: RequestHandler = async (_req, res, next) => {
     next(err);
   }
 };
+
+/* =========================================================
+   LISTER LES VOYAGES DE L'UTILISATEUR
+========================================================= */
 
 const browseTheTrip: RequestHandler = async (req, res, next) => {
   try {
@@ -211,15 +300,16 @@ const browseTheTrip: RequestHandler = async (req, res, next) => {
         if (!Number.isInteger(tripId) || tripId <= 0) {
           return {
             ...trip,
+
             participants: [],
           };
         }
 
-        const participants =
-          await tripRepository.findMembersByTrip(tripId);
+        const participants = await tripRepository.findMembersByTrip(tripId);
 
         return {
           ...trip,
+
           participants,
         };
       }),
@@ -231,6 +321,10 @@ const browseTheTrip: RequestHandler = async (req, res, next) => {
   }
 };
 
+/* =========================================================
+   RÉCUPÉRER UN VOYAGE
+========================================================= */
+
 const browseMyTrip: RequestHandler = async (req, res, next) => {
   try {
     const tripId = Number(req.params.id);
@@ -239,6 +333,7 @@ const browseMyTrip: RequestHandler = async (req, res, next) => {
 
     if (trip == null) {
       res.sendStatus(404);
+
       return;
     }
 
@@ -246,12 +341,17 @@ const browseMyTrip: RequestHandler = async (req, res, next) => {
 
     res.json({
       ...trip,
+
       participants,
     });
   } catch (err) {
     next(err);
   }
 };
+
+/* =========================================================
+   SUPPRIMER UN VOYAGE
+========================================================= */
 
 const delate: RequestHandler = async (req, res, next) => {
   try {
@@ -269,6 +369,10 @@ const delate: RequestHandler = async (req, res, next) => {
   }
 };
 
+/* =========================================================
+   INFORMATIONS D'UN VOYAGE
+========================================================= */
+
 const read: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
@@ -277,6 +381,7 @@ const read: RequestHandler = async (req, res, next) => {
 
     if (!trip) {
       res.sendStatus(404);
+
       return;
     }
 
@@ -285,6 +390,10 @@ const read: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+/* =========================================================
+   COMPTER LES VOYAGES
+========================================================= */
 
 const count: RequestHandler = async (_req, res, next) => {
   try {
@@ -295,6 +404,10 @@ const count: RequestHandler = async (_req, res, next) => {
     next(err);
   }
 };
+
+/* =========================================================
+   CRÉER UN VOYAGE
+========================================================= */
 
 const add: RequestHandler = async (req, res, next) => {
   const authReq = req as AuthRequest;
@@ -355,15 +468,25 @@ const add: RequestHandler = async (req, res, next) => {
 
     const newTrip: Trip = {
       title,
+
       description,
+
       city,
+
       country,
+
       country_code,
+
       local_currency,
+
       base_currency,
+
       start_at,
+
       end_at,
+
       user_id: Number(authReq.auth.sub),
+
       place_id: place_id || null,
     };
 
@@ -371,13 +494,19 @@ const add: RequestHandler = async (req, res, next) => {
 
     res.status(201).json({
       insertId,
+
       message: "Voyage créé avec succès",
+
       place_id: newTrip.place_id,
     });
   } catch (err) {
     next(err);
   }
 };
+
+/* =========================================================
+   MEMBRES DU VOYAGE
+========================================================= */
 
 const getMembersByTrip: RequestHandler = async (req, res, next) => {
   try {
@@ -399,6 +528,10 @@ const getMembersByTrip: RequestHandler = async (req, res, next) => {
   }
 };
 
+/* =========================================================
+   MODIFIER UN VOYAGE
+========================================================= */
+
 const edit: RequestHandler = async (req, res, next) => {
   try {
     const authReq = req as AuthRequest;
@@ -406,6 +539,10 @@ const edit: RequestHandler = async (req, res, next) => {
     const tripId = Number(req.params.id);
 
     const userId = Number(authReq.auth.sub);
+
+    /* =====================================================
+         VALIDATION
+      ====================================================== */
 
     if (!Number.isInteger(tripId) || tripId <= 0) {
       res.status(400).json({
@@ -423,6 +560,10 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    /* =====================================================
+         VOYAGE AVANT MODIFICATION
+      ====================================================== */
+
     const previousTrip = await tripRepository.read(tripId);
 
     if (!previousTrip) {
@@ -433,6 +574,10 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    /* =====================================================
+         VÉRIFICATION ORGANISATEUR
+      ====================================================== */
+
     if (Number(previousTrip.user_id) !== userId) {
       res.status(403).json({
         error: "Vous n'êtes pas autorisé à modifier ce voyage",
@@ -440,6 +585,10 @@ const edit: RequestHandler = async (req, res, next) => {
 
       return;
     }
+
+    /* =====================================================
+         MODIFICATION
+      ====================================================== */
 
     const updatedTrip = await tripRepository.updateTripEdit(
       tripId,
@@ -455,27 +604,34 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    console.log("DATES AVANT :", {
-      start_at: previousTrip.start_at,
-      end_at: previousTrip.end_at,
-    });
-
-    console.log("DATES APRÈS :", {
-      start_at: updatedTrip.start_at,
-      end_at: updatedTrip.end_at,
-    });
-
-    console.log("DATES NORMALISÉES :", {
-      previousStart: normalizeDate(previousTrip.start_at),
-      updatedStart: normalizeDate(updatedTrip.start_at),
-      previousEnd: normalizeDate(previousTrip.end_at),
-      updatedEnd: normalizeDate(updatedTrip.end_at),
-    });
+    /* =====================================================
+         DÉTECTION DES CHANGEMENTS
+      ====================================================== */
 
     const changes = buildTripChanges(previousTrip, updatedTrip);
 
+    /* =====================================================
+         NOTIFICATION + ACTIVITÉ
+      ====================================================== */
+
     if (changes.length > 0) {
       await notificationService.notifyTripUpdated(tripId, userId, changes);
+
+      await activityService.createActivity({
+        tripId,
+
+        userId,
+
+        type: "trip_updated",
+
+        title: "Voyage modifié",
+
+        message: buildTripActivityMessage(changes),
+
+        referenceType: "trip",
+
+        referenceId: tripId,
+      });
     }
 
     res.status(200).json(updatedTrip);
@@ -483,6 +639,10 @@ const edit: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+/* =========================================================
+   EXPORT
+========================================================= */
 
 export default {
   browse,
