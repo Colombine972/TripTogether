@@ -498,13 +498,14 @@
   }
 }
 
+
 /* =========================================================
    LAPTOP
 ========================================================= */
 
 @media (max-width: 1200px) {
   .mytripsheader {
-    height: 420px;
+    height: 360px;
   }
 
   .tripcards {
@@ -524,59 +525,161 @@
   }
 }
 
+
 /* =========================================================
-   TABLETTE
+   TABLETTE / PETIT LAPTOP
 ========================================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .mytripsheader {
-    height: 420px;
+    height: 320px;
+  }
 
-    background-position: center;
+  .tripstate {
+    margin: 2.5rem 0;
   }
 
   .tripcards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 
-    gap: 1.3rem;
+    width: min(900px, calc(100% - 2.5rem));
+
+    gap: 1.4rem;
   }
 
   .tripcard {
-    height: 270px;
+    height: 275px;
   }
 }
+
+
+/* =========================================================
+   TABLETTE PORTRAIT
+========================================================= */
+
+@media (max-width: 768px) {
+  .mytripsheader {
+    height: 270px;
+  }
+
+  .mytripsheader-image {
+    object-position: center;
+  }
+
+  /* ================= FILTRES ================= */
+
+  .tripstate {
+    gap: 0.7rem;
+
+    margin: 2rem 0 2.2rem;
+
+    padding: 0 1rem;
+  }
+
+  .tripstate button {
+    padding: 0.6rem 1rem;
+
+    font-size: 0.88rem;
+  }
+
+  /* ================= CARTES ================= */
+
+  .tripcards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    width: calc(100% - 2rem);
+
+    gap: 1rem;
+
+    padding-bottom: 3rem;
+  }
+
+  .tripcard {
+    height: 255px;
+  }
+
+  .tripcard-content {
+    padding: 1rem;
+  }
+
+  .tripcard-content h2 {
+    margin-bottom: 0.35rem;
+
+    font-size: 1.25rem;
+  }
+
+  .tripcard-location {
+    font-size: 0.88rem;
+  }
+
+  .tripcard-date {
+    gap: 0.4rem;
+
+    font-size: 0.76rem;
+  }
+
+  .tripcard-participants {
+    margin-top: 0.7rem;
+  }
+
+  .tripcard-avatar {
+    width: 29px;
+    height: 29px;
+  }
+
+  .tripcard-actions {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .tripcard-menu-button {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 
 /* =========================================================
    MOBILE
 ========================================================= */
 
 @media (max-width: 600px) {
-  .mytripsheader {
-    height: 320px;
+  /* ================= HERO ================= */
 
-    background-position: center;
+  .mytripsheader {
+    height: 220px;
   }
 
-  .tripstate {
-    gap: 0.6rem;
+  .mytripsheader-image {
+    object-position: center;
+  }
 
-    margin: 1.5rem 0 2rem;
+  /* ================= FILTRES ================= */
+
+  .tripstate {
+    gap: 0.55rem;
+
+    margin: 1.5rem 0 1.8rem;
 
     padding: 0 0.75rem;
   }
 
   .tripstate button {
-    padding: 0.55rem 0.9rem;
+    padding: 0.55rem 0.85rem;
 
-    font-size: 0.82rem;
+    font-size: 0.8rem;
   }
+
+  /* ================= CARTES ================= */
 
   .tripcards {
     grid-template-columns: 1fr;
 
-    width: calc(100% - 1.5rem);
+    width: min(430px, calc(100% - 1.5rem));
 
     gap: 1.2rem;
+
+    padding-bottom: 2.5rem;
   }
 
   .tripcard {
@@ -591,8 +694,175 @@
     font-size: 1.35rem;
   }
 
+  .tripcard-location {
+    font-size: 0.9rem;
+  }
+
+  .tripcard-date {
+    font-size: 0.8rem;
+  }
+
+  .tripcard-avatar {
+    width: 30px;
+    height: 30px;
+  }
+
   .tripcard-menu-button {
     width: 38px;
     height: 38px;
+  }
+
+  .tripcard-menu {
+    min-width: 180px;
+  }
+}
+
+
+/* =========================================================
+   PETIT MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+  /* ================= HERO ================= */
+
+  .mytripsheader {
+    height: 190px;
+  }
+
+  /* ================= FILTRES ================= */
+
+  .tripstate {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    width: calc(100% - 1.5rem);
+
+    margin: 1.4rem auto 1.8rem;
+
+    padding: 0;
+
+    gap: 0.55rem;
+  }
+
+  .tripstate button {
+    width: 100%;
+
+    padding: 0.6rem 0.5rem;
+
+    font-size: 0.78rem;
+  }
+
+  /* ================= CARTES ================= */
+
+  .tripcards {
+    width: calc(100% - 1.25rem);
+
+    gap: 1rem;
+  }
+
+  .tripcard {
+    height: 250px;
+
+    border-radius: 14px;
+  }
+
+  .trip-status {
+    top: 11px;
+    left: 11px;
+
+    padding: 0.3rem 0.6rem;
+
+    font-size: 0.68rem;
+  }
+
+  .tripcard-content {
+    padding: 0.9rem;
+  }
+
+  .tripcard-content h2 {
+    font-size: 1.25rem;
+  }
+
+  .tripcard-location {
+    font-size: 0.84rem;
+  }
+
+  .tripcard-date {
+    padding-top: 0.4rem;
+
+    font-size: 0.74rem;
+  }
+
+  .tripcard-participants {
+    margin-top: 0.6rem;
+  }
+
+  .tripcard-avatar {
+    width: 28px;
+    height: 28px;
+
+    margin-left: -6px;
+  }
+
+  .tripcard-more-participants {
+    font-size: 0.72rem;
+  }
+
+  .tripcard-actions {
+    right: 9px;
+    bottom: 9px;
+  }
+
+  .tripcard-menu-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .tripcard-menu {
+    right: 0;
+
+    max-width: calc(100vw - 2rem);
+    min-width: 175px;
+  }
+}
+
+
+/* =========================================================
+   TRÈS PETIT MOBILE
+========================================================= */
+
+@media (max-width: 360px) {
+  .mytripsheader {
+    height: 170px;
+  }
+
+  .tripstate {
+    width: calc(100% - 1rem);
+  }
+
+  .tripstate button {
+    padding: 0.55rem 0.35rem;
+
+    font-size: 0.73rem;
+  }
+
+  .tripcards {
+    width: calc(100% - 1rem);
+  }
+
+  .tripcard {
+    height: 235px;
+  }
+
+  .tripcard-content h2 {
+    font-size: 1.15rem;
+  }
+
+  .tripcard-location {
+    font-size: 0.8rem;
+  }
+
+  .tripcard-date {
+    font-size: 0.7rem;
   }
 }
