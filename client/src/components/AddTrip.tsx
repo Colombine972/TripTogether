@@ -41,21 +41,26 @@ interface AddStepProps {
 
 interface PlaceResult {
   id: string;
+
   city: string;
   country: string;
   placeId: string;
 
   formattedAddress?: string;
+
   distanceKm?: number;
 
   imageUrl?: string;
   photoAttribution?: string;
 
   location?: google.maps.LatLng;
+
+  discoveryLabel?: string;
 }
 
 interface GooglePlaceAutocompleteElement extends HTMLElement {
   value: string;
+
   includedRegionCodes?: string[];
 }
 
@@ -82,6 +87,26 @@ const DEFAULT_CITY_IMAGE =
 const DEFAULT_VISIBLE_SUGGESTIONS =
   3;
 
+const MAX_FINAL_SUGGESTIONS =
+  10;
+
+const MAX_RESULTS_PER_SEARCH =
+  20;
+
+const MIN_DESIRED_SUGGESTIONS =
+  6;
+
+const DISCOVERY_RADIUS_LEVELS = [
+  50,
+  100,
+  150,
+] as const;
+
+const MAX_DISCOVERY_RADIUS_KM =
+  DISCOVERY_RADIUS_LEVELS[
+    DISCOVERY_RADIUS_LEVELS.length - 1
+  ];
+
 /* =========================================================
    DISTANCE ENTRE DEUX COORDONNÉES
 ========================================================= */
@@ -90,29 +115,42 @@ function getDistanceInKm(
   first: google.maps.LatLng,
   second: google.maps.LatLng,
 ) {
-  const earthRadius = 6371;
+  const earthRadius =
+    6371;
 
   const firstLatitude =
-    (first.lat() * Math.PI) / 180;
+    (first.lat() * Math.PI) /
+    180;
 
   const secondLatitude =
-    (second.lat() * Math.PI) / 180;
+    (second.lat() * Math.PI) /
+    180;
 
   const latitudeDifference =
-    ((second.lat() - first.lat()) *
+    ((second.lat() -
+      first.lat()) *
       Math.PI) /
     180;
 
   const longitudeDifference =
-    ((second.lng() - first.lng()) *
+    ((second.lng() -
+      first.lng()) *
       Math.PI) /
     180;
 
   const a =
-    Math.sin(latitudeDifference / 2) ** 2 +
+    Math.sin(
+      latitudeDifference / 2,
+    ) **
+      2 +
     Math.cos(firstLatitude) *
-      Math.cos(secondLatitude) *
-      Math.sin(longitudeDifference / 2) ** 2;
+      Math.cos(
+        secondLatitude,
+      ) *
+      Math.sin(
+        longitudeDifference / 2,
+      ) **
+        2;
 
   const c =
     2 *
@@ -121,7 +159,319 @@ function getDistanceInKm(
       Math.sqrt(1 - a),
     );
 
-  return earthRadius * c;
+  return (
+    earthRadius *
+    c
+  );
+}
+
+/* =========================================================
+   NORMALISATION TEXTE
+========================================================= */
+
+function normalizeText(
+  value: string,
+) {
+  return value
+    .normalize("NFD")
+    .split("")
+    .filter(
+      (
+        character,
+      ) => {
+        const code =
+          character.charCodeAt(
+            0,
+          );
+
+        return (
+          code <
+            0x0300 ||
+          code >
+            0x036f
+        );
+      },
+    )
+    .join("")
+    .trim()
+    .toLocaleLowerCase(
+      "fr-FR",
+    );
+}
+
+/* =========================================================
+   DÉDUPLICATION
+========================================================= */
+
+function removeDuplicatePlaces(
+  places: PlaceResult[],
+) {
+  const seenIds =
+    new Set<string>();
+
+  const seenNames =
+    new Set<string>();
+
+  return places.filter(
+    (
+      place,
+    ) => {
+      const normalizedName =
+        normalizeText(
+          `${place.city}-${place.country}`,
+        );
+
+      if (
+        seenIds.has(
+          place.placeId,
+        ) ||
+        seenNames.has(
+          normalizedName,
+        )
+      ) {
+        return false;
+      }
+
+      seenIds.add(
+        place.placeId,
+      );
+
+      seenNames.add(
+        normalizedName,
+      );
+
+      return true;
+    },
+  );
+}
+
+/* =========================================================
+   TYPES POUR LA RECHERCHE PRINCIPALE
+========================================================= */
+
+function isPrimaryDestinationPlace(
+  place: google.maps.places.Place,
+) {
+  const types =
+    place.types ?? [];
+
+  const acceptedTypes = [
+    "locality",
+    "postal_town",
+
+    "administrative_area_level_2",
+    "administrative_area_level_3",
+    "administrative_area_level_4",
+  ];
+
+  return acceptedTypes.some(
+    (
+      type,
+    ) =>
+      types.includes(
+        type,
+      ),
+  );
+}
+
+/* =========================================================
+   TYPES POUR LE FALLBACK HYBRIDE
+========================================================= */
+
+function isFallbackDestinationPlace(
+  place: google.maps.places.Place,
+) {
+  const types =
+    place.types ?? [];
+
+  const acceptedTypes = [
+    "locality",
+    "postal_town",
+
+    "sublocality",
+    "sublocality_level_1",
+    "sublocality_level_2",
+    "sublocality_level_3",
+    "sublocality_level_4",
+    "sublocality_level_5",
+
+    "neighborhood",
+
+    "administrative_area_level_2",
+    "administrative_area_level_3",
+    "administrative_area_level_4",
+  ];
+
+  return acceptedTypes.some(
+    (
+      type,
+    ) =>
+      types.includes(
+        type,
+      ),
+  );
+}
+
+/* =========================================================
+   DIVERSIFICATION DES DISTANCES
+========================================================= */
+
+function diversifySuggestions(
+  places: PlaceResult[],
+  maximumRadius: number,
+) {
+  const nearbyLimit =
+    Math.min(
+      20,
+      maximumRadius,
+    );
+
+  const mediumLimit =
+    Math.min(
+      60,
+      maximumRadius,
+    );
+
+  const nearby =
+    places
+      .filter(
+        (
+          place,
+        ) =>
+          place.distanceKm !==
+            undefined &&
+          place.distanceKm <=
+            nearbyLimit,
+      )
+      .sort(
+        (
+          first,
+          second,
+        ) =>
+          (first.distanceKm ??
+            0) -
+          (second.distanceKm ??
+            0),
+      );
+
+  const medium =
+    places
+      .filter(
+        (
+          place,
+        ) =>
+          place.distanceKm !==
+            undefined &&
+          place.distanceKm >
+            nearbyLimit &&
+          place.distanceKm <=
+            mediumLimit,
+      )
+      .sort(
+        (
+          first,
+          second,
+        ) =>
+          (first.distanceKm ??
+            0) -
+          (second.distanceKm ??
+            0),
+      );
+
+  const far =
+    places
+      .filter(
+        (
+          place,
+        ) =>
+          place.distanceKm !==
+            undefined &&
+          place.distanceKm >
+            mediumLimit &&
+          place.distanceKm <=
+            maximumRadius,
+      )
+      .sort(
+        (
+          first,
+          second,
+        ) =>
+          (first.distanceKm ??
+            0) -
+          (second.distanceKm ??
+            0),
+      );
+
+  const diversified:
+    PlaceResult[] =
+      [];
+
+  /*
+   * On limite volontairement
+   * les destinations très proches.
+   */
+
+  diversified.push(
+    ...nearby.slice(
+      0,
+      3,
+    ),
+  );
+
+  diversified.push(
+    ...medium.slice(
+      0,
+      4,
+    ),
+  );
+
+  diversified.push(
+    ...far.slice(
+      0,
+      3,
+    ),
+  );
+
+  /*
+   * Complément éventuel.
+   */
+
+  const selectedIds =
+    new Set(
+      diversified.map(
+        (
+          place,
+        ) =>
+          place.placeId,
+      ),
+    );
+
+  const remaining =
+    places
+      .filter(
+        (
+          place,
+        ) =>
+          !selectedIds.has(
+            place.placeId,
+          ),
+      )
+      .sort(
+        (
+          first,
+          second,
+        ) =>
+          (first.distanceKm ??
+            Number.POSITIVE_INFINITY) -
+          (second.distanceKm ??
+            Number.POSITIVE_INFINITY),
+      );
+
+  diversified.push(
+    ...remaining,
+  );
+
+  return diversified;
 }
 
 /* =========================================================
@@ -138,20 +488,24 @@ export default function AddStep({
   tripCountryCode,
   tripPlaceId,
 }: AddStepProps) {
-  const { auth } =
+  const {
+    auth,
+  } =
     useAuth();
 
   const {
-    tripId: routeTripId,
+    tripId:
+      routeTripId,
     id,
   } =
     useParams();
 
   const tripId =
-    routeTripId || id;
+    routeTripId ||
+    id;
 
   /* =======================================================
-     DATES DU VOYAGE
+     DATES
   ======================================================= */
 
   const minDate =
@@ -215,7 +569,7 @@ export default function AddStep({
     useState(false);
 
   /* =======================================================
-     AUTOCOMPLÉTION GOOGLE
+     AUTOCOMPLETE MANUEL
   ======================================================= */
 
   const placeInputRef =
@@ -253,11 +607,11 @@ export default function AddStep({
     useState(false);
 
   const [
-    suggestionOrigin,
-    setSuggestionOrigin,
+    activeDiscoveryRadius,
+    setActiveDiscoveryRadius,
   ] =
-    useState<google.maps.LatLng | null>(
-      null,
+    useState<number>(
+      DISCOVERY_RADIUS_LEVELS[0],
     );
 
   /* =======================================================
@@ -310,11 +664,13 @@ export default function AddStep({
     });
 
   /* =======================================================
-     SYNCHRONISATION CODE PAYS
+     CODE PAYS
   ======================================================= */
 
   useEffect(() => {
-    if (!tripCountryCode) {
+    if (
+      !tripCountryCode
+    ) {
       return;
     }
 
@@ -328,7 +684,7 @@ export default function AddStep({
   ]);
 
   /* =======================================================
-     POSITION + PAYS DU VOYAGE
+     POSITION PRINCIPALE
   ======================================================= */
 
   useEffect(() => {
@@ -351,7 +707,8 @@ export default function AddStep({
 
           const place =
             new Place({
-              id: tripPlaceId,
+              id:
+                tripPlaceId,
             });
 
           await place.fetchFields({
@@ -361,22 +718,22 @@ export default function AddStep({
             ],
           });
 
-          if (place.location) {
+          if (
+            place.location
+          ) {
             setTripOrigin(
               place.location,
             );
 
             tripOriginRef.current =
               place.location;
-
-            setSuggestionOrigin(
-              place.location,
-            );
           }
 
           const countryComponent =
             place.addressComponents?.find(
-              (component) =>
+              (
+                component,
+              ) =>
                 component.types.includes(
                   "country",
                 ),
@@ -396,19 +753,9 @@ export default function AddStep({
                 .toLowerCase(),
             );
           }
-
-          console.log(
-            "Pays du voyage détecté :",
-            {
-              city: tripCity,
-              country: tripCountry,
-              countryCode:
-                detectedCountryCode,
-            },
-          );
         } catch (error) {
           console.error(
-            "Erreur récupération position/pays du voyage :",
+            "Erreur récupération position du voyage :",
             error,
           );
         }
@@ -419,21 +766,22 @@ export default function AddStep({
     isLoaded,
     tripPlaceId,
     tripCountryCode,
-    tripCountry,
-    tripCity,
   ]);
 
   /* =======================================================
-     TRANSFORMATION D'UN PLACE GOOGLE
+     PLACE → RESULT
   ======================================================= */
 
   const buildPlaceResult =
     useCallback(
       (
-        place: google.maps.places.Place,
+        place:
+          google.maps.places.Place,
       ): PlaceResult | null => {
         const placeCity =
-          place.displayName || "";
+          place.displayName
+            ?.trim() ||
+          "";
 
         if (
           !place.id ||
@@ -444,7 +792,9 @@ export default function AddStep({
 
         const countryComponent =
           place.addressComponents?.find(
-            (component) =>
+            (
+              component,
+            ) =>
               component.types.includes(
                 "country",
               ),
@@ -474,8 +824,11 @@ export default function AddStep({
 
         const imageUrl =
           firstPhoto?.getURI({
-            maxWidth: 700,
-            maxHeight: 420,
+            maxWidth:
+              700,
+
+            maxHeight:
+              420,
           });
 
         const photoAttribution =
@@ -484,10 +837,17 @@ export default function AddStep({
             ?.displayName;
 
         return {
-          id: place.id,
-          city: placeCity,
-          country: placeCountry,
-          placeId: place.id,
+          id:
+            place.id,
+
+          city:
+            placeCity,
+
+          country:
+            placeCountry,
+
+          placeId:
+            place.id,
 
           formattedAddress:
             place.formattedAddress ??
@@ -504,6 +864,9 @@ export default function AddStep({
           location:
             place.location ??
             undefined,
+
+          discoveryLabel:
+            "Destination à découvrir",
         };
       },
       [
@@ -513,8 +876,7 @@ export default function AddStep({
     );
 
   /* =======================================================
-     AUTOCOMPLÉTION GOOGLE
-     LIMITÉE AU PAYS DU VOYAGE
+     AUTOCOMPLETE MANUEL
   ======================================================= */
 
   useEffect(() => {
@@ -557,7 +919,9 @@ export default function AddStep({
           const container =
             placeInputRef.current;
 
-          if (!container) {
+          if (
+            !container
+          ) {
             return;
           }
 
@@ -584,7 +948,7 @@ export default function AddStep({
           );
 
           /* ===============================================
-             DESTINATION SÉLECTIONNÉE
+             SÉLECTION
           =============================================== */
 
           autocomplete.addEventListener(
@@ -616,15 +980,19 @@ export default function AddStep({
                     "formattedAddress",
                     "location",
                     "photos",
+                    "types",
                   ],
                 });
 
                 const placeCity =
-                  place.displayName || "";
+                  place.displayName ||
+                  "";
 
                 const countryComponent =
                   place.addressComponents?.find(
-                    (component) =>
+                    (
+                      component,
+                    ) =>
                       component.types.includes(
                         "country",
                       ),
@@ -641,7 +1009,8 @@ export default function AddStep({
                   "";
 
                 const selectedPlaceId =
-                  place.id || "";
+                  place.id ||
+                  "";
 
                 if (
                   !placeCity ||
@@ -654,10 +1023,6 @@ export default function AddStep({
 
                   return;
                 }
-
-                /* ===========================================
-                   SÉCURITÉ PAYS
-                =========================================== */
 
                 if (
                   effectiveCountryCode &&
@@ -695,8 +1060,11 @@ export default function AddStep({
 
                 const imageUrl =
                   firstPhoto?.getURI({
-                    maxWidth: 700,
-                    maxHeight: 420,
+                    maxWidth:
+                      700,
+
+                    maxHeight:
+                      420,
                   });
 
                 const photoAttribution =
@@ -704,36 +1072,40 @@ export default function AddStep({
                     ?.authorAttributions?.[0]
                     ?.displayName;
 
-                const result: PlaceResult =
-                  {
-                    id:
-                      selectedPlaceId,
+                const result:
+                  PlaceResult =
+                    {
+                      id:
+                        selectedPlaceId,
 
-                    city:
-                      placeCity,
+                      city:
+                        placeCity,
 
-                    country:
-                      placeCountry,
+                      country:
+                        placeCountry,
 
-                    placeId:
-                      selectedPlaceId,
+                      placeId:
+                        selectedPlaceId,
 
-                    formattedAddress:
-                      place.formattedAddress ??
-                      undefined,
+                      formattedAddress:
+                        place.formattedAddress ??
+                        undefined,
 
-                    distanceKm,
+                      distanceKm,
 
-                    imageUrl:
-                      imageUrl ||
-                      DEFAULT_CITY_IMAGE,
+                      imageUrl:
+                        imageUrl ||
+                        DEFAULT_CITY_IMAGE,
 
-                    photoAttribution,
+                      photoAttribution,
 
-                    location:
-                      place.location ??
-                      undefined,
-                  };
+                      location:
+                        place.location ??
+                        undefined,
+
+                      discoveryLabel:
+                        "Destination sélectionnée",
+                    };
 
                 setCity(
                   result.city,
@@ -750,18 +1122,6 @@ export default function AddStep({
                 setSelectedPlace(
                   result,
                 );
-
-                setShowAllSuggestions(
-                  false,
-                );
-
-                if (
-                  place.location
-                ) {
-                  setSuggestionOrigin(
-                    place.location,
-                  );
-                }
               } catch (error) {
                 console.error(
                   "Erreur sélection destination :",
@@ -783,8 +1143,7 @@ export default function AddStep({
             "change",
             () => {
               if (
-                autocomplete.value
-                  .trim()
+                autocomplete.value.trim()
               ) {
                 return;
               }
@@ -804,18 +1163,6 @@ export default function AddStep({
               setSelectedPlace(
                 null,
               );
-
-              setShowAllSuggestions(
-                false,
-              );
-
-              if (
-                tripOriginRef.current
-              ) {
-                setSuggestionOrigin(
-                  tripOriginRef.current,
-                );
-              }
             },
           );
 
@@ -859,16 +1206,233 @@ export default function AddStep({
   ]);
 
   /* =======================================================
-     SUGGESTIONS AUTOMATIQUES
+     RECHERCHE GOOGLE GÉNÉRIQUE
+  ======================================================= */
 
-     LOGIQUE SEARCHBYTEXT STABLE
+  const runTextSearch =
+    useCallback(
+      async (
+        queries: string[],
+        radiusKm: number,
+        fallbackMode = false,
+      ): Promise<PlaceResult[]> => {
+        if (
+          !tripOrigin
+        ) {
+          return [];
+        }
+
+        const {
+          Place,
+        } =
+          (await google.maps.importLibrary(
+            "places",
+          )) as google.maps.PlacesLibrary;
+
+        const locationBias:
+          google.maps.CircleLiteral =
+            {
+              center: {
+                lat:
+                  tripOrigin.lat(),
+
+                lng:
+                  tripOrigin.lng(),
+              },
+
+              radius:
+                radiusKm *
+                1000,
+            };
+
+        const searchResults =
+          await Promise.allSettled(
+            queries.map(
+              async (
+                textQuery,
+              ) => {
+                const request:
+                  google.maps.places.SearchByTextRequest =
+                    {
+                      textQuery,
+
+                      fields: [
+                        "id",
+                        "displayName",
+                        "formattedAddress",
+                        "addressComponents",
+                        "location",
+                        "photos",
+                        "types",
+                      ],
+
+                      language:
+                        "fr-FR",
+
+                      region:
+                        effectiveCountryCode ||
+                        undefined,
+
+                      locationBias,
+
+                      maxResultCount:
+                        MAX_RESULTS_PER_SEARCH,
+                    };
+
+                const {
+                  places,
+                } =
+                  await Place.searchByText(
+                    request,
+                  );
+
+                return places;
+              },
+            ),
+          );
+
+        const googlePlaces =
+          searchResults.flatMap(
+            (
+              result,
+            ) =>
+              result.status ===
+              "fulfilled"
+                ? result.value
+                : [],
+          );
+
+        /* ===============================================
+           FILTRE SELON LE MODE
+        =============================================== */
+
+        const geographicPlaces =
+          googlePlaces.filter(
+            fallbackMode
+              ? isFallbackDestinationPlace
+              : isPrimaryDestinationPlace,
+          );
+
+        /* ===============================================
+           TRANSFORMATION
+        =============================================== */
+
+        const transformed =
+          geographicPlaces
+            .map(
+              buildPlaceResult,
+            )
+            .filter(
+              (
+                result,
+              ): result is PlaceResult =>
+                Boolean(
+                  result,
+                ),
+            );
+
+        /* ===============================================
+           RETIRER LA DESTINATION PRINCIPALE
+        =============================================== */
+
+        const withoutOrigin =
+          transformed.filter(
+            (
+              result,
+            ) =>
+              normalizeText(
+                result.city,
+              ) !==
+              normalizeText(
+                tripCity,
+              ),
+          );
+
+        /* ===============================================
+           LIMITER AU PAYS
+        =============================================== */
+
+        const sameCountry =
+          withoutOrigin.filter(
+            (
+              result,
+            ) => {
+              const destinationCountry =
+                normalizeText(
+                  result.country,
+                );
+
+              const currentCountry =
+                normalizeText(
+                  tripCountry,
+                );
+
+              return (
+                destinationCountry.includes(
+                  currentCountry,
+                ) ||
+                currentCountry.includes(
+                  destinationCountry,
+                )
+              );
+            },
+          );
+
+        const countryResults =
+          sameCountry.length >
+          0
+            ? sameCountry
+            : withoutOrigin;
+
+        /* ===============================================
+           DISTANCE RÉELLE
+        =============================================== */
+
+        const withinRadius =
+          countryResults.filter(
+            (
+              result,
+            ) => {
+              if (
+                result.distanceKm ===
+                undefined
+              ) {
+                return false;
+              }
+
+              return (
+                result.distanceKm >
+                  0.5 &&
+                result.distanceKm <=
+                  radiusKm
+              );
+            },
+          );
+
+        return removeDuplicatePlaces(
+          withinRadius,
+        );
+      },
+      [
+        tripOrigin,
+        tripCity,
+        tripCountry,
+        effectiveCountryCode,
+        buildPlaceResult,
+      ],
+    );
+
+  /* =======================================================
+     SUGGESTIONS HYBRIDES
+     50 → 100 → 150 KM
   ======================================================= */
 
   useEffect(() => {
     if (
       !isLoaded ||
       !tripCity ||
-      !tripCountry
+      !tripCountry ||
+      !tripOrigin
     ) {
       return;
     }
@@ -879,181 +1443,201 @@ export default function AddStep({
           true,
         );
 
+        setSuggestions(
+          [],
+        );
+
+        setShowAllSuggestions(
+          false,
+        );
+
         try {
-          const {
-            Place,
-          } =
-            (await google.maps.importLibrary(
-              "places",
-            )) as google.maps.PlacesLibrary;
+          let accumulatedResults:
+            PlaceResult[] =
+              [];
 
-          const suggestionCity =
-            selectedPlace?.city ||
-            tripCity;
+          let finalRadius:
+            number =
+              DISCOVERY_RADIUS_LEVELS[0];
 
-          const suggestionCountry =
-            selectedPlace?.country ||
-            tripCountry;
+          /* =============================================
+             REQUÊTES PRINCIPALES
 
-          const request: google.maps.places.SearchByTextRequest =
-            {
-              textQuery:
-                `villes à visiter près de ${suggestionCity}, ${suggestionCountry}`,
+             Elles fonctionnent très bien pour des
+             destinations comme la Martinique ou Melbourne.
+          ============================================= */
 
-              fields: [
-                "id",
-                "displayName",
-                "formattedAddress",
-                "addressComponents",
-                "location",
-                "photos",
-                "types",
-              ],
+          const primaryQueries = [
+            `villes autour de ${tripCity}, ${tripCountry}`,
 
-              language:
-                "fr-FR",
+            `communes autour de ${tripCity}, ${tripCountry}`,
 
-              maxResultCount:
-                8,
+            `villes de ${tripCountry}`,
 
-              ...(suggestionOrigin
-                ? {
-                    locationBias:
-                      suggestionOrigin,
-                  }
-                : {}),
-            };
+            `communes de ${tripCountry}`,
 
-          const {
-            places,
-          } =
-            await Place.searchByText(
-              request,
-            );
+            `municipalités de ${tripCountry}`,
+          ];
 
-          console.log(
-            `Suggestions Google reçues autour de ${suggestionCity} :`,
-            places.map(
-              (place) => ({
-                name:
-                  place.displayName,
+          /* =============================================
+             FALLBACK
 
-                types:
-                  place.types,
+             Utilisé uniquement si les villes / communes
+             ne suffisent pas.
 
-                address:
-                  place.formattedAddress,
-              }),
-            ),
-          );
+             C'est particulièrement utile pour :
+             - Paris ;
+             - New York ;
+             - grandes métropoles ;
+             - destinations où Google indexe les lieux
+               sous forme de quartiers / sublocalités.
+          ============================================= */
 
-          /* ===============================================
-             RETIRER LA DESTINATION CENTRALE
-          =============================================== */
+          const fallbackQueries = [
+            `quartiers de ${tripCity}, ${tripCountry}`,
 
-          const filteredPlaces =
-            places.filter(
-              (place) => {
-                const name =
-                  place.displayName
-                    ?.toLocaleLowerCase(
-                      "fr-FR",
-                    );
+            `arrondissements de ${tripCity}, ${tripCountry}`,
 
-                return (
-                  Boolean(name) &&
-                  name !==
-                    suggestionCity.toLocaleLowerCase(
-                      "fr-FR",
-                    )
-                );
-              },
-            );
+            `districts de ${tripCity}, ${tripCountry}`,
 
-          /* ===============================================
-             TRANSFORMATION
-          =============================================== */
+            `quartiers autour de ${tripCity}, ${tripCountry}`,
 
-          const results =
-            filteredPlaces
-              .slice(
-                0,
-                5,
-              )
-              .map(
-                buildPlaceResult,
-              )
-              .filter(
-                (
-                  result,
-                ): result is PlaceResult =>
-                  Boolean(
-                    result,
-                  ),
+            `villes proches de ${tripCity}, ${tripCountry}`,
+
+            `communes proches de ${tripCity}, ${tripCountry}`,
+
+            `villages autour de ${tripCity}, ${tripCountry}`,
+          ];
+
+          /* =============================================
+             RAYONS SUCCESSIFS
+          ============================================= */
+
+          for (
+            const radius
+            of DISCOVERY_RADIUS_LEVELS
+          ) {
+            finalRadius =
+              radius;
+
+            /* ===========================================
+               1. VILLES / COMMUNES
+            =========================================== */
+
+            const primaryResults =
+              await runTextSearch(
+                primaryQueries,
+                radius,
+                false,
               );
 
-          /* ===============================================
-             PRIORITÉ AU PAYS DU VOYAGE
-          =============================================== */
+            accumulatedResults =
+              removeDuplicatePlaces(
+                [
+                  ...accumulatedResults,
 
-          const sameCountryResults =
-            results.filter(
-              (result) =>
-                result.country
-                  .toLocaleLowerCase(
-                    "fr-FR",
-                  )
-                  .includes(
-                    tripCountry.toLocaleLowerCase(
-                      "fr-FR",
-                    ),
-                  ),
+                  ...primaryResults,
+                ],
+              );
+
+            /*
+             * Si la recherche principale suffit,
+             * aucun fallback n'est nécessaire.
+             */
+
+            if (
+              accumulatedResults.length >=
+              MIN_DESIRED_SUGGESTIONS
+            ) {
+              break;
+            }
+
+            /* ===========================================
+               2. FALLBACK QUARTIERS / SUBLOCALITÉS
+            =========================================== */
+
+            const fallbackResults =
+              await runTextSearch(
+                fallbackQueries,
+                radius,
+                true,
+              );
+
+            accumulatedResults =
+              removeDuplicatePlaces(
+                [
+                  ...accumulatedResults,
+
+                  ...fallbackResults,
+                ],
+              );
+
+            /*
+             * Après fallback, si on a nos 6 suggestions,
+             * on arrête ici.
+             */
+
+            if (
+              accumulatedResults.length >=
+              MIN_DESIRED_SUGGESTIONS
+            ) {
+              break;
+            }
+          }
+
+          /* =============================================
+             DIVERSIFICATION
+          ============================================= */
+
+          const diversified =
+            diversifySuggestions(
+              accumulatedResults,
+              finalRadius,
             );
 
-          /*
-           * On conserve volontairement
-           * le fallback de la version stable.
-           */
+          /* =============================================
+             RÉSULTAT FINAL
+          ============================================= */
+
           const finalSuggestions =
-            sameCountryResults.length >=
-            3
-              ? sameCountryResults
-              : results;
-
-          /* ===============================================
-             TRI PAR DISTANCE
-          =============================================== */
-
-          finalSuggestions.sort(
-            (
-              first,
-              second,
-            ) =>
-              (first.distanceKm ??
-                Number.POSITIVE_INFINITY) -
-              (second.distanceKm ??
-                Number.POSITIVE_INFINITY),
-          );
+            diversified.slice(
+              0,
+              MAX_FINAL_SUGGESTIONS,
+            );
 
           console.log(
-            `Suggestions affichées autour de ${suggestionCity} :`,
-            finalSuggestions,
+            "Suggestions finales TripTogether :",
+            {
+              destination:
+                tripCity,
+
+              radius:
+                finalRadius,
+
+              total:
+                finalSuggestions.length,
+
+              suggestions:
+                finalSuggestions.map(
+                  (
+                    suggestion,
+                  ) => ({
+                    name:
+                      suggestion.city,
+
+                    distanceKm:
+                      suggestion.distanceKm,
+                  }),
+                ),
+            },
           );
 
-          /*
-           * IMPORTANT :
-           * On garde maintenant toutes les suggestions
-           * retournées par notre logique.
-           *
-           * Le JSX décide ensuite d'en afficher
-           * seulement 3 ou toutes.
-           */
+          setActiveDiscoveryRadius(
+            finalRadius,
+          );
+
           setSuggestions(
             finalSuggestions,
-          );
-
-          setShowAllSuggestions(
-            false,
           );
         } catch (error) {
           console.error(
@@ -1063,6 +1647,10 @@ export default function AddStep({
 
           setSuggestions(
             [],
+          );
+
+          setActiveDiscoveryRadius(
+            DISCOVERY_RADIUS_LEVELS[0],
           );
         } finally {
           setSuggestionsLoading(
@@ -1076,9 +1664,8 @@ export default function AddStep({
     isLoaded,
     tripCity,
     tripCountry,
-    suggestionOrigin,
-    selectedPlace,
-    buildPlaceResult,
+    tripOrigin,
+    runTextSearch,
   ]);
 
   /* =======================================================
@@ -1098,12 +1685,13 @@ export default function AddStep({
     DEFAULT_VISIBLE_SUGGESTIONS;
 
   /* =======================================================
-     CLIC SUR UNE SUGGESTION
+     CLIC SUR SUGGESTION
   ======================================================= */
 
   const handleSuggestionClick =
     (
-      suggestion: PlaceResult,
+      suggestion:
+        PlaceResult,
     ) => {
       setCity(
         suggestion.city,
@@ -1120,18 +1708,6 @@ export default function AddStep({
       setSelectedPlace(
         suggestion,
       );
-
-      setShowAllSuggestions(
-        false,
-      );
-
-      if (
-        suggestion.location
-      ) {
-        setSuggestionOrigin(
-          suggestion.location,
-        );
-      }
 
       if (
         placeAutocompleteRef.current
@@ -1152,7 +1728,7 @@ export default function AddStep({
     };
 
   /* =======================================================
-     RÉINITIALISATION
+     RESET
   ======================================================= */
 
   const resetForm =
@@ -1186,14 +1762,6 @@ export default function AddStep({
       );
 
       if (
-        tripOriginRef.current
-      ) {
-        setSuggestionOrigin(
-          tripOriginRef.current,
-        );
-      }
-
-      if (
         placeAutocompleteRef.current
       ) {
         placeAutocompleteRef.current.value =
@@ -1207,7 +1775,8 @@ export default function AddStep({
 
   const handleAddStep =
     async (
-      event: React.FormEvent<HTMLFormElement>,
+      event:
+        React.FormEvent<HTMLFormElement>,
     ) => {
       event.preventDefault();
 
@@ -1217,7 +1786,9 @@ export default function AddStep({
         ) ||
         auth?.token;
 
-      if (!token) {
+      if (
+        !token
+      ) {
         toast.error(
           "Vous devez être connecté.",
         );
@@ -1225,7 +1796,9 @@ export default function AddStep({
         return;
       }
 
-      if (!tripId) {
+      if (
+        !tripId
+      ) {
         toast.error(
           "Voyage introuvable.",
         );
@@ -1307,6 +1880,7 @@ export default function AddStep({
               body:
                 JSON.stringify({
                   city,
+
                   country,
 
                   place_id:
@@ -1390,8 +1964,8 @@ export default function AddStep({
             </h2>
 
             <p>
-              Recherchez une destination, choisissez vos dates et
-              ajoutez-la à votre itinéraire.
+              Recherchez une destination ou découvrez des idées d'étapes autour
+              de votre voyage.
             </p>
           </div>
         </div>
@@ -1617,11 +2191,16 @@ export default function AddStep({
               size={20}
             />
 
-            <h3>
-              {selectedPlace
-                ? `Suggestions près de ${selectedPlace.city}`
-                : "Suggestions près de votre voyage"}
-            </h3>
+            <div>
+              <h3>
+                Idées d'étapes autour de {tripCity}
+              </h3>
+
+              <p>
+                Découvrez d'autres destinations dans un rayon allant jusqu'à{" "}
+                {activeDiscoveryRadius} km.
+              </p>
+            </div>
           </div>
 
           {hasMoreSuggestions && (
@@ -1630,7 +2209,9 @@ export default function AddStep({
               className="step-suggestions-see-all"
               onClick={() =>
                 setShowAllSuggestions(
-                  (current) =>
+                  (
+                    current,
+                  ) =>
                     !current,
                 )
               }
@@ -1661,7 +2242,7 @@ export default function AddStep({
             />
 
             <span>
-              Recherche de destinations...
+              Recherche de destinations à découvrir...
             </span>
           </div>
         )}
@@ -1685,7 +2266,12 @@ export default function AddStep({
                       suggestion.placeId
                     }
                     type="button"
-                    className="step-suggestion-card"
+                    className={`step-suggestion-card ${
+                      selectedPlace?.placeId ===
+                      suggestion.placeId
+                        ? "is-selected"
+                        : ""
+                    }`}
                     onClick={() =>
                       handleSuggestionClick(
                         suggestion,
@@ -1749,7 +2335,9 @@ export default function AddStep({
                         )}
 
                         <small>
-                          Découverte
+                          {
+                            suggestion.discoveryLabel
+                          }
                         </small>
                       </div>
 
@@ -1767,7 +2355,9 @@ export default function AddStep({
           suggestions.length ===
             0 && (
             <p className="step-suggestions-empty">
-              Aucune suggestion disponible pour le moment.
+              Aucune autre destination n'a été trouvée dans un rayon de{" "}
+              {MAX_DISCOVERY_RADIUS_KM} km. Vous pouvez toujours rechercher une
+              destination manuellement ci-dessus.
             </p>
           )}
       </section>

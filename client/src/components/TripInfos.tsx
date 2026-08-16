@@ -33,25 +33,34 @@ import "../pages/styles/TripInfos.css";
 type TripInfosProps = {
   trip: TheTrip | null;
 
-  onTripUpdated: (updatedTrip: TheTrip) => void;
+  onTripUpdated?: (updatedTrip: TheTrip) => void;
 
   totalSteps?: number;
+
   validatedStepsCount?: number;
 
   steps?: Step[];
+
+  canEdit?: boolean;
 };
 
 type TripMember = {
   id: number;
+
   firstname: string;
+
   lastname?: string;
+
   avatar_url?: string | null;
 };
 
 type BudgetRecapData = {
   total: number;
+
   paid: number;
+
   owed: number;
+
   balance: number;
 };
 
@@ -65,10 +74,12 @@ function TripInfos({
   totalSteps = 0,
   validatedStepsCount = 0,
   steps = [],
+  canEdit = false,
 }: TripInfosProps) {
   const { auth } = useAuth();
 
   const location = useLocation();
+
   const navigate = useNavigate();
 
   /* =======================================================
@@ -76,6 +87,7 @@ function TripInfos({
   ======================================================= */
 
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   /* =======================================================
@@ -90,8 +102,11 @@ function TripInfos({
 
   const [budgetRecap, setBudgetRecap] = useState<BudgetRecapData>({
     total: 0,
+
     paid: 0,
+
     owed: 0,
+
     balance: 0,
   });
 
@@ -151,6 +166,7 @@ function TripInfos({
           {
             headers: {
               "Content-Type": "application/json",
+
               Authorization: `Bearer ${token}`,
             },
           },
@@ -168,8 +184,11 @@ function TripInfos({
 
         setBudgetRecap({
           total: Number(data?.total || 0),
+
           paid: Number(data?.paid || 0),
+
           owed: Number(data?.owed || 0),
+
           balance: Number(data?.balance || 0),
         });
       } catch (error) {
@@ -177,8 +196,11 @@ function TripInfos({
 
         setBudgetRecap({
           total: 0,
+
           paid: 0,
+
           owed: 0,
+
           balance: 0,
         });
       }
@@ -207,6 +229,18 @@ function TripInfos({
 
   const isOrganizer = Number(auth?.user?.id) === Number(trip.user_id);
 
+  /*
+   * canManageTrip impose une double vérification :
+   *
+   * 1. la page doit explicitement autoriser la modification ;
+   * 2. l'utilisateur connecté doit être l'organisateur.
+   *
+   * Ainsi, canEdit={false} masque toujours les actions
+   * de modification, notamment sur une page d'invitation.
+   */
+
+  const canManageTrip = canEdit && isOrganizer;
+
   const participantCount = members.length || trip.participants || 0;
 
   /* =======================================================
@@ -232,7 +266,9 @@ function TripInfos({
 
   const headerPhotos = [
     getPlaceImageUrl(trip.place_id, 0),
+
     getPlaceImageUrl(trip.place_id, 1),
+
     getPlaceImageUrl(trip.place_id, 2),
   ];
 
@@ -247,11 +283,17 @@ function TripInfos({
 
     const params = new URLSearchParams({
       center: mapLocation,
+
       zoom: "11",
+
       size: "600x300",
+
       scale: "2",
+
       maptype: "roadmap",
+
       markers: `color:green|${mapLocation}`,
+
       key: apiKey,
     });
 
@@ -271,7 +313,9 @@ function TripInfos({
 
     return new Intl.DateTimeFormat("fr-FR", {
       day: "numeric",
+
       month: "long",
+
       year: "numeric",
     }).format(date);
   };
@@ -282,6 +326,16 @@ function TripInfos({
 
   const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
     event.currentTarget.src = "/images/default-city.jpg";
+  };
+
+  /* =======================================================
+     MISE À JOUR DU VOYAGE
+  ======================================================= */
+
+  const handleTripUpdated = (updatedTrip: TheTrip) => {
+    onTripUpdated?.(updatedTrip);
+
+    setIsEditModalOpen(false);
   };
 
   /* =======================================================
@@ -296,7 +350,9 @@ function TripInfos({
 
       <section className="trip-stage">
         <div className="trip-stage-glow trip-stage-glow-left" />
+
         <div className="trip-stage-glow trip-stage-glow-right" />
+
         <div className="trip-stage-grid" />
 
         <div className="trip-stage-center">
@@ -341,13 +397,19 @@ function TripInfos({
                 </div>
               </div>
 
-              {isOrganizer && (
+              {/* =============================================
+                  MODIFIER LE VOYAGE
+                  UNIQUEMENT POUR L'ORGANISATEUR AUTORISÉ
+              ============================================== */}
+
+              {canManageTrip && (
                 <button
                   type="button"
                   className="trip-header-edit"
                   onClick={() => setIsEditModalOpen(true)}
                 >
                   <Pencil size={16} />
+
                   Modifier le voyage
                 </button>
               )}
@@ -417,13 +479,19 @@ function TripInfos({
                   <h2>À propos du voyage</h2>
                 </div>
 
-                {isOrganizer && (
+                {/* ===========================================
+                    MODIFIER
+                    UNIQUEMENT POUR L'ORGANISATEUR AUTORISÉ
+                ============================================ */}
+
+                {canManageTrip && (
                   <button
                     type="button"
                     className="trip-overview-action"
                     onClick={() => setIsEditModalOpen(true)}
                   >
                     <Pencil size={17} />
+
                     Modifier
                   </button>
                 )}
@@ -460,7 +528,9 @@ function TripInfos({
                   <div className="trip-overview-detail">
                     <Coins size={19} />
 
-                    <span className="trip-detail-label">Devise du voyage</span>
+                    <span className="trip-detail-label">
+                      Devise du voyage
+                    </span>
 
                     <strong>
                       {trip.local_currency || trip.base_currency || "EUR"}
@@ -528,6 +598,7 @@ function TripInfos({
                   className="trip-members-see-all"
                 >
                   Voir tous
+
                   <ArrowRight size={16} />
                 </Link>
               </div>
@@ -562,7 +633,7 @@ function TripInfos({
                     );
                   })}
 
-                  {isOrganizer && (
+                  {canManageTrip && (
                     <div className="trip-member-invite">
                       <button
                         type="button"
@@ -597,6 +668,7 @@ function TripInfos({
                   className="trip-progress-link"
                 >
                   Voir toutes
+
                   <ArrowRight size={16} />
                 </Link>
               </div>
@@ -630,41 +702,47 @@ function TripInfos({
 
       {/* =====================================================
           MODALE INVITATION
+          UNIQUEMENT SI AUTORISÉ
       ====================================================== */}
 
-      <Modal
-        isOpen={isInviteModalOpen}
-        onClose={() => setIsInviteModalOpen(false)}
-      >
-        <TripInvitation
-          tripId={trip.id}
-          title={trip.title}
-          city={trip.city}
-          country={trip.country}
-          countryCode={trip.country_code}
-          placeId={trip.place_id}
-          currency={trip.local_currency ?? trip.base_currency ?? "EUR"}
-          startAt={trip.start_at}
-          endAt={trip.end_at}
-          participants={participantCount}
+      {canManageTrip && (
+        <Modal
+          isOpen={isInviteModalOpen}
           onClose={() => setIsInviteModalOpen(false)}
-        />
-      </Modal>
+        >
+          <TripInvitation
+            tripId={trip.id}
+            title={trip.title}
+            city={trip.city}
+            country={trip.country}
+            countryCode={trip.country_code}
+            placeId={trip.place_id}
+            currency={trip.local_currency ?? trip.base_currency ?? "EUR"}
+            startAt={trip.start_at}
+            endAt={trip.end_at}
+            participants={participantCount}
+            onClose={() => setIsInviteModalOpen(false)}
+          />
+        </Modal>
+      )}
 
       {/* =====================================================
           MODALE MODIFICATION
+          UNIQUEMENT SI AUTORISÉ
       ====================================================== */}
 
-      <Modal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-      >
-        <TripActions
-          trip={trip}
+      {canManageTrip && (
+        <Modal
+          isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          onTripUpdated={onTripUpdated}
-        />
-      </Modal>
+        >
+          <TripActions
+            trip={trip}
+            onClose={() => setIsEditModalOpen(false)}
+            onTripUpdated={handleTripUpdated}
+          />
+        </Modal>
+      )}
     </>
   );
 }

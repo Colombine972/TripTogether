@@ -1,59 +1,97 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
-import "./styles/invitation.css";
+
 import TripInfos from "../components/TripInfos";
+
 import { useAuth } from "../contexts/AuthContext";
+
 import type { invitationType } from "../types/invitationType";
 import type { TheTrip } from "../types/tripType";
+
+import "./styles/invitation.css";
 
 function Invitation() {
   const { id, invitationId } = useParams<{
     id: string;
     invitationId: string;
   }>();
-  const [invitation, setInvitation] = useState<invitationType | null>(null);
-  const [myTrip, setMyTrip] = useState<TheTrip | null>(null);
+
   const navigate = useNavigate();
+
   const { auth } = useAuth();
+
+  const [invitation, setInvitation] =
+    useState<invitationType | null>(null);
+
+  const [myTrip, setMyTrip] =
+    useState<TheTrip | null>(null);
+
+  /* =========================================================
+     CHARGEMENT DU VOYAGE ET DE L'INVITATION
+  ========================================================= */
 
   useEffect(() => {
     if (!invitationId) {
       toast.error("Invitation invalide");
+
       navigate("/");
+
       return;
     }
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/trips/${id}`)
+    /* =====================================================
+       VOYAGE
+    ====================================================== */
 
+    fetch(`${import.meta.env.VITE_API_URL}/api/trips/${id}`)
       .then(async (response) => {
         if (!response.ok) {
           if (response.status === 401) {
-            toast.error("Veuillez vous connecter pour accéder à ce voyage.");
+            toast.error(
+              "Veuillez vous connecter pour accéder à ce voyage.",
+            );
+
             return;
           }
+
           throw new Error("Erreur chargement voyage");
         }
+
         const data = await response.json();
+
         setMyTrip(data);
       })
-      .catch((err) => {
-        console.error(err);
+      .catch((error) => {
+        console.error(error);
+
         toast.error("Impossible de charger le voyage");
       });
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/invitation/${invitationId}`)
+    /* =====================================================
+       INVITATION
+    ====================================================== */
+
+    fetch(
+      `${import.meta.env.VITE_API_URL}/api/invitation/${invitationId}`,
+    )
       .then(async (response) => {
-        const invitation = await response.json();
+        const invitationData = await response.json();
 
         if (response.status === 400) {
-          toast.error(invitation.message);
+          toast.error(invitationData.message);
+
           navigate("/");
+
+          return;
         }
 
         if (response.status === 403) {
-          toast.error(invitation.message);
+          toast.error(invitationData.message);
+
           navigate("/");
+
+          return;
         }
 
         if (response.status === 404) {
@@ -61,90 +99,176 @@ function Invitation() {
             state: {
               toast: {
                 type: "error",
-                message: "Veuillez vous connecter pour accéder à l'invitation",
+
+                message:
+                  "Veuillez vous connecter pour accéder à l'invitation",
               },
             },
           });
-          toast.error(invitation.message);
+
+          toast.error(invitationData.message);
+
+          return;
         }
 
         if (response.status === 409) {
-          toast.error(invitation.message);
+          toast.error(invitationData.message);
+
           navigate("/");
+
+          return;
         }
 
         if (response.status === 410) {
-          toast.error(invitation.message);
+          toast.error(invitationData.message);
+
           navigate("/");
+
+          return;
         }
 
-        setInvitation(invitation);
+        if (!response.ok) {
+          throw new Error("Erreur chargement invitation");
+        }
+
+        setInvitation(invitationData);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error(error);
+
         toast.error("Invitation introuvable ou accès non autorisé");
+
         navigate("/");
       });
   }, [navigate, invitationId, id]);
 
-  async function invitationResponded(status: "accepted" | "refused") {
-    if (!invitationId) return;
+  /* =========================================================
+     RÉPONSE À L'INVITATION
+  ========================================================= */
+
+  const invitationResponded = async (
+    status: "accepted" | "refused",
+  ) => {
+    if (!invitationId) {
+      return;
+    }
 
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/invitation/${invitationId}`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status }),
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            status,
+          }),
         },
       );
 
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw new Error(
+          data?.message ||
+            data?.error ||
+            `HTTP ${response.status}`,
+        );
       }
 
       if (status === "accepted") {
         toast.success("Invitation acceptée");
-        navigate(`/trip/${id ?? invitation?.trip_id}`);
-      } else {
-        toast.error("Invitation refusée");
-        navigate("/");
+
+        navigate(
+          `/trip/${id ?? invitation?.trip_id}`,
+        );
+
+        return;
       }
-    } catch (err) {
-      toast.error("Erreur lors du traitement de l'invitation");
+
+      toast.info("Invitation refusée");
+
+      navigate("/");
+    } catch (error) {
+      console.error(
+        "Erreur traitement invitation :",
+        error,
+      );
+
+      toast.error(
+        "Erreur lors du traitement de l'invitation",
+      );
     }
-  }
+  };
+
+  /* =========================================================
+     RENDU
+  ========================================================= */
 
   return (
     <>
-      <TripInfos trip={myTrip} onTripUpdated={setMyTrip} />
+      {/* =====================================================
+          APERÇU DU VOYAGE
+          MODE CONSULTATION UNIQUEMENT
+      ====================================================== */}
+
+      <TripInfos
+        trip={myTrip}
+        onTripUpdated={setMyTrip}
+        canEdit={false}
+      />
+
+      {/* =====================================================
+          INVITATION
+      ====================================================== */}
+
       <main className="invitation-main">
-        <article id="invitation" className="invitation-card">
-          <p className="invitation-text">{`${auth?.user.firstname ?? ""}, vous avez été invité au voyage de`}</p>
+        <article
+          id="invitation"
+          className="invitation-card"
+        >
+          <p className="invitation-text">
+            {`${auth?.user.firstname ?? ""}, vous avez été invité au voyage de`}
+          </p>
+
           <img
             src="/profile-pic-logo.png"
-            alt={invitation?.creator_firstname}
+            alt={invitation?.creator_firstname ?? "Organisateur"}
             className="invitation-avatar"
           />
+
           <p className="invitation-inviter-name">
             {`${invitation?.creator_firstname ?? ""} ${
               invitation?.creator_lastname ?? ""
             }`}
           </p>
-          <p>"{invitation?.message}"</p>
+
+          {invitation?.message && (
+            <p className="invitation-message">
+              "{invitation.message.trim()}"
+            </p>
+          )}
 
           <div className="invitation-actions">
             <button
               type="button"
               className="invitation-btn-primary"
-              onClick={() => invitationResponded("accepted")}
+              onClick={() =>
+                invitationResponded("accepted")
+              }
             >
               Accepter
             </button>
+
             <button
               type="button"
               className="invitation-btn-outline"
-              onClick={() => invitationResponded("refused")}
+              onClick={() =>
+                invitationResponded("refused")
+              }
             >
               Refuser
             </button>

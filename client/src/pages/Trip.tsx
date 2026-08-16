@@ -99,12 +99,14 @@ function Trip() {
 
         setMyTrip(data);
       })
-      .catch((err) => {
-        console.error(err);
+      .catch((error) => {
+        console.error(error);
 
         toast.error("Impossible de charger le voyage");
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
 
     /* =====================================================
        ÉTAPES
@@ -146,8 +148,8 @@ function Trip() {
 
         setSteps(data.steps);
       })
-      .catch((err) => {
-        console.error(err);
+      .catch((error) => {
+        console.error(error);
 
         toast.error("Impossible de charger les étapes");
       });
@@ -169,8 +171,11 @@ function Trip() {
           step.is_initial
             ? {
                 ...step,
+
                 city: updatedTrip.city,
+
                 country: updatedTrip.country,
+
                 place_id: updatedTrip.place_id,
               }
             : step,
@@ -189,6 +194,15 @@ function Trip() {
   const validatedStepsCount = validatedSteps.length;
 
   /* =========================================================
+     AUTORISATION DE MODIFICATION
+  ========================================================= */
+
+  const canEditTrip =
+    Boolean(myTrip) &&
+    Boolean(auth?.user?.id) &&
+    Number(auth?.user?.id) === Number(myTrip?.user_id);
+
+  /* =========================================================
      RENDU
   ========================================================= */
 
@@ -201,6 +215,7 @@ function Trip() {
           totalSteps={totalSteps}
           validatedStepsCount={validatedStepsCount}
           steps={steps}
+          canEdit={canEditTrip}
         />
       )}
     </>

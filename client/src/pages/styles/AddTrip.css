@@ -159,11 +159,6 @@
   color-scheme: light;
 }
 
-/*
- * Permet d'éviter le rendu sombre automatique
- * du composant Google Places.
- */
-
 gmp-place-autocomplete {
   color-scheme: light;
 }
@@ -205,13 +200,7 @@ gmp-place-autocomplete {
 
   color: #138045;
 
-  background:
-    rgba(
-      255,
-      255,
-      255,
-      0.8
-    );
+  background: rgba(255, 255, 255, 0.8);
 
   border-radius: 11px;
 }
@@ -273,13 +262,7 @@ gmp-place-autocomplete {
   border-color: #4a9a63;
 
   box-shadow:
-    0 0 0 4px
-      rgba(
-        25,
-        120,
-        59,
-        0.09
-      );
+    0 0 0 4px rgba(25, 120, 59, 0.09);
 }
 
 .step-date-input-wrapper input {
@@ -301,7 +284,7 @@ gmp-place-autocomplete {
 }
 
 /* =========================================================
-   BOUTON AJOUTER CETTE ÉTAPE
+   BOUTON AJOUTER
 ========================================================= */
 
 .add-step-submit {
@@ -331,13 +314,7 @@ gmp-place-autocomplete {
   cursor: pointer;
 
   box-shadow:
-    0 7px 17px
-      rgba(
-        18,
-        107,
-        54,
-        0.16
-      );
+    0 7px 17px rgba(18, 107, 54, 0.16);
 
   transition:
     transform 180ms ease,
@@ -349,13 +326,7 @@ gmp-place-autocomplete {
   transform: translateY(-1px);
 
   box-shadow:
-    0 10px 22px
-      rgba(
-        18,
-        107,
-        54,
-        0.22
-      );
+    0 10px 22px rgba(18, 107, 54, 0.22);
 }
 
 .add-step-submit:disabled {
@@ -389,7 +360,7 @@ gmp-place-autocomplete {
 
 .step-suggestions-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1.5rem;
 
@@ -398,7 +369,7 @@ gmp-place-autocomplete {
 
 .step-suggestions-title {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.65rem;
 
   min-width: 0;
@@ -406,8 +377,14 @@ gmp-place-autocomplete {
   color: #16743b;
 }
 
-.step-suggestions-title svg {
+.step-suggestions-title > svg {
   flex: 0 0 auto;
+
+  margin-top: 0.08rem;
+}
+
+.step-suggestions-title > div {
+  min-width: 0;
 }
 
 .step-suggestions-title h3 {
@@ -418,6 +395,16 @@ gmp-place-autocomplete {
   font-family: var(--title-font);
   font-size: 1rem;
   font-weight: 700;
+}
+
+.step-suggestions-title p {
+  margin: 0.25rem 0 0;
+
+  color: #737c76;
+
+  font-family: var(--body-text);
+  font-size: 0.8rem;
+  line-height: 1.45;
 }
 
 /* =========================================================
@@ -432,7 +419,7 @@ gmp-place-autocomplete {
 
   flex: 0 0 auto;
 
-  padding: 0;
+  padding: 0.1rem 0 0;
 
   color: #16743b;
 
@@ -462,46 +449,32 @@ gmp-place-autocomplete {
 }
 
 .step-suggestions-see-all:hover svg {
-  transform:
-    translateX(
-      2px
-    );
+  transform: translateX(2px);
 }
 
 .step-suggestions-see-all svg.is-open {
-  transform:
-    rotate(
-      90deg
-    );
+  transform: rotate(90deg);
 }
 
 .step-suggestions-see-all:hover svg.is-open {
-  transform:
-    rotate(
-      90deg
-    );
+  transform: rotate(90deg);
 }
 
 /* =========================================================
-   GRILLE DES SUGGESTIONS
+   GRILLE
 ========================================================= */
 
 .step-suggestions-grid {
   display: grid;
+
   grid-template-columns:
     repeat(
       3,
-      minmax(
-        0,
-        1fr
-      )
+      minmax(0, 1fr)
     );
+
   gap: 1rem;
 }
-
-/* =========================================================
-   OUVERTURE DES SUGGESTIONS
-========================================================= */
 
 .step-suggestions-grid.is-expanded {
   animation:
@@ -513,34 +486,26 @@ gmp-place-autocomplete {
   from {
     opacity: 0;
 
-    transform:
-      translateY(
-        -6px
-      );
+    transform: translateY(-6px);
   }
 
   to {
     opacity: 1;
 
-    transform:
-      translateY(
-        0
-      );
+    transform: translateY(0);
   }
 }
 
 /* =========================================================
-   CARTE DE SUGGESTION
+   CARTE
 ========================================================= */
 
 .step-suggestion-card {
   display: grid;
+
   grid-template-columns:
     145px
-    minmax(
-      0,
-      1fr
-    );
+    minmax(0, 1fr);
 
   min-width: 0;
 
@@ -549,6 +514,7 @@ gmp-place-autocomplete {
   overflow: hidden;
 
   color: inherit;
+
   text-align: left;
 
   background: #ffffff;
@@ -567,23 +533,25 @@ gmp-place-autocomplete {
 .step-suggestion-card:hover {
   border-color: #b9d8c2;
 
-  transform:
-    translateY(
-      -2px
-    );
+  transform: translateY(-2px);
 
   box-shadow:
-    0 10px 24px
-      rgba(
-        28,
-        61,
-        37,
-        0.08
-      );
+    0 10px 24px rgba(28, 61, 37, 0.08);
 }
 
 /* =========================================================
-   IMAGE SUGGESTION
+   CARTE SÉLECTIONNÉE
+========================================================= */
+
+.step-suggestion-card.is-selected {
+  border-color: #69a77a;
+
+  box-shadow:
+    0 0 0 2px rgba(22, 116, 59, 0.08);
+}
+
+/* =========================================================
+   IMAGE
 ========================================================= */
 
 .step-suggestion-image-wrapper {
@@ -609,6 +577,7 @@ gmp-place-autocomplete {
 
 .step-photo-attribution {
   position: absolute;
+
   right: 0.35rem;
   bottom: 0.35rem;
 
@@ -630,13 +599,7 @@ gmp-place-autocomplete {
   text-overflow: ellipsis;
   white-space: nowrap;
 
-  background:
-    rgba(
-      0,
-      0,
-      0,
-      0.55
-    );
+  background: rgba(0, 0, 0, 0.55);
 
   border-radius: 4px;
 }
@@ -704,8 +667,14 @@ gmp-place-autocomplete {
   color: #7b847e;
 }
 
+.step-suggestion-card.is-selected
+  .step-suggestion-content
+  > svg {
+  color: #16743b;
+}
+
 /* =========================================================
-   CHARGEMENT / AUCUN RÉSULTAT
+   CHARGEMENT / VIDE
 ========================================================= */
 
 .step-suggestions-loading,
@@ -725,6 +694,13 @@ gmp-place-autocomplete {
   font-size: 0.9rem;
 }
 
+.step-suggestions-empty {
+  padding: 1rem;
+
+  text-align: center;
+  line-height: 1.6;
+}
+
 /* =========================================================
    ANIMATIONS
 ========================================================= */
@@ -739,17 +715,11 @@ gmp-place-autocomplete {
 
 @keyframes step-spin {
   from {
-    transform:
-      rotate(
-        0deg
-      );
+    transform: rotate(0deg);
   }
 
   to {
-    transform:
-      rotate(
-        360deg
-      );
+    transform: rotate(360deg);
   }
 }
 
@@ -767,10 +737,7 @@ gmp-place-autocomplete {
     grid-template-columns:
       repeat(
         2,
-        minmax(
-          0,
-          1fr
-        )
+        minmax(0, 1fr)
       );
   }
 }
@@ -843,7 +810,6 @@ gmp-place-autocomplete {
   }
 
   .step-suggestions-header {
-    align-items: flex-start;
     flex-direction: column;
     gap: 0.7rem;
   }
@@ -862,10 +828,7 @@ gmp-place-autocomplete {
   .step-suggestion-card {
     grid-template-columns:
       115px
-      minmax(
-        0,
-        1fr
-      );
+      minmax(0, 1fr);
   }
 
   .step-suggestion-image-wrapper,
@@ -882,10 +845,7 @@ gmp-place-autocomplete {
   .step-suggestion-card {
     grid-template-columns:
       95px
-      minmax(
-        0,
-        1fr
-      );
+      minmax(0, 1fr);
   }
 
   .step-suggestion-content {
@@ -898,5 +858,9 @@ gmp-place-autocomplete {
 
   .step-suggestions-title h3 {
     font-size: 0.92rem;
+  }
+
+  .step-suggestions-title p {
+    font-size: 0.74rem;
   }
 }
