@@ -1001,14 +1001,32 @@ margin-bottom: 1.5rem;
 }
 
 /* =========================================================
-   TABLET
+   PETIT DESKTOP / LAPTOP
+========================================================= */
+
+@media (max-width: 1200px) {
+  .home-hero-content {
+    background-position: 56% center;
+  }
+
+  .home-hero-text {
+    width: 48%;
+  }
+
+  .home-features {
+    padding-inline: 2rem;
+  }
+}
+
+/* =========================================================
+   TABLETTE / PETIT LAPTOP
 ========================================================= */
 
 @media (max-width: 1100px) {
   .home-hero-content {
     min-height: 670px;
 
-    background-position: 58% center;
+    background-position: 60% center;
   }
 
   .home-hero-text {
@@ -1019,32 +1037,36 @@ margin-bottom: 1.5rem;
   }
 
   .home-hero-text h1 {
-    font-size: clamp(2.5rem, 5vw, 3.4rem);
+    font-size: clamp(2.4rem, 5vw, 3.4rem);
   }
 
   .home-hero-text h2 {
-    font-size: clamp(2rem, 4vw, 2.7rem);
+    font-size: clamp(1.9rem, 4vw, 2.7rem);
+  }
+
+  .home-hero-text p {
+    font-size: 1.1rem;
   }
 
   .hero-card-travelers {
     top: 5%;
+    right: 3%;
     left: auto;
-    right: 4%;
   }
 
   .hero-card-destination {
-    top: 23%;
-    right: 4%;
+    top: 24%;
+    right: 3%;
   }
 
   .hero-card-budget {
-    left: auto;
-    right: 4%;
+    right: 3%;
     bottom: 21%;
+    left: auto;
   }
 
   .hero-card-balance {
-    right: 4%;
+    right: 3%;
     bottom: 5%;
   }
 
@@ -1054,10 +1076,10 @@ margin-bottom: 1.5rem;
 }
 
 /* =========================================================
-   MOBILE
+   TABLETTE PORTRAIT / MOBILE LARGE
 ========================================================= */
 
-@media (max-width: 700px) {
+@media (max-width: 768px) {
   .home-hero-content {
     min-height: 830px;
 
@@ -1072,34 +1094,40 @@ margin-bottom: 1.5rem;
     max-width: none;
     min-height: auto;
 
-    padding: 2.5rem 1.25rem 0;
+    padding: 2.5rem 1.5rem 0;
   }
 
   .home-hero-text h1 {
-    max-width: 340px;
+    max-width: 360px;
 
-    font-size: 2.25rem;
+    font-size: clamp(2.1rem, 8vw, 2.5rem);
   }
 
   .home-hero-text h2 {
-    max-width: 340px;
+    max-width: 360px;
 
-    font-size: 1.85rem;
+    font-size: clamp(1.7rem, 6.5vw, 2rem);
   }
 
   .home-hero-text p {
-    max-width: 330px;
+    max-width: 360px;
 
     margin-top: 1.25rem;
 
-    font-size: 0.88rem;
+    padding-bottom: 0;
+
+    font-size: 1rem;
+    line-height: 1.55;
   }
 
   .home-hero-actions {
     flex-direction: column;
+    align-items: stretch;
 
     width: 100%;
-    max-width: 330px;
+    max-width: 360px;
+
+    margin-top: 1.4rem;
   }
 
   .home-primary-btn,
@@ -1116,10 +1144,10 @@ margin-bottom: 1.5rem;
   }
 
   .hero-floating-icon {
+    flex-basis: 36px;
+
     width: 36px;
     height: 36px;
-
-    flex-basis: 36px;
   }
 
   .hero-floating-icon svg {
@@ -1164,11 +1192,15 @@ margin-bottom: 1.5rem;
   }
 
   .home-features {
-    padding: 3.5rem 1rem;
+    padding: 3.5rem 1.25rem;
   }
 
   .home-features-header {
     margin-bottom: 2.5rem;
+  }
+
+  .home-features-header p {
+    font-size: 1.05rem;
   }
 
   .home-features-grid {
@@ -1177,5 +1209,145 @@ margin-bottom: 1.5rem;
 
   .feature-card {
     min-height: 380px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+  .home-hero-content {
+    min-height: 800px;
+
+    background-position: 70% bottom;
+  }
+
+  .home-hero-text {
+    padding: 2rem 1rem 0;
+  }
+
+  .home-hero-text h1 {
+    max-width: 310px;
+
+    font-size: 2rem;
+  }
+
+  .home-hero-text h2 {
+    max-width: 310px;
+
+    font-size: 1.6rem;
+  }
+
+  .home-hero-text p {
+    max-width: 310px;
+
+    font-size: 0.9rem;
+  }
+
+  .home-hero-actions {
+    max-width: 310px;
+  }
+
+  .home-primary-btn,
+  .home-secondary-btn {
+    min-height: 46px;
+
+    padding-inline: 1rem;
+
+    font-size: 0.95rem;
+  }
+
+  .hero-floating-card {
+    padding: 0.55rem 0.65rem;
+  }
+
+  .hero-card-travelers,
+  .hero-card-budget {
+    left: 0.75rem;
+  }
+
+  .hero-card-destination,
+  .hero-card-balance {
+    right: 0.75rem;
+  }
+
+  .home-features {
+    padding: 3rem 0.8rem;
+  }
+
+  .home-features-header h2 {
+    font-size: 1.9rem;
+  }
+
+  .home-features-header p {
+    font-size: 0.95rem;
+  }
+
+  .feature-card {
+    min-height: auto;
+
+    padding: 1.4rem 1rem;
+  }
+
+  .participant-avatar {
+    flex-basis: 58px;
+
+    width: 58px;
+    height: 58px;
+  }
+
+  .participant-add {
+    flex-basis: 60px;
+
+    width: 60px;
+    height: 60px;
+
+    font-size: 2rem;
+  }
+
+  .budget-visuals {
+    grid-template-columns: 1fr;
+
+    gap: 1rem;
+  }
+
+  .budget-category-chart {
+    justify-content: flex-start;
+  }
+
+  .reimbursement-row {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+
+    gap: 0.5rem;
+
+    padding: 0.65rem 0.5rem;
+  }
+
+  .reimbursement-avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .reimbursement-text {
+    min-width: 0;
+
+    font-size: 0.88rem;
+
+    white-space: normal;
+  }
+
+  .reimbursement-row strong {
+    font-size: 0.8rem;
+  }
+
+  .notification-demo-row strong {
+    white-space: normal;
+
+    font-size: 0.88rem;
+  }
+
+  .recap-demo span {
+    font-size: 0.9rem;
   }
 }
