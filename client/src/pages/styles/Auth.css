@@ -391,41 +391,899 @@
 }
 
 /* =========================================================
-   RESPONSIVE
-   ========================================================= */
+   AUTH - TABLETTE
+========================================================= */
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .auth-page {
-    padding: 30px 16px 24px;
+    padding: 36px 24px;
   }
 
   .auth-card {
-    padding: 32px 24px;
+    max-width: 480px;
+
+    padding: 36px 42px;
 
     border-radius: 18px;
   }
 
   .title {
-    margin-bottom: 24px;
+    margin-bottom: 26px;
 
-    font-size: 24px;
+    font-size: 26px;
   }
 
   .logo-icon {
-    font-size: 36px;
+    font-size: 38px;
   }
 
   .logo-text {
+    font-size: 23px;
+  }
+}
+
+/* =========================================================
+   AUTH - MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+  .auth-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+
+    padding: 28px 16px;
+
+    background-position: center;
+  }
+
+  /* ================= GLASS CARD ================= */
+
+  .auth-card {
+    width: 100%;
+    max-width: 390px;
+    min-height: auto;
+
+    padding: 24px 22px;
+
+    border-radius: 18px;
+  }
+
+  /* ================= LOGO ================= */
+
+  .logo-container {
+    margin-bottom: 12px;
+  }
+
+  .logo-icon {
+    margin-bottom: 5px;
+
+    font-size: 32px;
+  }
+
+  .logo-text {
+    font-size: 21px;
+  }
+
+  /* ================= TITRE ================= */
+
+  .title {
+    margin-top: 10px;
+    margin-bottom: 18px;
+
     font-size: 22px;
   }
 
+  /* ================= FORMULAIRE ================= */
+
+  .auth-form {
+    gap: 12px;
+  }
+
   .form-input {
-    padding: 14px 18px;
+    min-height: 46px;
+
+    padding: 12px 17px;
 
     font-size: 16px;
   }
 
+  /* ================= MOT DE PASSE ================= */
+
+  .password-input {
+    padding-right: 52px;
+  }
+
+  .password-toggle {
+    right: 15px;
+  }
+
+  /* ================= MOT DE PASSE OUBLIÉ ================= */
+
+  .forgot-password-container {
+    margin-top: -4px;
+    padding-right: 4px;
+  }
+
+  .forgot-password-link {
+    font-size: 12px;
+  }
+
+  /* ================= BOUTON ================= */
+
+  .submit-btn {
+    min-height: 46px;
+
+    margin-top: 6px;
+    padding: 11px 14px;
+
+    font-size: 15px;
+  }
+
+  /* ================= INSCRIPTION ================= */
+
+  .footer-login {
+    margin-top: 18px;
+
+    font-size: 13px;
+  }
+
+  /* ================= CHECKBOX REGISTER ================= */
+
   .checkbox-label {
     margin-left: 0;
+  }
+
+  /* ================= MESSAGES ================= */
+
+  .error-message,
+  .success-message {
+    margin-bottom: 14px;
+
+    padding: 10px 12px;
+
+    font-size: 13px;
+  }
+
+  .auth-description {
+    margin-bottom: 18px;
+  }
+}
+
+
+/* =========================================================
+   AUTH - TRÈS PETIT MOBILE
+========================================================= */
+
+@media (max-width: 360px) {
+  .auth-page {
+    padding: 24px 12px;
+  }
+
+  .auth-card {
+    max-width: 100%;
+
+    padding: 22px 18px;
+  }
+
+  .logo-container {
+    margin-bottom: 10px;
+  }
+
+  .logo-icon {
+    font-size: 30px;
+  }
+
+  .logo-text {
+    font-size: 20px;
+  }
+
+  .title {
+    margin-bottom: 16px;
+
+    font-size: 21px;
+  }
+
+  .form-input {
+    padding-inline: 16px;
+  }
+
+  .footer-login {
+    margin-top: 16px;
+
+    font-size: 12px;
+  }
+}
+
+/* =========================================================
+   REGISTER - TABLETTE
+========================================================= */
+
+@media (max-width: 768px) {
+  .auth-page-register {
+    padding: 28px 20px;
+  }
+
+  .auth-card-register {
+    max-width: 500px;
+    min-height: auto;
+
+    padding: 28px 36px;
+  }
+
+  .auth-card-register .logo-container {
+    margin-bottom: 12px;
+  }
+
+  .auth-card-register .logo-icon {
+    margin-bottom: 5px;
+
+    font-size: 32px;
+  }
+
+  .auth-card-register .logo-text {
+    font-size: 21px;
+  }
+
+  .auth-card-register .title {
+    margin: 8px 0 18px;
+
+    font-size: 23px;
+    line-height: 1.2;
+  }
+
+  .auth-card-register .auth-form {
+    gap: 11px;
+  }
+
+  .auth-card-register .form-input {
+    min-height: 46px;
+
+    padding: 12px 18px;
+  }
+
+  .auth-card-register .checkbox-group {
+    margin: 5px 0;
+  }
+
+  .auth-card-register .checkbox-label {
+    margin-left: 0;
+
+    font-size: 0.88rem;
+  }
+
+  .auth-card-register .submit-btn {
+    min-height: 46px;
+
+    margin-top: 5px;
+    padding: 11px 14px;
+  }
+
+  .auth-card-register .footer-login {
+    margin-top: 16px;
+  }
+}
+
+
+/* =========================================================
+   REGISTER - MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+  .auth-page-register {
+    align-items: center;
+
+    padding: 20px 14px;
+  }
+
+  .auth-card-register {
+    width: 100%;
+    max-width: 390px;
+    min-height: auto;
+
+    padding: 20px 20px;
+
+    border-radius: 18px;
+  }
+
+  /* ================= LOGO ================= */
+
+  .auth-card-register .logo-container {
+    margin-bottom: 8px;
+  }
+
+  .auth-card-register .logo-icon {
+    margin-bottom: 3px;
+
+    font-size: 28px;
+  }
+
+  .auth-card-register .logo-text {
+    font-size: 19px;
+  }
+
+  /* ================= TITRE ================= */
+
+  .auth-card-register .title {
+    margin: 6px 0 14px;
+
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  /* ================= FORMULAIRE ================= */
+
+  .auth-card-register .auth-form {
+    gap: 9px;
+  }
+
+  .auth-card-register .form-input {
+    min-height: 43px;
+
+    padding: 10px 16px;
+
+    font-size: 15px;
+  }
+
+  /* ================= PASSWORD ================= */
+
+  .auth-card-register .password-input {
+    padding-right: 84px;
+  }
+
+  .auth-card-register .password-toggle {
+    right: 14px;
+  }
+
+  .auth-card-register .validation-icon {
+    font-size: 15px;
+  }
+
+  .auth-card-register .password-validation-icon {
+    right: 47px;
+  }
+
+  /* ================= CHECKBOX ================= */
+
+  .auth-card-register .checkbox-group {
+    margin: 3px 0;
+  }
+
+  .auth-card-register .checkbox-label {
+    gap: 8px;
+
+    margin-left: 0;
+
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .auth-card-register .checkbox-label input[type="checkbox"] {
+    flex-shrink: 0;
+
+    margin-top: 2px;
+  }
+
+  /* ================= BOUTON ================= */
+
+  .auth-card-register .submit-btn {
+    min-height: 44px;
+
+    margin-top: 3px;
+    padding: 10px 12px;
+
+    font-size: 14px;
+  }
+
+  /* ================= FOOTER ================= */
+
+  .auth-card-register .footer-login {
+    margin-top: 13px;
+
+    font-size: 12px;
+  }
+}
+
+
+/* =========================================================
+   REGISTER - PETIT MOBILE
+========================================================= */
+
+@media (max-width: 360px) {
+  .auth-page-register {
+    padding: 16px 10px;
+  }
+
+  .auth-card-register {
+    padding: 18px 16px;
+  }
+
+  .auth-card-register .logo-icon {
+    font-size: 26px;
+  }
+
+  .auth-card-register .logo-text {
+    font-size: 18px;
+  }
+
+  .auth-card-register .title {
+    margin-bottom: 12px;
+
+    font-size: 18px;
+  }
+
+  .auth-card-register .auth-form {
+    gap: 8px;
+  }
+
+  .auth-card-register .form-input {
+    min-height: 41px;
+
+    padding: 9px 14px;
+
+    font-size: 14px;
+  }
+
+  .auth-card-register .password-input {
+    padding-right: 80px;
+  }
+
+  .auth-card-register .password-toggle {
+    right: 12px;
+  }
+
+  .auth-card-register .password-validation-icon {
+    right: 43px;
+  }
+
+  .auth-card-register .checkbox-label {
+    font-size: 0.75rem;
+  }
+
+  .auth-card-register .submit-btn {
+    min-height: 42px;
+
+    font-size: 13px;
+  }
+
+  .auth-card-register .footer-login {
+    margin-top: 11px;
+
+    font-size: 11px;
+  }
+}
+
+/* =========================================================
+   FORGOT PASSWORD - TABLETTE
+========================================================= */
+
+@media (max-width: 768px) {
+  .auth-page-forgot-password {
+    padding: 28px 20px;
+  }
+
+  .auth-card-forgot-password {
+    max-width: 480px;
+    min-height: auto;
+
+    padding: 30px 36px;
+  }
+
+  .auth-card-forgot-password .logo-container {
+    margin-bottom: 12px;
+  }
+
+  .auth-card-forgot-password .logo-icon {
+    margin-bottom: 5px;
+
+    font-size: 32px;
+  }
+
+  .auth-card-forgot-password .logo-text {
+    font-size: 21px;
+  }
+
+  .auth-card-forgot-password .title {
+    margin: 8px 0 16px;
+
+    font-size: 24px;
+  }
+
+  .auth-card-forgot-password .auth-description {
+    max-width: 360px;
+
+    margin: 0 auto 20px;
+
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .auth-card-forgot-password .auth-form {
+    gap: 12px;
+  }
+
+  .auth-card-forgot-password .submit-btn {
+    min-height: 46px;
+
+    margin-top: 5px;
+  }
+
+  .auth-card-forgot-password .footer-login {
+    margin-top: 18px;
+  }
+}
+
+
+/* =========================================================
+   FORGOT PASSWORD - MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+  .auth-page-forgot-password {
+    align-items: center;
+
+    padding: 22px 14px;
+  }
+
+  .auth-card-forgot-password {
+    width: 100%;
+    max-width: 390px;
+    min-height: auto;
+
+    padding: 24px 20px;
+
+    border-radius: 18px;
+  }
+
+  /* ================= LOGO ================= */
+
+  .auth-card-forgot-password .logo-container {
+    margin-bottom: 8px;
+  }
+
+  .auth-card-forgot-password .logo-icon {
+    margin-bottom: 3px;
+
+    font-size: 28px;
+  }
+
+  .auth-card-forgot-password .logo-text {
+    font-size: 19px;
+  }
+
+  /* ================= TITRE ================= */
+
+  .auth-card-forgot-password .title {
+    margin: 6px 0 12px;
+
+    font-size: 21px;
+  }
+
+  /* ================= DESCRIPTION ================= */
+
+  .auth-card-forgot-password .auth-description {
+    max-width: 310px;
+
+    margin: 0 auto 16px;
+
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  /* ================= FORMULAIRE ================= */
+
+  .auth-card-forgot-password .auth-form {
+    gap: 10px;
+  }
+
+  .auth-card-forgot-password .form-input {
+    min-height: 43px;
+
+    padding: 10px 16px;
+
+    font-size: 15px;
+  }
+
+  /* ================= BOUTON ================= */
+
+  .auth-card-forgot-password .submit-btn {
+    min-height: 44px;
+
+    margin-top: 4px;
+    padding: 10px 12px;
+
+    font-size: 14px;
+  }
+
+  /* ================= FOOTER ================= */
+
+  .auth-card-forgot-password .footer-login {
+    margin-top: 15px;
+
+    font-size: 12px;
+  }
+
+  /* ================= MESSAGES ================= */
+
+  .auth-card-forgot-password .success-message,
+  .auth-card-forgot-password .error-message {
+    margin-bottom: 14px;
+
+    padding: 10px 12px;
+
+    font-size: 13px;
+  }
+}
+
+
+/* =========================================================
+   FORGOT PASSWORD - PETIT MOBILE
+========================================================= */
+
+@media (max-width: 360px) {
+  .auth-page-forgot-password {
+    padding: 18px 10px;
+  }
+
+  .auth-card-forgot-password {
+    padding: 22px 16px;
+  }
+
+  .auth-card-forgot-password .logo-icon {
+    font-size: 26px;
+  }
+
+  .auth-card-forgot-password .logo-text {
+    font-size: 18px;
+  }
+
+  .auth-card-forgot-password .title {
+    font-size: 19px;
+  }
+
+  .auth-card-forgot-password .auth-description {
+    font-size: 12px;
+  }
+
+  .auth-card-forgot-password .form-input {
+    min-height: 41px;
+
+    padding: 9px 14px;
+
+    font-size: 14px;
+  }
+
+  .auth-card-forgot-password .submit-btn {
+    min-height: 42px;
+
+    font-size: 13px;
+  }
+
+  .auth-card-forgot-password .footer-login {
+    font-size: 11px;
+  }
+}
+
+/* =========================================================
+   RESET PASSWORD - TABLETTE
+========================================================= */
+
+@media (max-width: 768px) {
+  .auth-page-reset-password {
+    padding: 28px 20px;
+  }
+
+  .auth-card-reset-password {
+    max-width: 480px;
+    min-height: auto;
+
+    padding: 30px 36px;
+  }
+
+  .auth-card-reset-password .logo-container {
+    margin-bottom: 12px;
+  }
+
+  .auth-card-reset-password .logo-icon {
+    margin-bottom: 5px;
+
+    font-size: 32px;
+  }
+
+  .auth-card-reset-password .logo-text {
+    font-size: 21px;
+  }
+
+  .auth-card-reset-password .title {
+    margin: 8px 0 16px;
+
+    font-size: 24px;
+    line-height: 1.2;
+  }
+
+  .auth-card-reset-password .auth-description {
+    max-width: 360px;
+
+    margin: 0 auto 20px;
+
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .auth-card-reset-password .auth-form {
+    gap: 12px;
+  }
+
+  .auth-card-reset-password .submit-btn {
+    min-height: 46px;
+
+    margin-top: 5px;
+  }
+
+  .auth-card-reset-password .footer-login {
+    margin-top: 18px;
+  }
+}
+
+
+/* =========================================================
+   RESET PASSWORD - MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+  .auth-page-reset-password {
+    align-items: center;
+
+    padding: 22px 14px;
+  }
+
+  .auth-card-reset-password {
+    width: 100%;
+    max-width: 390px;
+    min-height: auto;
+
+    padding: 24px 20px;
+
+    border-radius: 18px;
+  }
+
+  /* ================= LOGO ================= */
+
+  .auth-card-reset-password .logo-container {
+    margin-bottom: 8px;
+  }
+
+  .auth-card-reset-password .logo-icon {
+    margin-bottom: 3px;
+
+    font-size: 28px;
+  }
+
+  .auth-card-reset-password .logo-text {
+    font-size: 19px;
+  }
+
+  /* ================= TITRE ================= */
+
+  .auth-card-reset-password .title {
+    margin: 6px 0 12px;
+
+    font-size: 21px;
+    line-height: 1.2;
+  }
+
+  /* ================= DESCRIPTION ================= */
+
+  .auth-card-reset-password .auth-description {
+    max-width: 310px;
+
+    margin: 0 auto 16px;
+
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  /* ================= FORMULAIRE ================= */
+
+  .auth-card-reset-password .auth-form {
+    gap: 10px;
+  }
+
+  .auth-card-reset-password .form-input {
+    min-height: 43px;
+
+    padding: 10px 16px;
+
+    font-size: 15px;
+  }
+
+  /* ================= PASSWORD ================= */
+
+  .auth-card-reset-password .password-input {
+    padding-right: 52px;
+  }
+
+  .auth-card-reset-password .password-toggle {
+    right: 14px;
+  }
+
+  /* ================= BOUTON ================= */
+
+  .auth-card-reset-password .submit-btn {
+    min-height: 44px;
+
+    margin-top: 4px;
+    padding: 10px 12px;
+
+    font-size: 14px;
+  }
+
+  /* ================= FOOTER ================= */
+
+  .auth-card-reset-password .footer-login {
+    margin-top: 15px;
+
+    font-size: 12px;
+  }
+
+  /* ================= ERREUR ================= */
+
+  .auth-card-reset-password .error-message {
+    margin-bottom: 14px;
+
+    padding: 10px 12px;
+
+    font-size: 13px;
+  }
+}
+
+
+/* =========================================================
+   RESET PASSWORD - PETIT MOBILE
+========================================================= */
+
+@media (max-width: 360px) {
+  .auth-page-reset-password {
+    padding: 18px 10px;
+  }
+
+  .auth-card-reset-password {
+    padding: 22px 16px;
+  }
+
+  .auth-card-reset-password .logo-icon {
+    font-size: 26px;
+  }
+
+  .auth-card-reset-password .logo-text {
+    font-size: 18px;
+  }
+
+  .auth-card-reset-password .title {
+    font-size: 19px;
+  }
+
+  .auth-card-reset-password .auth-description {
+    font-size: 12px;
+  }
+
+  .auth-card-reset-password .form-input {
+    min-height: 41px;
+
+    padding: 9px 14px;
+
+    font-size: 14px;
+  }
+
+  .auth-card-reset-password .submit-btn {
+    min-height: 42px;
+
+    font-size: 13px;
+  }
+
+  .auth-card-reset-password .footer-login {
+    font-size: 11px;
   }
 }
