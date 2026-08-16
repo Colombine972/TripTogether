@@ -1,5 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap");
 
+/* =====================================================
+   VARIABLES GLOBALES
+===================================================== */
+
 :root {
   --black: #0d1117;
   --white: #f8f9fb;
@@ -14,8 +18,10 @@
   --grey-text: #555;
 
   --button-radius: 10px;
+
   --title-font: "Playfair Display", serif;
   --body-text: "Source Sans 3", sans-serif;
+
   --font-size-XL: 48px;
   --font-size-L: 36px;
   --font-size-M: 24px;
@@ -29,62 +35,157 @@
   --space-XS: 4px;
 }
 
+/* =====================================================
+   RESET GLOBAL
+===================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+
+  font-family: var(--body-text);
+  color: var(--black);
+
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* =====================================================
+   CONTENU PRINCIPAL
+===================================================== */
+
 main {
+  flex: 1;
+  width: 100%;
+
   background-color: var(--background);
 }
+
+/* =====================================================
+   IMAGES
+===================================================== */
+
+img,
+picture,
+svg {
+  max-width: 100%;
+}
+
+img {
+  display: block;
+  height: auto;
+}
+
+/* =====================================================
+   FORMULAIRES
+===================================================== */
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* =====================================================
+   TEXTES
+===================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  overflow-wrap: break-word;
+}
+
+/* =====================================================
+   ERREURS
+===================================================== */
 
 .error {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  width: 100%;
+
   color: var(--brown);
   background-color: var(--light-brown);
+
   border-left: 4px solid var(--brown);
+  border-radius: 4px;
+
   margin: 2rem 0;
   padding: 1rem;
-  border-radius: 4px;
 }
+
+/* =====================================================
+   CHARGEMENT
+===================================================== */
 
 .loading-text {
   display: flex;
+
+  width: 100%;
+
   background-color: #f5f5f5;
   color: #444;
+
   padding: 1rem;
-  border-radius: 6px;
   margin: 1.5rem 0;
+
+  border-radius: 6px;
 }
+
 .loading-text::after {
   content: "";
   animation: dots 1.5s infinite;
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
-  margin: 0;
-}
-
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-main {
-  flex: 1;
-}
+/* =====================================================
+   ANIMATIONS
+===================================================== */
 
 @keyframes dots {
   0% {
     content: "";
   }
+
   33% {
     content: ".";
   }
+
   66% {
     content: "..";
   }
+
   100% {
     content: "...";
   }

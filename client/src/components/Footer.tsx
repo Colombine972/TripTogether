@@ -26,8 +26,12 @@ function Footer() {
         </div>
 
         <div className="footer-right">
-          &copy; {year} TripTogether.{" "}
-          <span className="footer-heart">Fait avec ❤️ pour les voyageurs.</span>
+          <span>&copy; {year} TripTogether.</span>
+
+          <span>
+            Fait avec <span className="footer-heart">❤️</span> pour les
+            voyageurs.
+          </span>
         </div>
       </article>
     </footer>
