@@ -1,9 +1,12 @@
 import type { RequestHandler } from "express";
+
 import type { ReimbursementPaymentMethod } from "../../types/reimbursement";
+
+import activityService from "../activity/activityService";
 import notificationService from "../notification/notificationService";
 import tripRepository from "../trip/tripRepository";
+
 import reimbursementRepository from "./reimbursementRepository";
-import activityService from "../activity/activityService";
 
 const allowedPaymentMethods: ReimbursementPaymentMethod[] = [
   "wero",
@@ -11,17 +14,31 @@ const allowedPaymentMethods: ReimbursementPaymentMethod[] = [
   "other",
 ];
 
+/* =========================================================
+   AJOUTER / DÉCLARER UN REMBOURSEMENT
+========================================================= */
+
 const add: RequestHandler = async (req, res, next) => {
   try {
     const fromUserId = Number(req.auth?.sub);
 
-    const { trip_id, to_user_id, amount, currency, payment_method } = req.body;
+    const {
+      trip_id,
+      to_user_id,
+      amount,
+      currency,
+      payment_method,
+    } = req.body;
 
     const tripId = Number(trip_id);
 
     const toUserId = Number(to_user_id);
 
     const reimbursementAmount = Number(amount);
+
+    /* =====================================================
+       UTILISATEUR AUTHENTIFIÉ
+    ====================================================== */
 
     if (!Number.isInteger(fromUserId) || fromUserId <= 0) {
       res.status(401).json({
@@ -31,6 +48,10 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    /* =====================================================
+       VOYAGE
+    ====================================================== */
+
     if (!Number.isInteger(tripId) || tripId <= 0) {
       res.status(400).json({
         error: "Identifiant du voyage invalide",
@@ -38,6 +59,10 @@ const add: RequestHandler = async (req, res, next) => {
 
       return;
     }
+
+    /* =====================================================
+       BÉNÉFICIAIRE
+    ====================================================== */
 
     if (!Number.isInteger(toUserId) || toUserId <= 0) {
       res.status(400).json({
@@ -55,7 +80,14 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    if (!Number.isFinite(reimbursementAmount) || reimbursementAmount <= 0) {
+    /* =====================================================
+       MONTANT
+    ====================================================== */
+
+    if (
+      !Number.isFinite(reimbursementAmount) ||
+      reimbursementAmount <= 0
+    ) {
       res.status(400).json({
         error: "Le montant du remboursement est invalide",
       });
@@ -63,7 +95,13 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const normalizedCurrency = String(currency || "").toUpperCase();
+    /* =====================================================
+       DEVISE
+    ====================================================== */
+
+    const normalizedCurrency = String(
+      currency || "",
+    ).toUpperCase();
 
     if (!/^[A-Z]{3}$/.test(normalizedCurrency)) {
       res.status(400).json({
@@ -73,7 +111,13 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    let normalizedPaymentMethod: ReimbursementPaymentMethod | null = null;
+    /* =====================================================
+       MOYEN DE PAIEMENT
+    ====================================================== */
+
+    let normalizedPaymentMethod:
+      | ReimbursementPaymentMethod
+      | null = null;
 
     if (payment_method) {
       if (
@@ -88,13 +132,19 @@ const add: RequestHandler = async (req, res, next) => {
         return;
       }
 
-      normalizedPaymentMethod = payment_method as ReimbursementPaymentMethod;
+      normalizedPaymentMethod =
+        payment_method as ReimbursementPaymentMethod;
     }
 
-    const fromUserIsMember = await tripRepository.isUserMemberOfTrip(
-      tripId,
-      fromUserId,
-    );
+    /* =====================================================
+       VÉRIFICATION DES PARTICIPANTS
+    ====================================================== */
+
+    const fromUserIsMember =
+      await tripRepository.isUserMemberOfTrip(
+        tripId,
+        fromUserId,
+      );
 
     if (!fromUserIsMember) {
       res.status(403).json({
@@ -104,24 +154,31 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const toUserIsMember = await tripRepository.isUserMemberOfTrip(
-      tripId,
-      toUserId,
-    );
+    const toUserIsMember =
+      await tripRepository.isUserMemberOfTrip(
+        tripId,
+        toUserId,
+      );
 
     if (!toUserIsMember) {
       res.status(404).json({
-        error: "Le bénéficiaire ne participe pas à ce voyage",
+        error:
+          "Le bénéficiaire ne participe pas à ce voyage",
       });
 
       return;
     }
 
-    const existingPending = await reimbursementRepository.findPendingBetween(
-      tripId,
-      fromUserId,
-      toUserId,
-    );
+    /* =====================================================
+       REMBOURSEMENT DÉJÀ EN ATTENTE
+    ====================================================== */
+
+    const existingPending =
+      await reimbursementRepository.findPendingBetween(
+        tripId,
+        fromUserId,
+        toUserId,
+      );
 
     if (existingPending) {
       res.status(409).json({
@@ -131,6 +188,10 @@ const add: RequestHandler = async (req, res, next) => {
 
       return;
     }
+
+    /* =====================================================
+       DETTE ACTUELLE
+    ====================================================== */
 
     const outstandingDebt =
       await reimbursementRepository.getOutstandingDebtBetween(
@@ -148,7 +209,10 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    if (reimbursementAmount > outstandingDebt + 0.01) {
+    if (
+      reimbursementAmount >
+      outstandingDebt + 0.01
+    ) {
       res.status(400).json({
         error: `Le montant ne peut pas dépasser ${outstandingDebt.toFixed(
           2,
@@ -158,19 +222,62 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const finalAmount = Number(reimbursementAmount.toFixed(2));
+    const finalAmount = Number(
+      reimbursementAmount.toFixed(2),
+    );
 
-    const reimbursementId = await reimbursementRepository.create({
-      tripId,
-      fromUserId,
-      toUserId,
-      amount: finalAmount,
-      currency: normalizedCurrency,
-      paymentMethod: normalizedPaymentMethod,
-    });
+    /* =====================================================
+       DÉTERMINER LES DÉPENSES CONCERNÉES
+    ====================================================== */
+
+    const allocations =
+      await reimbursementRepository.getExpenseAllocationsForReimbursement(
+        tripId,
+        fromUserId,
+        toUserId,
+        finalAmount,
+      );
+
+    /* =====================================================
+       CRÉATION DU REMBOURSEMENT
+    ====================================================== */
+
+    const reimbursementId =
+      await reimbursementRepository.create({
+        tripId,
+
+        fromUserId,
+
+        toUserId,
+
+        amount: finalAmount,
+
+        currency: normalizedCurrency,
+
+        paymentMethod: normalizedPaymentMethod,
+      });
+
+    /* =====================================================
+       LIAISON REMBOURSEMENT ↔ DÉPENSES
+    ====================================================== */
+
+    await reimbursementRepository.createExpenseAllocations(
+      reimbursementId,
+      allocations,
+    );
+
+    /* =====================================================
+       RÉCUPÉRATION DU REMBOURSEMENT
+    ====================================================== */
 
     const reimbursement =
-      await reimbursementRepository.findById(reimbursementId);
+      await reimbursementRepository.findById(
+        reimbursementId,
+      );
+
+    /* =====================================================
+       NOTIFICATION
+    ====================================================== */
 
     await notificationService.notifyReimbursementPending(
       tripId,
@@ -180,6 +287,10 @@ const add: RequestHandler = async (req, res, next) => {
       finalAmount,
       normalizedCurrency,
     );
+
+    /* =====================================================
+       ACTIVITÉ
+    ====================================================== */
 
     await activityService.createActivity({
       tripId,
@@ -199,9 +310,14 @@ const add: RequestHandler = async (req, res, next) => {
       referenceId: reimbursementId,
     });
 
+    /* =====================================================
+       RÉPONSE
+    ====================================================== */
+
     res.status(201).json({
       message:
         "Remboursement déclaré. Le bénéficiaire doit maintenant confirmer sa réception.",
+
       reimbursement,
     });
   } catch (err) {
@@ -209,11 +325,23 @@ const add: RequestHandler = async (req, res, next) => {
   }
 };
 
-const browseByTrip: RequestHandler = async (req, res, next) => {
+/* =========================================================
+   RÉCUPÉRER LES REMBOURSEMENTS D'UN VOYAGE
+========================================================= */
+
+const browseByTrip: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
   try {
     const tripId = Number(req.params.tripId);
 
     const userId = Number(req.auth?.sub);
+
+    /* =====================================================
+       UTILISATEUR
+    ====================================================== */
 
     if (!Number.isInteger(userId) || userId <= 0) {
       res.status(401).json({
@@ -222,6 +350,10 @@ const browseByTrip: RequestHandler = async (req, res, next) => {
 
       return;
     }
+
+    /* =====================================================
+       VOYAGE
+    ====================================================== */
 
     if (!Number.isInteger(tripId) || tripId <= 0) {
       res.status(400).json({
@@ -231,10 +363,15 @@ const browseByTrip: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const userIsMember = await tripRepository.isUserMemberOfTrip(
-      tripId,
-      userId,
-    );
+    /* =====================================================
+       PARTICIPATION AU VOYAGE
+    ====================================================== */
+
+    const userIsMember =
+      await tripRepository.isUserMemberOfTrip(
+        tripId,
+        userId,
+      );
 
     if (!userIsMember) {
       res.status(403).json({
@@ -244,10 +381,15 @@ const browseByTrip: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const reimbursements = await reimbursementRepository.findByTripAndUser(
-      tripId,
-      userId,
-    );
+    /* =====================================================
+       RÉCUPÉRATION
+    ====================================================== */
+
+    const reimbursements =
+      await reimbursementRepository.findByTripAndUser(
+        tripId,
+        userId,
+      );
 
     res.status(200).json(reimbursements);
   } catch (err) {
@@ -255,11 +397,25 @@ const browseByTrip: RequestHandler = async (req, res, next) => {
   }
 };
 
-const confirm: RequestHandler = async (req, res, next) => {
+/* =========================================================
+   CONFIRMER UN REMBOURSEMENT
+========================================================= */
+
+const confirm: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    const reimbursementId = Number(req.params.id);
+    const reimbursementId = Number(
+      req.params.id,
+    );
 
     const userId = Number(req.auth?.sub);
+
+    /* =====================================================
+       UTILISATEUR
+    ====================================================== */
 
     if (!Number.isInteger(userId) || userId <= 0) {
       res.status(401).json({
@@ -269,16 +425,26 @@ const confirm: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    if (!Number.isInteger(reimbursementId) || reimbursementId <= 0) {
+    /* =====================================================
+       REMBOURSEMENT
+    ====================================================== */
+
+    if (
+      !Number.isInteger(reimbursementId) ||
+      reimbursementId <= 0
+    ) {
       res.status(400).json({
-        error: "Identifiant du remboursement invalide",
+        error:
+          "Identifiant du remboursement invalide",
       });
 
       return;
     }
 
     const reimbursement =
-      await reimbursementRepository.findById(reimbursementId);
+      await reimbursementRepository.findById(
+        reimbursementId,
+      );
 
     if (!reimbursement) {
       res.status(404).json({
@@ -288,41 +454,85 @@ const confirm: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    if (Number(reimbursement.to_user_id) !== userId) {
+    /* =====================================================
+       SEUL LE BÉNÉFICIAIRE PEUT CONFIRMER
+    ====================================================== */
+
+    if (
+      Number(reimbursement.to_user_id) !==
+      userId
+    ) {
       res.status(403).json({
-        error: "Seul le bénéficiaire peut confirmer ce remboursement",
+        error:
+          "Seul le bénéficiaire peut confirmer ce remboursement",
       });
 
       return;
     }
 
-    if (reimbursement.status !== "pending") {
+    /* =====================================================
+       STATUT
+    ====================================================== */
+
+    if (
+      reimbursement.status !== "pending"
+    ) {
       res.status(409).json({
-        error: "Ce remboursement n’est plus en attente de confirmation",
+        error:
+          "Ce remboursement n’est plus en attente de confirmation",
       });
 
       return;
     }
 
-    await reimbursementRepository.confirm(reimbursementId);
+    /* =====================================================
+       CONFIRMATION
+    ====================================================== */
+
+    await reimbursementRepository.confirm(
+      reimbursementId,
+    );
 
     const updatedReimbursement =
-      await reimbursementRepository.findById(reimbursementId);
+      await reimbursementRepository.findById(
+        reimbursementId,
+      );
+
+    /* =====================================================
+       NOTIFICATION
+    ====================================================== */
 
     await notificationService.notifyReimbursementConfirmed(
       Number(reimbursement.trip_id),
+
       Number(reimbursement.from_user_id),
+
       userId,
+
       reimbursementId,
+
       Number(reimbursement.amount),
-      String(reimbursement.currency).toUpperCase(),
+
+      String(
+        reimbursement.currency,
+      ).toUpperCase(),
     );
 
-    const tripId = Number(reimbursement.trip_id);
+    /* =====================================================
+       ACTIVITÉ
+    ====================================================== */
 
-    const amount = Number(reimbursement.amount);
+    const tripId = Number(
+      reimbursement.trip_id,
+    );
 
-    const currency = String(reimbursement.currency).toUpperCase();
+    const amount = Number(
+      reimbursement.amount,
+    );
+
+    const currency = String(
+      reimbursement.currency,
+    ).toUpperCase();
 
     await activityService.createActivity({
       tripId,
@@ -342,8 +552,13 @@ const confirm: RequestHandler = async (req, res, next) => {
       referenceId: reimbursementId,
     });
 
+    /* =====================================================
+       RÉPONSE
+    ====================================================== */
+
     res.status(200).json({
       message: "Remboursement confirmé",
+
       reimbursement: updatedReimbursement,
     });
   } catch (err) {
@@ -351,11 +566,25 @@ const confirm: RequestHandler = async (req, res, next) => {
   }
 };
 
-const reject: RequestHandler = async (req, res, next) => {
+/* =========================================================
+   REFUSER UN REMBOURSEMENT
+========================================================= */
+
+const reject: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    const reimbursementId = Number(req.params.id);
+    const reimbursementId = Number(
+      req.params.id,
+    );
 
     const userId = Number(req.auth?.sub);
+
+    /* =====================================================
+       UTILISATEUR
+    ====================================================== */
 
     if (!Number.isInteger(userId) || userId <= 0) {
       res.status(401).json({
@@ -365,16 +594,26 @@ const reject: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    if (!Number.isInteger(reimbursementId) || reimbursementId <= 0) {
+    /* =====================================================
+       REMBOURSEMENT
+    ====================================================== */
+
+    if (
+      !Number.isInteger(reimbursementId) ||
+      reimbursementId <= 0
+    ) {
       res.status(400).json({
-        error: "Identifiant du remboursement invalide",
+        error:
+          "Identifiant du remboursement invalide",
       });
 
       return;
     }
 
     const reimbursement =
-      await reimbursementRepository.findById(reimbursementId);
+      await reimbursementRepository.findById(
+        reimbursementId,
+      );
 
     if (!reimbursement) {
       res.status(404).json({
@@ -384,41 +623,85 @@ const reject: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    if (Number(reimbursement.to_user_id) !== userId) {
+    /* =====================================================
+       SEUL LE BÉNÉFICIAIRE PEUT REFUSER
+    ====================================================== */
+
+    if (
+      Number(reimbursement.to_user_id) !==
+      userId
+    ) {
       res.status(403).json({
-        error: "Seul le bénéficiaire peut refuser ce remboursement",
+        error:
+          "Seul le bénéficiaire peut refuser ce remboursement",
       });
 
       return;
     }
 
-    if (reimbursement.status !== "pending") {
+    /* =====================================================
+       STATUT
+    ====================================================== */
+
+    if (
+      reimbursement.status !== "pending"
+    ) {
       res.status(409).json({
-        error: "Ce remboursement n’est plus en attente de confirmation",
+        error:
+          "Ce remboursement n’est plus en attente de confirmation",
       });
 
       return;
     }
 
-    await reimbursementRepository.reject(reimbursementId);
+    /* =====================================================
+       REFUS
+    ====================================================== */
+
+    await reimbursementRepository.reject(
+      reimbursementId,
+    );
 
     const updatedReimbursement =
-      await reimbursementRepository.findById(reimbursementId);
+      await reimbursementRepository.findById(
+        reimbursementId,
+      );
+
+    /* =====================================================
+       NOTIFICATION
+    ====================================================== */
 
     await notificationService.notifyReimbursementRejected(
       Number(reimbursement.trip_id),
+
       Number(reimbursement.from_user_id),
+
       userId,
+
       reimbursementId,
+
       Number(reimbursement.amount),
-      String(reimbursement.currency).toUpperCase(),
+
+      String(
+        reimbursement.currency,
+      ).toUpperCase(),
     );
 
-    const tripId = Number(reimbursement.trip_id);
+    /* =====================================================
+       ACTIVITÉ
+    ====================================================== */
 
-    const amount = Number(reimbursement.amount);
+    const tripId = Number(
+      reimbursement.trip_id,
+    );
 
-    const currency = String(reimbursement.currency).toUpperCase();
+    const amount = Number(
+      reimbursement.amount,
+    );
+
+    const currency = String(
+      reimbursement.currency,
+    ).toUpperCase();
 
     await activityService.createActivity({
       tripId,
@@ -438,14 +721,24 @@ const reject: RequestHandler = async (req, res, next) => {
       referenceId: reimbursementId,
     });
 
+    /* =====================================================
+       RÉPONSE
+    ====================================================== */
+
     res.status(200).json({
-      message: "Le remboursement a été signalé comme non reçu",
+      message:
+        "Le remboursement a été signalé comme non reçu",
+
       reimbursement: updatedReimbursement,
     });
   } catch (err) {
     next(err);
   }
 };
+
+/* =========================================================
+   EXPORT
+========================================================= */
 
 export default {
   add,

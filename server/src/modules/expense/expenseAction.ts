@@ -5,6 +5,7 @@ import expenseShareRepository from "../expenseShare/expenseShareRepository";
 import notificationService from "../notification/notificationService";
 
 import expenseRepository from "./expenseRepository";
+import reimbursementRepository from "../reimbursement/reimbursementRepository";
 
 /* =========================================================
    AJOUTER UNE DÉPENSE
@@ -774,13 +775,71 @@ const remove: RequestHandler = async (req, res, next) => {
   try {
     const expenseId = Number(req.params.id);
 
-    if (Number.isNaN(expenseId)) {
-      res.status(400).json({
-        error: "ID invalide",
+    const actorUserId = Number(req.auth?.sub);
+
+    /* =====================================================
+       UTILISATEUR AUTHENTIFIÉ
+    ====================================================== */
+
+    if (!Number.isInteger(actorUserId) || actorUserId <= 0) {
+      res.status(401).json({
+        error: "Utilisateur non authentifié",
       });
 
       return;
     }
+
+    /* =====================================================
+       ID DE LA DÉPENSE
+    ====================================================== */
+
+    if (!Number.isInteger(expenseId) || expenseId <= 0) {
+      res.status(400).json({
+        error: "ID de la dépense invalide",
+      });
+
+      return;
+    }
+
+    /* =====================================================
+       VÉRIFIER QUE LA DÉPENSE EXISTE
+    ====================================================== */
+
+    const existingExpense =
+      await expenseRepository.findById(expenseId);
+
+    if (!existingExpense) {
+      res.status(404).json({
+        error: "Dépense introuvable",
+      });
+
+      return;
+    }
+
+    /* =====================================================
+       VÉRIFIER SI LA DÉPENSE EST LIÉE
+       À UN REMBOURSEMENT
+    ====================================================== */
+
+    const isLocked =
+      await reimbursementRepository.isExpenseLockedByReimbursement(
+        expenseId,
+      );
+
+    if (isLocked) {
+      res.status(409).json({
+        code: "EXPENSE_REIMBURSEMENT_LOCKED",
+
+        error:
+          "Cette dépense est liée à un remboursement et ne peut plus être supprimée.",
+      });
+
+      return;
+    }
+
+    /* =====================================================
+       SUPPRESSION
+    ====================================================== */
 
     await expenseRepository.delete(expenseId);
 

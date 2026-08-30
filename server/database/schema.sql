@@ -233,6 +233,40 @@ CREATE TABLE reimbursement (
     CHECK (amount > 0)
 );
 
+CREATE TABLE reimbursement_expense (
+  reimbursement_id INT NOT NULL,
+  expense_id INT NOT NULL,
+
+  allocated_amount DECIMAL(10,2) NOT NULL,
+
+  allocation_type ENUM(
+    'debt',
+    'offset'
+  ) NOT NULL,
+
+  PRIMARY KEY (
+    reimbursement_id,
+    expense_id
+  ),
+
+  CONSTRAINT fk_reimbursement_expense_reimbursement
+    FOREIGN KEY (reimbursement_id)
+    REFERENCES reimbursement(id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_reimbursement_expense_expense
+    FOREIGN KEY (expense_id)
+    REFERENCES expense(id)
+    ON DELETE RESTRICT,
+
+  CONSTRAINT chk_reimbursement_expense_amount
+    CHECK (allocated_amount > 0)
+);
+
+CREATE INDEX idx_reimbursement_expense_expense
+ON reimbursement_expense(expense_id);
+
+
 CREATE TABLE notification (
   id INT AUTO_INCREMENT PRIMARY KEY,
 

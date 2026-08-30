@@ -35,12 +35,9 @@ type ExpenseTripRow = {
 };
 
 class ExpenseRepository {
-  async create(
-    payload: CreateExpensePayload,
-  ): Promise<number> {
-    const [result] =
-      await databaseClient.query<Result>(
-        `
+  async create(payload: CreateExpensePayload): Promise<number> {
+    const [result] = await databaseClient.query<Result>(
+      `
           INSERT INTO expense (
             trip_id,
             title,
@@ -57,32 +54,28 @@ class ExpenseRepository {
           )
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
-        [
-          payload.tripId,
-          payload.title,
-          payload.emoji || null,
-          payload.convertedAmount,
-          payload.originalAmount,
-          payload.originalCurrency,
-          payload.convertedAmount,
-          payload.convertedCurrency,
-          payload.exchangeRate,
-          payload.paidBy,
-          payload.categoryId,
-          payload.date,
-        ],
-      );
+      [
+        payload.tripId,
+        payload.title,
+        payload.emoji || null,
+        payload.convertedAmount,
+        payload.originalAmount,
+        payload.originalCurrency,
+        payload.convertedAmount,
+        payload.convertedCurrency,
+        payload.exchangeRate,
+        payload.paidBy,
+        payload.categoryId,
+        payload.date,
+      ],
+    );
 
     return result.insertId;
   }
 
-
-  async findById(
-    expenseId: number,
-  ): Promise<ExpenseTripRow | null> {
-    const [rows] =
-      await databaseClient.query<Rows>(
-        `
+  async findById(expenseId: number): Promise<ExpenseTripRow | null> {
+    const [rows] = await databaseClient.query<Rows>(
+      `
           SELECT
             id,
             trip_id
@@ -90,8 +83,8 @@ class ExpenseRepository {
           WHERE id = ?
           LIMIT 1
         `,
-        [expenseId],
-      );
+      [expenseId],
+    );
 
     const expense = rows[0];
 
@@ -105,12 +98,9 @@ class ExpenseRepository {
     };
   }
 
-  async update(
-    payload: UpdateExpensePayload,
-  ): Promise<number> {
-    const [result] =
-      await databaseClient.query<Result>(
-        `
+  async update(payload: UpdateExpensePayload): Promise<number> {
+    const [result] = await databaseClient.query<Result>(
+      `
           UPDATE expense
           SET
             title = ?,
@@ -126,106 +116,107 @@ class ExpenseRepository {
             date = ?
           WHERE id = ?
         `,
-        [
-          payload.title,
-          payload.emoji || null,
-          payload.convertedAmount,
-          payload.originalAmount,
-          payload.originalCurrency,
-          payload.convertedAmount,
-          payload.convertedCurrency,
-          payload.exchangeRate,
-          payload.paidBy,
-          payload.categoryId,
-          payload.date,
-          payload.expenseId,
-        ],
-      );
+      [
+        payload.title,
+        payload.emoji || null,
+        payload.convertedAmount,
+        payload.originalAmount,
+        payload.originalCurrency,
+        payload.convertedAmount,
+        payload.convertedCurrency,
+        payload.exchangeRate,
+        payload.paidBy,
+        payload.categoryId,
+        payload.date,
+        payload.expenseId,
+      ],
+    );
 
     return result.affectedRows;
   }
 
-  async findByTrip(
-    tripId: number,
-  ) {
-    const [expenses] =
-      await databaseClient.query<Rows>(
-        `
-          SELECT
-            e.*,
-            ec.name AS category_name,
-            u.firstname AS paid_by_name
-          FROM expense e
-          JOIN expense_category ec
-            ON ec.id = e.category_id
-          JOIN user u
-            ON u.id = e.paid_by
-          WHERE e.trip_id = ?
-          ORDER BY
-            e.date DESC,
-            e.created_at DESC
-        `,
-        [tripId],
-      );
+  async findByTrip(tripId: number) {
+    const [expenses] = await databaseClient.query<Rows>(
+      `
+        SELECT
+          e.*,
+          ec.name AS category_name,
+          u.firstname AS paid_by_name,
 
-    const expensesWithParticipants =
-      await Promise.all(
-        expenses.map(
-          async (expense) => {
-            const [participants] =
-              await databaseClient.query<Rows>(
-                `
-                  SELECT
-                    es.user_id,
-                    es.share_amount,
-                    es.split_type,
-                    u.firstname
-                  FROM expense_share es
-                  JOIN user u
-                    ON u.id = es.user_id
-                  WHERE es.expense_id = ?
-                `,
-                [expense.id],
-              );
+          EXISTS (
+            SELECT 1
+            FROM reimbursement_expense re
+            JOIN reimbursement r
+              ON r.id = re.reimbursement_id
+            WHERE
+              re.expense_id = e.id
+              AND r.status IN ('pending', 'confirmed')
+          ) AS deletion_locked
 
-            return {
-              ...expense,
-              participants,
-            };
-          },
-        ),
-      );
+        FROM expense e
+
+        JOIN expense_category ec
+          ON ec.id = e.category_id
+
+        JOIN user u
+          ON u.id = e.paid_by
+
+        WHERE e.trip_id = ?
+
+        ORDER BY
+          e.date DESC,
+          e.created_at DESC
+      `,
+      [tripId],
+    );
+
+    const expensesWithParticipants = await Promise.all(
+      expenses.map(async (expense) => {
+        const [participants] = await databaseClient.query<Rows>(
+          `
+                SELECT
+                  es.user_id,
+                  es.share_amount,
+                  es.split_type,
+                  u.firstname
+                FROM expense_share es
+                JOIN user u
+                  ON u.id = es.user_id
+                WHERE es.expense_id = ?
+              `,
+          [expense.id],
+        );
+
+        return {
+          ...expense,
+
+          deletion_locked: Boolean(expense.deletion_locked),
+
+          participants,
+        };
+      }),
+    );
 
     return expensesWithParticipants;
   }
 
-  async sumTotalByTrip(
-    tripId: number,
-  ): Promise<number> {
-    const [rows] =
-      await databaseClient.query<Rows>(
-        `
+  async sumTotalByTrip(tripId: number): Promise<number> {
+    const [rows] = await databaseClient.query<Rows>(
+      `
           SELECT
             SUM(converted_amount) AS total
           FROM expense
           WHERE trip_id = ?
         `,
-        [tripId],
-      );
-
-    return Number(
-      rows[0]?.total || 0,
+      [tripId],
     );
+
+    return Number(rows[0]?.total || 0);
   }
 
-
-  async sumPaidByUser(
-    tripId: number,
-    userId: number,
-  ): Promise<number> {
-    const [rows] =
-      await databaseClient.query<Rows>(
-        `
+  async sumPaidByUser(tripId: number, userId: number): Promise<number> {
+    const [rows] = await databaseClient.query<Rows>(
+      `
           SELECT
             SUM(converted_amount) AS total
           FROM expense
@@ -233,21 +224,13 @@ class ExpenseRepository {
             trip_id = ?
             AND paid_by = ?
         `,
-        [
-          tripId,
-          userId,
-        ],
-      );
-
-    return Number(
-      rows[0]?.total || 0,
+      [tripId, userId],
     );
+
+    return Number(rows[0]?.total || 0);
   }
 
-
-  async delete(
-    expenseId: number,
-  ): Promise<void> {
+  async delete(expenseId: number): Promise<void> {
     await databaseClient.query(
       `
         DELETE FROM expense
