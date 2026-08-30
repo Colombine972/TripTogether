@@ -1,4 +1,4 @@
-.guests-article {
+.guests-card {
   padding-bottom: 24px;
 }
 
@@ -26,7 +26,7 @@
   font-style: italic;
 }
 
-.guests-article ul {
+.guests-card ul {
   margin: 0;
   padding: 0;
 
@@ -166,21 +166,35 @@
   color: #b91c1c;
 }
 
+/* =========================================================
+   TABLETTE / MOBILE
+   ≤ 640 PX
+========================================================= */
+
 @media (max-width: 640px) {
   #member-list {
     margin-top: 10px;
   }
 
-  .guests-article {
+  .guests-card {
     width: 100%;
+
     margin-bottom: 10px;
+  }
+
+  .guests-title {
+    margin-top: 14px;
+
+    padding: 9px 16px;
+
+    font-size: 15px;
   }
 
   .guest-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-direction: row;
+
     gap: 10px;
 
     padding: 12px;
@@ -189,20 +203,12 @@
   .guest-left-side {
     display: flex;
     align-items: center;
-    gap: 10px;
 
-    width: auto;
-    min-width: 0;
     flex: 1;
-  }
 
-  .guest-right-side {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    min-width: 0;
 
-    width: auto;
-    flex-shrink: 0;
+    gap: 10px;
   }
 
   .guest-avatar {
@@ -211,22 +217,121 @@
   }
 
   .guest-infos {
+    flex: 1;
+
     min-width: 0;
   }
 
   .guest-name {
     font-size: 14px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .guest-date {
     font-size: 12px;
   }
 
+  .guest-date-small {
+    font-size: 11px;
+  }
+
+  .guest-right-side {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    flex-shrink: 0;
+  }
+
   .guest-badge {
     min-width: 72px;
     min-height: 28px;
+
     padding: 4px 10px;
 
     font-size: 11px;
+  }
+
+  .guests-empty-message {
+    padding: 16px;
+
+    font-size: 13px;
+  }
+}
+
+
+/* =========================================================
+   PETIT MOBILE
+   ≤ 375 PX
+========================================================= */
+
+@media (max-width: 375px) {
+  .guest-row {
+    padding: 10px;
+  }
+
+  .guest-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .guest-name {
+    font-size: 13px;
+  }
+
+  .guest-badge {
+    min-width: 68px;
+
+    padding-inline: 8px;
+
+    font-size: 10px;
+  }
+}
+
+
+/* =========================================================
+   TRÈS PETIT MOBILE
+   ≤ 340 PX
+========================================================= */
+
+@media (max-width: 340px) {
+  .guests-title {
+    padding-inline: 12px;
+
+    font-size: 14px;
+  }
+
+  .guest-row {
+    gap: 8px;
+
+    padding: 9px;
+  }
+
+  .guest-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .guest-name {
+    font-size: 12px;
+  }
+
+  .guest-badge {
+    min-width: 64px;
+    min-height: 26px;
+
+    padding: 3px 7px;
+
+    font-size: 9px;
+  }
+
+  .guests-empty-message {
+    padding: 14px 12px;
+
+    font-size: 12px;
   }
 }
