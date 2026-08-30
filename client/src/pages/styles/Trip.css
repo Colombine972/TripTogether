@@ -47,8 +47,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 18px;
 
-  box-shadow:
-    0 8px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 .trip-progress-header {
@@ -151,7 +150,6 @@
   font-size: 1rem;
 }
 
-
 @media (max-width: 768px) {
   .trip-page {
     padding: 0 1rem;
@@ -164,11 +162,24 @@
   }
 
   .trip-progress-header {
-    align-items: flex-start;
+    align-items: center;
+  }
+
+  .trip-progress-title {
+    align-items: center;
+
+    min-width: 0;
+  }
+
+  .trip-progress-link {
+    align-self: center;
+
+    flex-shrink: 0;
   }
 
   .trip-progress-title h2 {
     font-size: 1.05rem;
+    line-height: 1.15;
   }
 
   .trip-progress-footer {

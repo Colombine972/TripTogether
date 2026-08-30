@@ -226,7 +226,7 @@ function NextStepCard({ tripId, steps }: NextStepCardProps) {
             <Navigation size={19} />
           </span>
 
-          <h3>Prochaine étape</h3>
+          <h2>Prochaine étape</h2>
         </div>
 
         <button

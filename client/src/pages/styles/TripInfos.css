@@ -1,5 +1,9 @@
 /* =========================================================
-   ZONE HERO
+   TRIP INFOS
+   ========================================================= */
+
+/* =========================================================
+   1. HERO / STAGE
 ========================================================= */
 
 .trip-stage {
@@ -10,26 +14,15 @@
 
   width: 100%;
 
-  padding:
-    2rem
-    2rem
-    0;
-
-  box-sizing: border-box;
+  padding: 2rem 2rem 0;
 
   overflow: hidden;
 
-  background:
-    linear-gradient(
-      135deg,
-      #f8f6f2 0%,
-      #fcfbff 45%,
-      #f4f8ff 100%
-    );
+  background: linear-gradient(135deg, #f8f6f2 0%, #fcfbff 45%, #f4f8ff 100%);
 }
 
 /* =========================================================
-   EFFETS DE FOND
+   2. EFFETS DE FOND
 ========================================================= */
 
 .trip-stage-glow {
@@ -51,13 +44,7 @@
   width: 260px;
   height: 260px;
 
-  background:
-    rgba(
-      255,
-      182,
-      122,
-      0.28
-    );
+  background: rgba(255, 182, 122, 0.28);
 }
 
 .trip-stage-glow-right {
@@ -67,61 +54,25 @@
   width: 300px;
   height: 300px;
 
-  background:
-    rgba(
-      132,
-      174,
-      255,
-      0.22
-    );
+  background: rgba(132, 174, 255, 0.22);
 }
 
 .trip-stage-grid {
   position: absolute;
-
   inset: 0;
 
-  background-image:
-    linear-gradient(
-      rgba(
-        17,
-        24,
-        39,
-        0.03
-      )
-      1px,
-      transparent
-      1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(
-        17,
-        24,
-        39,
-        0.03
-      )
-      1px,
-      transparent
-      1px
-    );
+  background-image: linear-gradient(rgba(17, 24, 39, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 39, 0.03) 1px, transparent 1px);
 
-  background-size:
-    48px
-    48px;
+  background-size: 48px 48px;
 
-  mask-image:
-    radial-gradient(
-      circle at center,
-      black 35%,
-      transparent 85%
-    );
+  mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
 
   pointer-events: none;
 }
 
 /* =========================================================
-   CONTENEUR DU HEADER
+   3. CONTENEUR HEADER
 ========================================================= */
 
 .trip-stage-center {
@@ -129,64 +80,36 @@
 
   z-index: 2;
 
-  width:
-    min(
-      1500px,
-      100%
-    );
+  width: min(1500px, 100%);
 }
 
 /* =========================================================
-   HEADER
+   4. HEADER DU VOYAGE
 ========================================================= */
 
 .trip-header-modern {
   display: grid;
-
   grid-template-columns:
-    minmax(
-      340px,
-      0.9fr
-    )
-    minmax(
-      0,
-      2.1fr
-    );
-
+    minmax(340px, 0.9fr)
+    minmax(0, 2.1fr);
   align-items: center;
 
   gap: 1.1rem;
 
   width: 100%;
 
-  padding:
-    0.9rem
-    1.2rem;
-
-  box-sizing: border-box;
+  padding: 0.9rem 1.2rem;
 
   background: #ffffff;
 
-  border:
-    1px solid
-    #e3e8e4;
-
+  border: 1px solid #e3e8e4;
   border-radius: 22px;
 
-  box-shadow:
-    0
-    10px
-    30px
-    rgba(
-      31,
-      49,
-      37,
-      0.07
-    );
+  box-shadow: 0 10px 30px rgba(31, 49, 37, 0.07);
 }
 
 /* =========================================================
-   INFORMATIONS DU HEADER
+   5. INFORMATIONS HEADER
 ========================================================= */
 
 .trip-header-modern-info {
@@ -197,13 +120,11 @@
 
   min-width: 0;
 
-  padding:
-    0.45rem
-    0.8rem;
+  padding: 0.45rem 0.8rem;
 }
 
 /* =========================================================
-   LOCALISATION
+   6. LOCALISATION
 ========================================================= */
 
 .trip-header-location {
@@ -212,18 +133,13 @@
 
   gap: 0.4rem;
 
+  max-width: 100%;
+
   margin-bottom: 0.45rem;
 
-  color:
-    var(
-      --primary-button
-    );
+  color: var(--primary-button);
 
-  font-family:
-    var(
-      --body-text
-    );
-
+  font-family: var(--body-text);
   font-size: 1rem;
   font-weight: 650;
 }
@@ -232,35 +148,29 @@
   flex-shrink: 0;
 }
 
-/* =========================================================
-   TITRE
-========================================================= */
-
-.trip-header-modern-info h1 {
-  margin:
-    0.5rem
-    0;
-
-  color: #172019;
-
-  font-family:
-    var(
-      --title-font
-    );
-
-  font-size:
-    clamp(
-      1.8rem,
-      2.5vw,
-      2.5rem
-    );
-
-  font-weight: 750;
-  line-height: 1.05;
+.trip-header-location span {
+  min-width: 0;
 }
 
 /* =========================================================
-   DESCRIPTION
+   7. TITRE
+========================================================= */
+
+.trip-header-modern-info h1 {
+  margin: 0.5rem 0;
+
+  color: #172019;
+
+  font-family: var(--title-font);
+  font-size: clamp(1.8rem, 2.5vw, 2.5rem);
+  font-weight: 750;
+  line-height: 1.05;
+
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   8. DESCRIPTION
 ========================================================= */
 
 .trip-header-description {
@@ -268,30 +178,22 @@
 
   max-width: 520px;
 
-  margin:
-    0.45rem
-    0
-    0;
+  margin: 0.45rem 0 0;
 
   overflow: hidden;
 
   color: #69736c;
 
-  font-family:
-    var(
-      --body-text
-    );
-
+  font-family: var(--body-text);
   font-size: 1rem;
   line-height: 1.4;
 
-  line-clamp: 1;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 }
 
 /* =========================================================
-   DATES / PARTICIPANTS
+   9. MÉTADONNÉES
 ========================================================= */
 
 .trip-header-meta {
@@ -309,31 +211,20 @@
 
   gap: 0.5rem;
 
+  min-width: 0;
   min-height: 40px;
 
-  padding:
-    0.55rem
-    0.8rem;
-
-  box-sizing: border-box;
+  padding: 0.55rem 0.8rem;
 
   color: #4f5a53;
-
-  font-family:
-    var(
-      --body-text
-    );
-
-  font-size: 0.9rem;
-  font-weight: 600;
-
   background: #f6f8f6;
 
-  border:
-    1px solid
-    #e2e7e3;
-
+  border: 1px solid #e2e7e3;
   border-radius: 10px;
+
+  font-family: var(--body-text);
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .trip-header-meta-item svg {
@@ -343,7 +234,7 @@
 }
 
 /* =========================================================
-   MODIFIER LE VOYAGE
+   10. MODIFIER LE VOYAGE
 ========================================================= */
 
 .trip-header-edit {
@@ -353,25 +244,16 @@
   gap: 0.45rem;
 
   margin-top: 2rem;
-
   padding: 0;
 
-  color:
-    var(
-      --primary-button
-    );
-
-  font-family:
-    var(
-      --body-text
-    );
-
-  font-size: 1rem;
-  font-weight: 650;
-
+  color: var(--primary-button);
   background: transparent;
 
   border: none;
+
+  font-family: var(--body-text);
+  font-size: 1rem;
+  font-weight: 650;
 
   cursor: pointer;
 }
@@ -381,25 +263,15 @@
 }
 
 /* =========================================================
-   GALERIE
+   11. GALERIE
 ========================================================= */
 
 .trip-header-gallery {
   display: grid;
-
   grid-template-columns:
-    minmax(
-      0,
-      1.15fr
-    )
-    minmax(
-      0,
-      1fr
-    )
-    minmax(
-      0,
-      1fr
-    );
+    minmax(0, 1.15fr)
+    minmax(0, 1fr)
+    minmax(0, 1fr);
 
   gap: 0.65rem;
 
@@ -412,7 +284,7 @@
 }
 
 /* =========================================================
-   PHOTOS
+   12. PHOTOS
 ========================================================= */
 
 .trip-header-photo {
@@ -427,18 +299,7 @@
 
   border-radius: 17px;
 
-  box-shadow:
-    inset
-    0
-    0
-    0
-    1px
-    rgba(
-      15,
-      23,
-      42,
-      0.04
-    );
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.04);
 }
 
 .trip-header-photo img {
@@ -449,41 +310,27 @@
 
   object-fit: cover;
 
-  transition:
-    transform
-    350ms
-    ease;
+  transition: transform 350ms ease;
 }
 
 .trip-header-photo:hover img {
-  transform:
-    scale(
-      1.025
-    );
+  transform: scale(1.025);
 }
-
-/* =========================================================
-   CADRAGE
-========================================================= */
 
 .trip-header-photo-main img {
   object-position: center;
 }
 
 .trip-header-photo-secondary img {
-  object-position:
-    38%
-    center;
+  object-position: 38% center;
 }
 
 .trip-header-photo-third img {
-  object-position:
-    68%
-    center;
+  object-position: 68% center;
 }
 
 /* =========================================================
-   NAVIGATION
+   13. NAVIGATION DU VOYAGE
 ========================================================= */
 
 .trip-infos-navigation {
@@ -491,18 +338,14 @@
 
   margin-top: 30px;
 
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding: 8px 0;
 
   background: #ffffff;
 
-  border-bottom:
-    1px solid
-    #edf0ed;
+  border-bottom: 1px solid #edf0ed;
 }
 
-.trip-infos-navigation
-.nav-tabs {
+.trip-infos-navigation .nav-tabs {
   margin-top: 0;
 
   background: #ffffff;
@@ -512,62 +355,28 @@
 }
 
 /* =========================================================
-   RÉCAPITULATIF
+   14. RÉCAPITULATIF
 ========================================================= */
 
 .trip-overview {
   display: grid;
-
   grid-template-columns:
-    minmax(
-      0,
-      1.6fr
-    )
-    minmax(
-      300px,
-      0.9fr
-    );
-
+    minmax(0, 1.6fr)
+    minmax(300px, 0.9fr);
   align-items: start;
 
   gap: 1.5rem;
 
-  width:
-    min(
-      1400px,
-      calc(
-        100% - 4rem
-      )
-    );
+  width: min(1400px, calc(100% - 4rem));
 
-  margin:
-    2rem
-    auto;
+  margin: 2rem auto;
 }
 
 /* =========================================================
-   COLONNE GAUCHE
+   15. COLONNES DU RÉCAPITULATIF
 ========================================================= */
 
-.trip-overview-left {
-  display: flex;
-  flex-direction: column;
-
-  gap: 1rem;
-
-  min-width: 0;
-}
-
-.trip-overview-left > * {
-  width: 100%;
-
-  box-sizing: border-box;
-}
-
-/* =========================================================
-   COLONNE DROITE
-========================================================= */
-
+.trip-overview-left,
 .trip-overview-right {
   display: flex;
   flex-direction: column;
@@ -577,14 +386,13 @@
   min-width: 0;
 }
 
+.trip-overview-left > *,
 .trip-overview-right > * {
   width: 100%;
-
-  box-sizing: border-box;
 }
 
 /* =========================================================
-   CARTE COMMUNE
+   16. CARTE COMMUNE
 ========================================================= */
 
 .trip-overview-card {
@@ -592,30 +400,16 @@
 
   padding: 1.7rem;
 
-  box-sizing: border-box;
-
   background: #ffffff;
 
-  border:
-    1px solid
-    #e5e7eb;
-
+  border: 1px solid #e5e7eb;
   border-radius: 18px;
 
-  box-shadow:
-    0
-    8px
-    24px
-    rgba(
-      15,
-      23,
-      42,
-      0.06
-    );
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 /* =========================================================
-   HEADER CARTE
+   17. HEADER DES CARTES
 ========================================================= */
 
 .trip-overview-header {
@@ -632,25 +426,27 @@
   display: flex;
   align-items: center;
 
+  min-width: 0;
+
   gap: 0.65rem;
 }
 
 .trip-overview-heading h2 {
+  min-width: 0;
+
   margin: 0;
 
   color: #111827;
 
-  font-family:
-    var(
-      --body-text
-    );
-
+  font-family: var(--body-text);
   font-size: 1.2rem;
   font-weight: 800;
+
+  overflow-wrap: anywhere;
 }
 
 /* =========================================================
-   ICÔNES
+   18. ICÔNES CARTES
 ========================================================= */
 
 .trip-overview-icon,
@@ -658,26 +454,19 @@
   display: grid;
   place-items: center;
 
-  flex:
-    0
-    0
-    38px;
+  flex: 0 0 38px;
 
   width: 38px;
   height: 38px;
 
-  color:
-    var(
-      --primary-button
-    );
-
+  color: var(--primary-button);
   background: #eaf5eb;
 
   border-radius: 50%;
 }
 
 /* =========================================================
-   BOUTON MODIFIER
+   19. ACTION MODIFIER
 ========================================================= */
 
 .trip-overview-action {
@@ -688,74 +477,47 @@
 
   gap: 0.4rem;
 
-  padding:
-    0.55rem
-    0.9rem;
+  padding: 0.55rem 0.9rem;
 
-  color:
-    var(
-      --primary-button
-    );
-
+  color: var(--primary-button);
   background: transparent;
 
-  border:
-    1px solid
-    #cfe3d1;
-
+  border: 1px solid #cfe3d1;
   border-radius: 10px;
 
-  font-family:
-    var(
-      --body-text
-    );
-
+  font-family: var(--body-text);
   font-size: 0.9rem;
   font-weight: 600;
 
   cursor: pointer;
 
-  transition:
-    background-color
-    180ms
-    ease,
-    border-color
-    180ms
-    ease;
+  transition: background-color 180ms ease, border-color 180ms ease;
 }
 
 .trip-overview-action:hover {
   background: #eff8f0;
 
-  border-color:
-    var(
-      --primary-button
-    );
+  border-color: var(--primary-button);
 }
 
 /* =========================================================
-   DESCRIPTION
+   20. DESCRIPTION DU VOYAGE
 ========================================================= */
 
 .trip-overview-description {
-  margin:
-    0
-    0
-    1rem;
+  margin: 0 0 1rem;
 
   color: #4b5563;
 
-  font-family:
-    var(
-      --body-text
-    );
-
+  font-family: var(--body-text);
   font-size: 0.98rem;
   line-height: 1.65;
+
+  overflow-wrap: anywhere;
 }
 
 /* =========================================================
-   DÉTAILS
+   21. DÉTAILS DU VOYAGE
 ========================================================= */
 
 .trip-overview-details {
@@ -767,12 +529,10 @@
 
 .trip-overview-detail {
   display: grid;
-
   grid-template-columns:
     24px
     150px
-    1fr;
-
+    minmax(0, 1fr);
   align-items: center;
 
   gap: 0.7rem;
@@ -781,53 +541,44 @@
 }
 
 .trip-overview-detail svg {
+  flex-shrink: 0;
+
   color: #7b8189;
 }
 
 .trip-detail-label {
   color: #6b7280;
 
-  font-family:
-    var(
-      --body-text
-    );
+  font-family: var(--body-text);
 }
 
 .trip-overview-detail strong {
+  min-width: 0;
+
   color: #374151;
 
-  font-family:
-    var(
-      --body-text
-    );
-
+  font-family: var(--body-text);
   font-weight: 600;
+
+  overflow-wrap: anywhere;
 }
 
 /* =========================================================
-   À PROPOS + MAP
+   22. À PROPOS + CARTE
 ========================================================= */
 
 .trip-about-content {
   display: grid;
-
   grid-template-columns:
-    minmax(
-      0,
-      1.45fr
-    )
-    minmax(
-      240px,
-      300px
-    );
-
+    minmax(0, 1.45fr)
+    minmax(240px, 300px);
   align-items: center;
 
   gap: 1.5rem;
 }
 
 /* =========================================================
-   MINI MAP
+   23. MINI CARTE
 ========================================================= */
 
 .trip-about-map {
@@ -842,31 +593,20 @@
 
   border-radius: 16px;
 
-  box-shadow:
-    inset
-    0
-    0
-    0
-    1px
-    rgba(
-      15,
-      23,
-      42,
-      0.05
-    );
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
 }
 
 .trip-about-map img {
   display: block;
 
   width: 100%;
-  height: 180px;
+  height: 100%;
 
   object-fit: cover;
 }
 
 /* =========================================================
-   VILLE SUR LA MAP
+   24. LABEL VILLE SUR CARTE
 ========================================================= */
 
 .trip-about-map-label {
@@ -875,68 +615,35 @@
   left: 50%;
   bottom: 14px;
 
-  padding:
-    0.3rem
-    0.7rem;
+  padding: 0.3rem 0.7rem;
 
   color: #111827;
-
-  background:
-    rgba(
-      255,
-      255,
-      255,
-      0.9
-    );
+  background: rgba(255, 255, 255, 0.9);
 
   border-radius: 8px;
 
-  font-family:
-    var(
-      --body-text
-    );
-
+  font-family: var(--body-text);
   font-size: 1rem;
   font-weight: 700;
 
-  transform:
-    translateX(
-      -50%
-    );
+  transform: translateX(-50%);
 
-  box-shadow:
-    0
-    3px
-    10px
-    rgba(
-      15,
-      23,
-      42,
-      0.12
-    );
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12);
 }
 
 /* =========================================================
-   PARTICIPANTS
+   25. PARTICIPANTS
 ========================================================= */
 
 .trip-members-overview {
   width: 100%;
 
-  padding:
-    1.4rem
-    1.7rem;
+  padding: 1.4rem 1.7rem;
 
-  background:
-    linear-gradient(
-      135deg,
-      #ffffff 0%,
-      #f0f8f1 100%
-    );
+  background: linear-gradient(135deg, #ffffff 0%, #f0f8f1 100%);
 }
 
-.trip-members-overview
-.trip-overview-header {
+.trip-members-overview .trip-overview-header {
   margin-bottom: 0.7rem;
 }
 
@@ -947,68 +654,114 @@
   min-height: 80px;
 }
 
+/* =========================================================
+   26. LISTE DES AVATARS
+========================================================= */
+
 .trip-members-avatars {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+
+  row-gap: 0.6rem;
+
+  max-width: 100%;
 }
 
 /* =========================================================
-   VOIR TOUS
+   27. VOIR TOUS / LIENS
 ========================================================= */
 
-.trip-members-see-all {
+.trip-members-see-all,
+.trip-progress-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
 
   gap: 0.35rem;
 
-  color:
-    var(
-      --primary-button
-    );
+  color: var(--primary-button);
 
-  font-family:
-    var(
-      --body-text
-    );
-
+  font-family: var(--body-text);
   font-size: 0.9rem;
   font-weight: 600;
 
   text-decoration: none;
 
-  transition:
-    gap
-    180ms
-    ease;
+  white-space: nowrap;
+}
+
+.trip-members-see-all {
+  transition: gap 180ms ease;
 }
 
 .trip-members-see-all:hover {
   gap: 0.55rem;
 }
 
+.trip-members-see-all svg,
+.trip-progress-link svg {
+  flex-shrink: 0;
+}
+
 /* =========================================================
-   NOMBRE PARTICIPANTS
+   28. NOMBRE DE PARTICIPANTS
 ========================================================= */
 
 .trip-members-count {
-  margin:
-    0
-    0
-    0.8rem;
+  margin: 0 0 0.8rem;
 
   color: #6b7280;
 
-  font-family:
-    var(
-      --body-text
-    );
-
+  font-family: var(--body-text);
   font-size: 0.9rem;
 }
 
 /* =========================================================
-   INVITER
+   29. AVATARS
+========================================================= */
+
+.trip-member-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 72px;
+
+  width: 72px;
+  height: 72px;
+
+  margin-left: -8px;
+
+  overflow: hidden;
+
+  object-fit: cover;
+
+  color: #245c32;
+  background: #e8f3ea;
+
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+
+  font-family: var(--body-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.1);
+}
+
+.trip-member-avatar:first-child {
+  margin-left: 0;
+}
+
+.trip-member-avatar-fallback {
+  line-height: 1;
+}
+
+/* =========================================================
+   30. INVITATION PARTICIPANT
 ========================================================= */
 
 .trip-member-invite {
@@ -1021,166 +774,50 @@
   margin-left: 0.8rem;
 }
 
-.trip-member-invite
-.trip-member-add {
+.trip-member-invite .trip-member-add {
   margin-left: 0;
 }
-
-/* =========================================================
-   AVATARS
-========================================================= */
-
-.trip-member-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  flex:
-    0
-    0
-    72px;
-
-  width: 72px;
-  height: 72px;
-
-  margin-left: -8px;
-
-  overflow: hidden;
-
-  object-fit: cover;
-
-  color: #245c32;
-
-  background: #e8f3ea;
-
-  border:
-    3px solid
-    #ffffff;
-
-  border-radius: 50%;
-
-  font-family:
-    var(
-      --body-text
-    );
-
-  font-size: 0.75rem;
-  font-weight: 700;
-
-  box-shadow:
-    0
-    2px
-    7px
-    rgba(
-      0,
-      0,
-      0,
-      0.1
-    );
-}
-
-.trip-member-avatar:first-child {
-  margin-left: 0;
-}
-
-.trip-member-avatar-fallback {
-  line-height: 1;
-}
-
-/* =========================================================
-   BOUTON +
-========================================================= */
 
 .trip-member-add {
   display: grid;
   place-items: center;
 
-  flex:
-    0
-    0
-    60px;
+  flex: 0 0 60px;
 
   width: 60px;
   height: 60px;
 
-  margin-left: 0.8rem;
+  color: var(--primary-button);
+  background: rgba(255, 255, 255, 0.75);
 
-  color:
-    var(
-      --primary-button
-    );
-
-  background:
-    rgba(
-      255,
-      255,
-      255,
-      0.75
-    );
-
-  border:
-    1px dashed
-    var(
-      --primary-button
-    );
-
+  border: 1px dashed var(--primary-button);
   border-radius: 50%;
 
   cursor: pointer;
 
-  transition:
-    background-color
-    180ms
-    ease,
-    transform
-    180ms
-    ease;
+  transition: background-color 180ms ease, transform 180ms ease;
 }
 
 .trip-member-add:hover {
   background: #ffffff;
 
-  transform:
-    scale(
-      1.05
-    );
+  transform: scale(1.05);
 }
 
 /* =========================================================
-   LIENS
+   RESPONSIVE
 ========================================================= */
-
-.trip-progress-link,
-.trip-members-see-all {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 0.35rem;
-
-  white-space: nowrap;
-}
-
-.trip-progress-link svg,
-.trip-members-see-all svg {
-  flex-shrink: 0;
-}
 
 /* =========================================================
    GRAND ÉCRAN
+   ≥ 1500 PX
 ========================================================= */
 
 @media (min-width: 1500px) {
   .trip-header-modern {
     grid-template-columns:
-      minmax(
-        390px,
-        0.9fr
-      )
-      minmax(
-        0,
-        2.1fr
-      );
+      minmax(390px, 0.9fr)
+      minmax(0, 2.1fr);
 
     min-height: 260px;
 
@@ -1194,13 +831,13 @@
 }
 
 /* =========================================================
-   TABLETTE LARGE
+   PETIT DESKTOP / TABLETTE LARGE
+   ≤ 1100 PX
 ========================================================= */
 
 @media (max-width: 1100px) {
   .trip-header-modern {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
 
     gap: 0.85rem;
 
@@ -1208,20 +845,11 @@
   }
 
   .trip-header-modern-info {
-    padding:
-      0.5rem
-      0.4rem;
+    padding: 0.5rem 0.4rem;
   }
 
   .trip-header-gallery {
-    grid-template-columns:
-      repeat(
-        3,
-        minmax(
-          0,
-          1fr
-        )
-      );
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 
     height: 190px;
   }
@@ -1231,63 +859,78 @@
     min-height: 0;
   }
 
-  .trip-header-photo img {
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-  }
-
   .trip-header-photo-main img {
-    object-position:
-      center
-      45%;
+    object-position: center 45%;
   }
 
   .trip-header-photo-secondary img {
-    object-position:
-      center
-      42%;
+    object-position: center 42%;
   }
 
   .trip-header-photo-third img {
-    object-position:
-      center
-      45%;
+    object-position: center 45%;
+  }
+
+  .trip-about-content {
+    grid-template-columns: 1fr;
+
+    gap: 1.25rem;
+  }
+
+  .trip-about-map {
+    height: 180px;
+  }
+
+  .trip-overview-detail {
+    grid-template-columns:
+      24px
+      130px
+      minmax(0, 1fr);
   }
 }
 
 /* =========================================================
    TABLETTE
+   ≤ 900 PX
 ========================================================= */
 
 @media (max-width: 900px) {
   .trip-stage {
-    padding:
-      1.5rem
-      1rem
-      0;
+    padding: 1.5rem 1rem 0;
   }
 
   .trip-overview {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
 
-    width:
-      calc(
-        100% - 2rem
-      );
+    width: calc(100% - 2rem);
   }
 }
 
 /* =========================================================
-   MOBILE
+   TABLETTE PORTRAIT
+   ≤ 768 PX
+========================================================= */
+
+@media (max-width: 768px) {
+  .trip-about-content {
+    grid-template-columns: 1fr;
+
+    gap: 1.25rem;
+  }
+
+  .trip-about-map {
+    height: 180px;
+  }
+}
+
+/* =========================================================
+   MOBILE LARGE
+   ≤ 700 PX
 ========================================================= */
 
 @media (max-width: 700px) {
   .trip-header-modern {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
 
     gap: 0.9rem;
 
@@ -1297,9 +940,7 @@
   }
 
   .trip-header-modern-info {
-    padding:
-      0.35rem
-      0.25rem;
+    padding: 0.35rem 0.25rem;
   }
 
   .trip-header-location {
@@ -1317,15 +958,12 @@
 
     font-size: 0.82rem;
 
-    line-clamp: 2;
     -webkit-line-clamp: 2;
   }
 
   .trip-header-meta {
     display: grid;
-
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
 
     width: 100%;
 
@@ -1336,7 +974,6 @@
 
   .trip-header-meta-item {
     width: 100%;
-
     min-height: 38px;
   }
 
@@ -1345,16 +982,7 @@
   }
 
   .trip-header-gallery {
-    display: grid;
-
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(
-          0,
-          1fr
-        )
-      );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
     gap: 0.55rem;
 
@@ -1363,8 +991,7 @@
   }
 
   .trip-header-photo-main {
-    grid-column:
-      1 / -1;
+    grid-column: 1 / -1;
 
     height: 175px;
   }
@@ -1382,15 +1009,176 @@
 }
 
 /* =========================================================
+   MOBILE
+   ≤ 600 PX
+========================================================= */
+
+@media (max-width: 600px) {
+  /* ================= CARDS ================= */
+
+  .trip-overview-card {
+    padding: 1.2rem;
+
+    border-radius: 16px;
+  }
+
+  /* ================= DÉTAILS ================= */
+
+  .trip-overview-detail {
+    grid-template-columns:
+      22px
+      minmax(0, 1fr);
+
+    align-items: start;
+
+    gap: 0.25rem 0.65rem;
+  }
+
+  .trip-overview-detail svg {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+
+    margin-top: 0.1rem;
+  }
+
+  .trip-detail-label {
+    grid-column: 2;
+    grid-row: 1;
+
+    font-size: 0.82rem;
+  }
+
+  .trip-overview-detail strong {
+    grid-column: 2;
+    grid-row: 2;
+
+    font-size: 0.9rem;
+  }
+
+  /* ================= PARTICIPANTS ================= */
+
+  .trip-member-avatar {
+    flex-basis: 58px;
+
+    width: 58px;
+    height: 58px;
+
+    margin-left: -6px;
+  }
+
+  .trip-member-add {
+    flex-basis: 52px;
+
+    width: 52px;
+    height: 52px;
+  }
+
+  .trip-member-invite {
+    margin-left: 0.6rem;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ≤ 480 PX
+========================================================= */
+
+@media (max-width: 480px) {
+  /* ================= HERO ================= */
+
+  .trip-stage {
+    padding: 0.8rem 0.6rem 0;
+  }
+
+  .trip-header-modern {
+    padding: 0.8rem;
+
+    border-radius: 16px;
+  }
+
+  .trip-header-modern-info h1 {
+    font-size: 1.6rem;
+  }
+
+  .trip-header-location span {
+    overflow-wrap: anywhere;
+  }
+
+  .trip-header-meta-item {
+    padding: 0.55rem 0.7rem;
+
+    font-size: 0.82rem;
+  }
+
+  /* ================= NAVIGATION ================= */
+
+  .trip-infos-navigation {
+    margin-top: 20px;
+
+    padding: 6px 0;
+  }
+
+  /* ================= OVERVIEW ================= */
+
+  .trip-overview {
+    width: calc(100% - 1rem);
+
+    margin: 1.25rem auto;
+
+    gap: 1rem;
+  }
+
+  /* ================= HEADER CARDS ================= */
+
+  .trip-overview-header {
+    flex-wrap: wrap;
+
+    gap: 0.75rem;
+  }
+
+  .trip-overview-heading h2 {
+    font-size: 1.05rem;
+  }
+
+  .trip-overview-action,
+  .trip-members-see-all,
+  .trip-progress-link {
+    font-size: 0.82rem;
+  }
+
+  /* ================= MAP ================= */
+
+  .trip-about-map {
+    height: 160px;
+  }
+
+  .trip-about-map-label {
+    bottom: 10px;
+
+    font-size: 0.88rem;
+  }
+
+  /* ================= PARTICIPANTS ================= */
+
+  .trip-members-overview {
+    padding: 1.2rem;
+  }
+
+  .trip-members-content {
+    min-height: 65px;
+  }
+}
+
+/* =========================================================
    PETIT MOBILE
+   ≤ 400 PX
 ========================================================= */
 
 @media (max-width: 400px) {
+  /* ================= HERO ================= */
+
   .trip-stage {
-    padding:
-      0.7rem
-      0.45rem
-      0;
+    padding: 0.7rem 0.45rem 0;
   }
 
   .trip-header-modern {
@@ -1398,7 +1186,7 @@
   }
 
   .trip-header-modern-info h1 {
-    font-size: 1.65rem;
+    font-size: 1.5rem;
   }
 
   .trip-header-photo-main {
@@ -1408,5 +1196,142 @@
   .trip-header-photo-secondary,
   .trip-header-photo-third {
     height: 90px;
+  }
+
+  /* ================= OVERVIEW ================= */
+
+  .trip-overview-card {
+    padding: 1rem;
+  }
+
+  .trip-overview-heading {
+    gap: 0.5rem;
+  }
+
+  .trip-overview-icon,
+  .trip-members-icon {
+    flex-basis: 34px;
+
+    width: 34px;
+    height: 34px;
+  }
+
+  /* =====================================================
+     TITRES DE TOUTES LES CARTES
+  ====================================================== */
+
+  .trip-overview h2,
+  .trip-overview h3,
+  .trip-progress-card .trip-progress-title h2 {
+    font-size: 1rem;
+    line-height: 1.15;
+    font-weight: 800;
+  }
+
+  /* ================= LIENS ================= */
+
+  .trip-progress-link,
+  .trip-members-see-all {
+    font-size: 0.78rem;
+  }
+
+  /* ================= PARTICIPANTS ================= */
+
+  .trip-member-avatar {
+    flex-basis: 52px;
+
+    width: 52px;
+    height: 52px;
+  }
+
+  .trip-member-add {
+    flex-basis: 48px;
+
+    width: 48px;
+    height: 48px;
+  }
+
+  .trip-member-invite {
+    margin-left: 0.45rem;
+  }
+}
+
+
+/* =========================================================
+   TRÈS PETIT MOBILE
+   ≤ 340 PX
+========================================================= */
+
+@media (max-width: 340px) {
+  .trip-stage {
+    padding-inline: 0.35rem;
+  }
+
+  .trip-header-modern {
+    padding: 0.65rem;
+  }
+
+  .trip-header-modern-info h1 {
+    font-size: 1.4rem;
+  }
+
+  .trip-header-meta-item {
+    padding-inline: 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  .trip-overview {
+    width: calc(100% - 0.7rem);
+  }
+
+  .trip-overview-card {
+    padding: 0.9rem;
+  }
+
+  .trip-overview-action {
+    min-height: 38px;
+    padding: 0.4rem 0.6rem;
+
+    font-size: 0.78rem;
+  }
+
+  .trip-overview-action svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* ================= PARTICIPANTS ================= */
+
+  .trip-member-avatar {
+    flex-basis: 48px;
+
+    width: 48px;
+    height: 48px;
+  }
+
+  .trip-member-add {
+    flex-basis: 45px;
+
+    width: 45px;
+    height: 45px;
+  }
+
+  /* =====================================================
+     TITRES DE TOUTES LES CARTES
+  ====================================================== */
+
+  .trip-overview h2,
+  .trip-overview h3,
+  .trip-progress-card .trip-progress-title h2 {
+    font-size: 1rem;
+    line-height: 1.15;
+    font-weight: 800;
+  }
+
+  /* ================= LIENS ================= */
+
+  .trip-progress-link,
+  .trip-members-see-all {
+    font-size: 0.78rem;
   }
 }

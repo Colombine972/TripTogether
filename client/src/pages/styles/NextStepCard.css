@@ -14,9 +14,7 @@
   border: 1px solid #e3e8e4;
   border-radius: 18px;
 
-  box-shadow:
-    0 8px 26px
-    rgba(35, 52, 39, 0.06);
+  box-shadow: 0 8px 26px rgba(35, 52, 39, 0.06);
 
   font-family: var(--body-text);
 }
@@ -54,6 +52,7 @@
   border-radius: 10px;
 }
 
+.next-step-title h2,
 .next-step-title h3 {
   margin: 0;
 
@@ -62,6 +61,7 @@
   font-family: var(--body-text);
   font-size: 1.2rem;
   font-weight: 800;
+  line-height: 1.15;
 }
 
 /* =========================================================
@@ -75,7 +75,7 @@
 
   padding: 0;
 
-    color: var(--primary-button);
+  color: var(--primary-button);
 
   font-family: var(--body-text);
   font-size: 0.9rem;
@@ -91,15 +91,11 @@
 }
 
 .next-step-see-all svg {
-  transition:
-    transform 180ms ease;
+  transition: transform 180ms ease;
 }
 
 .next-step-see-all:hover svg {
-  transform:
-    translateX(
-      2px
-    );
+  transform: translateX(2px);
 }
 
 /* =========================================================
@@ -109,10 +105,7 @@
 .next-step-content {
   display: grid;
   grid-template-columns:
-    minmax(
-      0,
-      1fr
-    )
+    minmax(0, 1fr)
     150px;
 
   gap: 1rem;
@@ -161,10 +154,7 @@
 }
 
 .next-step-country {
-  margin:
-    0.8rem
-    0
-    0;
+  margin: 0.8rem 0 0;
 
   color: #747d77;
 
@@ -181,9 +171,7 @@
 
   margin-bottom: 0.7rem;
 
-  padding:
-    0.3rem
-    0.65rem;
+  padding: 0.3rem 0.65rem;
 
   color: #17683a;
 
@@ -216,7 +204,6 @@
   color: #218149;
 }
 
-
 /* =========================================================
    IMAGE
 ========================================================= */
@@ -244,16 +231,11 @@
 
   object-fit: cover;
 
-  transition:
-    transform 350ms ease;
+  transition: transform 350ms ease;
 }
 
-.next-step-card:hover
-.next-step-image {
-  transform:
-    scale(
-      1.035
-    );
+.next-step-card:hover .next-step-image {
+  transform: scale(1.035);
 }
 
 .next-step-image-overlay {
@@ -262,26 +244,12 @@
 
   pointer-events: none;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(
-        20,
-        30,
-        23,
-        0.02
-      )
-      45%,
-      rgba(
-        20,
-        30,
-        23,
-        0.58
-      )
-      100%
-    );
+  background: linear-gradient(
+    180deg,
+    rgba(20, 30, 23, 0.02) 45%,
+    rgba(20, 30, 23, 0.58) 100%
+  );
 }
-
 
 /* =========================================================
    AUCUNE PROCHAINE ÉTAPE
@@ -354,10 +322,7 @@
 @media (max-width: 900px) {
   .next-step-content {
     grid-template-columns:
-      minmax(
-        0,
-        1fr
-      )
+      minmax(0, 1fr)
       135px;
   }
 }
@@ -372,12 +337,23 @@
   }
 
   .next-step-header {
-    align-items: flex-start;
+    align-items: center;
+  }
+
+  .next-step-title {
+    align-items: center;
+
+    min-width: 0;
+  }
+
+  .next-step-see-all {
+    align-self: center;
+
+    flex-shrink: 0;
   }
 
   .next-step-content {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: 1fr;
   }
 
   .next-step-image-wrapper {
@@ -389,6 +365,25 @@
   .next-step-info h4 {
     font-size: 1.3rem;
   }
-
-
 }
+
+/* =========================================================
+   HARMONISATION TITRE PROCHAINE ÉTAPE - MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+  .next-step-title h2,
+  .next-step-title h3 {
+    margin: 0;
+
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+
+  .next-step-see-all {
+    font-size: 0.78rem;
+  }
+}
+
+
