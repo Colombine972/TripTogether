@@ -53,6 +53,7 @@ type Expense = {
   category_name?: string;
   paid_by_name?: string;
   participants?: ExpenseShare[];
+  deletion_locked?: boolean;
 };
 
 type MemberApiResponse = {
@@ -770,8 +771,7 @@ function TripBudgetPage() {
 
         members,
 
-        tripImageUrl:
-        trip.place_id
+        tripImageUrl: trip.place_id
           ? `${import.meta.env.VITE_API_URL}/api/places/photo/${trip.place_id}`
           : null,
       });
@@ -801,6 +801,16 @@ function TripBudgetPage() {
 
   const handleDeleteExpense = async () => {
     if (!expenseToDelete) {
+      return;
+    }
+
+    if (expenseToDelete.deletion_locked) {
+      toast.info(
+        "Cette dépense est liée à un remboursement. Sa suppression est impossible.",
+      );
+
+      setExpenseToDelete(null);
+
       return;
     }
 
@@ -852,7 +862,6 @@ function TripBudgetPage() {
       {trip && <TripInfos trip={trip} onTripUpdated={setTrip} />}
 
       <main className="page-membre trip-budget-page">
-
         {isLoading ? (
           <p className="loading-text">Chargement du budget...</p>
         ) : (
@@ -1004,27 +1013,54 @@ function TripBudgetPage() {
                                     </svg>
                                   </button>
 
-                                  <button
-                                    type="button"
-                                    className="delete-expense-btn"
-                                    onClick={() => setExpenseToDelete(expense)}
-                                    aria-label={`Supprimer la dépense ${expense.title}`}
-                                    title="Supprimer la dépense"
+                                  <div
+                                    className="expense-delete-wrapper"
+                                    title={
+                                      expense.deletion_locked
+                                        ? "Cette dépense est liée à un remboursement. Sa suppression est impossible."
+                                        : "Supprimer la dépense"
+                                    }
                                   >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      viewBox="0 0 24 24"
-                                      fill="currentColor"
-                                      className="trash-icon"
-                                      aria-hidden="true"
+                                    <button
+                                      type="button"
+                                      className={`delete-expense-btn ${
+                                        expense.deletion_locked
+                                          ? "delete-expense-btn-disabled"
+                                          : ""
+                                      }`}
+                                      aria-disabled={expense.deletion_locked}
+                                      aria-label={
+                                        expense.deletion_locked
+                                          ? `Suppression impossible pour la dépense ${expense.title} : dépense liée à un remboursement`
+                                          : `Supprimer la dépense ${expense.title}`
+                                      }
+                                      onClick={() => {
+                                        if (expense.deletion_locked) {
+                                          toast.info(
+                                            "Cette dépense est liée à un remboursement. Sa suppression est impossible.",
+                                          );
+
+                                          return;
+                                        }
+
+                                        setExpenseToDelete(expense);
+                                      }}
                                     >
-                                      <path
-                                        fillRule="evenodd"
-                                        d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-3.536 4.569a.75.75 0 0 0-1.44.32l.5 10a.75.75 0 0 0 1.498-.06l-.558-10.26Zm4.5 0a.75.75 0 0 0-1.5 0v10.26a.75.75 0 0 0 1.5 0v-10.26Zm3.536.26a.75.75 0 0 0-1.44-.32l-.558 10.26a.75.75 0 0 0 1.498.06l.5-10Z"
-                                        clipRule="evenodd"
-                                      />
-                                    </svg>
-                                  </button>
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                        className="trash-icon"
+                                        aria-hidden="true"
+                                      >
+                                        <path
+                                          fillRule="evenodd"
+                                          d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-3.536 4.569a.75.75 0 0 0-1.44.32l.5 10a.75.75 0 0 0 1.498-.06l-.558-10.26Zm4.5 0a.75.75 0 0 0-1.5 0v10.26a.75.75 0 0 0 1.5 0v-10.26Zm3.536.26a.75.75 0 0 0-1.44-.32l-.558 10.26a.75.75 0 0 0 1.498.06l.5-10Z"
+                                          clipRule="evenodd"
+                                        />
+                                      </svg>
+                                    </button>
+                                  </div>
                                 </div>
 
                                 <strong className="expense-amount">

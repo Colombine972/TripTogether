@@ -1,9 +1,6 @@
 import databaseClient from "../../../database/client";
 
-import type {
-  Result,
-  Rows,
-} from "../../../database/client";
+import type { Result, Rows } from "../../../database/client";
 
 import type {
   CreateReimbursementPayload,
@@ -16,12 +13,9 @@ class ReimbursementRepository {
      CRÉER UN REMBOURSEMENT
   ========================================================= */
 
-  async create(
-    payload: CreateReimbursementPayload,
-  ): Promise<number> {
-    const [result] =
-      await databaseClient.query<Result>(
-        `
+  async create(payload: CreateReimbursementPayload): Promise<number> {
+    const [result] = await databaseClient.query<Result>(
+      `
           INSERT INTO reimbursement (
             trip_id,
             from_user_id,
@@ -33,15 +27,15 @@ class ReimbursementRepository {
           )
           VALUES (?, ?, ?, ?, ?, ?, 'pending')
         `,
-        [
-          payload.tripId,
-          payload.fromUserId,
-          payload.toUserId,
-          payload.amount,
-          payload.currency,
-          payload.paymentMethod,
-        ],
-      );
+      [
+        payload.tripId,
+        payload.fromUserId,
+        payload.toUserId,
+        payload.amount,
+        payload.currency,
+        payload.paymentMethod,
+      ],
+    );
 
     return result.insertId;
   }
@@ -50,12 +44,9 @@ class ReimbursementRepository {
      TROUVER UN REMBOURSEMENT
   ========================================================= */
 
-  async findById(
-    reimbursementId: number,
-  ): Promise<Reimbursement | null> {
-    const [rows] =
-      await databaseClient.query<Rows>(
-        `
+  async findById(reimbursementId: number): Promise<Reimbursement | null> {
+    const [rows] = await databaseClient.query<Rows>(
+      `
           SELECT
             r.*,
             from_user.firstname AS from_firstname,
@@ -72,8 +63,8 @@ class ReimbursementRepository {
 
           LIMIT 1
         `,
-        [reimbursementId],
-      );
+      [reimbursementId],
+    );
 
     if (!rows[0]) {
       return null;
@@ -90,9 +81,8 @@ class ReimbursementRepository {
     tripId: number,
     userId: number,
   ): Promise<Reimbursement[]> {
-    const [rows] =
-      await databaseClient.query<Rows>(
-        `
+    const [rows] = await databaseClient.query<Rows>(
+      `
           SELECT
             r.*,
             from_user.firstname AS from_firstname,
@@ -114,12 +104,8 @@ class ReimbursementRepository {
 
           ORDER BY r.created_at DESC
         `,
-        [
-          tripId,
-          userId,
-          userId,
-        ],
-      );
+      [tripId, userId, userId],
+    );
 
     return rows as Reimbursement[];
   }
@@ -133,9 +119,8 @@ class ReimbursementRepository {
     fromUserId: number,
     toUserId: number,
   ): Promise<Reimbursement | null> {
-    const [rows] =
-      await databaseClient.query<Rows>(
-        `
+    const [rows] = await databaseClient.query<Rows>(
+      `
           SELECT *
           FROM reimbursement
 
@@ -147,12 +132,8 @@ class ReimbursementRepository {
 
           LIMIT 1
         `,
-        [
-          tripId,
-          fromUserId,
-          toUserId,
-        ],
-      );
+      [tripId, fromUserId, toUserId],
+    );
 
     if (!rows[0]) {
       return null;
@@ -165,12 +146,9 @@ class ReimbursementRepository {
      CONFIRMER
   ========================================================= */
 
-  async confirm(
-    reimbursementId: number,
-  ): Promise<number> {
-    const [result] =
-      await databaseClient.query<Result>(
-        `
+  async confirm(reimbursementId: number): Promise<number> {
+    const [result] = await databaseClient.query<Result>(
+      `
           UPDATE reimbursement
 
           SET
@@ -182,8 +160,8 @@ class ReimbursementRepository {
             id = ?
             AND status = 'pending'
         `,
-        [reimbursementId],
-      );
+      [reimbursementId],
+    );
 
     return result.affectedRows;
   }
@@ -192,12 +170,9 @@ class ReimbursementRepository {
      REFUSER
   ========================================================= */
 
-  async reject(
-    reimbursementId: number,
-  ): Promise<number> {
-    const [result] =
-      await databaseClient.query<Result>(
-        `
+  async reject(reimbursementId: number): Promise<number> {
+    const [result] = await databaseClient.query<Result>(
+      `
           UPDATE reimbursement
 
           SET
@@ -209,10 +184,24 @@ class ReimbursementRepository {
             id = ?
             AND status = 'pending'
         `,
-        [reimbursementId],
-      );
+      [reimbursementId],
+    );
 
     return result.affectedRows;
+  }
+
+  /* =========================================================
+   SUPPRIMER LES ALLOCATIONS D'UN REMBOURSEMENT
+========================================================= */
+
+  async deleteExpenseAllocations(reimbursementId: number): Promise<void> {
+    await databaseClient.query(
+      `
+      DELETE FROM reimbursement_expense
+      WHERE reimbursement_id = ?
+    `,
+      [reimbursementId],
+    );
   }
 
   /* =========================================================
@@ -229,9 +218,8 @@ class ReimbursementRepository {
      * Le débiteur possède une part.
      */
 
-    const [debtorOwesRows] =
-      await databaseClient.query<Rows>(
-        `
+    const [debtorOwesRows] = await databaseClient.query<Rows>(
+      `
           SELECT
             COALESCE(
               SUM(es.share_amount),
@@ -248,20 +236,15 @@ class ReimbursementRepository {
             AND e.paid_by = ?
             AND es.user_id = ?
         `,
-        [
-          tripId,
-          creditorId,
-          debtorId,
-        ],
-      );
+      [tripId, creditorId, debtorId],
+    );
 
     /*
      * Dette dans le sens inverse.
      */
 
-    const [creditorOwesRows] =
-      await databaseClient.query<Rows>(
-        `
+    const [creditorOwesRows] = await databaseClient.query<Rows>(
+      `
           SELECT
             COALESCE(
               SUM(es.share_amount),
@@ -278,20 +261,15 @@ class ReimbursementRepository {
             AND e.paid_by = ?
             AND es.user_id = ?
         `,
-        [
-          tripId,
-          debtorId,
-          creditorId,
-        ],
-      );
+      [tripId, debtorId, creditorId],
+    );
 
     /*
      * Remboursements confirmés dans les deux sens.
      */
 
-    const [confirmedRows] =
-      await databaseClient.query<Rows>(
-        `
+    const [confirmedRows] = await databaseClient.query<Rows>(
+      `
           SELECT
             COALESCE(
               SUM(
@@ -320,39 +298,24 @@ class ReimbursementRepository {
             trip_id = ?
             AND status = 'confirmed'
         `,
-        [
-          debtorId,
-          creditorId,
+      [
+        debtorId,
+        creditorId,
 
-          creditorId,
-          debtorId,
+        creditorId,
+        debtorId,
 
-          tripId,
-        ],
-      );
-
-    const debtorOwes =
-      Number(
-        debtorOwesRows[0]?.total || 0,
-      );
-
-    const creditorOwes =
-      Number(
-        creditorOwesRows[0]?.total || 0,
-      );
-
-    const confirmedPayments =
-      Number(
-        confirmedRows[0]?.total || 0,
-      );
-
-    return Number(
-      (
-        debtorOwes -
-        creditorOwes -
-        confirmedPayments
-      ).toFixed(2),
+        tripId,
+      ],
     );
+
+    const debtorOwes = Number(debtorOwesRows[0]?.total || 0);
+
+    const creditorOwes = Number(creditorOwesRows[0]?.total || 0);
+
+    const confirmedPayments = Number(confirmedRows[0]?.total || 0);
+
+    return Number((debtorOwes - creditorOwes - confirmedPayments).toFixed(2));
   }
 
   /* =========================================================
@@ -374,9 +337,8 @@ class ReimbursementRepository {
      * Elles AUGMENTENT la dette.
      */
 
-    const [debtRows] =
-      await databaseClient.query<Rows>(
-        `
+    const [debtRows] = await databaseClient.query<Rows>(
+      `
           SELECT
             e.id AS expense_id,
             e.date,
@@ -398,12 +360,8 @@ class ReimbursementRepository {
             e.created_at ASC,
             e.id ASC
         `,
-        [
-          tripId,
-          creditorId,
-          debtorId,
-        ],
-      );
+      [tripId, creditorId, debtorId],
+    );
 
     /*
      * Dépenses dans le sens inverse :
@@ -414,9 +372,8 @@ class ReimbursementRepository {
      * Elles DIMINUENT la dette nette.
      */
 
-    const [offsetRows] =
-      await databaseClient.query<Rows>(
-        `
+    const [offsetRows] = await databaseClient.query<Rows>(
+      `
           SELECT
             e.id AS expense_id,
             e.date,
@@ -438,21 +395,16 @@ class ReimbursementRepository {
             e.created_at ASC,
             e.id ASC
         `,
-        [
-          tripId,
-          debtorId,
-          creditorId,
-        ],
-      );
+      [tripId, debtorId, creditorId],
+    );
 
     /*
      * Les allocations de remboursements déjà
      * confirmés ne doivent pas être réutilisées.
      */
 
-    const [usedDebtRows] =
-      await databaseClient.query<Rows>(
-        `
+    const [usedDebtRows] = await databaseClient.query<Rows>(
+      `
           SELECT
             re.expense_id,
 
@@ -478,16 +430,11 @@ class ReimbursementRepository {
 
           GROUP BY re.expense_id
         `,
-        [
-          tripId,
-          debtorId,
-          creditorId,
-        ],
-      );
+      [tripId, debtorId, creditorId],
+    );
 
-    const [usedOffsetRows] =
-      await databaseClient.query<Rows>(
-        `
+    const [usedOffsetRows] = await databaseClient.query<Rows>(
+      `
           SELECT
             re.expense_id,
 
@@ -513,104 +460,65 @@ class ReimbursementRepository {
 
           GROUP BY re.expense_id
         `,
-        [
-          tripId,
-          debtorId,
-          creditorId,
-        ],
-      );
+      [tripId, debtorId, creditorId],
+    );
 
     const usedDebt = new Map<number, number>();
 
     for (const row of usedDebtRows) {
-      usedDebt.set(
-        Number(row.expense_id),
-        Number(row.allocated || 0),
-      );
+      usedDebt.set(Number(row.expense_id), Number(row.allocated || 0));
     }
 
-    const usedOffset =
-      new Map<number, number>();
+    const usedOffset = new Map<number, number>();
 
     for (const row of usedOffsetRows) {
-      usedOffset.set(
-        Number(row.expense_id),
-        Number(row.allocated || 0),
-      );
+      usedOffset.set(Number(row.expense_id), Number(row.allocated || 0));
     }
 
     /*
      * Montants encore disponibles.
      */
 
-    const availableDebt =
-      debtRows
-        .map((row) => {
-          const expenseId =
-            Number(row.expense_id);
+    const availableDebt = debtRows
+      .map((row) => {
+        const expenseId = Number(row.expense_id);
 
-          const share =
-            Number(row.share_amount);
+        const share = Number(row.share_amount);
 
-          const alreadyAllocated =
-            usedDebt.get(expenseId) || 0;
+        const alreadyAllocated = usedDebt.get(expenseId) || 0;
 
-          return {
-            expenseId,
+        return {
+          expenseId,
 
-            amount: Number(
-              Math.max(
-                0,
-                share -
-                  alreadyAllocated,
-              ).toFixed(2),
-            ),
-          };
-        })
-        .filter(
-          (item) =>
-            item.amount > 0.001,
-        );
+          amount: Number(Math.max(0, share - alreadyAllocated).toFixed(2)),
+        };
+      })
+      .filter((item) => item.amount > 0.001);
 
-    const availableOffset =
-      offsetRows
-        .map((row) => {
-          const expenseId =
-            Number(row.expense_id);
+    const availableOffset = offsetRows
+      .map((row) => {
+        const expenseId = Number(row.expense_id);
 
-          const share =
-            Number(row.share_amount);
+        const share = Number(row.share_amount);
 
-          const alreadyAllocated =
-            usedOffset.get(expenseId) || 0;
+        const alreadyAllocated = usedOffset.get(expenseId) || 0;
 
-          return {
-            expenseId,
+        return {
+          expenseId,
 
-            amount: Number(
-              Math.max(
-                0,
-                share -
-                  alreadyAllocated,
-              ).toFixed(2),
-            ),
-          };
-        })
-        .filter(
-          (item) =>
-            item.amount > 0.001,
-        );
+          amount: Number(Math.max(0, share - alreadyAllocated).toFixed(2)),
+        };
+      })
+      .filter((item) => item.amount > 0.001);
 
     /*
      * Calcul de la compensation disponible.
      */
 
-    const totalOffset =
-      availableOffset.reduce(
-        (sum, item) =>
-          sum + item.amount,
-        0,
-      );
+    const totalOffset = availableOffset.reduce(
+      (sum, item) => sum + item.amount,
+      0,
+    );
 
     /*
      * Pour couvrir un remboursement de 60 €
@@ -620,17 +528,9 @@ class ReimbursementRepository {
      * 100 - 40 = 60.
      */
 
-    let debtToAllocate =
-      Number(
-        (
-          reimbursementAmount +
-          totalOffset
-        ).toFixed(2),
-      );
+    let debtToAllocate = Number((reimbursementAmount + totalOffset).toFixed(2));
 
-    const allocations:
-      ReimbursementExpenseAllocation[] =
-        [];
+    const allocations: ReimbursementExpenseAllocation[] = [];
 
     /* =====================================================
        ALLOCATION DES DETTES
@@ -641,36 +541,23 @@ class ReimbursementRepository {
         break;
       }
 
-      const allocatedAmount =
-        Number(
-          Math.min(
-            item.amount,
-            debtToAllocate,
-          ).toFixed(2),
-        );
+      const allocatedAmount = Number(
+        Math.min(item.amount, debtToAllocate).toFixed(2),
+      );
 
       if (allocatedAmount <= 0) {
         continue;
       }
 
       allocations.push({
-        expenseId:
-          item.expenseId,
+        expenseId: item.expenseId,
 
-        amount:
-          allocatedAmount,
+        amount: allocatedAmount,
 
-        type:
-          "debt",
+        type: "debt",
       });
 
-      debtToAllocate =
-        Number(
-          (
-            debtToAllocate -
-            allocatedAmount
-          ).toFixed(2),
-        );
+      debtToAllocate = Number((debtToAllocate - allocatedAmount).toFixed(2));
     }
 
     /*
@@ -679,109 +566,53 @@ class ReimbursementRepository {
      * que la quantité réellement utilisée.
      */
 
-    const allocatedDebtTotal =
-      allocations
-        .filter(
-          (allocation) =>
-            allocation.type ===
-            "debt",
-        )
-        .reduce(
-          (sum, allocation) =>
-            sum +
-            allocation.amount,
-          0,
-        );
+    const allocatedDebtTotal = allocations
+      .filter((allocation) => allocation.type === "debt")
+      .reduce((sum, allocation) => sum + allocation.amount, 0);
 
-    let offsetToAllocate =
-      Number(
-        Math.max(
-          0,
-          allocatedDebtTotal -
-            reimbursementAmount,
-        ).toFixed(2),
-      );
+    let offsetToAllocate = Number(
+      Math.max(0, allocatedDebtTotal - reimbursementAmount).toFixed(2),
+    );
 
     /* =====================================================
        ALLOCATION DES COMPENSATIONS
     ====================================================== */
 
-    for (
-      const item of availableOffset
-    ) {
-      if (
-        offsetToAllocate <= 0.001
-      ) {
+    for (const item of availableOffset) {
+      if (offsetToAllocate <= 0.001) {
         break;
       }
 
-      const allocatedAmount =
-        Number(
-          Math.min(
-            item.amount,
-            offsetToAllocate,
-          ).toFixed(2),
-        );
+      const allocatedAmount = Number(
+        Math.min(item.amount, offsetToAllocate).toFixed(2),
+      );
 
       if (allocatedAmount <= 0) {
         continue;
       }
 
       allocations.push({
-        expenseId:
-          item.expenseId,
+        expenseId: item.expenseId,
 
-        amount:
-          allocatedAmount,
+        amount: allocatedAmount,
 
-        type:
-          "offset",
+        type: "offset",
       });
 
-      offsetToAllocate =
-        Number(
-          (
-            offsetToAllocate -
-            allocatedAmount
-          ).toFixed(2),
-        );
+      offsetToAllocate = Number(
+        (offsetToAllocate - allocatedAmount).toFixed(2),
+      );
     }
 
-    const debtTotal =
-      allocations
-        .filter(
-          (allocation) =>
-            allocation.type ===
-            "debt",
-        )
-        .reduce(
-          (sum, allocation) =>
-            sum +
-            allocation.amount,
-          0,
-        );
+    const debtTotal = allocations
+      .filter((allocation) => allocation.type === "debt")
+      .reduce((sum, allocation) => sum + allocation.amount, 0);
 
-    const offsetTotal =
-      allocations
-        .filter(
-          (allocation) =>
-            allocation.type ===
-            "offset",
-        )
-        .reduce(
-          (sum, allocation) =>
-            sum +
-            allocation.amount,
-          0,
-        );
+    const offsetTotal = allocations
+      .filter((allocation) => allocation.type === "offset")
+      .reduce((sum, allocation) => sum + allocation.amount, 0);
 
-    const allocatedNet =
-      Number(
-        (
-          debtTotal -
-          offsetTotal
-        ).toFixed(2),
-      );
+    const allocatedNet = Number((debtTotal - offsetTotal).toFixed(2));
 
     /*
      * Sécurité métier :
@@ -791,12 +622,7 @@ class ReimbursementRepository {
      * du remboursement.
      */
 
-    if (
-      Math.abs(
-        allocatedNet -
-          reimbursementAmount,
-      ) > 0.01
-    ) {
+    if (Math.abs(allocatedNet - reimbursementAmount) > 0.01) {
       throw new Error(
         "Impossible de rattacher correctement le remboursement aux dépenses concernées.",
       );
@@ -811,8 +637,7 @@ class ReimbursementRepository {
 
   async createExpenseAllocations(
     reimbursementId: number,
-    allocations:
-      ReimbursementExpenseAllocation[],
+    allocations: ReimbursementExpenseAllocation[],
   ): Promise<void> {
     for (const allocation of allocations) {
       await databaseClient.query(
@@ -842,12 +667,9 @@ class ReimbursementRepository {
      VÉRIFIER SI UNE DÉPENSE EST VERROUILLÉE
   ========================================================= */
 
-  async isExpenseLockedByReimbursement(
-    expenseId: number,
-  ): Promise<boolean> {
-    const [rows] =
-      await databaseClient.query<Rows>(
-        `
+  async isExpenseLockedByReimbursement(expenseId: number): Promise<boolean> {
+    const [rows] = await databaseClient.query<Rows>(
+      `
           SELECT
             1 AS locked
 
@@ -865,8 +687,8 @@ class ReimbursementRepository {
 
           LIMIT 1
         `,
-        [expenseId],
-      );
+      [expenseId],
+    );
 
     return Boolean(rows[0]);
   }

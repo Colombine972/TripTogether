@@ -395,6 +395,36 @@
 
 
 /* =========================================================
+   SUPPRESSION D'UNE DÉPENSE VERROUILLÉE
+========================================================= */
+
+.expense-delete-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-expense-btn-disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.delete-expense-btn-disabled .trash-icon {
+  color: #9ca3af;
+}
+
+.delete-expense-btn-disabled:hover {
+  cursor: not-allowed;
+}
+
+.delete-expense-btn-disabled:hover .trash-icon {
+  color: #9ca3af;
+  opacity: 1;
+  transform: none;
+}
+
+
+/* =========================================================
    7. PARTICIPANTS ET INFOBULLE
    ========================================================= */
 
