@@ -4,8 +4,6 @@ import { toast } from "react-toastify";
 
 import TripInfos from "../components/TripInfos";
 
-import { useAuth } from "../contexts/AuthContext";
-
 import type { invitationType } from "../types/invitationType";
 import type { TheTrip } from "../types/tripType";
 
@@ -19,13 +17,9 @@ function Invitation() {
 
   const navigate = useNavigate();
 
-  const { auth } = useAuth();
+  const [invitation, setInvitation] = useState<invitationType | null>(null);
 
-  const [invitation, setInvitation] =
-    useState<invitationType | null>(null);
-
-  const [myTrip, setMyTrip] =
-    useState<TheTrip | null>(null);
+  const [myTrip, setMyTrip] = useState<TheTrip | null>(null);
 
   /* =========================================================
      CHARGEMENT DU VOYAGE ET DE L'INVITATION
@@ -48,9 +42,7 @@ function Invitation() {
       .then(async (response) => {
         if (!response.ok) {
           if (response.status === 401) {
-            toast.error(
-              "Veuillez vous connecter pour accéder à ce voyage.",
-            );
+            toast.error("Veuillez vous connecter pour accéder à ce voyage.");
 
             return;
           }
@@ -72,9 +64,7 @@ function Invitation() {
        INVITATION
     ====================================================== */
 
-    fetch(
-      `${import.meta.env.VITE_API_URL}/api/invitation/${invitationId}`,
-    )
+    fetch(`${import.meta.env.VITE_API_URL}/api/invitation/${invitationId}`)
       .then(async (response) => {
         const invitationData = await response.json();
 
@@ -100,8 +90,7 @@ function Invitation() {
               toast: {
                 type: "error",
 
-                message:
-                  "Veuillez vous connecter pour accéder à l'invitation",
+                message: "Veuillez vous connecter pour accéder à l'invitation",
               },
             },
           });
@@ -146,9 +135,7 @@ function Invitation() {
      RÉPONSE À L'INVITATION
   ========================================================= */
 
-  const invitationResponded = async (
-    status: "accepted" | "refused",
-  ) => {
+  const invitationResponded = async (status: "accepted" | "refused") => {
     if (!invitationId) {
       return;
     }
@@ -173,18 +160,14 @@ function Invitation() {
 
       if (!response.ok) {
         throw new Error(
-          data?.message ||
-            data?.error ||
-            `HTTP ${response.status}`,
+          data?.message || data?.error || `HTTP ${response.status}`,
         );
       }
 
       if (status === "accepted") {
         toast.success("Invitation acceptée");
 
-        navigate(
-          `/trip/${id ?? invitation?.trip_id}`,
-        );
+        navigate(`/trip/${id ?? invitation?.trip_id}`);
 
         return;
       }
@@ -193,14 +176,9 @@ function Invitation() {
 
       navigate("/");
     } catch (error) {
-      console.error(
-        "Erreur traitement invitation :",
-        error,
-      );
+      console.error("Erreur traitement invitation :", error);
 
-      toast.error(
-        "Erreur lors du traitement de l'invitation",
-      );
+      toast.error("Erreur lors du traitement de l'invitation");
     }
   };
 
@@ -215,28 +193,27 @@ function Invitation() {
           MODE CONSULTATION UNIQUEMENT
       ====================================================== */}
 
-      <TripInfos
-        trip={myTrip}
-        onTripUpdated={setMyTrip}
-        canEdit={false}
-      />
+      <TripInfos trip={myTrip} onTripUpdated={setMyTrip} canEdit={false} />
 
       {/* =====================================================
           INVITATION
       ====================================================== */}
 
       <main className="invitation-main">
-        <article
-          id="invitation"
-          className="invitation-card"
-        >
+        <article id="invitation" className="invitation-card">
           <p className="invitation-text">
-            {`${auth?.user.firstname ?? ""}, vous avez été invité au voyage de`}
+            {invitation?.invited_firstname
+              ? `${invitation.invited_firstname}, vous avez été invité au voyage de`
+              : "Vous avez été invité au voyage de"}
           </p>
 
           <img
-            src="/profile-pic-logo.png"
-            alt={invitation?.creator_firstname ?? "Organisateur"}
+            src={invitation?.creator_avatar_url || "/profile-pic-logo.png"}
+            alt={
+              invitation?.creator_firstname
+                ? `${invitation.creator_firstname} ${invitation.creator_lastname ?? ""}`
+                : "Organisateur"
+            }
             className="invitation-avatar"
           />
 
@@ -247,18 +224,14 @@ function Invitation() {
           </p>
 
           {invitation?.message && (
-            <p className="invitation-message">
-              "{invitation.message.trim()}"
-            </p>
+            <p className="invitation-message">"{invitation.message.trim()}"</p>
           )}
 
           <div className="invitation-actions">
             <button
               type="button"
               className="invitation-btn-primary"
-              onClick={() =>
-                invitationResponded("accepted")
-              }
+              onClick={() => invitationResponded("accepted")}
             >
               Accepter
             </button>
@@ -266,9 +239,7 @@ function Invitation() {
             <button
               type="button"
               className="invitation-btn-outline"
-              onClick={() =>
-                invitationResponded("refused")
-              }
+              onClick={() => invitationResponded("refused")}
             >
               Refuser
             </button>

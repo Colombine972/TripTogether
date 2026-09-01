@@ -51,9 +51,15 @@ const read: RequestHandler = async (req, res, next) => {
   }
 };
 
-const edit: RequestHandler = async (req, res, next) => {
+const edit: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    const invitationId = Number(req.params.id);
+    const invitationId = Number(
+      req.params.id,
+    );
 
     if (Number.isNaN(invitationId)) {
       res.status(400).json({
@@ -63,7 +69,10 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const updateInvitation = await invitationRepository.select(invitationId);
+    const updateInvitation =
+      await invitationRepository.select(
+        invitationId,
+      );
 
     if (!updateInvitation) {
       res.status(404).json({
@@ -73,10 +82,25 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const success = await invitationRepository.updateStatus(
-      invitationId,
-      req.body.status,
-    );
+    const status = req.body.status;
+
+    if (
+      status !== "accepted" &&
+      status !== "refused"
+    ) {
+      res.status(400).json({
+        error:
+          "Statut d'invitation invalide",
+      });
+
+      return;
+    }
+
+    const success =
+      await invitationRepository.updateStatus(
+        invitationId,
+        status,
+      );
 
     if (!success) {
       res.status(500).json({
@@ -86,26 +110,30 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    if (req.body.status === "accepted" && updateInvitation.user_id) {
-      const tripId = Number(updateInvitation.trip_id);
+    if (
+      status === "accepted" &&
+      updateInvitation.user_id
+    ) {
+      const tripId = Number(
+        updateInvitation.trip_id,
+      );
 
-      const joinedUserId = Number(updateInvitation.user_id);
+      const joinedUserId = Number(
+        updateInvitation.user_id,
+      );
 
-      await notificationService.notifyParticipantJoined(tripId, joinedUserId);
+      await notificationService.notifyParticipantJoined(
+        tripId,
+        joinedUserId,
+      );
 
       await activityService.createActivity({
         tripId,
-
         userId: joinedUserId,
-
         type: "participant_joined",
-
         title: "Nouveau participant",
-
         message: "a rejoint le voyage.",
-
         referenceType: "participant",
-
         referenceId: joinedUserId,
       });
     }
