@@ -1,4 +1,4 @@
-import { Download } from "lucide-react";
+import { Download, Pencil } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 import { toast } from "react-toastify";
@@ -983,35 +983,55 @@ function TripBudgetPage() {
 
                               <div className="expense-right">
                                 <div className="expense-actions">
-                                  <button
-                                    type="button"
-                                    className="edit-expense-btn"
-                                    onClick={() => handleEditExpense(expense)}
-                                    aria-label={`Modifier la dépense ${expense.title}`}
-                                    title="Modifier la dépense"
+                                  <div
+                                    className="expense-edit-wrapper"
+                                    title={
+                                      expense.deletion_locked
+                                        ? "Cette dépense est liée à un remboursement. Sa modification est impossible."
+                                        : "Modifier la dépense"
+                                    }
                                   >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="1.8"
-                                      className="edit-icon"
-                                      aria-hidden="true"
+                                    <div
+                                      className="expense-edit-wrapper"
+                                      title={
+                                        expense.deletion_locked
+                                          ? "Cette dépense est liée à un remboursement. Sa modification est impossible."
+                                          : "Modifier la dépense"
+                                      }
                                     >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487Zm0 0L19.5 7.125"
-                                      />
+                                      <button
+                                        type="button"
+                                        className={`edit-expense-btn ${
+                                          expense.deletion_locked
+                                            ? "edit-expense-btn-disabled"
+                                            : ""
+                                        }`}
+                                        aria-disabled={expense.deletion_locked}
+                                        aria-label={
+                                          expense.deletion_locked
+                                            ? `Modification impossible pour la dépense ${expense.title} : dépense liée à un remboursement`
+                                            : `Modifier la dépense ${expense.title}`
+                                        }
+                                        onClick={() => {
+                                          if (expense.deletion_locked) {
+                                            toast.info(
+                                              "Cette dépense est liée à un remboursement. Sa modification est impossible.",
+                                            );
 
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M18 14.25v4.125A2.625 2.625 0 0 1 15.375 21H5.625A2.625 2.625 0 0 1 3 18.375V8.625A2.625 2.625 0 0 1 5.625 6H9.75"
-                                      />
-                                    </svg>
-                                  </button>
+                                            return;
+                                          }
+
+                                          handleEditExpense(expense);
+                                        }}
+                                      >
+                                        <Pencil
+                                          size={17}
+                                          className="edit-icon"
+                                          aria-hidden="true"
+                                        />
+                                      </button>
+                                    </div>
+                                  </div>
 
                                   <div
                                     className="expense-delete-wrapper"

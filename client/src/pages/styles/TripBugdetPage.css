@@ -393,6 +393,35 @@
   transform: scale(1.15);
 }
 
+/* =========================================================
+   MODIFICATION D'UNE DÉPENSE VERROUILLÉE
+========================================================= */
+
+.expense-edit-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-expense-btn-disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.edit-expense-btn-disabled .edit-icon {
+  color: #9ca3af;
+}
+
+.edit-expense-btn-disabled:hover {
+  cursor: not-allowed;
+}
+
+.edit-expense-btn-disabled:hover .edit-icon {
+  color: #9ca3af;
+  opacity: 1;
+  transform: none;
+}
+
 
 /* =========================================================
    SUPPRESSION D'UNE DÉPENSE VERROUILLÉE
