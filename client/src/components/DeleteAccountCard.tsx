@@ -1,7 +1,9 @@
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+
 import { useAuth } from "../contexts/AuthContext";
+
 import "../pages/styles/Account.css";
 
 type DeleteAccountCardProps = {
@@ -12,12 +14,20 @@ export default function DeleteAccountCard({
   onDeleted,
 }: DeleteAccountCardProps) {
   const navigate = useNavigate();
+
   const { auth, setAuth } = useAuth();
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [confirmText, setConfirmText] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [showDeleteModal, setShowDeleteModal] =
+    useState(false);
+
+  const [confirmText, setConfirmText] =
+    useState("");
+
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
+
+  const [errorMessage, setErrorMessage] =
+    useState("");
 
   const expectedConfirmation = "SUPPRIMER";
 
@@ -35,24 +45,36 @@ export default function DeleteAccountCard({
   };
 
   const handleCloseDeleteModal = () => {
-    if (isSubmitting) return;
+    if (isSubmitting) {
+      return;
+    }
+
     resetDeleteState();
   };
 
   const handleDeleteAccount = async () => {
     setErrorMessage("");
 
-    if (confirmText.trim() !== expectedConfirmation) {
+    if (
+      confirmText.trim() !==
+      expectedConfirmation
+    ) {
       setErrorMessage(
         `Veuillez saisir exactement "${expectedConfirmation}" pour confirmer la suppression.`,
       );
+
       return;
     }
 
-    const token = auth?.token || localStorage.getItem("token");
+    const token =
+      auth?.token ||
+      localStorage.getItem("token");
 
     if (!token) {
-      setErrorMessage("Votre session a expiré. Veuillez vous reconnecter.");
+      setErrorMessage(
+        "Votre session a expiré. Veuillez vous reconnecter.",
+      );
+
       return;
     }
 
@@ -63,14 +85,21 @@ export default function DeleteAccountCard({
         `${import.meta.env.VITE_API_URL}/api/users/me`,
         {
           method: "DELETE",
+
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${token}`,
           },
         },
       );
 
-      const data: { message?: string; error?: string } = await response
+      const data: {
+        message?: string;
+        error?: string;
+      } = await response
         .json()
         .catch(() => ({}));
 
@@ -84,6 +113,7 @@ export default function DeleteAccountCard({
 
       localStorage.removeItem("token");
       localStorage.removeItem("auth");
+
       setAuth(null);
 
       resetDeleteState();
@@ -94,9 +124,11 @@ export default function DeleteAccountCard({
 
       navigate("/login", {
         replace: true,
+
         state: {
           toast: {
             type: "success",
+
             message:
               "Votre compte a été supprimé définitivement. Vos données personnelles ont été supprimées et les données nécessaires ont été conservées de manière anonymisée.",
           },
@@ -108,17 +140,20 @@ export default function DeleteAccountCard({
           ? error.message
           : "Impossible de supprimer votre compte pour le moment.",
       );
+
       setIsSubmitting(false);
     }
   };
+
   return (
     <>
       <div className="delete-content">
         <p className="delete-account-warning">
-          En supprimant votre compte, vous perdez immédiatement l’accès à
-          l’application. <br />
-          Une nouvelle connexion ne sera plus possible, sauf en cas de création
-          d’un nouveau compte.
+          En supprimant votre compte, vous perdez
+          immédiatement l’accès à l’application.
+          <br />
+          Une nouvelle connexion ne sera plus possible,
+          sauf en cas de création d’un nouveau compte.
         </p>
 
         <div className="account-user-actions">
@@ -128,43 +163,48 @@ export default function DeleteAccountCard({
             onClick={handleOpenDeleteModal}
           >
             <Trash2 size={18} />
+
             Supprimer mon compte
           </button>
         </div>
       </div>
 
+
       {showDeleteModal && (
         <div className="modal-backdrop">
           <div className="modal delete-account-modal">
             <div className="account-modal-header">
-              <h4>Confirmer la suppression du compte</h4>
+              <h4>
+                Confirmer la suppression du compte
+              </h4>
+
               <p>
-                La suppression de votre compte est définitive. Après validation,
-                vous n’aurez plus accès à votre espace et votre session sera
-                immédiatement invalidée.
+                La suppression de votre compte est
+                définitive. Après validation, vous
+                n’aurez plus accès à votre espace et
+                votre session sera immédiatement
+                invalidée.
               </p>
             </div>
-
-            <p className="delete-account-warning-text">
-              La suppression de votre compte est définitive.
-              <br />
-              Après validation, vous n’aurez plus accès à votre espace et votre
-              session sera immédiatement invalidée.
-            </p>
 
             <div className="delete-account-info">
               <div className="delete-account-block">
                 <p className="delete-account-subtitle">
                   Seront supprimés définitivement :
                 </p>
+
                 <ul>
                   <li>Votre prénom</li>
                   <li>Votre nom</li>
                   <li>Votre adresse e-mail</li>
-                  <li>Votre mot de passe chiffré (hash)</li>
+                  <li>
+                    Votre mot de passe chiffré (hash)
+                  </li>
                   <li>Votre avatar</li>
                   <li>Vos préférences</li>
-                  <li>Vos invitations associées</li>
+                  <li>
+                    Vos invitations associées
+                  </li>
                 </ul>
               </div>
 
@@ -172,19 +212,34 @@ export default function DeleteAccountCard({
                 <p className="delete-account-subtitle">
                   Seront conservés de manière anonymisée :
                 </p>
+
                 <ul>
-                  <li>Les voyages liés à d’autres utilisateurs</li>
-                  <li>Les dépenses déjà enregistrées</li>
-                  <li>Les montants et calculs partagés</li>
                   <li>
-                    Les participations nécessaires à la cohérence des données
+                    Les voyages liés à d’autres utilisateurs
+                  </li>
+
+                  <li>
+                    Les dépenses déjà enregistrées
+                  </li>
+
+                  <li>
+                    Les montants et calculs partagés
+                  </li>
+
+                  <li>
+                    Les participations nécessaires à la
+                    cohérence des données
                   </li>
                 </ul>
               </div>
 
               <p className="delete-account-note">
-                Dans ces éléments, votre identité sera remplacée par{" "}
-                <strong>« utilisateur supprimé »</strong>.
+                Dans ces éléments, votre identité sera
+                remplacée par{" "}
+                <strong>
+                  « utilisateur supprimé »
+                </strong>
+                .
               </p>
             </div>
 
@@ -192,13 +247,20 @@ export default function DeleteAccountCard({
               <div className="form-group">
                 <label htmlFor="deleteConfirm">
                   Pour confirmer, saisissez{" "}
-                  <strong>{expectedConfirmation}</strong>
+                  <strong>
+                    {expectedConfirmation}
+                  </strong>
                 </label>
+
                 <input
                   id="deleteConfirm"
                   type="text"
                   value={confirmText}
-                  onChange={(e) => setConfirmText(e.target.value)}
+                  onChange={(event) =>
+                    setConfirmText(
+                      event.target.value,
+                    )
+                  }
                   placeholder={`Tapez ${expectedConfirmation}`}
                   disabled={isSubmitting}
                 />
@@ -206,7 +268,10 @@ export default function DeleteAccountCard({
             </div>
 
             {errorMessage && (
-              <p className="form-error" role="alert">
+              <p
+                className="form-error"
+                role="alert"
+              >
                 {errorMessage}
               </p>
             )}
@@ -226,7 +291,9 @@ export default function DeleteAccountCard({
                 className="account-modal-danger"
                 onClick={handleDeleteAccount}
                 disabled={
-                  isSubmitting || confirmText.trim() !== expectedConfirmation
+                  isSubmitting ||
+                  confirmText.trim() !==
+                    expectedConfirmation
                 }
               >
                 {isSubmitting
