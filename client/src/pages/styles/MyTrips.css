@@ -41,7 +41,15 @@
 }
 
 .tripstate button {
-  padding: 0.65rem 1.4rem;
+  height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.4rem;
+
+  padding: 0 1.4rem;
 
   color: #323732;
   background: #dedada;
@@ -52,6 +60,7 @@
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
+  line-height: 1;
 
   cursor: pointer;
 
@@ -88,32 +97,42 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+
+  gap: 0.4rem;
+}
+
+.tripstate-invitations svg {
+  flex-shrink: 0;
+
+  width: 16px;
+  height: 16px;
 }
 
 .invitation-count {
-  min-width: 22px;
-  height: 22px;
+  min-width: 18px;
+  height: 18px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  padding: 0 0.4rem;
+  padding: 0 0.3rem;
 
   border-radius: 999px;
 
   background-color: var(--primary-button);
-  color: white;
+  color: #ffffff;
 
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 700;
+  line-height: 1;
 }
 
 .tripstate-invitations.active .invitation-count {
-  background-color: white;
+  background-color: #ffffff;
   color: var(--primary-button);
 }
+
 
 /* =========================================================
    SECTION INVITATIONS
