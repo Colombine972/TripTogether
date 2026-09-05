@@ -7,8 +7,9 @@ type SendTripInvitationEmailParams = {
   invitedFirstname?: string | null;
   organizerFirstname: string;
   organizerLastname?: string | null;
-  tripId: number;
-  invitationId: number;
+
+  invitationLink: string;
+
   tripTitle: string;
   city: string;
   country: string;
@@ -23,8 +24,7 @@ const sendTripInvitationEmail = async ({
   invitedFirstname,
   organizerFirstname,
   organizerLastname,
-  tripId,
-  invitationId,
+  invitationLink,
   tripTitle,
   city,
   country,
@@ -33,13 +33,6 @@ const sendTripInvitationEmail = async ({
   message,
   placeId,
 }: SendTripInvitationEmailParams): Promise<void> => {
-  const clientUrl =
-    process.env.CLIENT_URL ??
-    "http://localhost:3000";
-
-  const invitationUrl =
-    `${clientUrl}/trip/${tripId}/invitation/${invitationId}`;
-
   const organizerName =
     `${organizerFirstname} ${
       organizerLastname ?? ""
@@ -52,8 +45,12 @@ const sendTripInvitationEmail = async ({
 
 Destination : ${city}, ${country}
 
-${message?.trim() ? `Message : ${message.trim()}\n\n` : ""}Voir l'invitation :
-${invitationUrl}`;
+${
+  message?.trim()
+    ? `Message : ${message.trim()}\n\n`
+    : ""
+}Voir l'invitation :
+${invitationLink}`;
 
   /* =====================================================
      RÉCUPÉRATION DE LA PHOTO DU VOYAGE
@@ -109,7 +106,10 @@ ${invitationUrl}`;
       country,
       startAt,
       endAt,
-      invitationUrl,
+
+      invitationUrl:
+        invitationLink,
+
       message,
 
       tripImageUrl:

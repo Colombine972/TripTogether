@@ -1,7 +1,4 @@
-import type {
-  Request,
-  RequestHandler,
-} from "express";
+import type { Request, RequestHandler } from "express";
 
 import activityService from "../activity/activityService";
 import notificationService from "../notification/notificationService";
@@ -15,9 +12,7 @@ import invitationRepository from "./invitationRepository";
    UTILITAIRE - UTILISATEUR CONNECTÉ
 ========================================================= */
 
-const getConnectedUserId = (
-  req: Request,
-): number => {
+const getConnectedUserId = (req: Request): number => {
   return Number(
     (
       req as Request & {
@@ -33,20 +28,11 @@ const getConnectedUserId = (
    LIRE UNE INVITATION
 ========================================================= */
 
-const read: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const read: RequestHandler = async (req, res, next) => {
   try {
-    const invitationId = Number(
-      req.params.id,
-    );
+    const invitationId = Number(req.params.id);
 
-    if (
-      Number.isNaN(invitationId) ||
-      invitationId <= 0
-    ) {
+    if (Number.isNaN(invitationId) || invitationId <= 0) {
       res.status(400).json({
         error: "ID invalide",
       });
@@ -54,10 +40,7 @@ const read: RequestHandler = async (
       return;
     }
 
-    const invitation =
-      await invitationRepository.select(
-        invitationId,
-      );
+    const invitation = await invitationRepository.select(invitationId);
 
     if (!invitation) {
       res.status(404).json({
@@ -71,16 +54,11 @@ const read: RequestHandler = async (
        CONTRÔLE DE L'UTILISATEUR CONNECTÉ
     ====================================================== */
 
-    const connectedUserId =
-      getConnectedUserId(req);
+    const connectedUserId = getConnectedUserId(req);
 
-    if (
-      invitation.user_id !==
-      connectedUserId
-    ) {
+    if (invitation.user_id !== connectedUserId) {
       res.status(403).json({
-        error:
-          "Vous n'êtes pas autorisé à consulter cette invitation",
+        error: "Vous n'êtes pas autorisé à consulter cette invitation",
       });
 
       return;
@@ -90,26 +68,18 @@ const read: RequestHandler = async (
        CONTRÔLE DU STATUT
     ====================================================== */
 
-    if (
-      invitation.status ===
-      "accepted"
-    ) {
+    if (invitation.status === "accepted") {
       res.status(409).json({
-        message:
-          "Invitation déjà acceptée",
+        message: "Invitation déjà acceptée",
         trip_id: invitation.trip_id,
       });
 
       return;
     }
 
-    if (
-      invitation.status ===
-      "refused"
-    ) {
+    if (invitation.status === "refused") {
       res.status(410).json({
-        message:
-          "Invitation déjà refusée",
+        message: "Invitation déjà refusée",
       });
 
       return;
@@ -126,19 +96,11 @@ const read: RequestHandler = async (
    DE L'UTILISATEUR CONNECTÉ
 ========================================================= */
 
-const readPending: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const readPending: RequestHandler = async (req, res, next) => {
   try {
-    const connectedUserId =
-      getConnectedUserId(req);
+    const connectedUserId = getConnectedUserId(req);
 
-    if (
-      Number.isNaN(connectedUserId) ||
-      connectedUserId <= 0
-    ) {
+    if (Number.isNaN(connectedUserId) || connectedUserId <= 0) {
       res.status(401).json({
         error: "Utilisateur non authentifié",
       });
@@ -147,9 +109,7 @@ const readPending: RequestHandler = async (
     }
 
     const invitations =
-      await invitationRepository.selectPendingByUser(
-        connectedUserId,
-      );
+      await invitationRepository.selectPendingByUser(connectedUserId);
 
     res.status(200).json(invitations);
   } catch (err) {
@@ -161,20 +121,11 @@ const readPending: RequestHandler = async (
    MODIFIER LE STATUT D'UNE INVITATION
 ========================================================= */
 
-const edit: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const edit: RequestHandler = async (req, res, next) => {
   try {
-    const invitationId = Number(
-      req.params.id,
-    );
+    const invitationId = Number(req.params.id);
 
-    if (
-      Number.isNaN(invitationId) ||
-      invitationId <= 0
-    ) {
+    if (Number.isNaN(invitationId) || invitationId <= 0) {
       res.status(400).json({
         error: "ID invalide",
       });
@@ -182,10 +133,7 @@ const edit: RequestHandler = async (
       return;
     }
 
-    const invitation =
-      await invitationRepository.select(
-        invitationId,
-      );
+    const invitation = await invitationRepository.select(invitationId);
 
     if (!invitation) {
       res.status(404).json({
@@ -201,13 +149,9 @@ const edit: RequestHandler = async (
 
     const status = req.body.status;
 
-    if (
-      status !== "accepted" &&
-      status !== "refused"
-    ) {
+    if (status !== "accepted" && status !== "refused") {
       res.status(400).json({
-        error:
-          "Statut d'invitation invalide",
+        error: "Statut d'invitation invalide",
       });
 
       return;
@@ -217,16 +161,11 @@ const edit: RequestHandler = async (
        CONTRÔLE DE L'UTILISATEUR CONNECTÉ
     ====================================================== */
 
-    const connectedUserId =
-      getConnectedUserId(req);
+    const connectedUserId = getConnectedUserId(req);
 
-    if (
-      invitation.user_id !==
-      connectedUserId
-    ) {
+    if (invitation.user_id !== connectedUserId) {
       res.status(403).json({
-        error:
-          "Vous n'êtes pas autorisé à répondre à cette invitation",
+        error: "Vous n'êtes pas autorisé à répondre à cette invitation",
       });
 
       return;
@@ -236,13 +175,9 @@ const edit: RequestHandler = async (
        INVITATION DÉJÀ TRAITÉE
     ====================================================== */
 
-    if (
-      invitation.status !==
-      "pending"
-    ) {
+    if (invitation.status !== "pending") {
       res.status(409).json({
-        error:
-          "Cette invitation a déjà été traitée",
+        error: "Cette invitation a déjà été traitée",
       });
 
       return;
@@ -252,16 +187,14 @@ const edit: RequestHandler = async (
        MISE À JOUR DU STATUT
     ====================================================== */
 
-    const success =
-      await invitationRepository.updateStatus(
-        invitationId,
-        status,
-      );
+    const success = await invitationRepository.updateStatus(
+      invitationId,
+      status,
+    );
 
     if (!success) {
       res.status(500).json({
-        error:
-          "Erreur lors de la mise à jour de l'invitation",
+        error: "Erreur lors de la mise à jour de l'invitation",
       });
 
       return;
@@ -271,46 +204,30 @@ const edit: RequestHandler = async (
        INVITATION ACCEPTÉE
     ====================================================== */
 
-    if (
-      status === "accepted" &&
-      invitation.user_id
-    ) {
-      const tripId = Number(
-        invitation.trip_id,
-      );
+    if (status === "accepted" && invitation.user_id) {
+      const tripId = Number(invitation.trip_id);
 
-      const joinedUserId = Number(
-        invitation.user_id,
-      );
+      const joinedUserId = Number(invitation.user_id);
 
       /* ===================================================
          NOTIFICATION
       ==================================================== */
 
-      await notificationService.notifyParticipantJoined(
-        tripId,
-        joinedUserId,
-      );
+      await notificationService.notifyParticipantJoined(tripId, joinedUserId);
 
       /* ===================================================
          ACTIVITÉ
       ==================================================== */
 
-      await activityService.createActivity(
-        {
-          tripId,
-          userId: joinedUserId,
-          type: "participant_joined",
-          title:
-            "Nouveau participant",
-          message:
-            "a rejoint le voyage.",
-          referenceType:
-            "participant",
-          referenceId:
-            joinedUserId,
-        },
-      );
+      await activityService.createActivity({
+        tripId,
+        userId: joinedUserId,
+        type: "participant_joined",
+        title: "Nouveau participant",
+        message: "a rejoint le voyage.",
+        referenceType: "participant",
+        referenceId: joinedUserId,
+      });
     }
 
     res.status(200).json({
@@ -328,23 +245,13 @@ const edit: RequestHandler = async (
    AJOUTER UNE INVITATION
 ========================================================= */
 
-const add: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const add: RequestHandler = async (req, res, next) => {
   try {
-    const tripId = Number(
-      req.params.id,
-    );
+    const tripId = Number(req.params.id);
 
-    if (
-      Number.isNaN(tripId) ||
-      tripId <= 0
-    ) {
+    if (Number.isNaN(tripId) || tripId <= 0) {
       res.status(400).json({
-        error:
-          "ID du voyage invalide",
+        error: "ID du voyage invalide",
       });
 
       return;
@@ -355,18 +262,12 @@ const add: RequestHandler = async (
     ====================================================== */
 
     const email =
-      typeof req.body.email ===
-      "string"
-        ? req.body.email
-            .trim()
-            .toLowerCase()
+      typeof req.body.email === "string"
+        ? req.body.email.trim().toLowerCase()
         : "";
 
     const message =
-      typeof req.body.message ===
-      "string"
-        ? req.body.message.trim()
-        : "";
+      typeof req.body.message === "string" ? req.body.message.trim() : "";
 
     if (!email) {
       res.status(400).json({
@@ -376,13 +277,11 @@ const add: RequestHandler = async (
       return;
     }
 
-    const emailRegex =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(email)) {
       res.status(400).json({
-        error:
-          "Format email invalide",
+        error: "Format email invalide",
       });
 
       return;
@@ -392,15 +291,11 @@ const add: RequestHandler = async (
        VOYAGE
     ====================================================== */
 
-    const trip =
-      await tripRepository.read(
-        tripId,
-      );
+    const trip = await tripRepository.read(tripId);
 
     if (!trip) {
       res.status(404).json({
-        error:
-          "Voyage introuvable",
+        error: "Voyage introuvable",
       });
 
       return;
@@ -410,37 +305,28 @@ const add: RequestHandler = async (
        UTILISATEUR INVITÉ
     ====================================================== */
 
-    const existingUser =
-      await userRepository.findByEmail(
-        email,
-      );
+    const existingUser = await userRepository.findByEmail(email);
 
-    const userId =
-      existingUser?.id ?? null;
+    const userId = existingUser?.id ?? null;
 
     /* =====================================================
        CRÉATION DE L'INVITATION
     ====================================================== */
 
-    const invitationId =
-      await invitationRepository.create(
-        tripId,
-        email,
-        message,
-        userId,
-      );
+    const { invitationId, publicToken } = await invitationRepository.create(
+      tripId,
+      email,
+      message,
+      userId,
+    );
 
     /* =====================================================
        LIEN D'INVITATION
     ====================================================== */
 
-    const clientUrl =
-      process.env.CLIENT_URL ??
-      "http://localhost:3000";
+    const clientUrl = process.env.CLIENT_URL ?? "http://localhost:3000";
 
-    const invitationLink =
-      `${clientUrl}/trip/${tripId}` +
-      `/invitation/${invitationId}`;
+    const invitationLink = `${clientUrl}/invitation/${publicToken}`;
 
     /* =====================================================
        EMAIL D'INVITATION
@@ -449,54 +335,35 @@ const add: RequestHandler = async (
     let emailSent = false;
 
     try {
-      await invitationEmailService.sendTripInvitationEmail(
-        {
-          recipientEmail: email,
+      await invitationEmailService.sendTripInvitationEmail({
+        recipientEmail: email,
 
-          invitedFirstname:
-            existingUser?.firstname ??
-            null,
+        invitedFirstname: existingUser?.firstname ?? null,
 
-          organizerFirstname:
-            trip.owner_firstname ??
-            "Un organisateur",
+        organizerFirstname: trip.owner_firstname ?? "Un organisateur",
 
-          organizerLastname:
-            trip.owner_lastname ??
-            null,
+        organizerLastname: trip.owner_lastname ?? null,
 
-          tripId,
+        invitationLink,
 
-          invitationId,
+        tripTitle: trip.title,
 
-          tripTitle:
-            trip.title,
+        city: trip.city,
 
-          city:
-            trip.city,
+        country: trip.country,
 
-          country:
-            trip.country,
+        startAt: trip.start_at,
 
-          startAt:
-            trip.start_at,
+        endAt: trip.end_at,
 
-          endAt:
-            trip.end_at,
+        message: message || null,
 
-          message:
-            message || null,
-
-          placeId:
-            trip.place_id ?? null,
-        },
-      );
+        placeId: trip.place_id ?? null,
+      });
 
       emailSent = true;
 
-      console.log(
-        `Email d'invitation envoyé à ${email}`,
-      );
+      console.log(`Email d'invitation envoyé à ${email}`);
     } catch (emailError) {
       console.error(
         `Invitation ${invitationId} créée mais email non envoyé à ${email} :`,
@@ -522,123 +389,79 @@ const add: RequestHandler = async (
    LISTER LES INVITATIONS D'UN VOYAGE
 ========================================================= */
 
-const selectInvitationsByTrip: RequestHandler =
-  async (
-    req,
-    res,
-    next,
-  ) => {
-    try {
-      const tripId = Number(
-        req.params.id,
-      );
-
-      if (
-        Number.isNaN(tripId) ||
-        tripId <= 0
-      ) {
-        res.status(400).json({
-          error:
-            "ID de voyage invalide",
-        });
-
-        return;
-      }
-
-      const trip =
-        await tripRepository.read(
-          tripId,
-        );
-
-      if (!trip) {
-        res.status(404).json({
-          error:
-            "Voyage introuvable",
-        });
-
-        return;
-      }
-
-      const invitations =
-        await invitationRepository.selectByTrip(
-          tripId,
-        );
-
-      res.json({
-        trip: {
-          id:
-            trip.id,
-
-          title:
-            trip.title,
-
-          description:
-            trip.description,
-
-          start_at:
-            trip.start_at,
-
-          end_at:
-            trip.end_at,
-
-          user_id:
-            trip.user_id,
-
-          owner_firstname:
-            trip.owner_firstname,
-
-          owner_lastname:
-            trip.owner_lastname,
-
-          owner_avatar_url:
-            trip.owner_avatar_url,
-
-          image_url:
-            trip.image_url,
-        },
-
-        invitations,
-      });
-    } catch (err) {
-      next(err);
-    }
-  };
-
-/* =========================================================
-   SUPPRIMER UNE INVITATION / UN PARTICIPANT
-========================================================= */
-
-const delate: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const selectInvitationsByTrip: RequestHandler = async (req, res, next) => {
   try {
-    const tripId = Number(
-      req.params.tripId,
-    );
+    const tripId = Number(req.params.id);
 
-    const userId = Number(
-      req.params.userId,
-    );
-
-    if (
-      Number.isNaN(tripId) ||
-      Number.isNaN(userId)
-    ) {
+    if (Number.isNaN(tripId) || tripId <= 0) {
       res.status(400).json({
-        message:
-          "Paramètres invalides",
+        error: "ID de voyage invalide",
       });
 
       return;
     }
 
-    const success =
-      await invitationRepository.deleteInvitation(
-        tripId,
-        userId,
-      );
+    const trip = await tripRepository.read(tripId);
+
+    if (!trip) {
+      res.status(404).json({
+        error: "Voyage introuvable",
+      });
+
+      return;
+    }
+
+    const invitations = await invitationRepository.selectByTrip(tripId);
+
+    res.json({
+      trip: {
+        id: trip.id,
+
+        title: trip.title,
+
+        description: trip.description,
+
+        start_at: trip.start_at,
+
+        end_at: trip.end_at,
+
+        user_id: trip.user_id,
+
+        owner_firstname: trip.owner_firstname,
+
+        owner_lastname: trip.owner_lastname,
+
+        owner_avatar_url: trip.owner_avatar_url,
+
+        image_url: trip.image_url,
+      },
+
+      invitations,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* =========================================================
+   SUPPRIMER UNE INVITATION / UN PARTICIPANT
+========================================================= */
+
+const delate: RequestHandler = async (req, res, next) => {
+  try {
+    const tripId = Number(req.params.tripId);
+
+    const userId = Number(req.params.userId);
+
+    if (Number.isNaN(tripId) || Number.isNaN(userId)) {
+      res.status(400).json({
+        message: "Paramètres invalides",
+      });
+
+      return;
+    }
+
+    const success = await invitationRepository.deleteInvitation(tripId, userId);
 
     if (!success) {
       res.sendStatus(404);

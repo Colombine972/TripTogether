@@ -642,7 +642,7 @@ const buildTripInvitationTemplate = ({
                           text-decoration:none;
                         "
                       >
-                        Rejoindre le voyage&nbsp;&nbsp;→
+                        Voir mon invitation&nbsp;&nbsp;→
                       </a>
                     </td>
                   </tr>

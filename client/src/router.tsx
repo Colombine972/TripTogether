@@ -67,6 +67,13 @@ export const router = createBrowserRouter([
         path: "create-trip",
         element: <CreateTrip />,
       },
+
+      /* NOUVELLE ROUTE PUBLIQUE */
+      {
+        path: "invitation/:token",
+        element: <Invitation />,
+      },
+
       {
         path: "trip/:id",
         element: <Trip />,
@@ -78,10 +85,6 @@ export const router = createBrowserRouter([
       {
         path: "trip/:id/invitations",
         element: <Invitations />,
-      },
-      {
-        path: "trip/:id/invitation/:invitationId",
-        element: <Invitation />,
       },
       {
         path: "trip/:id/budget",

@@ -1,3 +1,5 @@
+import crypto from "node:crypto";
+
 import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
 
@@ -6,6 +8,8 @@ type Invitation = {
   status: string;
   created_at: string;
   updated_at: string;
+
+  public_token: string;
 
   user_id: number | null;
   trip_id: number;
@@ -106,59 +110,59 @@ class InvitationRepository {
     return rows[0] as Invitation;
   }
 
-
   /* =========================================================
-   LISTER LES INVITATIONS EN ATTENTE
-   D'UN UTILISATEUR
-========================================================= */
+     LISTER LES INVITATIONS EN ATTENTE
+     D'UN UTILISATEUR
+  ========================================================= */
 
-async selectPendingByUser(
-  userId: number,
-): Promise<Invitation[]> {
-  const [rows] =
-    await databaseClient.query<Rows>(
-      `
-        SELECT
-          i.id,
-          i.trip_id,
-          i.user_id,
-          i.email,
-          i.message,
-          i.status,
-          i.created_at,
-          i.updated_at,
+  async selectPendingByUser(
+    userId: number,
+  ): Promise<Invitation[]> {
+    const [rows] =
+      await databaseClient.query<Rows>(
+        `
+          SELECT
+            i.id,
+            i.trip_id,
+            i.user_id,
+            i.email,
+            i.message,
+            i.status,
+            i.public_token,
+            i.created_at,
+            i.updated_at,
 
-          t.title AS trip_title,
-          t.city AS trip_city,
-          t.country AS trip_country,
-          t.place_id AS trip_place_id,
-          t.start_at AS trip_start_at,
-          t.end_at AS trip_end_at,
-          t.user_id AS creator_id,
+            t.title AS trip_title,
+            t.city AS trip_city,
+            t.country AS trip_country,
+            t.place_id AS trip_place_id,
+            t.start_at AS trip_start_at,
+            t.end_at AS trip_end_at,
+            t.user_id AS creator_id,
 
-          c.firstname AS creator_firstname,
-          c.lastname AS creator_lastname,
-          c.avatar_url AS creator_avatar_url
+            c.firstname AS creator_firstname,
+            c.lastname AS creator_lastname,
+            c.avatar_url AS creator_avatar_url
 
-        FROM invitation i
+          FROM invitation i
 
-        JOIN trip t
-          ON t.id = i.trip_id
+          JOIN trip t
+            ON t.id = i.trip_id
 
-        JOIN user c
-          ON c.id = t.user_id
+          JOIN user c
+            ON c.id = t.user_id
 
-        WHERE i.user_id = ?
-          AND i.status = 'pending'
-          AND t.end_at >= CURRENT_DATE
+          WHERE i.user_id = ?
+            AND i.status = 'pending'
+            AND t.end_at >= CURRENT_DATE
 
-        ORDER BY i.created_at DESC
-      `,
-      [userId],
-    );
+          ORDER BY i.created_at DESC
+        `,
+        [userId],
+      );
 
-  return rows as Invitation[];
-}
+    return rows as Invitation[];
+  }
 
   async updateStatus(
     id: number,
@@ -179,34 +183,45 @@ async selectPendingByUser(
     return result.affectedRows === 1;
   }
 
-  async create(
-    tripId: number,
-    email: string,
-    message: string,
-    userId: number | null,
-  ): Promise<number> {
-    const [result] =
-      await databaseClient.query<Result>(
-        `
-          INSERT INTO invitation (
-            trip_id,
-            email,
-            message,
-            status,
-            user_id
-          )
-          VALUES (?, ?, ?, 'pending', ?)
-        `,
-        [
-          tripId,
+ async create(
+  tripId: number,
+  email: string,
+  message: string,
+  userId: number | null,
+): Promise<{
+  invitationId: number;
+  publicToken: string;
+}> {
+  const publicToken =
+    crypto.randomBytes(32).toString("hex");
+
+  const [result] =
+    await databaseClient.query<Result>(
+      `
+        INSERT INTO invitation (
+          trip_id,
           email,
           message,
-          userId,
-        ],
-      );
+          status,
+          public_token,
+          user_id
+        )
+        VALUES (?, ?, ?, 'pending', ?, ?)
+      `,
+      [
+        tripId,
+        email,
+        message,
+        publicToken,
+        userId,
+      ],
+    );
 
-    return result.insertId;
-  }
+  return {
+    invitationId: result.insertId,
+    publicToken,
+  };
+}
 
   async readParticipate(
     id: number,
@@ -307,7 +322,9 @@ async selectPendingByUser(
       await databaseClient.query<Result>(
         `
           UPDATE invitation
-          SET user_id = ?
+          SET
+            user_id = ?,
+            updated_at = CURRENT_TIMESTAMP
           WHERE email = ?
             AND status = 'pending'
         `,

@@ -12,7 +12,8 @@ import type { TheTrip } from "../types/tripType";
 import "./styles/invitation.css";
 
 function Invitation() {
-  const { id, invitationId } = useParams<{
+  const { token, id, invitationId } = useParams<{
+    token?: string,
     id: string;
     invitationId: string;
   }>();
