@@ -14,8 +14,17 @@ type Invitation = {
   message?: string | null;
 
   trip_title?: string;
+
   trip_start?: string;
   trip_end?: string;
+
+  /* Pour MyTrips / invitations en attente */
+  trip_start_at?: string;
+  trip_end_at?: string;
+
+  trip_city?: string | null;
+  trip_country?: string | null;
+  trip_place_id?: string | null;
 
   creator_id?: number;
   creator_firstname?: string;
@@ -96,6 +105,60 @@ class InvitationRepository {
 
     return rows[0] as Invitation;
   }
+
+
+  /* =========================================================
+   LISTER LES INVITATIONS EN ATTENTE
+   D'UN UTILISATEUR
+========================================================= */
+
+async selectPendingByUser(
+  userId: number,
+): Promise<Invitation[]> {
+  const [rows] =
+    await databaseClient.query<Rows>(
+      `
+        SELECT
+          i.id,
+          i.trip_id,
+          i.user_id,
+          i.email,
+          i.message,
+          i.status,
+          i.created_at,
+          i.updated_at,
+
+          t.title AS trip_title,
+          t.city AS trip_city,
+          t.country AS trip_country,
+          t.place_id AS trip_place_id,
+          t.start_at AS trip_start_at,
+          t.end_at AS trip_end_at,
+          t.user_id AS creator_id,
+
+          c.firstname AS creator_firstname,
+          c.lastname AS creator_lastname,
+          c.avatar_url AS creator_avatar_url
+
+        FROM invitation i
+
+        JOIN trip t
+          ON t.id = i.trip_id
+
+        JOIN user c
+          ON c.id = t.user_id
+
+        WHERE i.user_id = ?
+          AND i.status = 'pending'
+          AND t.end_at >= CURRENT_DATE
+
+        ORDER BY i.created_at DESC
+      `,
+      [userId],
+    );
+
+  return rows as Invitation[];
+}
 
   async updateStatus(
     id: number,

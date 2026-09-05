@@ -6,6 +6,20 @@ import invitationActions from "../../modules/invitation/invitationActions";
 import invitationServices from "../../modules/invitation/invitationServices";
 import { verifyToken } from "../../modules/auth/authActions";
 
+/* =========================================================
+   INVITATIONS EN ATTENTE DE L'UTILISATEUR CONNECTÉ
+========================================================= */
+
+router.get(
+  "/pending",
+  verifyToken,
+  invitationActions.readPending,
+);
+
+/* =========================================================
+   LECTURE D'UNE INVITATION
+========================================================= */
+
 router.get(
   "/:id",
   verifyToken,
@@ -13,8 +27,24 @@ router.get(
   invitationActions.read,
 );
 
-router.patch("/:id", verifyToken, invitationActions.edit);
+/* =========================================================
+   ACCEPTATION / REFUS
+========================================================= */
 
-router.delete("/:tripId/:userId", invitationActions.delate);
+router.patch(
+  "/:id",
+  verifyToken,
+  invitationActions.edit,
+);
+
+/* =========================================================
+   SUPPRESSION D'UN PARTICIPANT / INVITATION
+========================================================= */
+
+router.delete(
+  "/:tripId/:userId",
+  verifyToken,
+  invitationActions.delate,
+);
 
 export default router;

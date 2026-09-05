@@ -81,6 +81,435 @@
 }
 
 /* =========================================================
+   ONGLET INVITATIONS
+========================================================= */
+
+.tripstate-invitations {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.invitation-count {
+  min-width: 22px;
+  height: 22px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 0.4rem;
+
+  border-radius: 999px;
+
+  background-color: var(--primary-button);
+  color: white;
+
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.tripstate-invitations.active .invitation-count {
+  background-color: white;
+  color: var(--primary-button);
+}
+
+/* =========================================================
+   SECTION INVITATIONS
+========================================================= */
+
+.pending-invitations {
+  width: min(1200px, calc(100% - 2rem));
+
+  margin: 2.75rem auto 4rem;
+}
+
+.pending-invitations-heading {
+  margin-bottom: 1.5rem;
+}
+
+.pending-invitations-heading h1 {
+  margin: 0 0 0.35rem;
+
+  font-family: "Playfair Display", serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+
+  color: var(--black);
+}
+
+.pending-invitations-heading p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 1rem;
+}
+
+/* =========================================================
+   LISTE
+========================================================= */
+
+.pending-invitations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* =========================================================
+   CARTE INVITATION
+========================================================= */
+
+.pending-invitation-card {
+  display: grid;
+
+  grid-template-columns:
+    230px minmax(0, 1fr) auto;
+
+  align-items: stretch;
+
+  overflow: hidden;
+
+  background-color: white;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 10px 30px
+    rgba(15, 23, 42, 0.07);
+}
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.pending-invitation-image-wrapper {
+  position: relative;
+
+  min-height: 210px;
+
+  overflow: hidden;
+}
+
+.pending-invitation-image {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+.pending-invitation-status {
+  position: absolute;
+
+  top: 1rem;
+  left: 1rem;
+
+  padding: 0.45rem 0.75rem;
+
+  border-radius: 999px;
+
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.94
+  );
+
+  color: var(--primary-button);
+
+  font-size: 0.8rem;
+  font-weight: 700;
+
+  box-shadow:
+    0 4px 12px
+    rgba(15, 23, 42, 0.1);
+}
+
+/* =========================================================
+   CONTENU
+========================================================= */
+
+.pending-invitation-content {
+  padding: 1.5rem 1.75rem;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+.pending-invitation-inviter {
+  display: flex;
+  align-items: center;
+
+  gap: 0.75rem;
+
+  margin-bottom: 0.75rem;
+}
+
+.pending-invitation-inviter p {
+  margin: 0;
+
+  color: #64748b;
+
+  line-height: 1.4;
+}
+
+.pending-invitation-inviter strong {
+  color: var(--black);
+}
+
+.pending-invitation-avatar {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  border: 2px solid #f1f5f9;
+}
+
+.pending-invitation-avatar-placeholder {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background-color: #eef5ef;
+
+  color: var(--primary-button);
+}
+
+.pending-invitation-content h2 {
+  margin: 0 0 0.8rem;
+
+  font-family: "Playfair Display", serif;
+
+  font-size: 1.55rem;
+  font-weight: 700;
+
+  color: var(--black);
+}
+
+.pending-invitation-location,
+.pending-invitation-dates {
+  display: flex;
+
+  align-items: center;
+
+  gap: 0.45rem;
+
+  margin: 0.2rem 0;
+
+  color: #64748b;
+
+  font-size: 0.95rem;
+}
+
+.pending-invitation-location svg,
+.pending-invitation-dates svg {
+  flex-shrink: 0;
+
+  color: var(--primary-button);
+}
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+.pending-invitation-message {
+  max-width: 600px;
+
+  margin: 1rem 0 0;
+
+  padding: 0.85rem 1rem;
+
+  border-left:
+    3px solid var(--primary-button);
+
+  border-radius: 0 10px 10px 0;
+
+  background-color: #f8fafc;
+
+  color: #475569;
+
+  font-style: italic;
+
+  line-height: 1.5;
+}
+
+/* =========================================================
+   ACTION
+========================================================= */
+
+.pending-invitation-action {
+  min-width: 210px;
+
+  padding: 1.5rem;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-left: 1px solid #eef2f7;
+}
+
+.pending-invitation-button {
+  min-width: 170px;
+
+  padding: 0.9rem 1.25rem;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background-color: var(--primary-button);
+
+  color: white;
+
+  font-size: 0.95rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.pending-invitation-button:hover {
+  background-color: var(--button-hover);
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 7px 16px
+    rgba(27, 94, 29, 0.2);
+}
+
+/* =========================================================
+   ÉTAT VIDE
+========================================================= */
+
+.no-pending-invitations {
+  min-height: 250px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 3rem 1.5rem;
+
+  border: 1px dashed #cbd5e1;
+
+  border-radius: 18px;
+
+  background-color: white;
+
+  color: #64748b;
+}
+
+.no-pending-invitations svg {
+  margin-bottom: 1rem;
+
+  color: var(--primary-button);
+}
+
+.no-pending-invitations h2 {
+  margin: 0 0 0.5rem;
+
+  font-family: "Playfair Display", serif;
+
+  color: var(--black);
+}
+
+.no-pending-invitations p {
+  margin: 0;
+}
+
+/* =========================================================
+   RESPONSIVE - TABLETTE
+========================================================= */
+
+@media (max-width: 1024px) {
+  .pending-invitation-card {
+    grid-template-columns:
+      200px minmax(0, 1fr);
+  }
+
+  .pending-invitation-action {
+    grid-column: 1 / -1;
+
+    border-left: none;
+
+    border-top: 1px solid #eef2f7;
+
+    justify-content: flex-end;
+
+    padding: 1rem 1.5rem;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE - MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+  .pending-invitations {
+    width: min(
+      100% - 2rem,
+      1200px
+    );
+
+    margin-top: 2rem;
+  }
+
+  .pending-invitation-card {
+    grid-template-columns: 1fr;
+  }
+
+  .pending-invitation-image-wrapper {
+    min-height: 180px;
+  }
+
+  .pending-invitation-content {
+    padding: 1.25rem;
+  }
+
+  .pending-invitation-action {
+    grid-column: auto;
+
+    padding: 0 1.25rem 1.25rem;
+
+    border-top: none;
+  }
+
+  .pending-invitation-button {
+    width: 100%;
+  }
+
+  .pending-invitations-heading h1 {
+    font-size: 1.5rem;
+  }
+}
+
+
+/* =========================================================
    GRILLE DES VOYAGES
 ========================================================= */
 

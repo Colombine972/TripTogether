@@ -122,6 +122,42 @@ const read: RequestHandler = async (
 };
 
 /* =========================================================
+   LIRE LES INVITATIONS EN ATTENTE
+   DE L'UTILISATEUR CONNECTÉ
+========================================================= */
+
+const readPending: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
+  try {
+    const connectedUserId =
+      getConnectedUserId(req);
+
+    if (
+      Number.isNaN(connectedUserId) ||
+      connectedUserId <= 0
+    ) {
+      res.status(401).json({
+        error: "Utilisateur non authentifié",
+      });
+
+      return;
+    }
+
+    const invitations =
+      await invitationRepository.selectPendingByUser(
+        connectedUserId,
+      );
+
+    res.status(200).json(invitations);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* =========================================================
    MODIFIER LE STATUT D'UNE INVITATION
 ========================================================= */
 
@@ -623,6 +659,7 @@ const delate: RequestHandler = async (
 export default {
   edit,
   read,
+  readPending,
   add,
   selectInvitationsByTrip,
   delate,
