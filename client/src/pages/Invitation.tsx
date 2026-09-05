@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
 
@@ -28,6 +28,35 @@ function Invitation() {
     useState<TheTrip | null>(null);
 
   /* =========================================================
+     CHEMIN DE RETOUR VERS L'INVITATION
+  ========================================================= */
+
+  const getInvitationPath = useCallback(() => {
+  if (!id || !invitationId) {
+    return "/";
+  }
+
+  return `/trip/${id}/invitation/${invitationId}`;
+}, [id, invitationId]);
+
+const redirectToLogin = useCallback(
+  (message?: string) => {
+    if (message) {
+      toast.error(message);
+    }
+
+    const invitationPath =
+      getInvitationPath();
+
+    navigate(
+      `/login?redirect=${encodeURIComponent(
+        invitationPath,
+      )}`,
+    );
+  },
+  [getInvitationPath, navigate],
+);
+  /* =========================================================
      CHARGEMENT DU VOYAGE ET DE L'INVITATION
   ========================================================= */
 
@@ -49,11 +78,7 @@ function Invitation() {
     ====================================================== */
 
     if (!auth?.token) {
-      toast.error(
-        "Veuillez vous connecter pour accéder à cette invitation.",
-      );
-
-      navigate("/login");
+      redirectToLogin();
 
       return;
     }
@@ -66,21 +91,26 @@ function Invitation() {
       `${import.meta.env.VITE_API_URL}/api/trips/${id}`,
     )
       .then(async (response) => {
+        /* =================================================
+           SESSION EXPIRÉE / NON AUTHENTIFIÉ
+        ================================================= */
+
+        if (response.status === 401) {
+          redirectToLogin(
+            "Votre session a expiré. Veuillez vous reconnecter.",
+          );
+
+          return;
+        }
+
         if (!response.ok) {
-          if (response.status === 401) {
-            toast.error(
-              "Veuillez vous connecter pour accéder à ce voyage.",
-            );
-
-            return;
-          }
-
           throw new Error(
             "Erreur chargement voyage",
           );
         }
 
-        const data = await response.json();
+        const data =
+          await response.json();
 
         setMyTrip(data);
       })
@@ -112,15 +142,13 @@ function Invitation() {
             .catch(() => null);
 
         /* =================================================
-           NON AUTHENTIFIÉ
+           SESSION EXPIRÉE / NON AUTHENTIFIÉ
         ================================================= */
 
         if (response.status === 401) {
-          toast.error(
-            "Veuillez vous connecter pour accéder à cette invitation.",
+          redirectToLogin(
+            "Votre session a expiré. Veuillez vous reconnecter.",
           );
-
-          navigate("/login");
 
           return;
         }
@@ -212,7 +240,9 @@ function Invitation() {
           );
         }
 
-        setInvitation(invitationData);
+        setInvitation(
+          invitationData,
+        );
       })
       .catch((error) => {
         console.error(error);
@@ -228,6 +258,7 @@ function Invitation() {
     invitationId,
     id,
     auth?.token,
+    redirectToLogin,
   ]);
 
   /* =========================================================
@@ -246,49 +277,47 @@ function Invitation() {
     ====================================================== */
 
     if (!auth?.token) {
-      toast.error(
+      redirectToLogin(
         "Veuillez vous connecter pour répondre à cette invitation.",
       );
-
-      navigate("/login");
 
       return;
     }
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/invitation/${invitationId}`,
-        {
-          method: "PATCH",
+      const response =
+        await fetch(
+          `${import.meta.env.VITE_API_URL}/api/invitation/${invitationId}`,
+          {
+            method: "PATCH",
 
-          headers: {
-            "Content-Type":
-              "application/json",
+            headers: {
+              "Content-Type":
+                "application/json",
 
-            Authorization:
-              `Bearer ${auth.token}`,
+              Authorization:
+                `Bearer ${auth.token}`,
+            },
+
+            body: JSON.stringify({
+              status,
+            }),
           },
+        );
 
-          body: JSON.stringify({
-            status,
-          }),
-        },
-      );
-
-      const data = await response
-        .json()
-        .catch(() => null);
+      const data =
+        await response
+          .json()
+          .catch(() => null);
 
       /* =====================================================
          SESSION EXPIRÉE / NON CONNECTÉ
       ====================================================== */
 
       if (response.status === 401) {
-        toast.error(
+        redirectToLogin(
           "Votre session a expiré. Veuillez vous reconnecter.",
         );
-
-        navigate("/login");
 
         return;
       }
@@ -370,7 +399,10 @@ function Invitation() {
         );
 
         navigate(
-          `/trip/${id ?? invitation?.trip_id}`,
+          `/trip/${
+            id ??
+            invitation?.trip_id
+          }`,
         );
 
         return;
@@ -380,7 +412,9 @@ function Invitation() {
          INVITATION REFUSÉE
       ====================================================== */
 
-      toast.info("Invitation refusée");
+      toast.info(
+        "Invitation refusée",
+      );
 
       navigate("/");
     } catch (error) {
@@ -408,7 +442,9 @@ function Invitation() {
 
       <TripInfos
         trip={myTrip}
-        onTripUpdated={setMyTrip}
+        onTripUpdated={
+          setMyTrip
+        }
         canEdit={false}
       />
 
@@ -453,7 +489,9 @@ function Invitation() {
           {invitation?.message && (
             <p className="invitation-message">
               "
-              {invitation.message.trim()}
+              {
+                invitation.message.trim()
+              }
               "
             </p>
           )}
