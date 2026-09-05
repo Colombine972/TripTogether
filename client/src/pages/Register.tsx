@@ -1,7 +1,15 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useRef, useState } from "react";
-import type { ChangeEventHandler, FormEventHandler } from "react";
-import { Link, useNavigate } from "react-router";
+import type {
+  ChangeEventHandler,
+  FormEventHandler,
+} from "react";
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+} from "react-router";
+
 import "./styles/Auth.css";
 
 function Register() {
@@ -11,27 +19,65 @@ function Register() {
 
   const navigate = useNavigate();
 
+  const [searchParams] = useSearchParams();
+
+  const redirect = searchParams.get("redirect");
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState(false);
 
-  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] =
+    useState(false);
 
-  const handlePasswordChange: ChangeEventHandler<HTMLInputElement> = (
-    event,
-  ) => {
+  /* =========================================================
+     REDIRECTION SÉCURISÉE
+  ========================================================= */
+
+  const safeRedirect =
+    redirect?.startsWith("/") &&
+    !redirect.startsWith("//")
+      ? redirect
+      : "/";
+
+  /* =========================================================
+     LIEN VERS LOGIN
+     CONSERVATION DU REDIRECT SI PRÉSENT
+  ========================================================= */
+
+  const loginPath =
+    safeRedirect !== "/"
+      ? `/login?redirect=${encodeURIComponent(
+          safeRedirect,
+        )}`
+      : "/login";
+
+  /* =========================================================
+     MOT DE PASSE
+  ========================================================= */
+
+  const handlePasswordChange: ChangeEventHandler<
+    HTMLInputElement
+  > = (event) => {
     setPassword(event.target.value);
   };
 
-  const handleConfirmPasswordChange: ChangeEventHandler<HTMLInputElement> = (
-    event,
-  ) => {
+  const handleConfirmPasswordChange: ChangeEventHandler<
+    HTMLInputElement
+  > = (event) => {
     setConfirmPassword(event.target.value);
   };
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
+  /* =========================================================
+     INSCRIPTION
+  ========================================================= */
+
+  const handleSubmit: FormEventHandler<
+    HTMLFormElement
+  > = async (event) => {
     event.preventDefault();
 
     try {
@@ -39,9 +85,11 @@ function Register() {
         `${import.meta.env.VITE_API_URL}/api/auth/register`,
         {
           method: "POST",
+
           headers: {
             "Content-Type": "application/json",
           },
+
           body: JSON.stringify({
             firstname: firstnameRef.current?.value,
             lastname: lastnameRef.current?.value,
@@ -51,8 +99,12 @@ function Register() {
         },
       );
 
+      /* =====================================================
+         INSCRIPTION RÉUSSIE
+      ====================================================== */
+
       if (response.status === 201) {
-        navigate("/login", {
+        navigate(loginPath, {
           state: {
             toast: {
               type: "success",
@@ -60,29 +112,45 @@ function Register() {
             },
           },
         });
-      } else {
-        console.info(response);
+
+        return;
       }
+
+      /* =====================================================
+         AUTRE ERREUR
+      ====================================================== */
+
+      console.info(response);
     } catch (err) {
       console.error(err);
     }
   };
 
+  /* =========================================================
+     RENDU
+  ========================================================= */
+
   return (
     <div className="auth-page auth-page-register">
       <div className="auth-card auth-card-register">
-
         <div className="logo-container">
-          <div className="logo-icon">🧳</div>
+          <div className="logo-icon">
+            🧳
+          </div>
 
-          <h1 className="logo-text">Trip Together</h1>
+          <h1 className="logo-text">
+            Trip Together
+          </h1>
         </div>
 
+        <h2 className="title">
+          Planifiez votre prochaine aventure
+        </h2>
 
-        <h2 className="title">Planifiez votre prochaine aventure</h2>
-
-        <form className="auth-form" onSubmit={handleSubmit}>
-
+        <form
+          className="auth-form"
+          onSubmit={handleSubmit}
+        >
           <div className="input-group">
             <input
               ref={lastnameRef}
@@ -121,7 +189,11 @@ function Register() {
 
           <div className="input-group password-input-group">
             <input
-              type={showPassword ? "text" : "password"}
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
               id="password"
               className="form-input password-input"
               placeholder="Mot de passe"
@@ -135,7 +207,12 @@ function Register() {
             <button
               type="button"
               className="password-toggle"
-              onClick={() => setShowPassword((previous) => !previous)}
+              onClick={() =>
+                setShowPassword(
+                  (previous) =>
+                    !previous,
+                )
+              }
               aria-label={
                 showPassword
                   ? "Masquer le mot de passe"
@@ -147,7 +224,11 @@ function Register() {
                   : "Afficher le mot de passe"
               }
             >
-              {showPassword ? <EyeOff size={21} /> : <Eye size={21} />}
+              {showPassword ? (
+                <EyeOff size={21} />
+              ) : (
+                <Eye size={21} />
+              )}
             </button>
 
             {password.length >= 8 && (
@@ -162,12 +243,18 @@ function Register() {
 
           <div className="input-group password-input-group">
             <input
-              type={showConfirmPassword ? "text" : "password"}
+              type={
+                showConfirmPassword
+                  ? "text"
+                  : "password"
+              }
               id="confirmPassword"
               className="form-input password-input"
               placeholder="Répéter le mot de passe"
               value={confirmPassword}
-              onChange={handleConfirmPasswordChange}
+              onChange={
+                handleConfirmPasswordChange
+              }
               autoComplete="new-password"
               required
             />
@@ -176,7 +263,10 @@ function Register() {
               type="button"
               className="password-toggle"
               onClick={() =>
-                setShowConfirmPassword((previous) => !previous)
+                setShowConfirmPassword(
+                  (previous) =>
+                    !previous,
+                )
               }
               aria-label={
                 showConfirmPassword
@@ -196,26 +286,31 @@ function Register() {
               )}
             </button>
 
-            {password === confirmPassword && password !== "" && (
-              <span
-                className="validation-icon password-validation-icon"
-                aria-label="Les mots de passe correspondent"
-              >
-                ✅
-              </span>
-            )}
+            {password === confirmPassword &&
+              password !== "" && (
+                <span
+                  className="validation-icon password-validation-icon"
+                  aria-label="Les mots de passe correspondent"
+                >
+                  ✅
+                </span>
+              )}
           </div>
 
-
           <div className="checkbox-group">
-            <label className="checkbox-label" htmlFor="privacy">
+            <label
+              className="checkbox-label"
+              htmlFor="privacy"
+            >
               <input
                 type="checkbox"
                 id="privacy"
                 required
                 checked={privacyAccepted}
                 onChange={(event) =>
-                  setPrivacyAccepted(event.target.checked)
+                  setPrivacyAccepted(
+                    event.target.checked,
+                  )
                 }
               />
 
@@ -232,7 +327,8 @@ function Register() {
             type="submit"
             className="submit-btn"
             disabled={
-              password !== confirmPassword ||
+              password !==
+                confirmPassword ||
               password.length < 8 ||
               !privacyAccepted
             }
@@ -243,7 +339,15 @@ function Register() {
 
         <div className="footer-login">
           Déjà membre ?{" "}
-          <Link to="/login" onClick={() => window.scrollTo({ top: 0 })}>
+
+          <Link
+            to={loginPath}
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+              })
+            }
+          >
             Se connecter
           </Link>
         </div>
