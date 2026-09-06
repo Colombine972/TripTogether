@@ -1,3 +1,4 @@
+import { CalendarDays, Coins, MapPin, UsersRound, Vote } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
@@ -168,6 +169,7 @@ function Invitation() {
       setLoading(true);
 
       setInvitation(null);
+
       setPublicInvitation(null);
 
       /* ===================================================
@@ -228,7 +230,7 @@ function Invitation() {
             }
 
             /* =============================================
-                 INVITATION INTROUVABLE
+                 INTROUVABLE
               ============================================= */
 
             if (response.status === 404) {
@@ -242,7 +244,7 @@ function Invitation() {
             }
 
             /* =============================================
-                 INVITATION DÉJÀ ACCEPTÉE
+                 DÉJÀ ACCEPTÉE
               ============================================= */
 
             if (response.status === 409) {
@@ -283,10 +285,6 @@ function Invitation() {
               );
             }
 
-            /* =============================================
-                 INVITATION PRIVÉE
-              ============================================= */
-
             setInvitation(data);
 
             if (data?.trip_id) {
@@ -313,10 +311,6 @@ function Invitation() {
             return;
           }
 
-          /* ===============================================
-               TOKEN INVALIDE
-            =============================================== */
-
           if (response.status === 400) {
             toast.error(
               data?.error || data?.message || "Lien d'invitation invalide.",
@@ -326,10 +320,6 @@ function Invitation() {
 
             return;
           }
-
-          /* ===============================================
-               INTROUVABLE
-            =============================================== */
 
           if (response.status === 404) {
             toast.error(
@@ -341,10 +331,6 @@ function Invitation() {
             return;
           }
 
-          /* ===============================================
-               DÉJÀ ACCEPTÉE
-            =============================================== */
-
           if (response.status === 409) {
             toast.info(
               data?.message || "Cette invitation a déjà été acceptée.",
@@ -354,10 +340,6 @@ function Invitation() {
 
             return;
           }
-
-          /* ===============================================
-               REFUSÉE / EXPIRÉE
-            =============================================== */
 
           if (response.status === 410) {
             toast.error(
@@ -399,7 +381,6 @@ function Invitation() {
 
       /* ===================================================
            ANCIEN PARCOURS
-           /trip/:id/invitation/:invitationId
         =================================================== */
 
       if (id && invitationId) {
@@ -507,10 +488,6 @@ function Invitation() {
 
         return;
       }
-
-      /* ===================================================
-           AUCUN PARCOURS VALIDE
-        =================================================== */
 
       toast.error("Invitation invalide.");
 
@@ -631,10 +608,6 @@ function Invitation() {
         );
       }
 
-      /* ===================================================
-           ACCEPTÉE
-        =================================================== */
-
       if (status === "accepted") {
         toast.success("Invitation acceptée");
 
@@ -648,10 +621,6 @@ function Invitation() {
 
         return;
       }
-
-      /* ===================================================
-           REFUSÉE
-        =================================================== */
 
       toast.info("Invitation refusée");
 
@@ -692,6 +661,20 @@ function Invitation() {
   };
 
   /* =========================================================
+     PHOTO DU VOYAGE
+  ========================================================= */
+
+  const getTripImageUrl = (placeId?: string | null) => {
+    if (!placeId) {
+      return null;
+    }
+
+    return `${
+      import.meta.env.VITE_API_URL
+    }/api/places/photo/${encodeURIComponent(placeId)}`;
+  };
+
+  /* =========================================================
      CHARGEMENT
   ========================================================= */
 
@@ -709,13 +692,14 @@ function Invitation() {
 
   /* =========================================================
      UTILISATEUR NON CONNECTÉ
-     + INVITATION PUBLIQUE
   ========================================================= */
 
   if (token && !auth?.token && publicInvitation) {
     const organizerName = `${publicInvitation.organizer.firstname ?? ""} ${
       publicInvitation.organizer.lastname ?? ""
     }`.trim();
+
+    const tripImageUrl = getTripImageUrl(publicInvitation.trip.placeId);
 
     /* =======================================================
        UTILISATEUR DÉJÀ INSCRIT
@@ -740,36 +724,49 @@ function Invitation() {
                 : "Vous avez reçu une invitation à rejoindre un voyage."}
             </p>
 
-            {/* ===============================================
-                VOYAGE
-            =============================================== */}
-
             <div className="invitation-public-trip">
-              <span className="invitation-public-trip-label">Voyage</span>
-
-              <h2>{publicInvitation.trip.title || "Voyage"}</h2>
-
-              {(publicInvitation.trip.city ||
-                publicInvitation.trip.country) && (
-                <p>
-                  📍{" "}
-                  {[publicInvitation.trip.city, publicInvitation.trip.country]
-                    .filter(Boolean)
-                    .join(", ")}
-                </p>
+              {tripImageUrl && (
+                <img
+                  src={tripImageUrl}
+                  alt=""
+                  className="invitation-public-trip-image"
+                />
               )}
 
-              {publicInvitation.trip.startAt && publicInvitation.trip.endAt && (
-                <p>
-                  📅 Du {formatDate(publicInvitation.trip.startAt)} au{" "}
-                  {formatDate(publicInvitation.trip.endAt)}
-                </p>
-              )}
+              <div className="invitation-public-trip-content">
+                <span className="invitation-public-trip-label">Voyage</span>
+
+                <h2>{publicInvitation.trip.title || "Voyage"}</h2>
+
+                {(publicInvitation.trip.city ||
+                  publicInvitation.trip.country) && (
+                  <p>
+                    <MapPin size={17} />
+
+                    <span>
+                      {[
+                        publicInvitation.trip.city,
+                        publicInvitation.trip.country,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </span>
+                  </p>
+                )}
+
+                {publicInvitation.trip.startAt &&
+                  publicInvitation.trip.endAt && (
+                    <p>
+                      <CalendarDays size={17} />
+
+                      <span>
+                        Du {formatDate(publicInvitation.trip.startAt)} au{" "}
+                        {formatDate(publicInvitation.trip.endAt)}
+                      </span>
+                    </p>
+                  )}
+              </div>
             </div>
-
-            {/* ===============================================
-                CONNEXION
-            =============================================== */}
 
             <p className="invitation-public-account-text">
               Connectez-vous à votre compte TripTogether pour consulter et
@@ -802,49 +799,75 @@ function Invitation() {
 
     return (
       <main className="invitation-public-main">
-        <section className="invitation-public-card">
-          <span className="invitation-public-badge">Invitation au voyage</span>
-
-          <h1 className="invitation-public-title">
-            Vous êtes invité(e) à rejoindre un voyage
-          </h1>
-
-          <p className="invitation-public-intro">
-            {organizerName
-              ? `${organizerName} vous invite à partager une nouvelle aventure.`
-              : "Vous avez reçu une invitation à rejoindre un voyage sur TripTogether."}
-          </p>
-
+        <section className="invitation-public-card invitation-public-card-discovery">
           {/* ===============================================
-              VOYAGE
+              HERO
           =============================================== */}
 
-          <div className="invitation-public-trip">
-            <span className="invitation-public-trip-label">
-              Votre prochain voyage
+          <header className="invitation-public-hero">
+            <span className="invitation-public-badge">
+              Invitation au voyage
             </span>
 
-            <h2>{publicInvitation.trip.title || "Voyage"}</h2>
+            <h1 className="invitation-public-title">
+              Vous êtes invité(e) à rejoindre un voyage
+            </h1>
 
-            {(publicInvitation.trip.city || publicInvitation.trip.country) && (
-              <p>
-                📍{" "}
-                {[publicInvitation.trip.city, publicInvitation.trip.country]
-                  .filter(Boolean)
-                  .join(", ")}
-              </p>
+            <p className="invitation-public-intro">
+              {organizerName
+                ? `${organizerName} vous invite à partager une nouvelle aventure.`
+                : "Vous avez reçu une invitation à rejoindre un voyage sur TripTogether."}
+            </p>
+          </header>
+
+          {/* ===============================================
+              CARTE VOYAGE
+          =============================================== */}
+
+          <div className="invitation-public-trip invitation-public-trip-discovery">
+            {tripImageUrl && (
+              <img
+                src={tripImageUrl}
+                alt=""
+                className="invitation-public-trip-image"
+              />
             )}
 
-            {publicInvitation.trip.startAt && publicInvitation.trip.endAt && (
-              <p>
-                📅 Du {formatDate(publicInvitation.trip.startAt)} au{" "}
-                {formatDate(publicInvitation.trip.endAt)}
-              </p>
-            )}
+            <div className="invitation-public-trip-content">
+              <span className="invitation-public-trip-label">
+                Votre prochain voyage
+              </span>
+
+              <h2>{publicInvitation.trip.title || "Voyage"}</h2>
+
+              {(publicInvitation.trip.city ||
+                publicInvitation.trip.country) && (
+                <p>
+                  <MapPin size={17} />
+
+                  <span>
+                    {[publicInvitation.trip.city, publicInvitation.trip.country]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </span>
+                </p>
+              )}
+
+              {publicInvitation.trip.startAt && publicInvitation.trip.endAt && (
+                <p>
+                  <CalendarDays size={17} />
+
+                  <span>
+                    Du {formatDate(publicInvitation.trip.startAt)} au{" "}
+                    {formatDate(publicInvitation.trip.endAt)}
+                  </span>
+                </p>
+              )}
+            </div>
           </div>
 
           {/* ===============================================
-              PRÉSENTATION TRIPTOGETHER
+              PRÉSENTATION
           =============================================== */}
 
           <div className="invitation-public-presentation">
@@ -857,12 +880,14 @@ function Invitation() {
           </div>
 
           {/* ===============================================
-              BÉNÉFICES
+              3 BÉNÉFICES
           =============================================== */}
 
           <div className="invitation-public-benefits">
             <article className="invitation-public-benefit">
-              <span className="invitation-public-benefit-icon">👥</span>
+              <span className="invitation-public-benefit-icon">
+                <UsersRound size={22} />
+              </span>
 
               <div>
                 <h3>Organisez ensemble</h3>
@@ -874,7 +899,9 @@ function Invitation() {
             </article>
 
             <article className="invitation-public-benefit">
-              <span className="invitation-public-benefit-icon">🗳️</span>
+              <span className="invitation-public-benefit-icon">
+                <Vote size={22} />
+              </span>
 
               <div>
                 <h3>Votez pour les étapes</h3>
@@ -884,7 +911,9 @@ function Invitation() {
             </article>
 
             <article className="invitation-public-benefit">
-              <span className="invitation-public-benefit-icon">💰</span>
+              <span className="invitation-public-benefit-icon">
+                <Coins size={22} />
+              </span>
 
               <div>
                 <h3>Partagez les dépenses</h3>
@@ -895,11 +924,11 @@ function Invitation() {
           </div>
 
           {/* ===============================================
-    VIDÉO DE PRÉSENTATION
-=============================================== */}
+              VIDÉO
+          =============================================== */}
 
           <section className="invitation-public-video-section">
-            <div className="invitation-public-video-heading">
+            <div className="invitation-public-video-copy">
               <span className="invitation-public-video-label">
                 Découvrir TripTogether
               </span>
@@ -912,21 +941,80 @@ function Invitation() {
               </p>
             </div>
 
-            <div className="invitation-public-video-wrapper">
-              <video
-                className="invitation-public-video"
-                controls
-                preload="metadata"
-                playsInline
-                muted
+            <div className="invitation-public-video-layout">
+              <div className="invitation-public-video-wrapper">
+                <video
+                  className="invitation-public-video"
+                  controls
+                  preload="metadata"
+                  playsInline
+                  muted
+                >
+                  <source
+                    src="/videos/triptogether-presentation.mp4"
+                    type="video/mp4"
+                  />
+                  Votre navigateur ne prend pas en charge la lecture de cette
+                  vidéo.
+                </video>
+              </div>
+
+              <aside
+                className="invitation-public-video-note"
+                aria-hidden="true"
               >
-                <source
-                  src="/videos/triptogether-presentation.mp4"
-                  type="video/mp4"
-                />
-                Votre navigateur ne prend pas en charge la lecture de cette
-                vidéo.
-              </video>
+                <span>
+                  Découvrez
+                  <br />
+                  l'application
+                  <br />
+                  en vidéo !
+                </span>
+
+                <svg
+                  className="invitation-public-video-arrow"
+                  viewBox="0 0 120 90"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    d="
+      M108 13
+      C88 10 72 14 62 25
+      C52 36 55 48 46 56
+      C41 61 35 64 27 65
+    "
+                    stroke="currentColor"
+                    strokeWidth="2.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+
+                  <path
+                    d="
+      M27 65
+      C34 59 39 53 42 48
+    "
+                    stroke="currentColor"
+                    strokeWidth="2.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+
+                  <path
+                    d="
+      M27 65
+      C35 66 42 69 47 73
+    "
+                    stroke="currentColor"
+                    strokeWidth="2.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </aside>
             </div>
           </section>
 
@@ -934,7 +1022,7 @@ function Invitation() {
               CTA
           =============================================== */}
 
-          <div className="invitation-public-actions">
+          <div className="invitation-public-actions invitation-public-actions-discovery">
             <button
               type="button"
               className="invitation-btn-primary"
@@ -966,7 +1054,6 @@ function Invitation() {
 
   /* =========================================================
      INVITATION AUTHENTIFIÉE
-     NOUVEAU + ANCIEN PARCOURS
   ========================================================= */
 
   if (invitation) {
@@ -976,17 +1063,9 @@ function Invitation() {
 
     return (
       <>
-        {/* ===================================================
-            APERÇU DU VOYAGE
-        =================================================== */}
-
         {myTrip && (
           <TripInfos trip={myTrip} onTripUpdated={setMyTrip} canEdit={false} />
         )}
-
-        {/* ===================================================
-            INVITATION
-        =================================================== */}
 
         <main className="invitation-main">
           <article id="invitation" className="invitation-card">
@@ -1009,10 +1088,6 @@ function Invitation() {
                 "{invitation.message.trim()}"
               </p>
             )}
-
-            {/* ===============================================
-                ACTIONS
-            =============================================== */}
 
             <div className="invitation-actions">
               <button

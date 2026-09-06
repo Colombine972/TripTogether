@@ -6,6 +6,7 @@
 .invitation-main {
   width: 100%;
   max-width: 1200px;
+
   margin: 0 auto;
   padding: 3rem 1rem;
 
@@ -32,12 +33,6 @@
   box-shadow:
     0 10px 25px -5px
     rgba(15, 23, 42, 0.12);
-}
-
-.invitation-other-informations {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
 }
 
 .invitation-text {
@@ -144,7 +139,8 @@
 }
 
 .invitation-btn-primary {
-  border: 1px solid
+  border:
+    1px solid
     var(--primary-button);
 
   background:
@@ -164,7 +160,8 @@
   border-color:
     var(--button-hover);
 
-  transform: translateY(-1px);
+  transform:
+    translateY(-1px);
 
   box-shadow:
     0 7px 16px
@@ -172,7 +169,8 @@
 }
 
 .invitation-btn-outline {
-  border: 2px solid
+  border:
+    2px solid
     var(--primary-button);
 
   background:
@@ -200,7 +198,7 @@
 }
 
 /* =========================================================
-   PAGE PUBLIQUE D'INVITATION
+   PAGE PUBLIQUE
 ========================================================= */
 
 .invitation-public-main {
@@ -216,13 +214,18 @@
 
   background:
     radial-gradient(
-      circle at top left,
-      rgba(27, 94, 29, 0.09),
-      transparent 34%
+      circle at 5% 15%,
+      rgba(27, 94, 29, 0.08),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 96% 80%,
+      rgba(27, 94, 29, 0.06),
+      transparent 25%
     ),
     linear-gradient(
       180deg,
-      #f8faf8 0%,
+      #fbfcfa 0%,
       var(--background) 100%
     );
 }
@@ -236,7 +239,6 @@
   max-width: 760px;
 
   margin-inline: auto;
-
   padding: 3rem;
 
   box-sizing: border-box;
@@ -248,17 +250,17 @@
   border-radius: 24px;
 
   background:
-    rgba(255, 255, 255, 0.96);
+    rgba(255, 255, 255, 0.97);
 
   box-shadow:
     0 22px 55px
     rgba(13, 17, 23, 0.08);
 }
 
-/* =========================================================
-   VERSION COURTE
-   UTILISATEUR DÉJÀ INSCRIT
-========================================================= */
+.invitation-public-card-discovery {
+  position: relative;
+  overflow: visible;
+}
 
 .invitation-public-card-existing-user {
   width: 100%;
@@ -270,17 +272,21 @@
 }
 
 /* =========================================================
-   BADGE
+   HERO
 ========================================================= */
+
+.invitation-public-hero {
+  margin-bottom: 1.8rem;
+}
 
 .invitation-public-badge {
   display: inline-flex;
   align-items: center;
 
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
 
   padding:
-    0.45rem 0.8rem;
+    0.4rem 0.8rem;
 
   border-radius: 999px;
 
@@ -290,21 +296,17 @@
   color:
     var(--primary-button);
 
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-
-/* =========================================================
-   TITRE
-========================================================= */
 
 .invitation-public-title {
   max-width: 650px;
 
   margin:
-    0 0 1rem;
+    0 0 0.7rem;
 
   color:
     var(--black);
@@ -316,8 +318,8 @@
   font-size:
     clamp(
       2rem,
-      5vw,
-      3.1rem
+      4vw,
+      2.75rem
     );
 
   font-weight: 700;
@@ -325,14 +327,13 @@
 }
 
 .invitation-public-intro {
-  max-width: 620px;
+  max-width: 630px;
 
-  margin:
-    0 0 2rem;
+  margin: 0;
 
   color: #616a64;
 
-  font-size: 1.08rem;
+  font-size: 1rem;
   line-height: 1.65;
 }
 
@@ -343,9 +344,12 @@
 .invitation-public-trip {
   width: 100%;
 
-  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
 
-  padding: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.15rem;
 
   box-sizing: border-box;
 
@@ -353,30 +357,93 @@
     1px solid
     rgba(27, 94, 29, 0.14);
 
-  border-radius: 18px;
+  border-radius: 17px;
 
   background:
     rgba(27, 94, 29, 0.045);
 }
 
+.invitation-public-trip-image {
+  flex: 0 0 145px;
+
+  width: 145px;
+  height: 105px;
+
+  border-radius: 13px;
+
+  object-fit: cover;
+
+  background: #edf1ed;
+}
+
+.invitation-public-trip-content {
+  min-width: 0;
+  flex: 1;
+}
+
 .invitation-public-trip-label {
   display: block;
 
-  margin-bottom:
-    0.35rem;
+  margin-bottom: 0.3rem;
 
   color:
     var(--primary-button);
 
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .invitation-public-trip h2 {
   margin:
-    0 0 0.8rem;
+    0 0 0.65rem;
+
+  color:
+    var(--black);
+
+  font-family:
+    "Playfair Display",
+    serif;
+
+  font-size: 1.55rem;
+  line-height: 1.22;
+}
+
+.invitation-public-trip p {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+
+  margin:
+    0.32rem 0;
+
+  color: #59615c;
+
+  font-size: 0.93rem;
+  line-height: 1.45;
+}
+
+.invitation-public-trip p svg {
+  flex: 0 0 auto;
+
+  margin-top: 0.12rem;
+
+  color:
+    var(--primary-button);
+}
+
+/* =========================================================
+   PRÉSENTATION
+========================================================= */
+
+.invitation-public-presentation {
+  margin-bottom: 1.35rem;
+}
+
+.invitation-public-presentation h2 {
+  margin:
+    0 0 0.35rem;
 
   color:
     var(--black);
@@ -389,102 +456,71 @@
   line-height: 1.25;
 }
 
-.invitation-public-trip p {
-  margin:
-    0.35rem 0;
-
-  color: #59615c;
-
-  font-size: 0.98rem;
-  line-height: 1.5;
-}
-
-/* =========================================================
-   PRÉSENTATION TRIPTOGETHER
-========================================================= */
-
-.invitation-public-presentation {
-  margin-bottom: 1.5rem;
-}
-
-.invitation-public-presentation h2 {
-  margin:
-    0 0 0.5rem;
-
-  color:
-    var(--black);
-
-  font-family:
-    "Playfair Display",
-    serif;
-
-  font-size: 1.75rem;
-}
-
 .invitation-public-presentation p {
   margin: 0;
 
   color: #68716b;
 
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: 0.95rem;
+  line-height: 1.55;
 }
 
 /* =========================================================
-   BÉNÉFICES
+   3 BÉNÉFICES
 ========================================================= */
 
 .invitation-public-benefits {
   display: grid;
-  gap: 0.75rem;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 1.2rem;
 
   margin:
-    1.5rem 0 2rem;
+    1.65rem 0 2.3rem;
 }
 
 .invitation-public-benefit {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
+  min-width: 0;
 
-  padding:
-    1rem 0;
-}
+  padding: 0.35rem;
 
-.invitation-public-benefit:not(
-  :last-child
-) {
-  border-bottom:
-    1px solid
-    rgba(13, 17, 23, 0.07);
+  text-align: center;
 }
 
 .invitation-public-benefit-icon {
   display: grid;
   place-items: center;
 
-  flex: 0 0 46px;
+  width: 48px;
+  height: 48px;
 
-  width: 46px;
-  height: 46px;
+  margin:
+    0 auto 0.75rem;
 
   border-radius: 50%;
 
   background:
-    rgba(27, 94, 29, 0.08);
+    rgba(27, 94, 29, 0.09);
 
-  font-size: 1.25rem;
+  color:
+    var(--primary-button);
 }
 
 .invitation-public-benefit h3 {
   margin:
-    0 0 0.25rem;
+    0 0 0.38rem;
 
   color:
     var(--black);
 
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: 0.96rem;
+  font-weight: 750;
+  line-height: 1.3;
 }
 
 .invitation-public-benefit p {
@@ -492,55 +528,35 @@
 
   color: #68716b;
 
-  font-size: 0.96rem;
-  line-height: 1.55;
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 /* =========================================================
-   VIDÉO DE PRÉSENTATION
+   VIDÉO
 ========================================================= */
 
 .invitation-public-video-section {
-  margin: 2rem 0;
+  margin:
+    0 0 1.8rem;
 }
 
-.invitation-public-video-heading {
-  margin-bottom: 1rem;
+.invitation-public-video-copy {
+  display: none;
 }
 
-.invitation-public-video-label {
-  display: block;
+.invitation-public-video-layout {
+  position: relative;
 
-  margin-bottom: 0.35rem;
+  display: grid;
 
-  color: var(--primary-button);
+  grid-template-columns:
+    minmax(0, 1fr)
+    135px;
 
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
+  align-items: center;
 
-.invitation-public-video-heading h2 {
-  margin: 0 0 0.5rem;
-
-  color: var(--black);
-
-  font-family:
-    "Playfair Display",
-    serif;
-
-  font-size: 1.6rem;
-  line-height: 1.3;
-}
-
-.invitation-public-video-heading p {
-  margin: 0;
-
-  color: #68716b;
-
-  font-size: 0.96rem;
-  line-height: 1.55;
+  gap: 0.9rem;
 }
 
 .invitation-public-video-wrapper {
@@ -548,14 +564,17 @@
 
   overflow: hidden;
 
-  border: 1px solid rgba(27, 94, 29, 0.12);
-  border-radius: 18px;
+  border:
+    1px solid
+    rgba(27, 94, 29, 0.14);
+
+  border-radius: 17px;
 
   background: #000000;
 
   box-shadow:
-    0 12px 30px
-    rgba(13, 17, 23, 0.1);
+    0 12px 28px
+    rgba(13, 17, 23, 0.12);
 }
 
 .invitation-public-video {
@@ -564,7 +583,8 @@
   width: 100%;
   height: auto;
 
-  aspect-ratio: 16 / 9;
+  aspect-ratio:
+    16 / 9;
 
   object-fit: cover;
 
@@ -572,49 +592,61 @@
 }
 
 /* =========================================================
-   RESPONSIVE VIDÉO
+   MESSAGE MANUSCRIT + FLÈCHE
 ========================================================= */
 
-@media (max-width: 425px) {
-  .invitation-public-video-section {
-    margin: 1.5rem 0;
-  }
+.invitation-public-video-note {
+  position: relative;
 
-  .invitation-public-video-heading h2 {
-    font-size: 1.4rem;
-  }
+  align-self: center;
 
-  .invitation-public-video-heading p {
-    font-size: 0.92rem;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-  .invitation-public-video-wrapper {
-    border-radius: 14px;
-  }
+  padding-top: 1rem;
+
+  color: #444c46;
+
+  text-align: center;
+
+  transform:
+    rotate(-3deg);
 }
 
-@media (max-width: 320px) {
-  .invitation-public-video-heading h2 {
-    font-size: 1.3rem;
-  }
+.invitation-public-video-note span {
+  font-family:
+    "Bradley Hand",
+    "Segoe Print",
+    "Comic Sans MS",
+    cursive;
 
-  .invitation-public-video-heading p {
-    font-size: 0.88rem;
-  }
+  font-size: 1rem;
+  line-height: 1.25;
 }
 
+.invitation-public-video-arrow {
+  width: 95px;
+  height: auto;
+
+  margin-top: 0.25rem;
+
+  color: #303833;
+
+  transform: none;
+}
 
 /* =========================================================
-   ZONE CTA
+   CTA
 ========================================================= */
 
 .invitation-public-actions {
   display: grid;
-  gap: 0.8rem;
+  gap: 0.7rem;
 
   width: 100%;
 
-  margin-top: 2rem;
+  margin-top: 1.4rem;
 
   box-sizing: border-box;
 }
@@ -624,6 +656,17 @@
 .invitation-public-actions
   .invitation-btn-outline {
   width: 100%;
+}
+
+.invitation-public-actions-discovery
+  .invitation-btn-primary {
+  min-height: 54px;
+
+  border-radius: 10px;
+
+  box-shadow:
+    0 8px 18px
+    rgba(27, 94, 29, 0.2);
 }
 
 /* =========================================================
@@ -653,16 +696,16 @@
 }
 
 /* =========================================================
-   LIEN LOGIN SECONDAIRE
+   LOGIN SECONDAIRE
 ========================================================= */
 
 .invitation-public-login-help {
   margin:
-    0.25rem 0 0;
+    0.15rem 0 0;
 
   color: #747b76;
 
-  font-size: 0.92rem;
+  font-size: 0.86rem;
   text-align: center;
 }
 
@@ -677,7 +720,7 @@
     var(--primary-button);
 
   font: inherit;
-  font-weight: 700;
+  font-weight: 750;
 
   cursor: pointer;
 
@@ -698,11 +741,11 @@
   max-width: 560px;
 
   margin:
-    1rem auto 0;
+    0.85rem auto 0;
 
   color: #8a918c;
 
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   line-height: 1.5;
   text-align: center;
 }
@@ -733,7 +776,8 @@
   }
 
   .invitation-public-card {
-    padding: 2.5rem;
+    padding:
+      2.5rem;
   }
 }
 
@@ -771,15 +815,110 @@
   }
 
   .invitation-public-title {
-    font-size: 2.3rem;
+    font-size: 2.25rem;
   }
 
-  .invitation-public-trip {
-    padding: 1.25rem;
+  .invitation-public-trip-image {
+    flex-basis: 125px;
+
+    width: 125px;
+    height: 95px;
   }
 
-  .invitation-public-presentation h2 {
-    font-size: 1.55rem;
+  .invitation-public-benefits {
+    gap: 0.75rem;
+  }
+
+  .invitation-public-benefit {
+    padding-inline:
+      0.15rem;
+  }
+
+  .invitation-public-video-layout {
+    grid-template-columns:
+      minmax(0, 1fr)
+      115px;
+  }
+
+  .invitation-public-video-note span {
+    font-size: 0.92rem;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE 600 PX
+========================================================= */
+
+@media (
+  max-width: 600px
+) {
+  .invitation-public-benefits {
+    grid-template-columns:
+      1fr;
+
+    gap: 0;
+  }
+
+  .invitation-public-benefit {
+    display: grid;
+
+    grid-template-columns:
+      44px
+      minmax(0, 1fr);
+
+    gap: 0.8rem;
+
+    align-items: center;
+
+    padding:
+      0.85rem 0;
+
+    text-align: left;
+  }
+
+  .invitation-public-benefit:not(
+    :last-child
+  ) {
+    border-bottom:
+      1px solid
+      rgba(13, 17, 23, 0.07);
+  }
+
+  .invitation-public-benefit-icon {
+    width: 42px;
+    height: 42px;
+
+    margin: 0;
+
+    grid-row:
+      1 / 3;
+  }
+
+  .invitation-public-benefit h3 {
+    margin: 0;
+  }
+
+  .invitation-public-video-layout {
+    display: block;
+  }
+
+  .invitation-public-video-note {
+    position: absolute;
+
+    right: 0.25rem;
+    top: -4rem;
+
+    padding: 0;
+
+    pointer-events: none;
+  }
+
+  .invitation-public-video-note span {
+    display: none;
+  }
+
+  .invitation-public-video-arrow {
+    display: none;
   }
 }
 
@@ -801,7 +940,8 @@
   }
 
   .invitation-actions {
-    flex-direction: column;
+    flex-direction:
+      column;
   }
 
   .invitation-btn-primary,
@@ -812,7 +952,9 @@
 
   .invitation-public-main {
     padding:
-      1.25rem 0.75rem 3rem;
+      1.25rem
+      0.75rem
+      3rem;
   }
 
   .invitation-public-card {
@@ -820,7 +962,8 @@
     max-width: 100%;
 
     padding:
-      1.5rem 1.25rem;
+      1.5rem
+      1.25rem;
 
     border-radius: 18px;
   }
@@ -830,48 +973,67 @@
     max-width: 100%;
   }
 
-  .invitation-public-badge {
-    margin-bottom: 0.8rem;
+  .invitation-public-hero {
+    margin-bottom: 1.5rem;
+  }
 
-    font-size: 0.72rem;
+  .invitation-public-badge {
+    margin-bottom: 0.75rem;
+
+    font-size: 0.68rem;
   }
 
   .invitation-public-title {
-    font-size: 2rem;
+    font-size: 1.85rem;
   }
 
   .invitation-public-intro {
-    margin-bottom: 1.5rem;
-
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .invitation-public-trip {
-    margin-bottom: 1.5rem;
+    align-items:
+      flex-start;
 
-    padding: 1.1rem;
+    gap: 0.9rem;
+
+    margin-bottom:
+      1.55rem;
+
+    padding: 0.95rem;
+  }
+
+  .invitation-public-trip-image {
+    flex-basis: 95px;
+
+    width: 95px;
+    height: 85px;
+
+    border-radius: 11px;
   }
 
   .invitation-public-trip h2 {
-    font-size: 1.45rem;
+    font-size: 1.3rem;
+  }
+
+  .invitation-public-trip p {
+    font-size: 0.84rem;
   }
 
   .invitation-public-presentation h2 {
-    font-size: 1.4rem;
+    font-size: 1.45rem;
   }
 
-  .invitation-public-benefit {
-    gap: 0.8rem;
-
-    padding:
-      0.9rem 0;
+  .invitation-public-presentation p {
+    font-size: 0.9rem;
   }
 
-  .invitation-public-benefit-icon {
-    flex-basis: 42px;
+  .invitation-public-video-section {
+    margin-bottom: 1.5rem;
+  }
 
-    width: 42px;
-    height: 42px;
+  .invitation-public-video-wrapper {
+    border-radius: 14px;
   }
 
   .invitation-public-account-text {
@@ -892,7 +1054,19 @@
   }
 
   .invitation-public-title {
-    font-size: 1.75rem;
+    font-size: 1.72rem;
+  }
+
+  .invitation-public-trip {
+    display: block;
+  }
+
+  .invitation-public-trip-image {
+    width: 100%;
+    height: 135px;
+
+    margin-bottom:
+      0.9rem;
   }
 }
 
@@ -904,7 +1078,8 @@
   max-width: 320px
 ) {
   .invitation-main {
-    padding-inline: 0.6rem;
+    padding-inline:
+      0.6rem;
   }
 
   .invitation-card {
@@ -914,7 +1089,9 @@
 
   .invitation-public-main {
     padding:
-      1.25rem 0.6rem 3rem;
+      1.25rem
+      0.6rem
+      3rem;
   }
 
   .invitation-public-card {
@@ -922,7 +1099,8 @@
     max-width: 100%;
 
     padding:
-      1.2rem 0.85rem;
+      1.2rem
+      0.85rem;
   }
 
   .invitation-public-card-existing-user {
@@ -931,37 +1109,38 @@
   }
 
   .invitation-public-title {
-    font-size: 1.6rem;
-  }
-
-  .invitation-public-trip {
-    padding: 1rem;
+    font-size: 1.58rem;
   }
 
   .invitation-public-benefit {
+    grid-template-columns:
+      40px
+      minmax(0, 1fr);
+
     gap: 0.65rem;
   }
 
   .invitation-public-benefit-icon {
-    flex-basis: 38px;
-
     width: 38px;
     height: 38px;
+  }
 
-    font-size: 1.05rem;
+  .invitation-public-benefit h3 {
+    font-size: 0.9rem;
   }
 
   .invitation-public-benefit p {
-    font-size: 0.92rem;
+    font-size: 0.84rem;
   }
 
   .invitation-public-return-info {
-    font-size: 0.8rem;
+    font-size: 0.76rem;
   }
 
   .invitation-btn-primary,
   .invitation-btn-outline {
-    padding-inline: 0.8rem;
+    padding-inline:
+      0.8rem;
 
     font-size: 0.95rem;
   }
