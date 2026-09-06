@@ -1,21 +1,37 @@
+/* =========================================================
+   INVITATION PRIVÉE
+   UTILISATEUR CONNECTÉ
+========================================================= */
+
 .invitation-main {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 3rem 1rem;
+
   display: flex;
   justify-content: center;
+
+  box-sizing: border-box;
 }
 
 .invitation-card {
   width: 100%;
   max-width: 370px;
-  background-color: #ffffff;
-  border-radius: 20px;
-  border: 1px solid #dcdcdc;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12);
-  padding: 32px;
-  margin: 0;
 
+  margin: 0;
+  padding: 32px;
+
+  box-sizing: border-box;
+
+  background-color: #ffffff;
+
+  border: 1px solid #dcdcdc;
+  border-radius: 20px;
+
+  box-shadow:
+    0 10px 25px -5px
+    rgba(15, 23, 42, 0.12);
 }
 
 .invitation-other-informations {
@@ -25,108 +41,763 @@
 }
 
 .invitation-text {
+  margin: 0 0 1.5rem;
+
   color: #64748b;
+
   font-size: 1.1rem;
   font-weight: 500;
-  margin-bottom: 1.5rem;
-  justify-content: center;
-  line-height: 1.5rem;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .invitation-avatar {
+  display: block;
+
   width: 80px;
   height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
+
   margin: 0 auto 1.25rem;
+
   border: 4px solid #f1f5f9;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  box-shadow:
+    0 8px 20px
+    rgba(0, 0, 0, 0.1);
 }
 
 .invitation-inviter-name {
-  text-align: center;
+  margin: 0 0 1rem;
+
+  color: var(--black);
+
+  font-family:
+    "Playfair Display",
+    serif;
+
   font-size: 1.5rem;
-  font-weight: 400;
-  color: #1e293b;
-  margin-bottom: 1rem;
-  background: linear-gradient(135deg, black 0%, black 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 600;
+  text-align: center;
 }
 
 .invitation-message {
-  font-style: italic;
-  color: #475569;
-  font-size: 1.1rem;
-  line-height: 1.6;
   margin: 1.5rem 0 2.5rem;
   padding: 1.25rem;
-  background: #f8fafc;
-  border-radius: 16px;
-  border-left: 4px solid rgba(0, 0, 0, 0.423);
-  border-right: 4px solid rgba(0, 0, 0, 0.427);
+
+  border-left:
+    4px solid
+    var(--primary-button);
+
+  border-radius: 14px;
+
+  background:
+    rgba(27, 94, 29, 0.06);
+
+  color: #475569;
+
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.6;
 }
 
 .invitation-actions {
   display: flex;
-  gap: 1rem;
   justify-content: center;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
+/* =========================================================
+   BOUTONS COMMUNS
+========================================================= */
+
 .invitation-btn-primary,
 .invitation-btn-outline {
-  flex: 1;
-  min-width: 140px;
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
+
+  min-height: 52px;
+  min-width: 140px;
+
+  padding: 0.9rem 1.5rem;
+
+  box-sizing: border-box;
+
+  border-radius: 12px;
+
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .invitation-btn-primary {
-  background: var(--primary-button);
-  color: white;
-  box-shadow: 0 1px 1px 0 var(--primary-button);
+  border: 1px solid
+    var(--primary-button);
+
+  background:
+    var(--primary-button);
+
+  color: #ffffff;
+
+  box-shadow:
+    0 4px 12px
+    rgba(27, 94, 29, 0.18);
 }
 
 .invitation-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 5px 0 var(--primary-button);
+  background:
+    var(--button-hover);
+
+  border-color:
+    var(--button-hover);
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 7px 16px
+    rgba(27, 94, 29, 0.22);
 }
 
 .invitation-btn-outline {
-  background: transparent;
-  color: var(--primary-button);
-  border: 2px solid var(--primary-button);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  border: 2px solid
+    var(--primary-button);
+
+  background:
+    transparent;
+
+  color:
+    var(--primary-button);
 }
 
 .invitation-btn-outline:hover {
-  background: var(--primary-button);
-  color: white;
-  transform: translateY(-2px);
+  background:
+    var(--primary-button);
+
+  color: #ffffff;
+
+  transform:
+    translateY(-1px);
+}
+
+.invitation-btn-primary:disabled,
+.invitation-btn-outline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================================
+   PAGE PUBLIQUE D'INVITATION
+========================================================= */
+
+.invitation-public-main {
+  width: 100%;
+
+  min-height:
+    calc(100vh - 160px);
+
+  padding:
+    3rem 1rem 4rem;
+
+  box-sizing: border-box;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(27, 94, 29, 0.09),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      #f8faf8 0%,
+      var(--background) 100%
+    );
+}
+
+/* =========================================================
+   CARTE PUBLIQUE
+========================================================= */
+
+.invitation-public-card {
+  width: 100%;
+  max-width: 760px;
+
+  margin-inline: auto;
+
+  padding: 3rem;
+
+  box-sizing: border-box;
+
+  border:
+    1px solid
+    rgba(13, 17, 23, 0.08);
+
+  border-radius: 24px;
+
+  background:
+    rgba(255, 255, 255, 0.96);
+
+  box-shadow:
+    0 22px 55px
+    rgba(13, 17, 23, 0.08);
+}
+
+/* =========================================================
+   VERSION COURTE
+   UTILISATEUR DÉJÀ INSCRIT
+========================================================= */
+
+.invitation-public-card-existing-user {
+  width: 100%;
+  max-width: 620px;
+
+  margin-inline: auto;
+
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   BADGE
+========================================================= */
+
+.invitation-public-badge {
+  display: inline-flex;
+  align-items: center;
+
+  margin-bottom: 1rem;
+
+  padding:
+    0.45rem 0.8rem;
+
+  border-radius: 999px;
+
+  background:
+    rgba(27, 94, 29, 0.09);
+
+  color:
+    var(--primary-button);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   TITRE
+========================================================= */
+
+.invitation-public-title {
+  max-width: 650px;
+
+  margin:
+    0 0 1rem;
+
+  color:
+    var(--black);
+
+  font-family:
+    "Playfair Display",
+    serif;
+
+  font-size:
+    clamp(
+      2rem,
+      5vw,
+      3.1rem
+    );
+
+  font-weight: 700;
+  line-height: 1.08;
+}
+
+.invitation-public-intro {
+  max-width: 620px;
+
+  margin:
+    0 0 2rem;
+
+  color: #616a64;
+
+  font-size: 1.08rem;
+  line-height: 1.65;
+}
+
+/* =========================================================
+   CARTE VOYAGE
+========================================================= */
+
+.invitation-public-trip {
+  width: 100%;
+
+  margin-bottom: 2rem;
+
+  padding: 1.5rem;
+
+  box-sizing: border-box;
+
+  border:
+    1px solid
+    rgba(27, 94, 29, 0.14);
+
+  border-radius: 18px;
+
+  background:
+    rgba(27, 94, 29, 0.045);
+}
+
+.invitation-public-trip-label {
+  display: block;
+
+  margin-bottom:
+    0.35rem;
+
+  color:
+    var(--primary-button);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.invitation-public-trip h2 {
+  margin:
+    0 0 0.8rem;
+
+  color:
+    var(--black);
+
+  font-family:
+    "Playfair Display",
+    serif;
+
+  font-size: 1.7rem;
+  line-height: 1.25;
+}
+
+.invitation-public-trip p {
+  margin:
+    0.35rem 0;
+
+  color: #59615c;
+
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   PRÉSENTATION TRIPTOGETHER
+========================================================= */
+
+.invitation-public-presentation {
+  margin-bottom: 1.5rem;
+}
+
+.invitation-public-presentation h2 {
+  margin:
+    0 0 0.5rem;
+
+  color:
+    var(--black);
+
+  font-family:
+    "Playfair Display",
+    serif;
+
+  font-size: 1.75rem;
+}
+
+.invitation-public-presentation p {
+  margin: 0;
+
+  color: #68716b;
+
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   BÉNÉFICES
+========================================================= */
+
+.invitation-public-benefits {
+  display: grid;
+  gap: 0.75rem;
+
+  margin:
+    1.5rem 0 2rem;
+}
+
+.invitation-public-benefit {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+
+  padding:
+    1rem 0;
+}
+
+.invitation-public-benefit:not(
+  :last-child
+) {
+  border-bottom:
+    1px solid
+    rgba(13, 17, 23, 0.07);
+}
+
+.invitation-public-benefit-icon {
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 46px;
+
+  width: 46px;
+  height: 46px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(27, 94, 29, 0.08);
+
+  font-size: 1.25rem;
+}
+
+.invitation-public-benefit h3 {
+  margin:
+    0 0 0.25rem;
+
+  color:
+    var(--black);
+
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.invitation-public-benefit p {
+  margin: 0;
+
+  color: #68716b;
+
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   VIDÉO DE PRÉSENTATION
+========================================================= */
+
+.invitation-public-video-section {
+  margin: 2rem 0;
+}
+
+.invitation-public-video-heading {
+  margin-bottom: 1rem;
+}
+
+.invitation-public-video-label {
+  display: block;
+
+  margin-bottom: 0.35rem;
+
+  color: var(--primary-button);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.invitation-public-video-heading h2 {
+  margin: 0 0 0.5rem;
+
+  color: var(--black);
+
+  font-family:
+    "Playfair Display",
+    serif;
+
+  font-size: 1.6rem;
+  line-height: 1.3;
+}
+
+.invitation-public-video-heading p {
+  margin: 0;
+
+  color: #68716b;
+
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+.invitation-public-video-wrapper {
+  width: 100%;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(27, 94, 29, 0.12);
+  border-radius: 18px;
+
+  background: #000000;
+
+  box-shadow:
+    0 12px 30px
+    rgba(13, 17, 23, 0.1);
+}
+
+.invitation-public-video {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  aspect-ratio: 16 / 9;
+
+  object-fit: cover;
+
+  background: #000000;
+}
+
+/* =========================================================
+   RESPONSIVE VIDÉO
+========================================================= */
+
+@media (max-width: 425px) {
+  .invitation-public-video-section {
+    margin: 1.5rem 0;
+  }
+
+  .invitation-public-video-heading h2 {
+    font-size: 1.4rem;
+  }
+
+  .invitation-public-video-heading p {
+    font-size: 0.92rem;
+  }
+
+  .invitation-public-video-wrapper {
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 320px) {
+  .invitation-public-video-heading h2 {
+    font-size: 1.3rem;
+  }
+
+  .invitation-public-video-heading p {
+    font-size: 0.88rem;
+  }
 }
 
 
+/* =========================================================
+   ZONE CTA
+========================================================= */
 
-@media (max-width: 640px) {
+.invitation-public-actions {
+  display: grid;
+  gap: 0.8rem;
+
+  width: 100%;
+
+  margin-top: 2rem;
+
+  box-sizing: border-box;
+}
+
+.invitation-public-actions
+  .invitation-btn-primary,
+.invitation-public-actions
+  .invitation-btn-outline {
+  width: 100%;
+}
+
+/* =========================================================
+   UTILISATEUR DÉJÀ INSCRIT
+========================================================= */
+
+.invitation-public-account-text {
+  width: 100%;
+
+  margin:
+    1.5rem 0 0;
+
+  padding:
+    1rem 1.1rem;
+
+  box-sizing: border-box;
+
+  border-radius: 14px;
+
+  background:
+    #f7f9f7;
+
+  color: #59615c;
+
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   LIEN LOGIN SECONDAIRE
+========================================================= */
+
+.invitation-public-login-help {
+  margin:
+    0.25rem 0 0;
+
+  color: #747b76;
+
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+.invitation-public-login-link {
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color:
+    var(--primary-button);
+
+  font: inherit;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.invitation-public-login-link:hover {
+  color:
+    var(--button-hover);
+}
+
+/* =========================================================
+   MESSAGE RETOUR
+========================================================= */
+
+.invitation-public-return-info {
+  max-width: 560px;
+
+  margin:
+    1rem auto 0;
+
+  color: #8a918c;
+
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* =========================================================
+   CHARGEMENT
+========================================================= */
+
+.invitation-loading {
+  margin: 0;
+
+  color: #68716b;
+
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* =========================================================
+   RESPONSIVE 1024 PX
+========================================================= */
+
+@media (
+  max-width: 1024px
+) {
+  .invitation-public-main {
+    padding:
+      2.5rem 1.25rem 3.5rem;
+  }
+
+  .invitation-public-card {
+    padding: 2.5rem;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE 768 PX
+========================================================= */
+
+@media (
+  max-width: 768px
+) {
   .invitation-main {
-    padding: 1.75rem 1rem;
+    padding:
+      2rem 1rem;
+  }
+
+  .invitation-public-main {
+    padding:
+      2rem 1rem 3rem;
+  }
+
+  .invitation-public-card {
+    width: 100%;
+    max-width: 100%;
+
+    padding: 2rem;
+
+    border-radius: 20px;
+  }
+
+  .invitation-public-card-existing-user {
+    width: 100%;
+    max-width: 620px;
+
+    margin-inline: auto;
+  }
+
+  .invitation-public-title {
+    font-size: 2.3rem;
+  }
+
+  .invitation-public-trip {
+    padding: 1.25rem;
+  }
+
+  .invitation-public-presentation h2 {
+    font-size: 1.55rem;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE 425 PX
+========================================================= */
+
+@media (
+  max-width: 425px
+) {
+  .invitation-main {
+    padding:
+      1.5rem 0.75rem;
   }
 
   .invitation-card {
-    padding: 2rem 1.5rem;
+    padding:
+      1.75rem 1.25rem;
   }
 
   .invitation-actions {
@@ -137,5 +808,161 @@
   .invitation-btn-outline {
     width: 100%;
     min-width: 100%;
+  }
+
+  .invitation-public-main {
+    padding:
+      1.25rem 0.75rem 3rem;
+  }
+
+  .invitation-public-card {
+    width: 100%;
+    max-width: 100%;
+
+    padding:
+      1.5rem 1.25rem;
+
+    border-radius: 18px;
+  }
+
+  .invitation-public-card-existing-user {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .invitation-public-badge {
+    margin-bottom: 0.8rem;
+
+    font-size: 0.72rem;
+  }
+
+  .invitation-public-title {
+    font-size: 2rem;
+  }
+
+  .invitation-public-intro {
+    margin-bottom: 1.5rem;
+
+    font-size: 1rem;
+  }
+
+  .invitation-public-trip {
+    margin-bottom: 1.5rem;
+
+    padding: 1.1rem;
+  }
+
+  .invitation-public-trip h2 {
+    font-size: 1.45rem;
+  }
+
+  .invitation-public-presentation h2 {
+    font-size: 1.4rem;
+  }
+
+  .invitation-public-benefit {
+    gap: 0.8rem;
+
+    padding:
+      0.9rem 0;
+  }
+
+  .invitation-public-benefit-icon {
+    flex-basis: 42px;
+
+    width: 42px;
+    height: 42px;
+  }
+
+  .invitation-public-account-text {
+    font-size: 0.94rem;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE 375 PX
+========================================================= */
+
+@media (
+  max-width: 375px
+) {
+  .invitation-public-card {
+    padding:
+      1.35rem 1rem;
+  }
+
+  .invitation-public-title {
+    font-size: 1.75rem;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE 320 PX
+========================================================= */
+
+@media (
+  max-width: 320px
+) {
+  .invitation-main {
+    padding-inline: 0.6rem;
+  }
+
+  .invitation-card {
+    padding:
+      1.5rem 1rem;
+  }
+
+  .invitation-public-main {
+    padding:
+      1.25rem 0.6rem 3rem;
+  }
+
+  .invitation-public-card {
+    width: 100%;
+    max-width: 100%;
+
+    padding:
+      1.2rem 0.85rem;
+  }
+
+  .invitation-public-card-existing-user {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .invitation-public-title {
+    font-size: 1.6rem;
+  }
+
+  .invitation-public-trip {
+    padding: 1rem;
+  }
+
+  .invitation-public-benefit {
+    gap: 0.65rem;
+  }
+
+  .invitation-public-benefit-icon {
+    flex-basis: 38px;
+
+    width: 38px;
+    height: 38px;
+
+    font-size: 1.05rem;
+  }
+
+  .invitation-public-benefit p {
+    font-size: 0.92rem;
+  }
+
+  .invitation-public-return-info {
+    font-size: 0.8rem;
+  }
+
+  .invitation-btn-primary,
+  .invitation-btn-outline {
+    padding-inline: 0.8rem;
+
+    font-size: 0.95rem;
   }
 }
