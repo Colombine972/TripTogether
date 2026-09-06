@@ -1,5 +1,8 @@
 import { Eye, EyeOff } from "lucide-react";
-import { useRef, useState } from "react";
+import {
+  useRef,
+  useState,
+} from "react";
 import type {
   ChangeEventHandler,
   FormEventHandler,
@@ -9,29 +12,68 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router";
+import { toast } from "react-toastify";
+
+import { useAuth } from "../contexts/AuthContext";
 
 import "./styles/Auth.css";
 
 function Register() {
-  const firstnameRef = useRef<HTMLInputElement>(null);
-  const lastnameRef = useRef<HTMLInputElement>(null);
-  const emailRef = useRef<HTMLInputElement>(null);
+  const firstnameRef =
+    useRef<HTMLInputElement>(null);
 
-  const navigate = useNavigate();
+  const lastnameRef =
+    useRef<HTMLInputElement>(null);
 
-  const [searchParams] = useSearchParams();
+  const emailRef =
+    useRef<HTMLInputElement>(null);
 
-  const redirect = searchParams.get("redirect");
+  const navigate =
+    useNavigate();
 
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [searchParams] =
+    useSearchParams();
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState(false);
+  const { setAuth } =
+    useAuth();
 
-  const [privacyAccepted, setPrivacyAccepted] =
-    useState(false);
+  const redirect =
+    searchParams.get("redirect");
+
+  const [
+    password,
+    setPassword,
+  ] = useState("");
+
+  const [
+    confirmPassword,
+    setConfirmPassword,
+  ] = useState("");
+
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false);
+
+  const [
+    showConfirmPassword,
+    setShowConfirmPassword,
+  ] = useState(false);
+
+  const [
+    privacyAccepted,
+    setPrivacyAccepted,
+  ] = useState(false);
+
+  const [
+    submitting,
+    setSubmitting,
+  ] = useState(false);
+
+  const [
+    error,
+    setError,
+  ] = useState("");
 
   /* =========================================================
      REDIRECTION SÉCURISÉE
@@ -45,7 +87,7 @@ function Register() {
 
   /* =========================================================
      LIEN VERS LOGIN
-     CONSERVATION DU REDIRECT SI PRÉSENT
+     CONSERVATION DU REDIRECT
   ========================================================= */
 
   const loginPath =
@@ -62,14 +104,79 @@ function Register() {
   const handlePasswordChange: ChangeEventHandler<
     HTMLInputElement
   > = (event) => {
-    setPassword(event.target.value);
+    setPassword(
+      event.target.value,
+    );
   };
 
   const handleConfirmPasswordChange: ChangeEventHandler<
     HTMLInputElement
   > = (event) => {
-    setConfirmPassword(event.target.value);
+    setConfirmPassword(
+      event.target.value,
+    );
   };
+
+  /* =========================================================
+     CONNEXION AUTOMATIQUE
+     APRÈS INSCRIPTION
+  ========================================================= */
+
+  const loginAutomatically =
+    async (
+      email: string,
+      userPassword: string,
+    ) => {
+      const response =
+        await fetch(
+          `${
+            import.meta.env
+              .VITE_API_URL
+          }/api/auth/login`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              email,
+              password:
+                userPassword,
+            }),
+          },
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          "Connexion automatique impossible",
+        );
+      }
+
+      const data =
+        await response.json();
+
+      /*
+       * Même fonctionnement
+       * que Login.tsx.
+       */
+
+      setAuth(data);
+
+      localStorage.setItem(
+        "token",
+        data.token,
+      );
+
+      localStorage.setItem(
+        "auth",
+        JSON.stringify(data),
+      );
+
+      return data;
+    };
 
   /* =========================================================
      INSCRIPTION
@@ -80,49 +187,201 @@ function Register() {
   > = async (event) => {
     event.preventDefault();
 
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/auth/register`,
-        {
-          method: "POST",
+    if (submitting) {
+      return;
+    }
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+    setError("");
 
-          body: JSON.stringify({
-            firstname: firstnameRef.current?.value,
-            lastname: lastnameRef.current?.value,
-            email: emailRef.current?.value,
-            password,
-          }),
-        },
+    const firstname =
+      firstnameRef.current
+        ?.value.trim() ?? "";
+
+    const lastname =
+      lastnameRef.current
+        ?.value.trim() ?? "";
+
+    const email =
+      emailRef.current
+        ?.value.trim()
+        .toLowerCase() ?? "";
+
+    /* =====================================================
+       VÉRIFICATIONS FRONT
+    ====================================================== */
+
+    if (
+      !firstname ||
+      !lastname ||
+      !email
+    ) {
+      setError(
+        "Veuillez renseigner tous les champs.",
       );
 
-      /* =====================================================
-         INSCRIPTION RÉUSSIE
-      ====================================================== */
+      return;
+    }
 
-      if (response.status === 201) {
-        navigate(loginPath, {
-          state: {
-            toast: {
-              type: "success",
-              message: "Inscription réussie",
+    if (
+      password.length < 8
+    ) {
+      setError(
+        "Le mot de passe doit contenir au moins 8 caractères.",
+      );
+
+      return;
+    }
+
+    if (
+      password !==
+      confirmPassword
+    ) {
+      setError(
+        "Les mots de passe ne correspondent pas.",
+      );
+
+      return;
+    }
+
+    if (!privacyAccepted) {
+      setError(
+        "Vous devez accepter la politique de confidentialité.",
+      );
+
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      /* ===================================================
+         CRÉATION DU COMPTE
+      =================================================== */
+
+      const response =
+        await fetch(
+          `${
+            import.meta.env
+              .VITE_API_URL
+          }/api/auth/register`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
             },
+
+            body: JSON.stringify({
+              firstname,
+              lastname,
+              email,
+              password,
+            }),
           },
+        );
+
+      /* ===================================================
+         INSCRIPTION RÉUSSIE
+      =================================================== */
+
+      if (
+        response.status === 201
+      ) {
+        /*
+         * On ne redirige PLUS
+         * vers Login.
+         *
+         * On connecte immédiatement
+         * l'utilisateur.
+         */
+
+        await loginAutomatically(
+          email,
+          password,
+        );
+
+        toast.success(
+          "Votre compte a été créé avec succès.",
+        );
+
+        /*
+         * Si l'utilisateur venait
+         * d'une invitation :
+         *
+         * /register?redirect=/invitation/xxx
+         *
+         * il revient directement
+         * sur cette invitation.
+         */
+
+        navigate(
+          safeRedirect,
+          {
+            replace: true,
+          },
+        );
+
+        window.scrollTo({
+          top: 0,
         });
 
         return;
       }
 
-      /* =====================================================
-         AUTRE ERREUR
-      ====================================================== */
+      /* ===================================================
+         EMAIL DÉJÀ UTILISÉ
+      =================================================== */
 
-      console.info(response);
+      if (
+        response.status === 409
+      ) {
+        setError(
+          "Un compte existe déjà avec cette adresse e-mail.",
+        );
+
+        return;
+      }
+
+      /* ===================================================
+         DONNÉES INVALIDES
+      =================================================== */
+
+      if (
+        response.status === 400
+      ) {
+        const data =
+          await response
+            .json()
+            .catch(() => null);
+
+        setError(
+          data?.message ||
+            data?.error ||
+            "Les informations saisies sont invalides.",
+        );
+
+        return;
+      }
+
+      /* ===================================================
+         AUTRE ERREUR
+      =================================================== */
+
+      setError(
+        "Une erreur est survenue lors de la création du compte.",
+      );
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Erreur inscription :",
+        err,
+      );
+
+      setError(
+        "Impossible de créer le compte. Veuillez réessayer.",
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -147,13 +406,25 @@ function Register() {
           Planifiez votre prochaine aventure
         </h2>
 
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+
         <form
           className="auth-form"
-          onSubmit={handleSubmit}
+          onSubmit={
+            handleSubmit
+          }
         >
+          {/* NOM */}
+
           <div className="input-group">
             <input
-              ref={lastnameRef}
+              ref={
+                lastnameRef
+              }
               type="text"
               id="lastname"
               className="form-input"
@@ -163,9 +434,13 @@ function Register() {
             />
           </div>
 
+          {/* PRÉNOM */}
+
           <div className="input-group">
             <input
-              ref={firstnameRef}
+              ref={
+                firstnameRef
+              }
               type="text"
               id="firstname"
               className="form-input"
@@ -174,6 +449,8 @@ function Register() {
               required
             />
           </div>
+
+          {/* EMAIL */}
 
           <div className="input-group">
             <input
@@ -187,6 +464,8 @@ function Register() {
             />
           </div>
 
+          {/* MOT DE PASSE */}
+
           <div className="input-group password-input-group">
             <input
               type={
@@ -197,8 +476,12 @@ function Register() {
               id="password"
               className="form-input password-input"
               placeholder="Mot de passe"
-              value={password}
-              onChange={handlePasswordChange}
+              value={
+                password
+              }
+              onChange={
+                handlePasswordChange
+              }
               autoComplete="new-password"
               minLength={8}
               required
@@ -225,13 +508,18 @@ function Register() {
               }
             >
               {showPassword ? (
-                <EyeOff size={21} />
+                <EyeOff
+                  size={21}
+                />
               ) : (
-                <Eye size={21} />
+                <Eye
+                  size={21}
+                />
               )}
             </button>
 
-            {password.length >= 8 && (
+            {password.length >=
+              8 && (
               <span
                 className="validation-icon password-validation-icon"
                 aria-label="Mot de passe valide"
@@ -240,6 +528,8 @@ function Register() {
               </span>
             )}
           </div>
+
+          {/* CONFIRMATION */}
 
           <div className="input-group password-input-group">
             <input
@@ -251,7 +541,9 @@ function Register() {
               id="confirmPassword"
               className="form-input password-input"
               placeholder="Répéter le mot de passe"
-              value={confirmPassword}
+              value={
+                confirmPassword
+              }
               onChange={
                 handleConfirmPasswordChange
               }
@@ -280,13 +572,18 @@ function Register() {
               }
             >
               {showConfirmPassword ? (
-                <EyeOff size={21} />
+                <EyeOff
+                  size={21}
+                />
               ) : (
-                <Eye size={21} />
+                <Eye
+                  size={21}
+                />
               )}
             </button>
 
-            {password === confirmPassword &&
+            {password ===
+                confirmPassword &&
               password !== "" && (
                 <span
                   className="validation-icon password-validation-icon"
@@ -297,6 +594,8 @@ function Register() {
               )}
           </div>
 
+          {/* CONFIDENTIALITÉ */}
+
           <div className="checkbox-group">
             <label
               className="checkbox-label"
@@ -306,22 +605,33 @@ function Register() {
                 type="checkbox"
                 id="privacy"
                 required
-                checked={privacyAccepted}
-                onChange={(event) =>
+                checked={
+                  privacyAccepted
+                }
+                onChange={(
+                  event,
+                ) =>
                   setPrivacyAccepted(
-                    event.target.checked,
+                    event
+                      .target
+                      .checked,
                   )
                 }
               />
 
               <span>
-                J’ai lu et j’accepte la{" "}
-                <Link to="/privacy-policy">
-                  politique de confidentialité
+                J’ai lu et
+                j’accepte la{" "}
+
+                <Link to="/privacy">
+                  politique de
+                  confidentialité
                 </Link>
               </span>
             </label>
           </div>
+
+          {/* SUBMIT */}
 
           <button
             type="submit"
@@ -329,11 +639,15 @@ function Register() {
             disabled={
               password !==
                 confirmPassword ||
-              password.length < 8 ||
-              !privacyAccepted
+              password.length <
+                8 ||
+              !privacyAccepted ||
+              submitting
             }
           >
-            Créer mon compte
+            {submitting
+              ? "Création du compte..."
+              : "Créer mon compte"}
           </button>
         </form>
 

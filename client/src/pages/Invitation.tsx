@@ -1,9 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+import {
+  useNavigate,
+  useParams,
+} from "react-router";
 import { toast } from "react-toastify";
 
 import TripInfos from "../components/TripInfos";
-
 import { useAuth } from "../contexts/AuthContext";
 
 import type { invitationType } from "../types/invitationType";
@@ -11,142 +17,819 @@ import type { TheTrip } from "../types/tripType";
 
 import "./styles/invitation.css";
 
+/* =========================================================
+   TYPE - INVITATION PUBLIQUE
+========================================================= */
+
+type PublicInvitation = {
+  publicToken: string;
+
+  status:
+    | "pending"
+    | "accepted"
+    | "refused";
+
+  hasAccount: boolean;
+
+  trip: {
+    id: number;
+    title?: string | null;
+    city?: string | null;
+    country?: string | null;
+    startAt?: string | null;
+    endAt?: string | null;
+    placeId?: string | null;
+  };
+
+  organizer: {
+    firstname?: string | null;
+    lastname?: string | null;
+    avatarUrl?: string | null;
+  };
+};
+
+/* =========================================================
+   COMPOSANT
+========================================================= */
+
 function Invitation() {
-  const { token, id, invitationId } = useParams<{
-    token?: string,
-    id: string;
-    invitationId: string;
+  const {
+    token,
+    id,
+    invitationId,
+  } = useParams<{
+    token?: string;
+    id?: string;
+    invitationId?: string;
   }>();
 
   const navigate = useNavigate();
 
   const { auth } = useAuth();
 
-  const [invitation, setInvitation] =
-    useState<invitationType | null>(null);
+  /* =========================================================
+     STATES
+  ========================================================= */
+
+  const [
+    invitation,
+    setInvitation,
+  ] =
+    useState<invitationType | null>(
+      null,
+    );
+
+  const [
+    publicInvitation,
+    setPublicInvitation,
+  ] =
+    useState<PublicInvitation | null>(
+      null,
+    );
 
   const [myTrip, setMyTrip] =
     useState<TheTrip | null>(null);
 
+  const [loading, setLoading] =
+    useState(true);
+
+  const [
+    submitting,
+    setSubmitting,
+  ] = useState(false);
+
   /* =========================================================
-     CHEMIN DE RETOUR VERS L'INVITATION
+     CHEMIN DE L'INVITATION
   ========================================================= */
 
-  const getInvitationPath = useCallback(() => {
-  if (!id || !invitationId) {
-    return "/";
-  }
+  const getInvitationPath =
+    useCallback(() => {
+      /*
+       * Nouveau parcours.
+       */
 
-  return `/trip/${id}/invitation/${invitationId}`;
-}, [id, invitationId]);
+      if (token) {
+        return `/invitation/${token}`;
+      }
 
-const redirectToLogin = useCallback(
-  (message?: string) => {
-    if (message) {
-      toast.error(message);
-    }
+      /*
+       * Ancien parcours.
+       */
 
-    const invitationPath =
-      getInvitationPath();
+      if (id && invitationId) {
+        return `/trip/${id}/invitation/${invitationId}`;
+      }
 
-    navigate(
-      `/login?redirect=${encodeURIComponent(
-        invitationPath,
-      )}`,
-    );
-  },
-  [getInvitationPath, navigate],
-);
+      return "/";
+    }, [
+      token,
+      id,
+      invitationId,
+    ]);
+
   /* =========================================================
-     CHARGEMENT DU VOYAGE ET DE L'INVITATION
+     REDIRECTION LOGIN
+  ========================================================= */
+
+  const redirectToLogin =
+    useCallback(
+      (message?: string) => {
+        if (message) {
+          toast.error(message);
+        }
+
+        const invitationPath =
+          getInvitationPath();
+
+        navigate(
+          `/login?redirect=${encodeURIComponent(
+            invitationPath,
+          )}`,
+        );
+      },
+      [
+        getInvitationPath,
+        navigate,
+      ],
+    );
+
+  /* =========================================================
+     REDIRECTION REGISTER
+  ========================================================= */
+
+  const redirectToRegister =
+    useCallback(() => {
+      const invitationPath =
+        getInvitationPath();
+
+      navigate(
+        `/register?redirect=${encodeURIComponent(
+          invitationPath,
+        )}`,
+      );
+    }, [
+      getInvitationPath,
+      navigate,
+    ]);
+
+  /* =========================================================
+     CHARGER UN VOYAGE
+  ========================================================= */
+
+  const loadTrip =
+    useCallback(
+      async (
+        tripId: number,
+        authToken: string,
+      ) => {
+        try {
+          const response =
+            await fetch(
+              `${
+                import.meta.env
+                  .VITE_API_URL
+              }/api/trips/${tripId}`,
+              {
+                headers: {
+                  Authorization:
+                    `Bearer ${authToken}`,
+                },
+              },
+            );
+
+          if (
+            response.status ===
+            401
+          ) {
+            redirectToLogin(
+              "Votre session a expiré. Veuillez vous reconnecter.",
+            );
+
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error(
+              "Erreur chargement voyage",
+            );
+          }
+
+          const data =
+            await response.json();
+
+          setMyTrip(data);
+        } catch (error) {
+          console.error(
+            "Erreur chargement voyage :",
+            error,
+          );
+
+          toast.error(
+            "Impossible de charger le voyage.",
+          );
+        }
+      },
+      [redirectToLogin],
+    );
+
+  /* =========================================================
+     CHARGEMENT DE L'INVITATION
   ========================================================= */
 
   useEffect(() => {
-    /* =====================================================
-       VÉRIFICATION DE L'INVITATION
-    ====================================================== */
+    let cancelled = false;
 
-    if (!invitationId) {
-      toast.error("Invitation invalide");
+    const loadInvitation =
+      async () => {
+        setLoading(true);
 
-      navigate("/");
+        setInvitation(null);
+        setPublicInvitation(null);
 
-      return;
-    }
+        /* ===================================================
+           NOUVEAU PARCOURS
+           /invitation/:token
+        =================================================== */
 
-    /* =====================================================
-       UTILISATEUR NON CONNECTÉ
-    ====================================================== */
+        if (token) {
+          try {
+            /* ===============================================
+               UTILISATEUR CONNECTÉ
+               → ENDPOINT PRIVÉ
+            =============================================== */
 
-    if (!auth?.token) {
-      redirectToLogin();
+            if (auth?.token) {
+              const response =
+                await fetch(
+                  `${
+                    import.meta.env
+                      .VITE_API_URL
+                  }/api/invitation/access/${encodeURIComponent(
+                    token,
+                  )}`,
+                  {
+                    headers: {
+                      Authorization:
+                        `Bearer ${auth.token}`,
+                    },
+                  },
+                );
 
-      return;
-    }
+              const data =
+                await response
+                  .json()
+                  .catch(
+                    () => null,
+                  );
 
-    /* =====================================================
-       VOYAGE
-    ====================================================== */
+              if (cancelled) {
+                return;
+              }
 
-    fetch(
-      `${import.meta.env.VITE_API_URL}/api/trips/${id}`,
-    )
-      .then(async (response) => {
-        /* =================================================
-           SESSION EXPIRÉE / NON AUTHENTIFIÉ
-        ================================================= */
+              /* =============================================
+                 SESSION EXPIRÉE
+              ============================================= */
 
-        if (response.status === 401) {
-          redirectToLogin(
-            "Votre session a expiré. Veuillez vous reconnecter.",
-          );
+              if (
+                response.status ===
+                401
+              ) {
+                redirectToLogin(
+                  "Votre session a expiré. Veuillez vous reconnecter.",
+                );
+
+                return;
+              }
+
+              /* =============================================
+                 MAUVAIS COMPTE
+              ============================================= */
+
+              if (
+                response.status ===
+                403
+              ) {
+                toast.error(
+                  data?.error ||
+                    "Cette invitation appartient à un autre utilisateur.",
+                );
+
+                navigate("/");
+
+                return;
+              }
+
+              /* =============================================
+                 INVITATION INTROUVABLE
+              ============================================= */
+
+              if (
+                response.status ===
+                404
+              ) {
+                toast.error(
+                  data?.error ||
+                    data?.message ||
+                    "Invitation introuvable.",
+                );
+
+                navigate("/");
+
+                return;
+              }
+
+              /* =============================================
+                 INVITATION DÉJÀ ACCEPTÉE
+              ============================================= */
+
+              if (
+                response.status ===
+                409
+              ) {
+                toast.info(
+                  data?.message ||
+                    "Cette invitation a déjà été acceptée.",
+                );
+
+                if (
+                  data?.trip_id
+                ) {
+                  navigate(
+                    `/trip/${data.trip_id}`,
+                  );
+                } else {
+                  navigate("/");
+                }
+
+                return;
+              }
+
+              /* =============================================
+                 REFUSÉE / EXPIRÉE
+              ============================================= */
+
+              if (
+                response.status ===
+                410
+              ) {
+                toast.error(
+                  data?.message ||
+                    data?.error ||
+                    "Cette invitation n'est plus disponible.",
+                );
+
+                navigate("/");
+
+                return;
+              }
+
+              if (
+                !response.ok
+              ) {
+                throw new Error(
+                  data?.error ||
+                    data?.message ||
+                    "Impossible de charger l'invitation.",
+                );
+              }
+
+              /* =============================================
+                 INVITATION PRIVÉE
+              ============================================= */
+
+              setInvitation(
+                data,
+              );
+
+              if (
+                data?.trip_id
+              ) {
+                await loadTrip(
+                  Number(
+                    data.trip_id,
+                  ),
+                  auth.token,
+                );
+              }
+
+              return;
+            }
+
+            /* ===============================================
+               UTILISATEUR NON CONNECTÉ
+               → ENDPOINT PUBLIC
+            =============================================== */
+
+            const response =
+              await fetch(
+                `${
+                  import.meta.env
+                    .VITE_API_URL
+                }/api/invitation/public/${encodeURIComponent(
+                  token,
+                )}`,
+              );
+
+            const data =
+              await response
+                .json()
+                .catch(
+                  () => null,
+                );
+
+            if (cancelled) {
+              return;
+            }
+
+            /* ===============================================
+               TOKEN INVALIDE
+            =============================================== */
+
+            if (
+              response.status ===
+              400
+            ) {
+              toast.error(
+                data?.error ||
+                  data?.message ||
+                  "Lien d'invitation invalide.",
+              );
+
+              navigate("/");
+
+              return;
+            }
+
+            /* ===============================================
+               INTROUVABLE
+            =============================================== */
+
+            if (
+              response.status ===
+              404
+            ) {
+              toast.error(
+                data?.error ||
+                  data?.message ||
+                  "Invitation introuvable.",
+              );
+
+              navigate("/");
+
+              return;
+            }
+
+            /* ===============================================
+               DÉJÀ ACCEPTÉE
+            =============================================== */
+
+            if (
+              response.status ===
+              409
+            ) {
+              toast.info(
+                data?.message ||
+                  "Cette invitation a déjà été acceptée.",
+              );
+
+              navigate("/");
+
+              return;
+            }
+
+            /* ===============================================
+               REFUSÉE / EXPIRÉE
+            =============================================== */
+
+            if (
+              response.status ===
+              410
+            ) {
+              toast.error(
+                data?.message ||
+                  data?.error ||
+                  "Cette invitation n'est plus disponible.",
+              );
+
+              navigate("/");
+
+              return;
+            }
+
+            if (
+              !response.ok
+            ) {
+              throw new Error(
+                data?.error ||
+                  data?.message ||
+                  "Impossible de charger l'invitation.",
+              );
+            }
+
+            setPublicInvitation(
+              data.invitation,
+            );
+
+            return;
+          } catch (error) {
+            console.error(
+              "Erreur chargement invitation par token :",
+              error,
+            );
+
+            if (!cancelled) {
+              toast.error(
+                "Impossible de charger cette invitation.",
+              );
+            }
+
+            return;
+          } finally {
+            if (!cancelled) {
+              setLoading(false);
+            }
+          }
+        }
+
+        /* ===================================================
+           ANCIEN PARCOURS
+           /trip/:id/invitation/:invitationId
+        =================================================== */
+
+        if (
+          id &&
+          invitationId
+        ) {
+          if (!auth?.token) {
+            setLoading(false);
+
+            redirectToLogin();
+
+            return;
+          }
+
+          try {
+            await loadTrip(
+              Number(id),
+              auth.token,
+            );
+
+            const response =
+              await fetch(
+                `${
+                  import.meta.env
+                    .VITE_API_URL
+                }/api/invitation/${invitationId}`,
+                {
+                  headers: {
+                    Authorization:
+                      `Bearer ${auth.token}`,
+                  },
+                },
+              );
+
+            const data =
+              await response
+                .json()
+                .catch(
+                  () => null,
+                );
+
+            if (cancelled) {
+              return;
+            }
+
+            if (
+              response.status ===
+              401
+            ) {
+              redirectToLogin(
+                "Votre session a expiré. Veuillez vous reconnecter.",
+              );
+
+              return;
+            }
+
+            if (
+              response.status ===
+              403
+            ) {
+              toast.error(
+                data?.error ||
+                  "Vous n'êtes pas autorisé à consulter cette invitation.",
+              );
+
+              navigate("/");
+
+              return;
+            }
+
+            if (
+              response.status ===
+              400
+            ) {
+              toast.error(
+                data?.error ||
+                  data?.message ||
+                  "Invitation invalide.",
+              );
+
+              navigate("/");
+
+              return;
+            }
+
+            if (
+              response.status ===
+              404
+            ) {
+              toast.error(
+                data?.error ||
+                  data?.message ||
+                  "Invitation introuvable.",
+              );
+
+              navigate("/");
+
+              return;
+            }
+
+            if (
+              response.status ===
+              409
+            ) {
+              toast.info(
+                data?.message ||
+                  "Invitation déjà acceptée.",
+              );
+
+              if (
+                data?.trip_id
+              ) {
+                navigate(
+                  `/trip/${data.trip_id}`,
+                );
+              } else {
+                navigate("/");
+              }
+
+              return;
+            }
+
+            if (
+              response.status ===
+              410
+            ) {
+              toast.error(
+                data?.message ||
+                  "Invitation déjà refusée.",
+              );
+
+              navigate("/");
+
+              return;
+            }
+
+            if (
+              !response.ok
+            ) {
+              throw new Error(
+                "Erreur chargement invitation",
+              );
+            }
+
+            setInvitation(
+              data,
+            );
+          } catch (error) {
+            console.error(
+              "Erreur chargement ancienne invitation :",
+              error,
+            );
+
+            if (!cancelled) {
+              toast.error(
+                "Une erreur est survenue lors du chargement de l'invitation.",
+              );
+            }
+          } finally {
+            if (!cancelled) {
+              setLoading(false);
+            }
+          }
 
           return;
         }
 
-        if (!response.ok) {
-          throw new Error(
-            "Erreur chargement voyage",
-          );
-        }
-
-        const data =
-          await response.json();
-
-        setMyTrip(data);
-      })
-      .catch((error) => {
-        console.error(error);
+        /* ===================================================
+           AUCUN PARCOURS VALIDE
+        =================================================== */
 
         toast.error(
-          "Impossible de charger le voyage",
+          "Invitation invalide.",
         );
-      });
 
-    /* =====================================================
-       INVITATION
-    ====================================================== */
+        navigate("/");
 
-    fetch(
-      `${import.meta.env.VITE_API_URL}/api/invitation/${invitationId}`,
-      {
-        headers: {
-          Authorization:
-            `Bearer ${auth.token}`,
-        },
-      },
-    )
-      .then(async (response) => {
-        const invitationData =
+        setLoading(false);
+      };
+
+    loadInvitation();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    token,
+    id,
+    invitationId,
+    auth?.token,
+    navigate,
+    redirectToLogin,
+    loadTrip,
+  ]);
+
+  /* =========================================================
+     ACCEPTATION / REFUS
+  ========================================================= */
+
+  const invitationResponded =
+    async (
+      status:
+        | "accepted"
+        | "refused",
+    ) => {
+      const currentInvitationId =
+        invitation?.id ??
+        (
+          invitationId
+            ? Number(
+                invitationId,
+              )
+            : null
+        );
+
+      if (
+        !currentInvitationId
+      ) {
+        toast.error(
+          "Invitation invalide.",
+        );
+
+        return;
+      }
+
+      if (!auth?.token) {
+        redirectToLogin(
+          "Veuillez vous connecter pour répondre à cette invitation.",
+        );
+
+        return;
+      }
+
+      if (submitting) {
+        return;
+      }
+
+      try {
+        setSubmitting(true);
+
+        const response =
+          await fetch(
+            `${
+              import.meta.env
+                .VITE_API_URL
+            }/api/invitation/${currentInvitationId}`,
+            {
+              method:
+                "PATCH",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                Authorization:
+                  `Bearer ${auth.token}`,
+              },
+
+              body:
+                JSON.stringify({
+                  status,
+                }),
+            },
+          );
+
+        const data =
           await response
             .json()
-            .catch(() => null);
+            .catch(
+              () => null,
+            );
 
-        /* =================================================
-           SESSION EXPIRÉE / NON AUTHENTIFIÉ
-        ================================================= */
-
-        if (response.status === 401) {
+        if (
+          response.status ===
+          401
+        ) {
           redirectToLogin(
             "Votre session a expiré. Veuillez vous reconnecter.",
           );
@@ -154,45 +837,38 @@ const redirectToLogin = useCallback(
           return;
         }
 
-        /* =================================================
-           CONNECTÉ MAIS NON AUTORISÉ
-        ================================================= */
-
-        if (response.status === 403) {
+        if (
+          response.status ===
+          403
+        ) {
           toast.error(
-            invitationData?.error ||
-              "Vous n'êtes pas autorisé à consulter cette invitation.",
+            data?.error ||
+              "Vous n'êtes pas autorisé à répondre à cette invitation.",
           );
-
-          navigate("/");
 
           return;
         }
 
-        /* =================================================
-           INVITATION INVALIDE / EXPIRÉE
-        ================================================= */
-
-        if (response.status === 400) {
+        if (
+          response.status ===
+          400
+        ) {
           toast.error(
-            invitationData?.message ||
-              invitationData?.error ||
-              "Invitation invalide ou expirée.",
+            data?.error ||
+              data?.message ||
+              "Impossible de traiter cette invitation.",
           );
-
-          navigate("/");
 
           return;
         }
 
-        /* =================================================
-           INVITATION INTROUVABLE
-        ================================================= */
-
-        if (response.status === 404) {
+        if (
+          response.status ===
+          404
+        ) {
           toast.error(
-            invitationData?.message ||
-              invitationData?.error ||
+            data?.error ||
+              data?.message ||
               "Invitation introuvable.",
           );
 
@@ -201,330 +877,622 @@ const redirectToLogin = useCallback(
           return;
         }
 
-        /* =================================================
-           INVITATION DÉJÀ ACCEPTÉE
-        ================================================= */
-
-        if (response.status === 409) {
+        if (
+          response.status ===
+          409
+        ) {
           toast.error(
-            invitationData?.message ||
-              "Invitation déjà acceptée.",
+            data?.error ||
+              data?.message ||
+              "Cette invitation a déjà été traitée.",
           );
-
-          navigate("/");
 
           return;
         }
 
-        /* =================================================
-           INVITATION DÉJÀ REFUSÉE
-        ================================================= */
-
-        if (response.status === 410) {
-          toast.error(
-            invitationData?.message ||
-              "Invitation déjà refusée.",
-          );
-
-          navigate("/");
-
-          return;
-        }
-
-        /* =================================================
-           AUTRE ERREUR
-        ================================================= */
-
-        if (!response.ok) {
+        if (
+          !response.ok
+        ) {
           throw new Error(
-            "Erreur chargement invitation",
+            data?.error ||
+              data?.message ||
+              `HTTP ${response.status}`,
           );
         }
 
-        setInvitation(
-          invitationData,
-        );
-      })
-      .catch((error) => {
-        console.error(error);
+        /* ===================================================
+           ACCEPTÉE
+        =================================================== */
 
-        toast.error(
-          "Une erreur est survenue lors du chargement de l'invitation.",
+        if (
+          status ===
+          "accepted"
+        ) {
+          toast.success(
+            "Invitation acceptée",
+          );
+
+          const tripId =
+            invitation?.trip_id ??
+            (
+              id
+                ? Number(id)
+                : null
+            );
+
+          if (tripId) {
+            navigate(
+              `/trip/${tripId}`,
+            );
+          } else {
+            navigate("/");
+          }
+
+          return;
+        }
+
+        /* ===================================================
+           REFUSÉE
+        =================================================== */
+
+        toast.info(
+          "Invitation refusée",
         );
 
         navigate("/");
-      });
-  }, [
-    navigate,
-    invitationId,
-    id,
-    auth?.token,
-    redirectToLogin,
-  ]);
+      } catch (error) {
+        console.error(
+          "Erreur traitement invitation :",
+          error,
+        );
+
+        toast.error(
+          "Erreur lors du traitement de l'invitation.",
+        );
+      } finally {
+        setSubmitting(false);
+      }
+    };
 
   /* =========================================================
-     RÉPONSE À L'INVITATION
+     FORMATAGE DATE
   ========================================================= */
 
-  const invitationResponded = async (
-    status: "accepted" | "refused",
-  ) => {
-    if (!invitationId) {
-      return;
+  const formatDate = (
+    value?: string | null,
+  ): string => {
+    if (!value) {
+      return "";
     }
 
-    /* =====================================================
-       UTILISATEUR NON CONNECTÉ
-    ====================================================== */
-
-    if (!auth?.token) {
-      redirectToLogin(
-        "Veuillez vous connecter pour répondre à cette invitation.",
+    const datePart =
+      value.slice(
+        0,
+        10,
       );
 
-      return;
+    const [
+      year,
+      month,
+      day,
+    ] =
+      datePart
+        .split("-")
+        .map(Number);
+
+    if (
+      !year ||
+      !month ||
+      !day
+    ) {
+      return value;
     }
 
-    try {
-      const response =
-        await fetch(
-          `${import.meta.env.VITE_API_URL}/api/invitation/${invitationId}`,
-          {
-            method: "PATCH",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-
-              Authorization:
-                `Bearer ${auth.token}`,
-            },
-
-            body: JSON.stringify({
-              status,
-            }),
-          },
-        );
-
-      const data =
-        await response
-          .json()
-          .catch(() => null);
-
-      /* =====================================================
-         SESSION EXPIRÉE / NON CONNECTÉ
-      ====================================================== */
-
-      if (response.status === 401) {
-        redirectToLogin(
-          "Votre session a expiré. Veuillez vous reconnecter.",
-        );
-
-        return;
-      }
-
-      /* =====================================================
-         NON AUTORISÉ
-      ====================================================== */
-
-      if (response.status === 403) {
-        toast.error(
-          data?.error ||
-            "Vous n'êtes pas autorisé à répondre à cette invitation.",
-        );
-
-        return;
-      }
-
-      /* =====================================================
-         INVITATION INVALIDE
-      ====================================================== */
-
-      if (response.status === 400) {
-        toast.error(
-          data?.error ||
-            data?.message ||
-            "Impossible de traiter cette invitation.",
-        );
-
-        return;
-      }
-
-      /* =====================================================
-         INVITATION INTROUVABLE
-      ====================================================== */
-
-      if (response.status === 404) {
-        toast.error(
-          data?.error ||
-            data?.message ||
-            "Invitation introuvable.",
-        );
-
-        navigate("/");
-
-        return;
-      }
-
-      /* =====================================================
-         INVITATION DÉJÀ TRAITÉE
-      ====================================================== */
-
-      if (response.status === 409) {
-        toast.error(
-          data?.error ||
-            data?.message ||
-            "Cette invitation a déjà été traitée.",
-        );
-
-        navigate("/");
-
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          data?.message ||
-            data?.error ||
-            `HTTP ${response.status}`,
-        );
-      }
-
-      /* =====================================================
-         INVITATION ACCEPTÉE
-      ====================================================== */
-
-      if (status === "accepted") {
-        toast.success(
-          "Invitation acceptée",
-        );
-
-        navigate(
-          `/trip/${
-            id ??
-            invitation?.trip_id
-          }`,
-        );
-
-        return;
-      }
-
-      /* =====================================================
-         INVITATION REFUSÉE
-      ====================================================== */
-
-      toast.info(
-        "Invitation refusée",
+    const date =
+      new Date(
+        year,
+        month - 1,
+        day,
       );
 
-      navigate("/");
-    } catch (error) {
-      console.error(
-        "Erreur traitement invitation :",
-        error,
-      );
-
-      toast.error(
-        "Erreur lors du traitement de l'invitation",
-      );
-    }
+    return new Intl.DateTimeFormat(
+      "fr-FR",
+      {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      },
+    ).format(date);
   };
 
   /* =========================================================
-     RENDU
+     CHARGEMENT
   ========================================================= */
 
-  return (
-    <>
-      {/* =====================================================
-          APERÇU DU VOYAGE
-          MODE CONSULTATION UNIQUEMENT
-      ====================================================== */}
-
-      <TripInfos
-        trip={myTrip}
-        onTripUpdated={
-          setMyTrip
-        }
-        canEdit={false}
-      />
-
-      {/* =====================================================
-          INVITATION
-      ====================================================== */}
-
-      <main className="invitation-main">
-        <article
-          id="invitation"
-          className="invitation-card"
-        >
-          <p className="invitation-text">
-            {invitation?.invited_firstname
-              ? `${invitation.invited_firstname}, vous avez été invité au voyage de`
-              : "Vous avez été invité au voyage de"}
+  if (loading) {
+    return (
+      <main className="invitation-public-main">
+        <section className="invitation-public-card">
+          <p className="invitation-loading">
+            Chargement de votre invitation...
           </p>
+        </section>
+      </main>
+    );
+  }
 
-          <img
-            src={
-              invitation?.creator_avatar_url ||
-              "/profile-pic-logo.png"
-            }
-            alt={
-              invitation?.creator_firstname
-                ? `${invitation.creator_firstname} ${
-                    invitation.creator_lastname ??
-                    ""
-                  }`
-                : "Organisateur"
-            }
-            className="invitation-avatar"
-          />
+  /* =========================================================
+     UTILISATEUR NON CONNECTÉ
+     + INVITATION PUBLIQUE
+  ========================================================= */
 
-          <p className="invitation-inviter-name">
-            {`${invitation?.creator_firstname ?? ""} ${
-              invitation?.creator_lastname ??
-              ""
-            }`}
-          </p>
+  if (
+    token &&
+    !auth?.token &&
+    publicInvitation
+  ) {
+    const organizerName =
+      `${
+        publicInvitation
+          .organizer
+          .firstname ?? ""
+      } ${
+        publicInvitation
+          .organizer
+          .lastname ?? ""
+      }`.trim();
 
-          {invitation?.message && (
-            <p className="invitation-message">
-              "
-              {
-                invitation.message.trim()
-              }
-              "
+    /* =======================================================
+       UTILISATEUR DÉJÀ INSCRIT
+       → VERSION COURTE
+    ======================================================= */
+
+    if (
+      publicInvitation.hasAccount
+    ) {
+      return (
+        <main className="invitation-public-main">
+          <section className="invitation-public-card invitation-public-card-existing-user">
+            <span className="invitation-public-badge">
+              Invitation au voyage
+            </span>
+
+            <h1 className="invitation-public-title">
+              Vous êtes invité(e) à rejoindre un voyage
+            </h1>
+
+            <p className="invitation-public-intro">
+              {organizerName
+                ? `${organizerName} vous invite à participer à ce voyage.`
+                : "Vous avez reçu une invitation à rejoindre un voyage."}
             </p>
-          )}
 
-          <div className="invitation-actions">
+            {/* ===============================================
+                VOYAGE
+            =============================================== */}
+
+            <div className="invitation-public-trip">
+              <span className="invitation-public-trip-label">
+                Voyage
+              </span>
+
+              <h2>
+                {publicInvitation
+                  .trip.title ||
+                  "Voyage"}
+              </h2>
+
+              {(
+                publicInvitation
+                  .trip.city ||
+                publicInvitation
+                  .trip.country
+              ) && (
+                <p>
+                  📍{" "}
+                  {[
+                    publicInvitation
+                      .trip.city,
+                    publicInvitation
+                      .trip.country,
+                  ]
+                    .filter(
+                      Boolean,
+                    )
+                    .join(
+                      ", ",
+                    )}
+                </p>
+              )}
+
+              {publicInvitation
+                .trip.startAt &&
+                publicInvitation
+                  .trip.endAt && (
+                  <p>
+                    📅 Du{" "}
+                    {formatDate(
+                      publicInvitation
+                        .trip
+                        .startAt,
+                    )}{" "}
+                    au{" "}
+                    {formatDate(
+                      publicInvitation
+                        .trip
+                        .endAt,
+                    )}
+                  </p>
+                )}
+            </div>
+
+            {/* ===============================================
+                CONNEXION
+            =============================================== */}
+
+            <p className="invitation-public-account-text">
+              Connectez-vous à votre compte TripTogether
+              pour consulter et répondre à cette invitation.
+            </p>
+
+            <div className="invitation-public-actions">
+              <button
+                type="button"
+                className="invitation-btn-primary"
+                onClick={() =>
+                  redirectToLogin()
+                }
+              >
+                Me connecter
+              </button>
+            </div>
+
+            <p className="invitation-public-return-info">
+              Après votre connexion, vous reviendrez
+              automatiquement sur cette invitation.
+            </p>
+          </section>
+        </main>
+      );
+    }
+
+    /* =======================================================
+       NOUVEL UTILISATEUR
+       → PAGE PUBLIQUE TRIPTOGETHER
+    ======================================================= */
+
+    return (
+      <main className="invitation-public-main">
+        <section className="invitation-public-card">
+          <span className="invitation-public-badge">
+            Invitation au voyage
+          </span>
+
+          <h1 className="invitation-public-title">
+            Vous êtes invité(e) à rejoindre un voyage
+          </h1>
+
+          <p className="invitation-public-intro">
+            {organizerName
+              ? `${organizerName} vous invite à partager une nouvelle aventure.`
+              : "Vous avez reçu une invitation à rejoindre un voyage sur TripTogether."}
+          </p>
+
+          {/* ===============================================
+              VOYAGE
+          =============================================== */}
+
+          <div className="invitation-public-trip">
+            <span className="invitation-public-trip-label">
+              Votre prochain voyage
+            </span>
+
+            <h2>
+              {publicInvitation
+                .trip.title ||
+                "Voyage"}
+            </h2>
+
+            {(
+              publicInvitation
+                .trip.city ||
+              publicInvitation
+                .trip.country
+            ) && (
+              <p>
+                📍{" "}
+                {[
+                  publicInvitation
+                    .trip.city,
+                  publicInvitation
+                    .trip.country,
+                ]
+                  .filter(
+                    Boolean,
+                  )
+                  .join(
+                    ", ",
+                  )}
+              </p>
+            )}
+
+            {publicInvitation
+              .trip.startAt &&
+              publicInvitation
+                .trip.endAt && (
+                <p>
+                  📅 Du{" "}
+                  {formatDate(
+                    publicInvitation
+                      .trip
+                      .startAt,
+                  )}{" "}
+                  au{" "}
+                  {formatDate(
+                    publicInvitation
+                      .trip
+                      .endAt,
+                  )}
+                </p>
+              )}
+          </div>
+
+          {/* ===============================================
+              PRÉSENTATION TRIPTOGETHER
+          =============================================== */}
+
+          <div className="invitation-public-presentation">
+            <h2>
+              Découvrez TripTogether
+            </h2>
+
+            <p>
+              L'application qui simplifie
+              l'organisation des voyages à plusieurs.
+            </p>
+          </div>
+
+          {/* ===============================================
+              BÉNÉFICES
+          =============================================== */}
+
+          <div className="invitation-public-benefits">
+            <article className="invitation-public-benefit">
+              <span className="invitation-public-benefit-icon">
+                👥
+              </span>
+
+              <div>
+                <h3>
+                  Organisez ensemble
+                </h3>
+
+                <p>
+                  Retrouvez toutes les informations du voyage
+                  au même endroit.
+                </p>
+              </div>
+            </article>
+
+            <article className="invitation-public-benefit">
+              <span className="invitation-public-benefit-icon">
+                🗳️
+              </span>
+
+              <div>
+                <h3>
+                  Votez pour les étapes
+                </h3>
+
+                <p>
+                  Choisissez ensemble les destinations
+                  et les activités.
+                </p>
+              </div>
+            </article>
+
+            <article className="invitation-public-benefit">
+              <span className="invitation-public-benefit-icon">
+                💰
+              </span>
+
+              <div>
+                <h3>
+                  Partagez les dépenses
+                </h3>
+
+                <p>
+                  Suivez qui a payé quoi et simplifiez
+                  les remboursements.
+                </p>
+              </div>
+            </article>
+          </div>
+
+          {/* ===============================================
+              FUTURE MICRO-VIDÉO
+          =============================================== */}
+
+          {/*
+            Ici pourra être ajoutée
+            la vidéo TripTogether de 15 à 30 secondes.
+          */}
+
+          {/* ===============================================
+              CTA
+          =============================================== */}
+
+          <div className="invitation-public-actions">
             <button
               type="button"
               className="invitation-btn-primary"
-              onClick={() =>
-                invitationResponded(
-                  "accepted",
-                )
+              onClick={
+                redirectToRegister
               }
             >
-              Accepter
+              Créer mon compte
             </button>
 
-            <button
-              type="button"
-              className="invitation-btn-outline"
-              onClick={() =>
-                invitationResponded(
-                  "refused",
-                )
-              }
-            >
-              Refuser
-            </button>
+            <p className="invitation-public-login-help">
+              Vous avez déjà un compte ?{" "}
+
+              <button
+                type="button"
+                className="invitation-public-login-link"
+                onClick={() =>
+                  redirectToLogin()
+                }
+              >
+                Se connecter
+              </button>
+            </p>
           </div>
-        </article>
+
+          <p className="invitation-public-return-info">
+            Après votre inscription, vous reviendrez
+            automatiquement sur cette invitation.
+          </p>
+        </section>
       </main>
-    </>
+    );
+  }
+
+  /* =========================================================
+     INVITATION AUTHENTIFIÉE
+     NOUVEAU + ANCIEN PARCOURS
+  ========================================================= */
+
+  if (invitation) {
+    const creatorName =
+      `${
+        invitation
+          .creator_firstname ??
+        ""
+      } ${
+        invitation
+          .creator_lastname ??
+        ""
+      }`.trim();
+
+    return (
+      <>
+        {/* ===================================================
+            APERÇU DU VOYAGE
+        =================================================== */}
+
+        {myTrip && (
+          <TripInfos
+            trip={myTrip}
+            onTripUpdated={
+              setMyTrip
+            }
+            canEdit={false}
+          />
+        )}
+
+        {/* ===================================================
+            INVITATION
+        =================================================== */}
+
+        <main className="invitation-main">
+          <article
+            id="invitation"
+            className="invitation-card"
+          >
+            <p className="invitation-text">
+              {invitation
+                .invited_firstname
+                ? `${invitation.invited_firstname}, vous avez été invité(e) au voyage de`
+                : "Vous avez été invité(e) au voyage de"}
+            </p>
+
+            <img
+              src={
+                invitation
+                  .creator_avatar_url ||
+                "/profile-pic-logo.png"
+              }
+              alt={
+                creatorName ||
+                "Organisateur"
+              }
+              className="invitation-avatar"
+            />
+
+            <p className="invitation-inviter-name">
+              {creatorName}
+            </p>
+
+            {invitation
+              .message && (
+              <p className="invitation-message">
+                "
+                {
+                  invitation.message.trim()
+                }
+                "
+              </p>
+            )}
+
+            {/* ===============================================
+                ACTIONS
+            =============================================== */}
+
+            <div className="invitation-actions">
+              <button
+                type="button"
+                className="invitation-btn-primary"
+                disabled={
+                  submitting
+                }
+                onClick={() =>
+                  invitationResponded(
+                    "accepted",
+                  )
+                }
+              >
+                {submitting
+                  ? "Traitement..."
+                  : "Accepter"}
+              </button>
+
+              <button
+                type="button"
+                className="invitation-btn-outline"
+                disabled={
+                  submitting
+                }
+                onClick={() =>
+                  invitationResponded(
+                    "refused",
+                  )
+                }
+              >
+                Refuser
+              </button>
+            </div>
+          </article>
+        </main>
+      </>
+    );
+  }
+
+  /* =========================================================
+     FALLBACK
+  ========================================================= */
+
+  return (
+    <main className="invitation-public-main">
+      <section className="invitation-public-card">
+        <h1>
+          Invitation indisponible
+        </h1>
+
+        <p>
+          Cette invitation ne peut pas être affichée.
+        </p>
+      </section>
+    </main>
   );
 }
 

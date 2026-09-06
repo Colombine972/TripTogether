@@ -25,7 +25,36 @@ const getConnectedUserId = (req: Request): number => {
 };
 
 /* =========================================================
+   UTILITAIRE - DATE DE FIN DU VOYAGE
+========================================================= */
+
+const getTripEndDate = (value: string | Date | undefined): Date | null => {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    const date = new Date(value);
+
+    date.setHours(23, 59, 59, 999);
+
+    return date;
+  }
+
+  const datePart = String(value).slice(0, 10);
+
+  const [year, month, day] = datePart.split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return null;
+  }
+
+  return new Date(year, month - 1, day, 23, 59, 59, 999);
+};
+
+/* =========================================================
    LIRE UNE INVITATION
+   ANCIEN PARCOURS PAR ID
 ========================================================= */
 
 const read: RequestHandler = async (req, res, next) => {
@@ -71,6 +100,7 @@ const read: RequestHandler = async (req, res, next) => {
     if (invitation.status === "accepted") {
       res.status(409).json({
         message: "Invitation déjà acceptée",
+
         trip_id: invitation.trip_id,
       });
 
@@ -85,7 +115,313 @@ const read: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    res.json(invitation);
+    res.status(200).json(invitation);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* =========================================================
+   LIRE UNE INVITATION PUBLIQUE PAR TOKEN
+========================================================= */
+
+const readPublic: RequestHandler = async (req, res, next) => {
+  try {
+    const publicToken =
+      typeof req.params.token === "string" ? req.params.token.trim() : "";
+
+    if (!publicToken) {
+      res.status(400).json({
+        error: "Token d'invitation invalide",
+      });
+
+      return;
+    }
+
+    const invitation =
+      await invitationRepository.readByPublicToken(publicToken);
+
+    if (!invitation) {
+      res.status(404).json({
+        error: "Invitation introuvable",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+         INVITATION DÉJÀ TRAITÉE
+      =================================================== */
+
+    if (invitation.status === "accepted") {
+      res.status(409).json({
+        message: "Cette invitation a déjà été acceptée",
+
+        trip_id: invitation.trip_id,
+      });
+
+      return;
+    }
+
+    if (invitation.status === "refused") {
+      res.status(410).json({
+        message: "Cette invitation a déjà été refusée",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+         VOYAGE TERMINÉ
+      =================================================== */
+
+    const tripEndDate = getTripEndDate(invitation.trip_end);
+
+    if (tripEndDate && tripEndDate < new Date()) {
+      res.status(410).json({
+        message: "Cette invitation a expiré car le voyage est terminé",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+         COMPTE EXISTANT ?
+      =================================================== */
+
+    let hasAccount = false;
+
+    if (invitation.email) {
+      const existingUser = await userRepository.findByEmail(invitation.email);
+
+      hasAccount = Boolean(existingUser);
+    }
+
+    /* ===================================================
+         RÉPONSE PUBLIQUE
+         NE PAS RENVOYER L'EMAIL
+      =================================================== */
+
+    res.status(200).json({
+      invitation: {
+        publicToken: invitation.public_token,
+
+        status: invitation.status,
+
+        hasAccount,
+
+        trip: {
+          id: invitation.trip_id,
+
+          title: invitation.trip_title,
+
+          city: invitation.trip_city,
+
+          country: invitation.trip_country,
+
+          startAt: invitation.trip_start,
+
+          endAt: invitation.trip_end,
+
+          placeId: invitation.trip_place_id,
+        },
+
+        organizer: {
+          firstname: invitation.creator_firstname,
+
+          lastname: invitation.creator_lastname,
+
+          avatarUrl: invitation.creator_avatar_url,
+        },
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* =========================================================
+   LIRE UNE INVITATION PAR TOKEN
+   POUR UN UTILISATEUR AUTHENTIFIÉ
+========================================================= */
+
+const readAccess: RequestHandler = async (req, res, next) => {
+  try {
+    const publicToken =
+      typeof req.params.token === "string" ? req.params.token.trim() : "";
+
+    if (!publicToken) {
+      res.status(400).json({
+        error: "Token d'invitation invalide",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+         UTILISATEUR CONNECTÉ
+      =================================================== */
+
+    const connectedUserId = getConnectedUserId(req);
+
+    if (Number.isNaN(connectedUserId) || connectedUserId <= 0) {
+      res.status(401).json({
+        error: "Utilisateur non authentifié",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+         RÉCUPÉRATION DE L'UTILISATEUR CONNECTÉ
+      =================================================== */
+
+    const connectedUser =
+      await invitationRepository.findUserById(connectedUserId);
+
+    if (!connectedUser) {
+      res.status(401).json({
+        error: "Utilisateur introuvable",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+         RÉCUPÉRATION DE L'INVITATION
+      =================================================== */
+
+    const invitation =
+      await invitationRepository.readByPublicToken(publicToken);
+
+    if (!invitation) {
+      res.status(404).json({
+        error: "Invitation introuvable",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+         CONTRÔLE DU STATUT
+      =================================================== */
+
+    if (invitation.status === "accepted") {
+      res.status(409).json({
+        message: "Cette invitation a déjà été acceptée.",
+
+        trip_id: invitation.trip_id,
+      });
+
+      return;
+    }
+
+    if (invitation.status === "refused") {
+      res.status(410).json({
+        message: "Cette invitation a déjà été refusée.",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+         VOYAGE TERMINÉ
+      =================================================== */
+
+    const tripEndDate = getTripEndDate(invitation.trip_end);
+
+    if (tripEndDate && tripEndDate < new Date()) {
+      res.status(410).json({
+        message: "Cette invitation a expiré car le voyage est terminé.",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+         CONTRÔLE DE L'EMAIL
+      =================================================== */
+
+    const connectedEmail = connectedUser.email.trim().toLowerCase();
+
+    const invitationEmail = invitation.email?.trim().toLowerCase();
+
+    if (!invitationEmail || invitationEmail !== connectedEmail) {
+      res.status(403).json({
+        error: "Cette invitation appartient à un autre utilisateur.",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+         NOUVEL UTILISATEUR
+         RATTACHEMENT DE L'INVITATION
+      =================================================== */
+
+    if (invitation.user_id === null) {
+      await invitationRepository.updateUserId(connectedUserId, connectedEmail);
+
+      invitation.user_id = connectedUserId;
+
+      /*
+       * Comme l'invitation a été chargée
+       * avant le rattachement, les champs
+       * invited_* peuvent être absents.
+       *
+       * Ce n'est pas bloquant pour le parcours.
+       */
+    }
+
+    /* ===================================================
+         SÉCURITÉ FINALE
+      =================================================== */
+
+    if (invitation.user_id !== connectedUserId) {
+      res.status(403).json({
+        error: "Cette invitation appartient à un autre utilisateur.",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+         RÉPONSE PRIVÉE
+      =================================================== */
+
+    res.status(200).json({
+      id: invitation.id,
+
+      status: invitation.status,
+
+      trip_id: invitation.trip_id,
+
+      message: invitation.message,
+
+      trip_title: invitation.trip_title,
+
+      trip_start: invitation.trip_start,
+
+      trip_end: invitation.trip_end,
+
+      trip_city: invitation.trip_city,
+
+      trip_country: invitation.trip_country,
+
+      trip_place_id: invitation.trip_place_id,
+
+      creator_firstname: invitation.creator_firstname,
+
+      creator_lastname: invitation.creator_lastname,
+
+      creator_avatar_url: invitation.creator_avatar_url,
+
+      invited_firstname: invitation.invited_firstname,
+
+      invited_lastname: invitation.invited_lastname,
+
+      invited_avatar_url: invitation.invited_avatar_url,
+    });
   } catch (err) {
     next(err);
   }
@@ -143,9 +479,9 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    /* =====================================================
-       VALIDATION DU STATUT DEMANDÉ
-    ====================================================== */
+    /* ===================================================
+         VALIDATION DU STATUT
+      =================================================== */
 
     const status = req.body.status;
 
@@ -157,9 +493,9 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    /* =====================================================
-       CONTRÔLE DE L'UTILISATEUR CONNECTÉ
-    ====================================================== */
+    /* ===================================================
+         CONTRÔLE UTILISATEUR
+      =================================================== */
 
     const connectedUserId = getConnectedUserId(req);
 
@@ -171,9 +507,9 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    /* =====================================================
-       INVITATION DÉJÀ TRAITÉE
-    ====================================================== */
+    /* ===================================================
+         DÉJÀ TRAITÉE
+      =================================================== */
 
     if (invitation.status !== "pending") {
       res.status(409).json({
@@ -183,9 +519,9 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    /* =====================================================
-       MISE À JOUR DU STATUT
-    ====================================================== */
+    /* ===================================================
+         MISE À JOUR
+      =================================================== */
 
     const success = await invitationRepository.updateStatus(
       invitationId,
@@ -200,24 +536,24 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    /* =====================================================
-       INVITATION ACCEPTÉE
-    ====================================================== */
+    /* ===================================================
+         INVITATION ACCEPTÉE
+      =================================================== */
 
     if (status === "accepted" && invitation.user_id) {
       const tripId = Number(invitation.trip_id);
 
       const joinedUserId = Number(invitation.user_id);
 
-      /* ===================================================
-         NOTIFICATION
-      ==================================================== */
+      /* =================================================
+           NOTIFICATION
+        ================================================= */
 
       await notificationService.notifyParticipantJoined(tripId, joinedUserId);
 
-      /* ===================================================
-         ACTIVITÉ
-      ==================================================== */
+      /* =================================================
+           ACTIVITÉ
+        ================================================= */
 
       await activityService.createActivity({
         tripId,
@@ -257,9 +593,9 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    /* =====================================================
-       EMAIL
-    ====================================================== */
+    /* ===================================================
+         EMAIL
+      =================================================== */
 
     const email =
       typeof req.body.email === "string"
@@ -287,9 +623,9 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    /* =====================================================
-       VOYAGE
-    ====================================================== */
+    /* ===================================================
+         VOYAGE
+      =================================================== */
 
     const trip = await tripRepository.read(tripId);
 
@@ -301,17 +637,17 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    /* =====================================================
-       UTILISATEUR INVITÉ
-    ====================================================== */
+    /* ===================================================
+         UTILISATEUR INVITÉ
+      =================================================== */
 
     const existingUser = await userRepository.findByEmail(email);
 
     const userId = existingUser?.id ?? null;
 
-    /* =====================================================
-       CRÉATION DE L'INVITATION
-    ====================================================== */
+    /* ===================================================
+         CRÉATION
+      =================================================== */
 
     const { invitationId, publicToken } = await invitationRepository.create(
       tripId,
@@ -320,17 +656,17 @@ const add: RequestHandler = async (req, res, next) => {
       userId,
     );
 
-    /* =====================================================
-       LIEN D'INVITATION
-    ====================================================== */
+    /* ===================================================
+         LIEN
+      =================================================== */
 
     const clientUrl = process.env.CLIENT_URL ?? "http://localhost:3000";
 
     const invitationLink = `${clientUrl}/invitation/${publicToken}`;
 
-    /* =====================================================
-       EMAIL D'INVITATION
-    ====================================================== */
+    /* ===================================================
+         EMAIL
+      =================================================== */
 
     let emailSent = false;
 
@@ -482,6 +818,8 @@ const delate: RequestHandler = async (req, res, next) => {
 export default {
   edit,
   read,
+  readPublic,
+  readAccess,
   readPending,
   add,
   selectInvitationsByTrip,
