@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router";
 
 import App from "./App";
 import Account from "./components/Account";
+import TripAccessGuard from "./components/TripAccessGuard";
 import CGU from "./pages/CGU";
 import Confidentialite from "./pages/Confidentialite";
 import CreateTrip from "./pages/CreateTrip";
@@ -68,27 +69,41 @@ export const router = createBrowserRouter([
         element: <CreateTrip />,
       },
 
-      /* NOUVELLE ROUTE PUBLIQUE */
+      /* =====================================================
+         INVITATION PUBLIQUE
+         Ne surtout pas mettre cette route dans TripAccessGuard
+      ===================================================== */
+
       {
         path: "invitation/:token",
         element: <Invitation />,
       },
 
+      /* =====================================================
+         ROUTES PRIVÉES D'UN VOYAGE
+      ===================================================== */
+
       {
         path: "trip/:id",
-        element: <Trip />,
-      },
-      {
-        path: "trip/:id/steps",
-        element: <Steps />,
-      },
-      {
-        path: "trip/:id/invitations",
-        element: <Invitations />,
-      },
-      {
-        path: "trip/:id/budget",
-        element: <TripBudgetPage />,
+        element: <TripAccessGuard />,
+        children: [
+          {
+            index: true,
+            element: <Trip />,
+          },
+          {
+            path: "steps",
+            element: <Steps />,
+          },
+          {
+            path: "invitations",
+            element: <Invitations />,
+          },
+          {
+            path: "budget",
+            element: <TripBudgetPage />,
+          },
+        ],
       },
     ],
   },
