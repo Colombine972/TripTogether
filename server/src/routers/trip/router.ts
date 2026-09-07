@@ -5,6 +5,7 @@ import invitationServices from "../../modules/invitation/invitationServices";
 import stepActions from "../../modules/step/stepActions";
 import tripActions from "../../modules/trip/tripActions";
 import userPaymentPreferenceActions from "../../modules/userPaymentPreference/userPaymentPreferenceActions";
+import verifyTripMember from "../../modules/trip/verifyTripMember";
 
 const router = express.Router();
 
@@ -22,14 +23,24 @@ router.get(
 router.get("/countries", tripActions.browse);
 router.get("/", tripActions.browse);
 
-router.get("/:id", tripActions.browseMyTrip);
+router.get(
+  "/:id",
+  verifyToken,
+  verifyTripMember,
+  tripActions.browseMyTrip,
+);
 
 router.post("/:id/invitations", invitationActions.add);
 
 router.post("/", verifyToken, tripActions.add);
 router.put("/:id", verifyToken, tripActions.edit);
 router.delete("/:id", verifyToken, tripActions.delate);
-router.delete("/:tripId/steps/:stepId", verifyToken, stepActions.deleteStep);
+router.delete(
+  "/:tripId/steps/:stepId",
+  verifyToken,
+  verifyTripMember,
+  stepActions.deleteStep,
+);
 
 router.get("/:id/invitations", invitationActions.selectInvitationsByTrip);
 router.get(
@@ -39,9 +50,30 @@ router.get(
 );
 router.patch("/:tripId/invitation/:id", invitationActions.edit);
 
-router.get("/:tripId/steps", verifyToken, stepActions.selectStepsByTrip);
-router.post("/:tripId/steps", verifyToken, stepActions.addStepCity);
-router.get("/:tripId/steps/:id/votes", verifyToken, stepActions.browseVote);
-router.post("/:tripId/steps/:id/votes", verifyToken, stepActions.addVote);
+router.get(
+  "/:tripId/steps",
+  verifyToken,
+  verifyTripMember,
+  stepActions.selectStepsByTrip,
+);
+router.post(
+  "/:tripId/steps",
+  verifyToken,
+  verifyTripMember,
+  stepActions.addStepCity,
+);
+router.get(
+  "/:tripId/steps/:id/votes",
+  verifyToken,
+  verifyTripMember,
+  stepActions.browseVote,
+);
+
+router.post(
+  "/:tripId/steps/:id/votes",
+  verifyToken,
+  verifyTripMember,
+  stepActions.addVote,
+);
 
 export default router;

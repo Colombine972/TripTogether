@@ -1,17 +1,38 @@
 const express = require("express");
+
 const router = express.Router();
 
 import { verifyToken } from "../../modules/auth/authActions";
+import verifyTripMember from "../../modules/trip/verifyTripMember";
+
 import expenseActions from "../../modules/expense/expenseAction";
 import expenseShareActions from "../../modules/expenseShare/expenseShareActions";
 
-router.get("/:id/summary", verifyToken, expenseActions.getSummary);
-router.post("/:id/shares", expenseShareActions.create);
+router.get(
+  "/:id/summary",
+  verifyToken,
+  verifyTripMember,
+  expenseActions.getSummary,
+);
 
-router.get("/:id", expenseActions.getExpensesByTrip);
-router.post("/:id", verifyToken, expenseActions.add);
+router.post(
+  "/:id/shares",
+  verifyToken,
+  verifyTripMember,
+  expenseShareActions.create,
+);
 
-router.put("/:id", verifyToken, expenseActions.update);
-router.delete("/:id", verifyToken, expenseActions.remove);
+router.get(
+  "/:id",
+  verifyToken,
+  verifyTripMember,
+  expenseActions.getExpensesByTrip,
+);
+
+router.post("/:id", verifyToken, verifyTripMember, expenseActions.add);
+
+router.put("/:id", verifyToken, verifyTripMember, expenseActions.update);
+
+router.delete("/:id", verifyToken, verifyTripMember, expenseActions.remove);
 
 export default router;

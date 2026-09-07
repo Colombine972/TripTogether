@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
 
 import TripInfos from "../components/TripInfos";
-
 import { useAuth } from "../contexts/AuthContext";
 
 import type { Step, TheTrip } from "../types/tripType";
@@ -37,15 +36,18 @@ function Trip() {
 
   useEffect(() => {
     if (!token) {
-      navigate("/login");
-
       toast.error("Veuillez vous connecter");
+
+      navigate("/login", {
+        replace: true,
+      });
 
       return;
     }
 
-    if (!tripId) {
+    if (!tripId || Number.isNaN(tripId)) {
       navigate("/", {
+        replace: true,
         state: {
           toast: {
             type: "error",
@@ -57,102 +59,223 @@ function Trip() {
       return;
     }
 
-    setLoading(true);
+    let cancelled = false;
 
-    /* =====================================================
-       VOYAGE
-    ====================================================== */
+    const loadTrip = async () => {
+      setLoading(true);
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/trips/${tripId}`, {
-      method: "GET",
+      try {
+        /* =====================================================
+           VOYAGE
+        ====================================================== */
 
-      headers: {
-        "Content-Type": "application/json",
+        const tripResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/trips/${tripId}`,
+          {
+            method: "GET",
 
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(async (response) => {
-        const data = await response.json();
+            headers: {
+              "Content-Type": "application/json",
 
-        if (response.status === 401) {
-          if (data.error === "Token expired") {
-            localStorage.removeItem("token");
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
-            navigate("/login");
+        let tripData = null;
 
-            toast.error("Session expirée. Veuillez vous reconnecter.");
+        try {
+          tripData = await tripResponse.json();
+        } catch {
+          tripData = null;
+        }
 
-            return;
-          }
+        /* =====================================================
+           SESSION EXPIRÉE / NON AUTHENTIFIÉ
+        ====================================================== */
 
-          toast.error("Veuillez vous connecter pour accéder à ce voyage.");
+        if (tripResponse.status === 401) {
+          localStorage.removeItem("token");
 
-          navigate("/login");
+          const message =
+            tripData?.error === "Token expired"
+              ? "Session expirée. Veuillez vous reconnecter."
+              : "Veuillez vous connecter pour accéder à ce voyage.";
+
+          toast.error(message);
+
+          navigate("/login", {
+            replace: true,
+          });
 
           return;
         }
 
-        if (!response.ok) {
-          throw new Error("Erreur chargement voyage");
-        }
+        /* =====================================================
+           ACCÈS NON AUTORISÉ
+        ====================================================== */
 
-        setMyTrip(data);
-      })
-      .catch((error) => {
-        console.error(error);
-
-        toast.error("Impossible de charger le voyage");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-
-    /* =====================================================
-       ÉTAPES
-    ====================================================== */
-
-    fetch(`${import.meta.env.VITE_API_URL}/api/trips/${tripId}/steps`, {
-      method: "GET",
-
-      headers: {
-        "Content-Type": "application/json",
-
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(async (response) => {
-        const data = await response.json();
-
-        if (response.status === 401) {
-          if (data.error === "Token expired") {
-            localStorage.removeItem("token");
-
-            navigate("/login");
-
-            toast.error("Session expirée. Veuillez vous reconnecter.");
-
-            return;
-          }
-
-          toast.error("Veuillez vous connecter pour accéder à ce voyage.");
-
-          navigate("/login");
+        if (tripResponse.status === 403) {
+          navigate("/", {
+            replace: true,
+            state: {
+              toast: {
+                type: "error",
+                message: "Accès non autorisé à ce voyage",
+              },
+            },
+          });
 
           return;
         }
 
-        if (!response.ok) {
-          throw new Error("Erreur chargement étapes");
+        /* =====================================================
+           VOYAGE INEXISTANT
+        ====================================================== */
+
+        if (tripResponse.status === 404) {
+          navigate("/", {
+            replace: true,
+            state: {
+              toast: {
+                type: "error",
+                message: "Ce voyage n'existe pas ou n'est plus disponible.",
+              },
+            },
+          });
+
+          return;
         }
 
-        setSteps(data.steps);
-      })
-      .catch((error) => {
-        console.error(error);
+        /* =====================================================
+           AUTRE ERREUR VOYAGE
+        ====================================================== */
 
-        toast.error("Impossible de charger les étapes");
-      });
+        if (!tripResponse.ok) {
+          toast.error("Impossible de charger le voyage");
+
+          return;
+        }
+
+        if (cancelled) return;
+
+        setMyTrip(tripData);
+
+        /* =====================================================
+           ÉTAPES
+        ====================================================== */
+
+        const stepsResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/steps`,
+          {
+            method: "GET",
+
+            headers: {
+              "Content-Type": "application/json",
+
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        let stepsData = null;
+
+        try {
+          stepsData = await stepsResponse.json();
+        } catch {
+          stepsData = null;
+        }
+
+        /* =====================================================
+           SESSION EXPIRÉE / NON AUTHENTIFIÉ
+        ====================================================== */
+
+        if (stepsResponse.status === 401) {
+          localStorage.removeItem("token");
+
+          const message =
+            stepsData?.error === "Token expired"
+              ? "Session expirée. Veuillez vous reconnecter."
+              : "Veuillez vous connecter pour accéder à ce voyage.";
+
+          toast.error(message);
+
+          navigate("/login", {
+            replace: true,
+          });
+
+          return;
+        }
+
+        /* =====================================================
+           ACCÈS NON AUTORISÉ
+        ====================================================== */
+
+        if (stepsResponse.status === 403) {
+          navigate("/", {
+            replace: true,
+            state: {
+              toast: {
+                type: "error",
+                message: "Accès non autorisé à ce voyage",
+              },
+            },
+          });
+
+          return;
+        }
+
+        /* =====================================================
+           VOYAGE / ÉTAPES INTROUVABLES
+        ====================================================== */
+
+        if (stepsResponse.status === 404) {
+          navigate("/", {
+            replace: true,
+            state: {
+              toast: {
+                type: "error",
+                message: "Ce voyage n'existe pas ou n'est plus disponible.",
+              },
+            },
+          });
+
+          return;
+        }
+
+        /* =====================================================
+           AUTRE ERREUR ÉTAPES
+        ====================================================== */
+
+        if (!stepsResponse.ok) {
+          toast.error("Impossible de charger les étapes");
+
+          return;
+        }
+
+        if (cancelled) return;
+
+        setSteps(stepsData?.steps ?? []);
+      } catch (error) {
+        if (cancelled) return;
+
+        console.error("Erreur chargement voyage :", error);
+
+        toast.error(
+          "Une erreur est survenue lors du chargement du voyage.",
+        );
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadTrip();
+
+    return () => {
+      cancelled = true;
+    };
   }, [tripId, token, navigate]);
 
   /* =========================================================
@@ -165,7 +288,9 @@ function Trip() {
     setSteps((previousSteps) =>
       previousSteps
         .filter(
-          (step) => step.is_initial || step.country === updatedTrip.country,
+          (step) =>
+            step.is_initial ||
+            step.country === updatedTrip.country,
         )
         .map((step) =>
           step.is_initial
@@ -187,7 +312,9 @@ function Trip() {
      PROGRESSION DES ÉTAPES
   ========================================================= */
 
-  const validatedSteps = steps.filter((step) => step.status === "validated");
+  const validatedSteps = steps.filter(
+    (step) => step.status === "validated",
+  );
 
   const totalSteps = steps.length;
 
