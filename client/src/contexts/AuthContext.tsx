@@ -1,6 +1,11 @@
-import { type ReactNode, createContext, useContext, useState } from "react";
-import type { UserType } from "../types/userType";
+import {
+  type ReactNode,
+  createContext,
+  useContext,
+  useState,
+} from "react";
 
+import type { UserType } from "../types/userType";
 
 type Auth = {
   user: UserType;
@@ -13,31 +18,69 @@ type AuthContextType = {
   logout: () => void;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext =
+  createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
   const [auth, setAuth] = useState<Auth | null>(() => {
-    const savedAuth = localStorage.getItem("auth");
-    return savedAuth ? JSON.parse(savedAuth) : null;
+    const savedAuth =
+      localStorage.getItem("auth");
+
+    return savedAuth
+      ? JSON.parse(savedAuth)
+      : null;
   });
 
   const logout = () => {
+    /* =====================================================
+       DÉCONNEXION VOLONTAIRE
+
+       Permet aux guards de distinguer :
+       - une vraie absence de session
+       - une déconnexion volontaire
+    ====================================================== */
+
+    sessionStorage.setItem(
+      "manualLogout",
+      "true",
+    );
+
+    /* =====================================================
+       NETTOYAGE AUTHENTIFICATION
+    ====================================================== */
+
     localStorage.removeItem("token");
     localStorage.removeItem("auth");
+
     setAuth(null);
   };
 
   return (
-    <AuthContext.Provider value={{ auth, setAuth, logout }}>
+    <AuthContext.Provider
+      value={{
+        auth,
+        setAuth,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const context =
+    useContext(AuthContext);
+
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error(
+      "useAuth must be used within an AuthProvider",
+    );
   }
+
   return context;
 };

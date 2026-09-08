@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { toast } from "react-toastify";
 
 import Guests from "../components/Guests";
@@ -11,10 +7,7 @@ import TripInfos from "../components/TripInfos";
 
 import { useAuth } from "../contexts/AuthContext";
 
-import type {
-  Guest,
-  invitationType,
-} from "../types/invitationType";
+import type { Guest, invitationType } from "../types/invitationType";
 import type { TheTrip } from "../types/tripType";
 
 import "./styles/invitations.css";
@@ -47,39 +40,29 @@ function Invitations() {
 
   const { auth } = useAuth();
 
-  const token =
-    auth?.token || localStorage.getItem("token");
+  const token = auth?.token || localStorage.getItem("token");
 
   const [searchParams] = useSearchParams();
 
-  const notificationTarget =
-    searchParams.get("target");
+  const notificationTarget = searchParams.get("target");
 
-  const notificationReferenceId =
-    searchParams.get("ref");
+  const notificationReferenceId = searchParams.get("ref");
 
-  const [trip, setTrip] =
-    useState<TheTrip | null>(null);
+  const [trip, setTrip] = useState<TheTrip | null>(null);
 
-  const [attendees, setAttendees] =
-    useState<Guest[]>([]);
+  const [attendees, setAttendees] = useState<Guest[]>([]);
 
-  const [otherInvitations, setOtherInvitations] =
-    useState<Guest[]>([]);
+  const [otherInvitations, setOtherInvitations] = useState<Guest[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [error, setError] =
-    useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const [
-    invitationToDelete,
-    setInvitationToDelete,
-  ] = useState<Guest | null>(null);
+  const [invitationToDelete, setInvitationToDelete] = useState<Guest | null>(
+    null,
+  );
 
-  const [isDeleting, setIsDeleting] =
-    useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   /* =========================================================
      CHARGEMENT DU VOYAGE ET DES INVITATIONS
@@ -104,12 +87,6 @@ function Invitations() {
       }
 
       if (!token) {
-        toast.error("Veuillez vous connecter.");
-
-        navigate("/login", {
-          replace: true,
-        });
-
         return;
       }
 
@@ -135,10 +112,7 @@ function Invitations() {
           },
         );
 
-        const tripData =
-          await tripResponse
-            .json()
-            .catch(() => null);
+        const tripData = await tripResponse.json().catch(() => null);
 
         if (cancelled) {
           return;
@@ -151,9 +125,7 @@ function Invitations() {
         if (tripResponse.status === 401) {
           localStorage.removeItem("token");
 
-          toast.error(
-            "Session expirée. Veuillez vous reconnecter.",
-          );
+          toast.error("Session expirée. Veuillez vous reconnecter.");
 
           navigate("/login", {
             replace: true,
@@ -172,8 +144,7 @@ function Invitations() {
             state: {
               toast: {
                 type: "error",
-                message:
-                  "Accès non autorisé à ce voyage",
+                message: "Accès non autorisé à ce voyage",
               },
             },
           });
@@ -191,8 +162,7 @@ function Invitations() {
             state: {
               toast: {
                 type: "error",
-                message:
-                  "Ce voyage n'existe pas ou n'est plus disponible.",
+                message: "Ce voyage n'existe pas ou n'est plus disponible.",
               },
             },
           });
@@ -201,9 +171,7 @@ function Invitations() {
         }
 
         if (!tripResponse.ok) {
-          throw new Error(
-            "Erreur chargement voyage",
-          );
+          throw new Error("Erreur chargement voyage");
         }
 
         setTrip(tripData);
@@ -212,31 +180,24 @@ function Invitations() {
            INVITATIONS
         ====================================================== */
 
-        const invitationsResponse =
-          await fetch(
-            `${
-              import.meta.env.VITE_API_URL
-            }/api/trips/${tripId}/invitations`,
-            {
-              method: "GET",
+        const invitationsResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/invitations`,
+          {
+            method: "GET",
 
-              headers: {
-                "Content-Type":
-                  "application/json",
+            headers: {
+              "Content-Type": "application/json",
 
-                Authorization:
-                  `Bearer ${token}`,
-              },
+              Authorization: `Bearer ${token}`,
             },
-          );
+          },
+        );
 
-        const result: InvitationsResponse =
-          await invitationsResponse
-            .json()
-            .catch(() => ({
-              error:
-                "Réponse serveur invalide",
-            }));
+        const result: InvitationsResponse = await invitationsResponse
+          .json()
+          .catch(() => ({
+            error: "Réponse serveur invalide",
+          }));
 
         if (cancelled) {
           return;
@@ -246,14 +207,10 @@ function Invitations() {
            SESSION NON VALIDE
         ====================================================== */
 
-        if (
-          invitationsResponse.status === 401
-        ) {
+        if (invitationsResponse.status === 401) {
           localStorage.removeItem("token");
 
-          toast.error(
-            "Session expirée. Veuillez vous reconnecter.",
-          );
+          toast.error("Session expirée. Veuillez vous reconnecter.");
 
           navigate("/login", {
             replace: true,
@@ -266,16 +223,13 @@ function Invitations() {
            ACCÈS NON AUTORISÉ
         ====================================================== */
 
-        if (
-          invitationsResponse.status === 403
-        ) {
+        if (invitationsResponse.status === 403) {
           navigate("/", {
             replace: true,
             state: {
               toast: {
                 type: "error",
-                message:
-                  "Accès non autorisé à ce voyage",
+                message: "Accès non autorisé à ce voyage",
               },
             },
           });
@@ -283,16 +237,13 @@ function Invitations() {
           return;
         }
 
-        if (
-          invitationsResponse.status === 404
-        ) {
+        if (invitationsResponse.status === 404) {
           navigate("/", {
             replace: true,
             state: {
               toast: {
                 type: "error",
-                message:
-                  "Voyage ou invitations introuvables",
+                message: "Voyage ou invitations introuvables",
               },
             },
           });
@@ -301,23 +252,16 @@ function Invitations() {
         }
 
         if (!invitationsResponse.ok) {
-          throw new Error(
-            "Erreur chargement invitations",
-          );
+          throw new Error("Erreur chargement invitations");
         }
 
         if (!("trip" in result)) {
-          setError(
-            "Données invitations invalides.",
-          );
+          setError("Données invitations invalides.");
 
           return;
         }
 
-        const {
-          trip: invitationTrip,
-          invitations,
-        } = result;
+        const { trip: invitationTrip, invitations } = result;
 
         /* =====================================================
            ORGANISATEUR
@@ -327,17 +271,11 @@ function Invitations() {
           id: invitationTrip.user_id || 0,
 
           name:
-            `${
-              invitationTrip.owner_firstname ??
-              ""
-            } ${
-              invitationTrip.owner_lastname ??
-              ""
+            `${invitationTrip.owner_firstname ?? ""} ${
+              invitationTrip.owner_lastname ?? ""
             }`.trim() || "Organisateur",
 
-          avatarUrl:
-            invitationTrip.owner_avatar_url ??
-            null,
+          avatarUrl: invitationTrip.owner_avatar_url ?? null,
 
           addedAt: null,
 
@@ -348,110 +286,70 @@ function Invitations() {
            PARTICIPANTS ACCEPTÉS
         ====================================================== */
 
-        const acceptedInvitations =
-          invitations.filter(
-            (
-              invitation,
-            ): invitation is invitationType & {
-              user_id: number;
-            } =>
-              invitation.status ===
-                "accepted" &&
-              invitation.user_id !== null,
-          );
+        const acceptedInvitations = invitations.filter(
+          (
+            invitation,
+          ): invitation is invitationType & {
+            user_id: number;
+          } => invitation.status === "accepted" && invitation.user_id !== null,
+        );
 
-        const acceptedGuests: Guest[] =
-          acceptedInvitations.map(
-            (invitation) => ({
-              id: invitation.user_id,
+        const acceptedGuests: Guest[] = acceptedInvitations.map(
+          (invitation) => ({
+            id: invitation.user_id,
 
-              name:
-                `${
-                  invitation.invited_firstname ??
-                  ""
-                } ${
-                  invitation.invited_lastname ??
-                  ""
-                }`.trim() ||
-                "Participant",
+            name:
+              `${invitation.invited_firstname ?? ""} ${
+                invitation.invited_lastname ?? ""
+              }`.trim() || "Participant",
 
-              avatarUrl:
-                invitation.invited_avatar_url ??
-                null,
+            avatarUrl: invitation.invited_avatar_url ?? null,
 
-              addedAt:
-                invitation.created_at,
+            addedAt: invitation.created_at,
 
-              role: "membre",
-            }),
-          );
+            role: "membre",
+          }),
+        );
 
-        const attendeesList: Guest[] = [
-          creator,
-          ...acceptedGuests,
-        ];
+        const attendeesList: Guest[] = [creator, ...acceptedGuests];
 
         /* =====================================================
            INVITATIONS NON ACCEPTÉES
         ====================================================== */
 
-        const otherInvitationsGuests:
-          Guest[] = invitations
-          .filter(
-            (invitation) =>
-              invitation.status !==
-              "accepted",
-          )
+        const otherInvitationsGuests: Guest[] = invitations
+          .filter((invitation) => invitation.status !== "accepted")
           .map((invitation) => ({
             id: invitation.id,
 
             name:
-              `${
-                invitation.invited_firstname ??
-                ""
-              } ${
-                invitation.invited_lastname ??
-                ""
+              `${invitation.invited_firstname ?? ""} ${
+                invitation.invited_lastname ?? ""
               }`.trim() ||
               invitation.email ||
               "Invité",
 
-            avatarUrl:
-              invitation.invited_avatar_url ??
-              null,
+            avatarUrl: invitation.invited_avatar_url ?? null,
 
-            addedAt:
-              invitation.created_at,
+            addedAt: invitation.created_at,
 
             inviteState:
-              invitation.status ===
-              "refused"
-                ? "refuse"
-                : "en-attente",
+              invitation.status === "refused" ? "refuse" : "en-attente",
 
-            lastReminderAt:
-              invitation.lastReminderAt ??
-              null,
+            lastReminderAt: invitation.lastReminderAt ?? null,
           }));
 
         setAttendees(attendeesList);
 
-        setOtherInvitations(
-          otherInvitationsGuests,
-        );
+        setOtherInvitations(otherInvitationsGuests);
       } catch (err) {
         if (cancelled) {
           return;
         }
 
-        console.error(
-          "Erreur chargement invitations :",
-          err,
-        );
+        console.error("Erreur chargement invitations :", err);
 
-        setError(
-          "Impossible de charger les invitations.",
-        );
+        setError("Impossible de charger les invitations.");
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -471,10 +369,7 @@ function Invitations() {
   ========================================================= */
 
   useEffect(() => {
-    if (
-      notificationTarget !== "participant" ||
-      !notificationReferenceId
-    ) {
+    if (notificationTarget !== "participant" || !notificationReferenceId) {
       return;
     }
 
@@ -482,22 +377,16 @@ function Invitations() {
       return;
     }
 
-    const selector =
-      `[data-notification-ref="participant-${notificationReferenceId}"]`;
+    const selector = `[data-notification-ref="participant-${notificationReferenceId}"]`;
 
     let attempts = 0;
 
     const maxAttempts = 20;
 
-    let timeoutId:
-      | number
-      | undefined;
+    let timeoutId: number | undefined;
 
     const scrollToParticipant = () => {
-      const participantElement =
-        document.querySelector<HTMLElement>(
-          selector,
-        );
+      const participantElement = document.querySelector<HTMLElement>(selector);
 
       if (participantElement) {
         participantElement.scrollIntoView({
@@ -505,14 +394,10 @@ function Invitations() {
           block: "center",
         });
 
-        participantElement.classList.add(
-          "notification-target-highlight",
-        );
+        participantElement.classList.add("notification-target-highlight");
 
         window.setTimeout(() => {
-          participantElement.classList.remove(
-            "notification-target-highlight",
-          );
+          participantElement.classList.remove("notification-target-highlight");
         }, 2500);
 
         return;
@@ -521,38 +406,24 @@ function Invitations() {
       attempts += 1;
 
       if (attempts < maxAttempts) {
-        timeoutId =
-          window.setTimeout(
-            scrollToParticipant,
-            150,
-          );
+        timeoutId = window.setTimeout(scrollToParticipant, 150);
       }
     };
 
-    timeoutId =
-      window.setTimeout(
-        scrollToParticipant,
-        150,
-      );
+    timeoutId = window.setTimeout(scrollToParticipant, 150);
 
     return () => {
       if (timeoutId !== undefined) {
         window.clearTimeout(timeoutId);
       }
     };
-  }, [
-    notificationTarget,
-    notificationReferenceId,
-    loading,
-  ]);
+  }, [notificationTarget, notificationReferenceId, loading]);
 
   /* =========================================================
      SUPPRESSION D'UN PARTICIPANT
   ========================================================= */
 
-  const removeParticipant = async (
-    userId: number,
-  ) => {
+  const removeParticipant = async (userId: number) => {
     if (!tripId || !token) {
       return;
     }
@@ -561,33 +432,24 @@ function Invitations() {
 
     try {
       const response = await fetch(
-        `${
-          import.meta.env.VITE_API_URL
-        }/api/invitation/${tripId}/${userId}`,
+        `${import.meta.env.VITE_API_URL}/api/invitation/${tripId}/${userId}`,
         {
           method: "DELETE",
 
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
 
-            Authorization:
-              `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         },
       );
 
-      const data =
-        await response
-          .json()
-          .catch(() => null);
+      const data = await response.json().catch(() => null);
 
       if (response.status === 401) {
         localStorage.removeItem("token");
 
-        toast.error(
-          "Session expirée. Veuillez vous reconnecter.",
-        );
+        toast.error("Session expirée. Veuillez vous reconnecter.");
 
         navigate("/login", {
           replace: true,
@@ -597,50 +459,30 @@ function Invitations() {
       }
 
       if (response.status === 403) {
-        toast.error(
-          data?.message ||
-            data?.error ||
-            "Accès non autorisé",
-        );
+        toast.error(data?.message || data?.error || "Accès non autorisé");
 
         return;
       }
 
       if (response.status === 404) {
-        toast.error(
-          data?.message ||
-            data?.error ||
-            "Membre introuvable",
-        );
+        toast.error(data?.message || data?.error || "Membre introuvable");
 
         return;
       }
 
       if (!response.ok) {
-        toast.error(
-          data?.message ||
-            data?.error ||
-            "Erreur serveur.",
-        );
+        toast.error(data?.message || data?.error || "Erreur serveur.");
 
         return;
       }
 
       setAttendees((previous) =>
-        previous.filter(
-          (participant) =>
-            participant.id !== userId,
-        ),
+        previous.filter((participant) => participant.id !== userId),
       );
 
-      toast.success(
-        "Membre retiré du voyage.",
-      );
+      toast.success("Membre retiré du voyage.");
     } catch (error) {
-      console.error(
-        "Erreur suppression participant :",
-        error,
-      );
+      console.error("Erreur suppression participant :", error);
 
       toast.error("Erreur serveur.");
     } finally {
@@ -651,31 +493,27 @@ function Invitations() {
   };
 
   /* =========================================================
+     DROITS ORGANISATEUR
+  ========================================================= */
+
+  const isOrganizer =
+    Boolean(trip) &&
+    Boolean(auth?.user?.id) &&
+    Number(auth?.user?.id) === Number(trip?.user_id);
+
+  /* =========================================================
      RENDU
   ========================================================= */
 
   return (
     <>
-      {!loading && trip && (
-        <TripInfos
-          trip={trip}
-          onTripUpdated={setTrip}
-        />
-      )}
+      {!loading && trip && <TripInfos trip={trip} onTripUpdated={setTrip} />}
 
       <div className="page-membre">
         <section id="member-list">
-          {loading && (
-            <p className="loading-text">
-              Chargement des membres
-            </p>
-          )}
+          {loading && <p className="loading-text">Chargement des membres</p>}
 
-          {error && (
-            <p className="error">
-              {error}
-            </p>
-          )}
+          {error && <p className="error">{error}</p>}
 
           {!loading && !error && (
             <>
@@ -683,16 +521,12 @@ function Invitations() {
                 title="Participants"
                 invited={attendees}
                 type="attendees"
-                delete={
-                  setInvitationToDelete
-                }
+                delete={isOrganizer ? setInvitationToDelete : undefined}
               />
 
               <Guests
                 title="Invités"
-                invited={
-                  otherInvitations
-                }
+                invited={otherInvitations}
                 type="others"
               />
             </>
@@ -706,36 +540,22 @@ function Invitations() {
               className="participant-delete-dialog"
               aria-labelledby="delete-participant-title"
             >
-              <div
-                className="participant-delete-icon"
-                aria-hidden="true"
-              >
+              <div className="participant-delete-icon" aria-hidden="true">
                 !
               </div>
 
-              <h4 id="delete-participant-title">
-                Retirer ce participant ?
-              </h4>
+              <h4 id="delete-participant-title">Retirer ce participant ?</h4>
 
               <p>
                 Voulez-vous vraiment retirer{" "}
-                <strong>
-                  {
-                    invitationToDelete.name
-                  }
-                </strong>{" "}
-                de ce voyage ?
+                <strong>{invitationToDelete.name}</strong> de ce voyage ?
               </p>
 
               <div className="participant-delete-actions">
                 <button
                   type="button"
                   className="participant-delete-cancel"
-                  onClick={() =>
-                    setInvitationToDelete(
-                      null,
-                    )
-                  }
+                  onClick={() => setInvitationToDelete(null)}
                   disabled={isDeleting}
                 >
                   Annuler
@@ -744,16 +564,10 @@ function Invitations() {
                 <button
                   type="button"
                   className="participant-delete-confirm"
-                  onClick={() =>
-                    removeParticipant(
-                      invitationToDelete.id,
-                    )
-                  }
+                  onClick={() => removeParticipant(invitationToDelete.id)}
                   disabled={isDeleting}
                 >
-                  {isDeleting
-                    ? "Retrait..."
-                    : "Confirmer le retrait"}
+                  {isDeleting ? "Retrait..." : "Confirmer le retrait"}
                 </button>
               </div>
             </dialog>

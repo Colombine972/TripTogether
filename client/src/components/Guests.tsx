@@ -20,27 +20,15 @@ function Guests(props: GuestsProps) {
 
   return (
     <article className="guests-card">
-      {/* =====================================================
-          TITRE
-          ===================================================== */}
-
       <h3 className="guests-title">
         {title} ({invited.length})
       </h3>
-
-      {/* =====================================================
-          MESSAGE SI AUCUNE INVITATION
-          ===================================================== */}
 
       {props.type === "others" && invited.length === 0 && (
         <p className="guests-empty-message">
           Aucune invitation en attente
         </p>
       )}
-
-      {/* =====================================================
-          LISTE DES MEMBRES
-          ===================================================== */}
 
       <ul>
         {invited.map((invitation) => (
@@ -49,10 +37,6 @@ function Guests(props: GuestsProps) {
             className="guest-row"
             data-notification-ref={`participant-${invitation.id}`}
           >
-            {/* =================================================
-                PARTIE GAUCHE
-                ================================================= */}
-
             <div className="guest-left-side">
               <div className="guest-avatar">
                 <img
@@ -85,17 +69,13 @@ function Guests(props: GuestsProps) {
               </div>
             </div>
 
-            {/* =================================================
-                PARTIE DROITE
-                ================================================= */}
-
             <div className="guest-right-side">
               {props.type === "attendees" ? (
                 invitation.role === "organisateur" ? (
                   <span className="guest-badge guest-badge-organisateur">
                     Organisateur
                   </span>
-                ) : (
+                ) : props.delete ? (
                   <button
                     type="button"
                     className="guest-badge guest-badge-accepted"
@@ -103,9 +83,11 @@ function Guests(props: GuestsProps) {
                   >
                     Retirer
                   </button>
-                )
+                ) : null
               ) : invitation.inviteState === "refuse" ? (
-                <span className="guest-badge guest-badge-refuse">Refusé</span>
+                <span className="guest-badge guest-badge-refuse">
+                  Refusé
+                </span>
               ) : (
                 <span className="guest-badge guest-badge-pending">
                   En attente

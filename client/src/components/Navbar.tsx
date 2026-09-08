@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
+import { toast } from "react-toastify";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationBell from "../components/NotificationBell";
 import "../pages/styles/Navbar.css";
@@ -90,9 +91,14 @@ export default function Navbar() {
    * =========================================================
    */
   function handleLogout() {
-    logout();
-
     closeMenu();
+
+    navigate("/", {
+      replace: true,
+    });
+
+    logout();
+    toast.success("Déconnexion réussie. À bientôt !");
   }
 
   return (
