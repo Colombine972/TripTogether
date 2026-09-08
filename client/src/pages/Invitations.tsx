@@ -64,6 +64,11 @@ function Invitations() {
 
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [pendingInvitationToDelete, setPendingInvitationToDelete] =
+    useState<Guest | null>(null);
+
+  const [isDeletingPending, setIsDeletingPending] = useState(false);
+
   /* =========================================================
      CHARGEMENT DU VOYAGE ET DES INVITATIONS
   ========================================================= */
@@ -493,6 +498,94 @@ function Invitations() {
   };
 
   /* =========================================================
+   ANNULATION D'UNE INVITATION EN ATTENTE
+========================================================= */
+
+  const removePendingInvitation = async (invitationId: number) => {
+    if (!token) {
+      return;
+    }
+
+    setIsDeletingPending(true);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/invitation/pending/${invitationId}`,
+        {
+          method: "DELETE",
+
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+
+        toast.error("Session expirée. Veuillez vous reconnecter.");
+
+        navigate("/login", {
+          replace: true,
+        });
+
+        return;
+      }
+
+      if (response.status === 403) {
+        toast.error(
+          data?.message ||
+            data?.error ||
+            "Vous n'êtes pas autorisé à annuler cette invitation.",
+        );
+
+        return;
+      }
+
+      if (response.status === 404) {
+        toast.error(data?.message || data?.error || "Invitation introuvable.");
+
+        return;
+      }
+
+      if (response.status === 409) {
+        toast.error(
+          data?.message ||
+            data?.error ||
+            "Cette invitation n'est plus en attente.",
+        );
+
+        return;
+      }
+
+      if (!response.ok) {
+        toast.error(
+          data?.message || data?.error || "Impossible d'annuler l'invitation.",
+        );
+
+        return;
+      }
+
+      setOtherInvitations((previous) =>
+        previous.filter((invitation) => invitation.id !== invitationId),
+      );
+
+      toast.success("Invitation annulée avec succès.");
+    } catch (error) {
+      console.error("Erreur annulation invitation :", error);
+
+      toast.error("Impossible d'annuler l'invitation.");
+    } finally {
+      setIsDeletingPending(false);
+
+      setPendingInvitationToDelete(null);
+    }
+  };
+
+  /* =========================================================
      DROITS ORGANISATEUR
   ========================================================= */
 
@@ -528,6 +621,7 @@ function Invitations() {
                 title="Invités"
                 invited={otherInvitations}
                 type="others"
+                delete={isOrganizer ? setPendingInvitationToDelete : undefined}
               />
             </>
           )}
@@ -573,6 +667,62 @@ function Invitations() {
             </dialog>
           </div>
         )}
+        {pendingInvitationToDelete && (
+  <div className="participant-delete-backdrop">
+    <dialog
+      open
+      className="participant-delete-dialog"
+      aria-labelledby="delete-pending-invitation-title"
+    >
+      <div
+        className="participant-delete-icon"
+        aria-hidden="true"
+      >
+        !
+      </div>
+
+      <h4 id="delete-pending-invitation-title">
+        Annuler cette invitation ?
+      </h4>
+
+      <p>
+        Voulez-vous vraiment annuler l'invitation de{" "}
+        <strong>
+          {pendingInvitationToDelete.name}
+        </strong>
+        ?
+      </p>
+
+      <div className="participant-delete-actions">
+        <button
+          type="button"
+          className="participant-delete-cancel"
+          onClick={() =>
+            setPendingInvitationToDelete(null)
+          }
+          disabled={isDeletingPending}
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          className="participant-delete-confirm"
+          onClick={() =>
+            removePendingInvitation(
+              pendingInvitationToDelete.id,
+            )
+          }
+          disabled={isDeletingPending}
+        >
+          {isDeletingPending
+            ? "Annulation..."
+            : "Confirmer l'annulation"}
+        </button>
+      </div>
+    </dialog>
+  </div>
+)}
       </div>
     </>
   );

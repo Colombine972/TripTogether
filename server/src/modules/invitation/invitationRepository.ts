@@ -381,6 +381,24 @@ class InvitationRepository {
   }
 
   /* =========================================================
+   SUPPRIMER UNE INVITATION EN ATTENTE
+========================================================= */
+
+  async deletePendingInvitation(invitationId: number): Promise<boolean> {
+    const [result] = await databaseClient.query<Result>(
+      `
+        DELETE FROM invitation
+
+        WHERE id = ?
+          AND status = 'pending'
+      `,
+      [invitationId],
+    );
+
+    return result.affectedRows === 1;
+  }
+
+  /* =========================================================
      SUPPRIMER UN PARTICIPANT / INVITATION ACCEPTÉE
   ========================================================= */
 

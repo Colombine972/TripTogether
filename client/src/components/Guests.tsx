@@ -25,9 +25,7 @@ function Guests(props: GuestsProps) {
       </h3>
 
       {props.type === "others" && invited.length === 0 && (
-        <p className="guests-empty-message">
-          Aucune invitation en attente
-        </p>
+        <p className="guests-empty-message">Aucune invitation en attente</p>
       )}
 
       <ul>
@@ -85,9 +83,15 @@ function Guests(props: GuestsProps) {
                   </button>
                 ) : null
               ) : invitation.inviteState === "refuse" ? (
-                <span className="guest-badge guest-badge-refuse">
-                  Refusé
-                </span>
+                <span className="guest-badge guest-badge-refuse">Refusé</span>
+              ) : props.delete ? (
+                <button
+                  type="button"
+                  className="guest-badge guest-badge-pending"
+                  onClick={() => props.delete?.(invitation)}
+                >
+                  Annuler l'invitation
+                </button>
               ) : (
                 <span className="guest-badge guest-badge-pending">
                   En attente

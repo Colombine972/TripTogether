@@ -42,6 +42,16 @@ router.get(
 );
 
 /* =========================================================
+   ANNULATION D'UNE INVITATION EN ATTENTE
+========================================================= */
+
+router.delete(
+  "/pending/:invitationId",
+  verifyToken,
+  invitationActions.deletePending,
+);
+
+/* =========================================================
    LECTURE D'UNE INVITATION
    UTILISATEUR CONNECTÉ
 ========================================================= */
