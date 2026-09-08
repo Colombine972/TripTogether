@@ -30,16 +30,78 @@ const read: RequestHandler = async (req, res, next) => {
 
 const add: RequestHandler = async (req, res, next) => {
   try {
+    /* =====================================================
+       DONNÉES UTILISATEUR
+    ====================================================== */
+
+    const firstname =
+      typeof req.body.firstname === "string" ? req.body.firstname.trim() : "";
+
+    const lastname =
+      typeof req.body.lastname === "string" ? req.body.lastname.trim() : "";
+
+    const email =
+      typeof req.body.email === "string"
+        ? req.body.email.trim().toLowerCase()
+        : "";
+
+    const hashedPassword =
+      typeof req.body.hashed_password === "string"
+        ? req.body.hashed_password
+        : "";
+
+    /* =====================================================
+       CHAMPS OBLIGATOIRES
+    ====================================================== */
+
+    if (!firstname || !lastname || !email || !hashedPassword) {
+      res.status(400).json({
+        message: "Tous les champs sont obligatoires.",
+      });
+
+      return;
+    }
+
+    /* =====================================================
+       EMAIL DÉJÀ UTILISÉ
+    ====================================================== */
+
+    const existingUser = await userRepository.findByEmail(email);
+
+    if (existingUser) {
+      res.status(409).json({
+        message: "Un compte existe déjà avec cette adresse e-mail.",
+      });
+
+      return;
+    }
+
+    /* =====================================================
+       CRÉATION DU COMPTE
+    ====================================================== */
+
     const newUser = {
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      email: req.body.email,
-      password: req.body.hashed_password,
+      firstname,
+      lastname,
+      email,
+      password: hashedPassword,
     };
 
     const insertId = await userRepository.create(newUser);
-    await invitationRepository.updateUserId(insertId, req.body.email);
-    res.status(201).json({ insertId });
+
+    /* =====================================================
+       RATTACHEMENT DES INVITATIONS EXISTANTES
+    ====================================================== */
+
+    await invitationRepository.updateUserId(insertId, email);
+
+    /* =====================================================
+       SUCCÈS
+    ====================================================== */
+
+    res.status(201).json({
+      insertId,
+    });
   } catch (err) {
     next(err);
   }
@@ -136,9 +198,7 @@ const changePassword: RequestHandler = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      res
-        .status(400)
-        .json({ error: "Tous les champs sont obligatoires" });
+      res.status(400).json({ error: "Tous les champs sont obligatoires" });
       return;
     }
 
@@ -157,4 +217,12 @@ const changePassword: RequestHandler = async (req, res) => {
   }
 };
 
-export default { browse, read, add, updateMe, exportMyData, deleteMyAccount, changePassword };
+export default {
+  browse,
+  read,
+  add,
+  updateMe,
+  exportMyData,
+  deleteMyAccount,
+  changePassword,
+};
