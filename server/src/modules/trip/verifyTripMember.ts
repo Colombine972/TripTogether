@@ -1,4 +1,8 @@
-import type { NextFunction, Request, Response } from "express";
+import type {
+  NextFunction,
+  Request,
+  Response,
+} from "express";
 import type { JwtPayload } from "jsonwebtoken";
 
 import tripRepository from "../../modules/trip/tripRepository";
@@ -17,16 +21,29 @@ const verifyTripMember = async (
   next: NextFunction,
 ) => {
   try {
-    const authenticatedReq = req as RequestWithAuth;
+    /* =====================================================
+       UTILISATEUR CONNECTÉ
+    ====================================================== */
 
-    const userId = Number(authenticatedReq.auth?.sub);
+    const authenticatedReq =
+      req as RequestWithAuth;
+
+    const userId = Number(
+      authenticatedReq.auth?.sub,
+    );
 
     if (!userId || Number.isNaN(userId)) {
       res.status(401).json({
-        message: "Utilisateur non authentifié",
+        message:
+          "Utilisateur non authentifié",
       });
+
       return;
     }
+
+    /* =====================================================
+       IDENTIFIANT DU VOYAGE
+    ====================================================== */
 
     const tripId = Number(
       req.params.tripId ??
@@ -37,26 +54,58 @@ const verifyTripMember = async (
 
     if (!tripId || Number.isNaN(tripId)) {
       res.status(400).json({
-        message: "Identifiant du voyage invalide",
+        message:
+          "Identifiant du voyage invalide",
       });
+
       return;
     }
 
-    const isMember = await tripRepository.isUserMemberOfTrip(
-      tripId,
-      userId,
-    );
+    /* =====================================================
+       LE VOYAGE EXISTE-T-IL ?
+    ====================================================== */
+
+    const tripExists =
+      await tripRepository.exists(tripId);
+
+    if (!tripExists) {
+      res.status(404).json({
+        message:
+          "Ce voyage n'existe pas ou n'est plus disponible.",
+      });
+
+      return;
+    }
+
+    /* =====================================================
+       L'UTILISATEUR A-T-IL ACCÈS AU VOYAGE ?
+    ====================================================== */
+
+    const isMember =
+      await tripRepository.isUserMemberOfTrip(
+        tripId,
+        userId,
+      );
 
     if (!isMember) {
       res.status(403).json({
-        message: "Vous n'avez pas accès à ce voyage",
+        message:
+          "Vous n'avez pas accès à ce voyage",
       });
+
       return;
     }
 
+    /* =====================================================
+       ACCÈS AUTORISÉ
+    ====================================================== */
+
     next();
   } catch (error) {
-    console.error("Erreur verifyTripMember :", error);
+    console.error(
+      "Erreur verifyTripMember :",
+      error,
+    );
 
     res.status(500).json({
       message: "Erreur serveur",

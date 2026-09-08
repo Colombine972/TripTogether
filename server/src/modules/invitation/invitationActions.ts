@@ -386,6 +386,20 @@ const readAccess: RequestHandler = async (req, res, next) => {
     }
 
     /* ===================================================
+   RÉCUPÉRATION DU VOYAGE POUR L'AFFICHAGE
+=================================================== */
+
+    const trip = await tripRepository.read(Number(invitation.trip_id));
+
+    if (!trip) {
+      res.status(404).json({
+        error: "Voyage introuvable",
+      });
+
+      return;
+    }
+
+    /* ===================================================
          RÉPONSE PRIVÉE
       =================================================== */
 
@@ -421,6 +435,42 @@ const readAccess: RequestHandler = async (req, res, next) => {
       invited_lastname: invitation.invited_lastname,
 
       invited_avatar_url: invitation.invited_avatar_url,
+
+      /* =================================================
+     VOYAGE POUR TRIPINFOS
+  ================================================= */
+
+      trip: {
+        id: trip.id,
+
+        title: trip.title,
+
+        description: trip.description,
+
+        city: trip.city,
+
+        country: trip.country,
+
+        country_code: trip.country_code,
+
+        local_currency: trip.local_currency,
+
+        base_currency: trip.base_currency,
+
+        start_at: trip.start_at,
+
+        end_at: trip.end_at,
+
+        place_id: trip.place_id,
+
+        user_id: trip.user_id,
+
+        owner_firstname: trip.owner_firstname,
+
+        owner_lastname: trip.owner_lastname,
+
+        owner_avatar_url: trip.owner_avatar_url,
+      },
     });
   } catch (err) {
     next(err);
@@ -786,10 +836,14 @@ const selectInvitationsByTrip: RequestHandler = async (req, res, next) => {
 const delate: RequestHandler = async (req, res, next) => {
   try {
     const tripId = Number(req.params.tripId);
-
     const userId = Number(req.params.userId);
 
-    if (Number.isNaN(tripId) || Number.isNaN(userId)) {
+    if (
+      Number.isNaN(tripId) ||
+      Number.isNaN(userId) ||
+      tripId <= 0 ||
+      userId <= 0
+    ) {
       res.status(400).json({
         message: "Paramètres invalides",
       });
@@ -797,10 +851,56 @@ const delate: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const success = await invitationRepository.deleteInvitation(tripId, userId);
+    /* ===================================================
+       UTILISATEUR CONNECTÉ
+    =================================================== */
+
+    const connectedUserId = getConnectedUserId(req);
+
+    if (
+      Number.isNaN(connectedUserId) ||
+      connectedUserId <= 0
+    ) {
+      res.status(401).json({
+        message: "Utilisateur non authentifié",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+       SEUL L'ORGANISATEUR PEUT RETIRER UN PARTICIPANT
+    =================================================== */
+
+    const isOwner = await tripRepository.isOwner(
+      tripId,
+      connectedUserId,
+    );
+
+    if (!isOwner) {
+      res.status(403).json({
+        message:
+          "Seul l'organisateur peut retirer un participant du voyage.",
+      });
+
+      return;
+    }
+
+    /* ===================================================
+       SUPPRESSION
+    =================================================== */
+
+    const success =
+      await invitationRepository.deleteInvitation(
+        tripId,
+        userId,
+      );
 
     if (!success) {
-      res.sendStatus(404);
+      res.status(404).json({
+        message:
+          "Participant ou invitation introuvable",
+      });
 
       return;
     }

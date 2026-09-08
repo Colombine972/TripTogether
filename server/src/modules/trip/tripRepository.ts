@@ -72,6 +72,15 @@ class TripRepository {
     return rows[0] as Trip;
   }
 
+  async exists(tripId: number): Promise<boolean> {
+  const [rows] = await databaseClient.query<Rows>(
+    "SELECT id FROM trip WHERE id = ? LIMIT 1",
+    [tripId],
+  );
+
+  return rows.length > 0;
+}
+
   async isUserMemberOfTrip(tripId: number, userId: number): Promise<boolean> {
     const [rows] = await databaseClient.query<Rows>(
       `SELECT i.id

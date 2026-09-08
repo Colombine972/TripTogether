@@ -287,8 +287,8 @@ function Invitation() {
 
             setInvitation(data);
 
-            if (data?.trip_id) {
-              await loadTrip(Number(data.trip_id), auth.token);
+            if (data?.trip) {
+              setMyTrip(data.trip);
             }
 
             return;
