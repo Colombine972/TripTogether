@@ -63,6 +63,20 @@ const add: RequestHandler = async (req, res, next) => {
     }
 
     /* =====================================================
+       FORMAT DE L'EMAIL
+    ====================================================== */
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      res.status(400).json({
+        message: "Veuillez saisir une adresse e-mail valide.",
+      });
+
+      return;
+    }
+
+    /* =====================================================
        EMAIL DÉJÀ UTILISÉ
     ====================================================== */
 
