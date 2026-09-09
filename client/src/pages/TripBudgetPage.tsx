@@ -412,6 +412,11 @@ function TripBudgetPage() {
       return;
     }
 
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+
     const loadBudgetPage = async () => {
       setIsLoading(true);
 
@@ -431,6 +436,7 @@ function TripBudgetPage() {
     loadBudgetPage();
   }, [
     tripId,
+    token,
     getTrip,
     getUserPreferences,
     getMembers,
