@@ -1,7 +1,4 @@
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 import {
   Outlet,
   useNavigate,
@@ -10,6 +7,8 @@ import {
 import { toast } from "react-toastify";
 
 import { useAuth } from "../contexts/AuthContext";
+
+import "../pages/styles/TripAccessGuard.css";
 
 function TripAccessGuard() {
   const { id } =
@@ -47,7 +46,6 @@ function TripAccessGuard() {
 
         /* ===================================================
            DÉCONNEXION VOLONTAIRE
-           → PAS DE TOAST D'ERREUR
         ==================================================== */
 
         if (manualLogout) {
@@ -63,7 +61,7 @@ function TripAccessGuard() {
         }
 
         /* ===================================================
-           ACCÈS À UNE ROUTE PRIVÉE SANS SESSION
+           ROUTE PRIVÉE SANS SESSION
         ==================================================== */
 
         toast.error(
@@ -189,12 +187,12 @@ function TripAccessGuard() {
         }
 
         /* ===================================================
-           AUTRE ERREUR
+           AUTRE ERREUR SERVEUR
         ==================================================== */
 
         if (!response.ok) {
           throw new Error(
-            "Impossible de vérifier l'accès au voyage",
+            `Erreur serveur : ${response.status}`,
           );
         }
 
@@ -214,7 +212,7 @@ function TripAccessGuard() {
         );
 
         toast.error(
-          "Impossible de vérifier l'accès au voyage.",
+          "Le serveur est momentanément indisponible. Veuillez réessayer.",
         );
 
         navigate("/", {
@@ -243,7 +241,18 @@ function TripAccessGuard() {
   ========================================================= */
 
   if (loading) {
-    return null;
+    return (
+      <main className="trip-access-loading">
+        <div
+          className="trip-access-spinner"
+          aria-hidden="true"
+        />
+
+        <p>
+          Vérification de l'accès au voyage...
+        </p>
+      </main>
+    );
   }
 
   /* =========================================================
