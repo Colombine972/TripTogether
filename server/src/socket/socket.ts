@@ -1,7 +1,5 @@
 import type { Server as HttpServer } from "node:http";
-import jwt, {
-  type JwtPayload,
-} from "jsonwebtoken";
+import jwt, { type JwtPayload } from "jsonwebtoken";
 import { Server } from "socket.io";
 
 interface MyPayload extends JwtPayload {
@@ -10,21 +8,19 @@ interface MyPayload extends JwtPayload {
 
 let io: Server | null = null;
 
-export const initializeSocket = (
-  httpServer: HttpServer,
-): Server => {
+export const initializeSocket = (httpServer: HttpServer): Server => {
+  const frontendUrl = process.env.FRONTEND_URL;
+
+  if (!frontendUrl) {
+    throw new Error(
+      "FRONTEND_URL est manquant dans les variables d'environnement.",
+    );
+  }
+
   io = new Server(httpServer, {
     cors: {
-      origin:
-        process.env.FRONTEND_URL ||
-        "http://localhost:5173",
-      methods: [
-        "GET",
-        "POST",
-        "PUT",
-        "PATCH",
-        "DELETE",
-      ],
+      origin: frontendUrl,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       credentials: true,
     },
   });
@@ -40,44 +36,27 @@ export const initializeSocket = (
    */
   io.use((socket, next) => {
     try {
-      const token =
-        socket.handshake.auth.token;
+      const token = socket.handshake.auth.token;
 
-      if (
-        !token ||
-        typeof token !== "string"
-      ) {
-        return next(
-          new Error(
-            "Token Socket.IO manquant",
-          ),
-        );
+      if (!token || typeof token !== "string") {
+        return next(new Error("Token Socket.IO manquant"));
       }
 
-      const secret =
-        process.env.APP_SECRET;
+      const secret = process.env.APP_SECRET;
 
       if (!secret) {
         console.error(
           "APP_SECRET est manquant dans les variables d'environnement.",
         );
 
-        return next(
-          new Error(
-            "Configuration serveur invalide",
-          ),
-        );
+        return next(new Error("Configuration serveur invalide"));
       }
 
       /*
        * Même vérification que dans ton
        * middleware verifyToken.
        */
-      const decoded =
-        jwt.verify(
-          token,
-          secret,
-        ) as MyPayload;
+      const decoded = jwt.verify(token, secret) as MyPayload;
 
       /*
        * Ton JWT est créé avec :
@@ -90,27 +69,13 @@ export const initializeSocket = (
        * donc dans decoded.sub.
        */
       if (!decoded.sub) {
-        return next(
-          new Error(
-            "Utilisateur Socket.IO invalide",
-          ),
-        );
+        return next(new Error("Utilisateur Socket.IO invalide"));
       }
 
-      const userId =
-        Number(decoded.sub);
+      const userId = Number(decoded.sub);
 
-      if (
-        !Number.isInteger(
-          userId,
-        ) ||
-        userId <= 0
-      ) {
-        return next(
-          new Error(
-            "Identifiant utilisateur Socket.IO invalide",
-          ),
-        );
+      if (!Number.isInteger(userId) || userId <= 0) {
+        return next(new Error("Identifiant utilisateur Socket.IO invalide"));
       }
 
       /*
@@ -118,83 +83,45 @@ export const initializeSocket = (
        * socket.data pour pouvoir le récupérer
        * après l'authentification.
        */
-      socket.data.userId =
-        userId;
+      socket.data.userId = userId;
 
       next();
     } catch (error) {
-      console.error(
-        "Erreur authentification Socket.IO :",
-        error,
-      );
+      console.error("Erreur authentification Socket.IO :", error);
 
-      next(
-        new Error(
-          "Authentification Socket.IO invalide",
-        ),
-      );
+      next(new Error("Authentification Socket.IO invalide"));
     }
   });
 
   /*
    * Connexion Socket.IO réussie
    */
-  io.on(
-    "connection",
-    (socket) => {
-      const userId =
-        socket.data
-          .userId as number;
+  io.on("connection", (socket) => {
+    const userId = socket.data.userId as number;
 
-      /*
-       * Chaque utilisateur possède sa propre room.
-       *
-       * Exemple :
-       *
-       * user 12
-       *      ↓
-       * room "user:12"
-       */
-      const userRoom =
-        `user:${userId}`;
+    /*
+     * Chaque utilisateur possède sa propre room.
+     *
+     * Exemple :
+     *
+     * user 12
+     *      ↓
+     * room "user:12"
+     */
+    const userRoom = `user:${userId}`;
 
-      socket.join(
-        userRoom,
-      );
+    socket.join(userRoom);
 
-      console.info(
-        `Socket connecté : user ${userId} - ${socket.id}`,
-      );
+    console.info(`Socket connecté : user ${userId} - ${socket.id}`);
 
-      /*
-       * Événement temporaire permettant
-       * de vérifier que Socket.IO fonctionne.
-       *
-       * Nous pourrons le supprimer après
-       * nos tests.
-       */
-      socket.emit(
-        "socket:test",
-        {
-          message:
-            "Connexion Socket.IO réussie",
-          userId,
-        },
-      );
 
-      /*
-       * Déconnexion
-       */
-      socket.on(
-        "disconnect",
-        (reason) => {
-          console.info(
-            `Socket déconnecté : user ${userId} - ${reason}`,
-          );
-        },
-      );
-    },
-  );
+    /*
+     * Déconnexion
+     */
+    socket.on("disconnect", (reason) => {
+      console.info(`Socket déconnecté : user ${userId} - ${reason}`);
+    });
+  });
 
   return io;
 };
@@ -209,13 +136,10 @@ export const initializeSocket = (
  *   .to("user:12")
  *   .emit("notification:refresh");
  */
-export const getIo =
-  (): Server => {
-    if (!io) {
-      throw new Error(
-        "Socket.IO n'a pas encore été initialisé",
-      );
-    }
+export const getIo = (): Server => {
+  if (!io) {
+    throw new Error("Socket.IO n'a pas encore été initialisé");
+  }
 
-    return io;
-  };
+  return io;
+};

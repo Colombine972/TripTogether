@@ -5,14 +5,21 @@ import cors from "cors";
 import express from "express";
 import apiRouter from "./routers/api/router";
 
-
 const app = express();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-if (process.env.FRONTEND_URL != null) {
-  app.use(cors({ origin: [process.env.FRONTEND_URL] }));
+if (!process.env.FRONTEND_URL) {
+  throw new Error(
+    "FRONTEND_URL est manquant dans les variables d'environnement.",
+  );
 }
+
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+  }),
+);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
