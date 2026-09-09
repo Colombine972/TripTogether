@@ -31,8 +31,18 @@ router.get(
 
 router.post("/:id", verifyToken, verifyTripMember, expenseActions.add);
 
-router.put("/:id", verifyToken, verifyTripMember, expenseActions.update);
+router.put(
+  "/:tripId/:expenseId",
+  verifyToken,
+  verifyTripMember,
+  expenseActions.update,
+);
 
-router.delete("/:id", verifyToken, verifyTripMember, expenseActions.remove);
+router.delete(
+  "/:tripId/:expenseId",
+  verifyToken,
+  verifyTripMember,
+  expenseActions.remove,
+);
 
 export default router;

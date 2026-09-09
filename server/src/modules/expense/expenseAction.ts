@@ -363,7 +363,7 @@ const add: RequestHandler = async (req, res, next) => {
 
 const update: RequestHandler = async (req, res, next) => {
   try {
-    const expenseId = Number(req.params.id);
+    const expenseId = Number(req.params.expenseId);
 
     /*
      * L'utilisateur qui effectue réellement
@@ -890,7 +890,7 @@ const remove: RequestHandler = async (
   next,
 ) => {
   try {
-    const expenseId = Number(req.params.id);
+    const expenseId = Number(req.params.expenseId);
 
     const actorUserId = Number(req.auth?.sub);
 

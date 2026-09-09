@@ -510,7 +510,7 @@ function AddExpenseForm({
     try {
       const endpoint =
         isEditMode && expenseToEdit
-          ? `${import.meta.env.VITE_API_URL}/api/expenses/${expenseToEdit.id}`
+          ? `${import.meta.env.VITE_API_URL}/api/expenses/${tripId}/${expenseToEdit.id}`
           : `${import.meta.env.VITE_API_URL}/api/expenses/${tripId}`;
 
       const method = isEditMode ? "PUT" : "POST";

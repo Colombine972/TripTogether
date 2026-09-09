@@ -824,7 +824,7 @@ function TripBudgetPage() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/expenses/${expenseToDelete.id}`,
+        `${import.meta.env.VITE_API_URL}/api/expenses/${tripId}/${expenseToDelete.id}`,
         {
           method: "DELETE",
           headers: authHeaders,

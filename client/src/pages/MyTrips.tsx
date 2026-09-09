@@ -164,9 +164,32 @@ export default function MyTrips() {
 
   useEffect(() => {
     if (!token) {
+      const manualLogout = sessionStorage.getItem("manualLogout") === "true";
+
+      /* =====================================================
+     DÉCONNEXION VOLONTAIRE
+     → PAS DE TOAST D'ERREUR
+  ====================================================== */
+
+      if (manualLogout) {
+        sessionStorage.removeItem("manualLogout");
+
+        navigate("/", {
+          replace: true,
+        });
+
+        return;
+      }
+
+      /* =====================================================
+     ACCÈS À MES VOYAGES SANS ÊTRE CONNECTÉ
+  ====================================================== */
+
       toast.error("Vous devez être connecté pour voir vos voyages");
 
-      navigate("/login");
+      navigate("/login", {
+        replace: true,
+      });
 
       return;
     }
