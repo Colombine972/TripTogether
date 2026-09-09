@@ -710,7 +710,7 @@ const add: RequestHandler = async (req, res, next) => {
          LIEN
       =================================================== */
 
-    const clientUrl = process.env.CLIENT_URL ?? "http://localhost:3000";
+    const clientUrl = process.env.FRONTEND_URL ?? "http://localhost:3000";
 
     const invitationLink = `${clientUrl}/invitation/${publicToken}`;
 

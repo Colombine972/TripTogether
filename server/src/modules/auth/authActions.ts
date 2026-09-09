@@ -166,7 +166,7 @@ export const forgotPassword: RequestHandler = async (
 
     if (result) {
       const frontendUrl =
-        process.env.CLIENT_URL ||
+        process.env.FRONTEND_URL ||
         "http://localhost:3000";
 
       const resetUrl =

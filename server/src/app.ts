@@ -10,8 +10,8 @@ const app = express();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-if (process.env.CLIENT_URL != null) {
-  app.use(cors({ origin: [process.env.CLIENT_URL] }));
+if (process.env.FRONTEND_URL != null) {
+  app.use(cors({ origin: [process.env.FRONTEND_URL] }));
 }
 
 app.use(express.json({ limit: "10mb" }));
