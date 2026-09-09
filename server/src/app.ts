@@ -45,8 +45,8 @@ if (fs.existsSync(clientBuildPath)) {
 import type { ErrorRequestHandler } from "express";
 
 const logErrors: ErrorRequestHandler = (err, req, res, next) => {
-  console.error(err);
-  console.error("on req:", req.method, req.path);
+  console.error(`[${new Date().toISOString()}]`, req.method, req.path, err);
+
   next(err);
 };
 
