@@ -10,12 +10,6 @@ import userActions from "../../modules/user/userActions";
 
 const router = express.Router();
 
-router.get("/test", (_req, res) => {
-  res.status(200).json({
-    message: "Auth router OK",
-  });
-});
-
 router.post("/register", hashPassword, userActions.add);
 router.post("/login", login);
 
