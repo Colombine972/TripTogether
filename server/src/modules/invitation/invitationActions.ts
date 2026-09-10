@@ -710,7 +710,13 @@ const add: RequestHandler = async (req, res, next) => {
          LIEN
       =================================================== */
 
-    const clientUrl = process.env.FRONTEND_URL ?? "http://localhost:3000";
+    const clientUrl = process.env.FRONTEND_URL;
+
+    if (!clientUrl) {
+      throw new Error(
+        "FRONTEND_URL est manquant dans les variables d'environnement.",
+      );
+    }
 
     const invitationLink = `${clientUrl}/invitation/${publicToken}`;
 
@@ -829,24 +835,15 @@ const selectInvitationsByTrip: RequestHandler = async (req, res, next) => {
   }
 };
 
-
 /* =========================================================
    ANNULER UNE INVITATION EN ATTENTE
 ========================================================= */
 
-const deletePending: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const deletePending: RequestHandler = async (req, res, next) => {
   try {
-    const invitationId =
-      Number(req.params.invitationId);
+    const invitationId = Number(req.params.invitationId);
 
-    if (
-      Number.isNaN(invitationId) ||
-      invitationId <= 0
-    ) {
+    if (Number.isNaN(invitationId) || invitationId <= 0) {
       res.status(400).json({
         message: "Invitation invalide",
       });
@@ -854,85 +851,65 @@ const deletePending: RequestHandler = async (
       return;
     }
 
-    const connectedUserId =
-      getConnectedUserId(req);
+    const connectedUserId = getConnectedUserId(req);
 
-    if (
-      Number.isNaN(connectedUserId) ||
-      connectedUserId <= 0
-    ) {
+    if (Number.isNaN(connectedUserId) || connectedUserId <= 0) {
       res.status(401).json({
-        message:
-          "Utilisateur non authentifié",
+        message: "Utilisateur non authentifié",
       });
 
       return;
     }
 
-    const invitation =
-      await invitationRepository.read(
-        invitationId,
-      );
+    const invitation = await invitationRepository.read(invitationId);
 
     if (!invitation) {
       res.status(404).json({
-        message:
-          "Invitation introuvable",
+        message: "Invitation introuvable",
       });
 
       return;
     }
 
-    if (
-      invitation.status !== "pending"
-    ) {
+    if (invitation.status !== "pending") {
       res.status(409).json({
-        message:
-          "Cette invitation n'est plus en attente.",
+        message: "Cette invitation n'est plus en attente.",
       });
 
       return;
     }
 
-    const isOwner =
-      await tripRepository.isOwner(
-        invitation.trip_id,
-        connectedUserId,
-      );
+    const isOwner = await tripRepository.isOwner(
+      invitation.trip_id,
+      connectedUserId,
+    );
 
     if (!isOwner) {
       res.status(403).json({
-        message:
-          "Seul l'organisateur peut annuler cette invitation.",
+        message: "Seul l'organisateur peut annuler cette invitation.",
       });
 
       return;
     }
 
     const success =
-      await invitationRepository.deletePendingInvitation(
-        invitationId,
-      );
+      await invitationRepository.deletePendingInvitation(invitationId);
 
     if (!success) {
       res.status(404).json({
-        message:
-          "Invitation introuvable ou déjà traitée.",
+        message: "Invitation introuvable ou déjà traitée.",
       });
 
       return;
     }
 
     res.status(200).json({
-      message:
-        "Invitation annulée avec succès.",
+      message: "Invitation annulée avec succès.",
     });
   } catch (err) {
     next(err);
   }
 };
-
-
 
 /* =========================================================
    SUPPRIMER UNE INVITATION / UN PARTICIPANT
@@ -962,10 +939,7 @@ const delate: RequestHandler = async (req, res, next) => {
 
     const connectedUserId = getConnectedUserId(req);
 
-    if (
-      Number.isNaN(connectedUserId) ||
-      connectedUserId <= 0
-    ) {
+    if (Number.isNaN(connectedUserId) || connectedUserId <= 0) {
       res.status(401).json({
         message: "Utilisateur non authentifié",
       });
@@ -977,15 +951,11 @@ const delate: RequestHandler = async (req, res, next) => {
        SEUL L'ORGANISATEUR PEUT RETIRER UN PARTICIPANT
     =================================================== */
 
-    const isOwner = await tripRepository.isOwner(
-      tripId,
-      connectedUserId,
-    );
+    const isOwner = await tripRepository.isOwner(tripId, connectedUserId);
 
     if (!isOwner) {
       res.status(403).json({
-        message:
-          "Seul l'organisateur peut retirer un participant du voyage.",
+        message: "Seul l'organisateur peut retirer un participant du voyage.",
       });
 
       return;
@@ -995,16 +965,11 @@ const delate: RequestHandler = async (req, res, next) => {
        SUPPRESSION
     =================================================== */
 
-    const success =
-      await invitationRepository.deleteInvitation(
-        tripId,
-        userId,
-      );
+    const success = await invitationRepository.deleteInvitation(tripId, userId);
 
     if (!success) {
       res.status(404).json({
-        message:
-          "Participant ou invitation introuvable",
+        message: "Participant ou invitation introuvable",
       });
 
       return;

@@ -1,12 +1,11 @@
-const express = require("express");
-
-const router = express.Router();
+import { Router } from "express";
 
 import { verifyToken } from "../../modules/auth/authActions";
 import verifyTripMember from "../../modules/trip/verifyTripMember";
-
 import expenseActions from "../../modules/expense/expenseAction";
 import expenseShareActions from "../../modules/expenseShare/expenseShareActions";
+
+const router = Router();
 
 router.get(
   "/:id/summary",
@@ -29,7 +28,12 @@ router.get(
   expenseActions.getExpensesByTrip,
 );
 
-router.post("/:id", verifyToken, verifyTripMember, expenseActions.add);
+router.post(
+  "/:id",
+  verifyToken,
+  verifyTripMember,
+  expenseActions.add,
+);
 
 router.put(
   "/:tripId/:expenseId",

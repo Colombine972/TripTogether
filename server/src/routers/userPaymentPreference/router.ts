@@ -1,6 +1,6 @@
-const express = require("express");
+import { Router } from "express";
 
-const router = express.Router();
+const router = Router();
 
 import { verifyToken } from "../../modules/auth/authActions";
 import userPaymentPreferenceActions from "../../modules/userPaymentPreference/userPaymentPreferenceActions";

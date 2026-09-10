@@ -9,7 +9,7 @@ services:
     command: sh -c "npm run build && npm run start"
     environment:
       APP_PORT: 3310
-      APP_SECRET: ${APP_SECRET:-123456789}
+      APP_SECRET: ${APP_SECRET}
       DB_HOST: ${DATABASE_SUBDOMAIN_NAME}-db
       DB_PORT: 3306
       DB_USER: ${USER_NAME}

@@ -6,6 +6,7 @@ import stepActions from "../../modules/step/stepActions";
 import tripActions from "../../modules/trip/tripActions";
 import userPaymentPreferenceActions from "../../modules/userPaymentPreference/userPaymentPreferenceActions";
 import verifyTripMember from "../../modules/trip/verifyTripMember";
+import verifyTripOwner from "../../modules/trip/verifyTripOwner";
 
 
 const router = express.Router();
@@ -102,7 +103,7 @@ router.delete(
 router.post(
   "/:id/invitations",
   verifyToken,
-  verifyTripMember,
+  verifyTripOwner,
   invitationActions.add,
 );
 

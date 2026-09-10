@@ -11,7 +11,7 @@ services:
       - "3000:3000"
     environment:
       APP_PORT: 3310
-      APP_SECRET: 123456789
+      APP_SECRET: ${APP_SECRET:-dev_secret_only}
       DB_HOST: database
       DB_PORT: 3306
       DB_USER: user

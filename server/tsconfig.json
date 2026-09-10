@@ -3,7 +3,6 @@
     /* Language and Environment */
     "target": "esnext",
     "lib": ["esnext"],
-    "ignoreDeprecations": "6.0",
 
     /* Modules */
     "module": "esnext",

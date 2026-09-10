@@ -1,6 +1,6 @@
-const express = require("express");
+import { Router } from "express";
 
-const router = express.Router();
+const router = Router();
 
 import invitationActions from "../../modules/invitation/invitationActions";
 

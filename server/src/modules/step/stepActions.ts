@@ -375,8 +375,7 @@ const addVote: RequestHandler = async (req, res, next) => {
             referenceId: stepId,
           });
         } else {
-
-        /* ===============================================
+          /* ===============================================
              ÉTAPE REJETÉE
           ================================================ */
           await activityService.createActivity({
@@ -480,12 +479,28 @@ const browseVote: RequestHandler = async (req, res, next) => {
 const deleteStep: RequestHandler = async (req, res, next) => {
   try {
     const stepId = Number(req.params.stepId);
-
     const tripId = Number(req.params.tripId);
 
     const authReq = req as RequestWithAuth;
-
     const userId = Number(authReq.auth.sub);
+
+    if (!Number.isInteger(tripId) || tripId <= 0) {
+      return res.status(400).json({
+        error: "ID de voyage invalide",
+      });
+    }
+
+    if (!Number.isInteger(stepId) || stepId <= 0) {
+      return res.status(400).json({
+        error: "ID d'étape invalide",
+      });
+    }
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(401).json({
+        error: "Non authentifié",
+      });
+    }
 
     const step = await stepRepository.getStepWithTrip(stepId);
 
@@ -495,6 +510,14 @@ const deleteStep: RequestHandler = async (req, res, next) => {
       });
     }
 
+    /* Vérifie que l'étape appartient bien au voyage de l'URL */
+    if (Number(step.trip_id) !== tripId) {
+      return res.status(404).json({
+        error: "Étape introuvable pour ce voyage",
+      });
+    }
+
+    /* Seul l'organisateur peut supprimer une étape */
     const isOwner = await tripRepository.isOwner(tripId, userId);
 
     if (!isOwner) {

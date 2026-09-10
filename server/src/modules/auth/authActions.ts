@@ -1,14 +1,13 @@
 import argon2 from "argon2";
 import type { Request, RequestHandler } from "express";
-import jwt, {
-  JsonWebTokenError,
-  TokenExpiredError,
-  type JwtPayload,
-} from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import type { JwtPayload } from "jsonwebtoken";
 
 import sendPasswordResetEmail from "../../services/passwordResetEmail";
 import userRepository from "../user/userRepository";
 import passwordResetService from "./PasswordResetService";
+
+const { JsonWebTokenError, TokenExpiredError } = jwt;
 
 interface MyPayload extends JwtPayload {
   sub: string;
@@ -27,10 +26,7 @@ export const login: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const verified = await argon2.verify(
-      user.password,
-      req.body.password,
-    );
+    const verified = await argon2.verify(user.password, req.body.password);
 
     if (!verified) {
       res.sendStatus(401);
@@ -43,13 +39,9 @@ export const login: RequestHandler = async (req, res, next) => {
       sub: user.id.toString(),
     };
 
-    const token = jwt.sign(
-      payload,
-      process.env.APP_SECRET as string,
-      {
-        expiresIn: "3h",
-      },
-    );
+    const token = jwt.sign(payload, process.env.APP_SECRET as string, {
+      expiresIn: "3h",
+    });
 
     res.json({
       token,
@@ -60,11 +52,7 @@ export const login: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const hashPassword: RequestHandler = async (
-  req,
-  _res,
-  next,
-) => {
+export const hashPassword: RequestHandler = async (req, _res, next) => {
   try {
     const { password, ...otherBodyProps } = req.body;
 
@@ -86,11 +74,7 @@ export const hashPassword: RequestHandler = async (
   }
 };
 
-export const verifyToken: RequestHandler = (
-  req,
-  res,
-  next,
-) => {
+export const verifyToken: RequestHandler = (req, res, next) => {
   try {
     const authHeader = req.get("Authorization");
 
@@ -142,11 +126,7 @@ export const verifyToken: RequestHandler = (
   }
 };
 
-export const forgotPassword: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+export const forgotPassword: RequestHandler = async (req, res, next) => {
   try {
     const email =
       typeof req.body.email === "string"
@@ -161,17 +141,16 @@ export const forgotPassword: RequestHandler = async (
       return;
     }
 
-    const result =
-      await passwordResetService.createPasswordReset(email);
+    const result = await passwordResetService.createPasswordReset(email);
 
     if (result) {
-      const frontendUrl =
-        process.env.FRONTEND_URL ||
-        "http://localhost:3000";
+      const frontendUrl = process.env.FRONTEND_URL;
 
-      const resetUrl =
-        `${frontendUrl}/reset-password` +
-        `?token=${encodeURIComponent(result.token)}`;
+      if (!frontendUrl) {
+        throw new Error("FRONTEND_URL est manquant");
+      }
+
+      const resetUrl = `${frontendUrl}/reset-password?token=${encodeURIComponent(result.token)}`;
 
       await sendPasswordResetEmail({
         email: result.user.email,
@@ -190,21 +169,13 @@ export const forgotPassword: RequestHandler = async (
   }
 };
 
-export const resetPassword: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+export const resetPassword: RequestHandler = async (req, res, next) => {
   try {
     const token =
-      typeof req.body.token === "string"
-        ? req.body.token.trim()
-        : "";
+      typeof req.body.token === "string" ? req.body.token.trim() : "";
 
     const password =
-      typeof req.body.password === "string"
-        ? req.body.password
-        : "";
+      typeof req.body.password === "string" ? req.body.password : "";
 
     if (!token || !password) {
       res.status(400).json({
@@ -216,31 +187,24 @@ export const resetPassword: RequestHandler = async (
 
     if (password.length < 8) {
       res.status(400).json({
-        message:
-          "Le mot de passe doit contenir au moins 8 caractères",
+        message: "Le mot de passe doit contenir au moins 8 caractères",
       });
 
       return;
     }
 
-    const success =
-      await passwordResetService.resetPassword(
-        token,
-        password,
-      );
+    const success = await passwordResetService.resetPassword(token, password);
 
     if (!success) {
       res.status(400).json({
-        message:
-          "Ce lien de réinitialisation est invalide ou a expiré.",
+        message: "Ce lien de réinitialisation est invalide ou a expiré.",
       });
 
       return;
     }
 
     res.status(200).json({
-      message:
-        "Votre mot de passe a été modifié avec succès.",
+      message: "Votre mot de passe a été modifié avec succès.",
     });
   } catch (error) {
     next(error);
