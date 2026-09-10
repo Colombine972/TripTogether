@@ -355,15 +355,58 @@ const browseMyTrip: RequestHandler = async (req, res, next) => {
 
 const delate: RequestHandler = async (req, res, next) => {
   try {
-    const id = Number(req.params.id);
+    const authReq = req as AuthRequest;
 
-    const affectedRows = await tripRepository.delete(id);
+    const tripId = Number(req.params.id);
+    const userId = Number(authReq.auth.sub);
+
+    if (!Number.isInteger(tripId) || tripId <= 0) {
+      res.status(400).json({
+        error: "Identifiant du voyage invalide",
+      });
+
+      return;
+    }
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      res.status(401).json({
+        error: "Utilisateur non authentifié",
+      });
+
+      return;
+    }
+
+    const tripExists = await tripRepository.exists(tripId);
+
+    if (!tripExists) {
+      res.status(404).json({
+        error: "Voyage introuvable",
+      });
+
+      return;
+    }
+
+    const isOwner = await tripRepository.isOwner(tripId, userId);
+
+    if (!isOwner) {
+      res.status(403).json({
+        error: "Vous n'êtes pas autorisé à supprimer ce voyage",
+      });
+
+      return;
+    }
+
+    const affectedRows = await tripRepository.delete(tripId);
 
     if (affectedRows === 0) {
-      res.status(404).send("Voyage non trouvé");
-    } else {
-      res.status(204).send();
+      res.status(404).json({
+        error: "Voyage introuvable",
+      });
+
+      return;
     }
+
+    res.status(204).send();
   } catch (err) {
     next(err);
   }

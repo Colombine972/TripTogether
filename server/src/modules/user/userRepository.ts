@@ -50,11 +50,20 @@ class UserRepository {
 
   async read(id: number) {
     const [rows] = await databaseClient.query<Rows>(
-      "select * from user where id = ?",
+      `
+      SELECT
+        id,
+        firstname,
+        lastname,
+        email,
+        avatar_url
+      FROM user
+      WHERE id = ?
+    `,
       [id],
     );
 
-    return rows[0] as User;
+    return rows[0] as Omit<User, "password">;
   }
 
   async readByEmail(email: string) {
@@ -67,9 +76,20 @@ class UserRepository {
   }
 
   async readAll() {
-    const [rows] = await databaseClient.query<Rows>("select * from user");
+    const [rows] = await databaseClient.query<Rows>(
+      `
+      SELECT
+        id,
+        firstname,
+        lastname,
+        email,
+        avatar_url
+      FROM user
+      ORDER BY lastname, firstname
+    `,
+    );
 
-    return rows as User[];
+    return rows as Omit<User, "password">[];
   }
 
   async findByEmail(email: string) {
@@ -90,7 +110,7 @@ class UserRepository {
     return result;
   }
 
-   async readPasswordById(id: number) {
+  async readPasswordById(id: number) {
     const [rows] = await databaseClient.query<Rows>(
       `
         SELECT id, password
@@ -253,7 +273,7 @@ class UserRepository {
     return rows;
   }
 
-    async deleteMyAccount(data: DeleteMyAccountData) {
+  async deleteMyAccount(data: DeleteMyAccountData) {
     const { userId, currentEmail, anonymizedEmail, anonymizedPassword } = data;
 
     const connection = await databaseClient.getConnection();

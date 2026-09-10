@@ -115,34 +115,58 @@ function TripInfos({
   ======================================================= */
 
   useEffect(() => {
-    if (!trip?.id) {
-      return;
-    }
+  if (!trip?.id) {
+    return;
+  }
 
-    const fetchMembers = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/trips/${trip.id}/members`,
+  const token =
+    auth?.token ||
+    localStorage.getItem("token");
+
+  if (!token) {
+    return;
+  }
+
+  const fetchMembers = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/trips/${trip.id}/members`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            data?.message ||
+            "Impossible de récupérer les membres",
         );
-
-        if (!response.ok) {
-          throw new Error("Impossible de récupérer les membres");
-        }
-
-        const data = await response.json();
-
-        const tripMembers = Array.isArray(data) ? data : (data.members ?? []);
-
-        setMembers(tripMembers);
-      } catch (error) {
-        console.error("Erreur récupération membres :", error);
-
-        setMembers([]);
       }
-    };
 
-    void fetchMembers();
-  }, [trip?.id]);
+      const tripMembers = Array.isArray(data)
+        ? data
+        : data?.members ?? [];
+
+      setMembers(tripMembers);
+    } catch (error) {
+      console.error(
+        "Erreur récupération membres :",
+        error,
+      );
+
+      setMembers([]);
+    }
+  };
+
+  void fetchMembers();
+}, [trip?.id, auth?.token]);
 
   /* =======================================================
      CHARGEMENT DU RÉSUMÉ BUDGET

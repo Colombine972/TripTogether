@@ -25,8 +25,10 @@ interface TripParticipant {
   avatar_url?: string | null;
 }
 
+
 interface TheTrip {
   id: number;
+  user_id: number;
   title: string;
   description: string;
   place_id?: string | null;
@@ -575,6 +577,8 @@ export default function MyTrips() {
             trips.map((trip) => {
               const status = getTripStatus(trip);
 
+              const isOwner = Number(trip.user_id) === Number(auth?.user?.id);
+
               const participants = trip.participants ?? [];
 
               const visibleParticipants = participants.slice(0, 3);
@@ -674,40 +678,44 @@ export default function MyTrips() {
                         MENU ACTIONS
                     ============================== */}
 
-                  <div
-                    className="tripcard-actions"
-                    ref={openMenuId === trip.id ? menuRef : null}
-                  >
-                    <button
-                      type="button"
-                      className="tripcard-menu-button"
-                      aria-label={`Actions pour ${trip.title}`}
-                      aria-expanded={openMenuId === trip.id}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-
-                        setOpenMenuId((currentId) =>
-                          currentId === trip.id ? null : trip.id,
-                        );
-                      }}
+                  {isOwner && (
+                    <div
+                      className="tripcard-actions"
+                      ref={openMenuId === trip.id ? menuRef : null}
                     >
-                      <MoreHorizontal size={22} />
-                    </button>
+                      <button
+                        type="button"
+                        className="tripcard-menu-button"
+                        aria-label={`Actions pour ${trip.title}`}
+                        aria-expanded={openMenuId === trip.id}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
 
-                    {openMenuId === trip.id && (
-                      <div className="tripcard-menu">
-                        <button
-                          type="button"
-                          className="tripcard-delete-action"
-                          onClick={(event) => handleDeleteTrip(event, trip.id)}
-                        >
-                          <Trash2 size={17} />
-                          Supprimer le voyage
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                          setOpenMenuId((currentId) =>
+                            currentId === trip.id ? null : trip.id,
+                          );
+                        }}
+                      >
+                        <MoreHorizontal size={22} />
+                      </button>
+
+                      {openMenuId === trip.id && (
+                        <div className="tripcard-menu">
+                          <button
+                            type="button"
+                            className="tripcard-delete-action"
+                            onClick={(event) =>
+                              handleDeleteTrip(event, trip.id)
+                            }
+                          >
+                            <Trash2 size={17} />
+                            Supprimer le voyage
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </article>
               );
             })

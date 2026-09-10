@@ -73,13 +73,13 @@ class TripRepository {
   }
 
   async exists(tripId: number): Promise<boolean> {
-  const [rows] = await databaseClient.query<Rows>(
-    "SELECT id FROM trip WHERE id = ? LIMIT 1",
-    [tripId],
-  );
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT id FROM trip WHERE id = ? LIMIT 1",
+      [tripId],
+    );
 
-  return rows.length > 0;
-}
+    return rows.length > 0;
+  }
 
   async isUserMemberOfTrip(tripId: number, userId: number): Promise<boolean> {
     const [rows] = await databaseClient.query<Rows>(
@@ -191,26 +191,30 @@ class TripRepository {
 
     const [rows] = await databaseClient.query<Rows>(
       `SELECT 
-        t.id, 
-        t.title, 
-        t.description, 
-        t.city, 
-        t.country,
-        t.country_code,
-        t.local_currency,
-        t.base_currency,
-        t.start_at, 
-        t.end_at, 
-        t.place_id,
-        u.firstname AS creator_firstname,
-        u.lastname AS creator_lastname
-      FROM trip t
-      JOIN user u ON t.user_id = u.id
-      LEFT JOIN invitation i ON i.trip_id = t.id AND i.user_id = ?
-      WHERE 
-        (t.user_id = ? OR i.status = 'accepted')
-        ${dateCondition}
-      ORDER BY t.start_at ASC`,
+      t.id,
+      t.user_id,
+      t.title,
+      t.description,
+      t.city,
+      t.country,
+      t.country_code,
+      t.local_currency,
+      t.base_currency,
+      t.start_at,
+      t.end_at,
+      t.place_id,
+      u.firstname AS creator_firstname,
+      u.lastname AS creator_lastname
+    FROM trip t
+    JOIN user u
+      ON t.user_id = u.id
+    LEFT JOIN invitation i
+      ON i.trip_id = t.id
+      AND i.user_id = ?
+    WHERE
+      (t.user_id = ? OR i.status = 'accepted')
+      ${dateCondition}
+    ORDER BY t.start_at ASC`,
       [userId, userId],
     );
 
