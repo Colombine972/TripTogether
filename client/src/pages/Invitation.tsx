@@ -9,7 +9,7 @@ import { useAuth } from "../contexts/AuthContext";
 import type { invitationType } from "../types/invitationType";
 import type { TheTrip } from "../types/tripType";
 
-import "./styles/invitation.css";
+import "./styles/Invitation.css";
 
 /* =========================================================
    TYPE - INVITATION PUBLIQUE
