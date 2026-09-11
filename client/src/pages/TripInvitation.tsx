@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { useAuth } from "../contexts/AuthContext";
 
 import "./styles/TripInvitation.css";
 
@@ -53,6 +54,8 @@ function TripInvitation({
 
   const [emails, setEmails] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const { auth } = useAuth();
 
   /* =======================================================
      FORMAT DATE
@@ -184,7 +187,6 @@ function TripInvitation({
     }
   };
 
-
   /* =======================================================
      COPIER LIEN
   ======================================================= */
@@ -211,19 +213,16 @@ function TripInvitation({
       return;
     }
 
+    if (!auth?.token) {
+      toast.error("Votre session a expiré. Veuillez vous reconnecter.");
+      return;
+    }
+
     const message = invitationForm.message.trim();
 
     setLoading(true);
 
     try {
-      /*
-       * Pour rester compatible avec ton endpoint actuel,
-       * on envoie une requête par adresse email.
-       *
-       * On pourra ensuite optimiser le backend avec
-       * un véritable endpoint multi-invitations.
-       */
-
       const results = await Promise.allSettled(
         emails.map(async (email) => {
           const response = await fetch(
@@ -232,6 +231,7 @@ function TripInvitation({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${auth.token}`,
               },
               body: JSON.stringify({
                 email,
