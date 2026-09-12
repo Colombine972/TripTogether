@@ -47,7 +47,7 @@ function Steps() {
      AUTH
   ========================================================= */
 
-  const { auth, logout } = useAuth();
+  const { auth } = useAuth();
 
   const currentUserId = auth?.user?.id || 0;
 
@@ -77,21 +77,19 @@ function Steps() {
       const data = await response.json();
 
       if (response.status === 401) {
-        if (data.error === "Token expired") {
-          logout();
+        const manualLogout = sessionStorage.getItem("manualLogout") === "true";
 
-          toast.error("Session expirée. Veuillez vous reconnecter.");
-
-          navigate("/login");
-
-          return;
+        if (!manualLogout) {
+          if (data.error === "Token expired") {
+            toast.error("Session expirée. Veuillez vous reconnecter.");
+          } else {
+            toast.error("Veuillez vous connecter pour accéder à ce voyage.");
+          }
         }
 
-        logout();
-
-        toast.error("Veuillez vous connecter pour accéder à ce voyage.");
-
-        navigate("/login");
+        navigate("/login", {
+          replace: true,
+        });
 
         return;
       }
@@ -108,7 +106,7 @@ function Steps() {
     } finally {
       setLoadingTrip(false);
     }
-  }, [tripId, token, logout, navigate]);
+  }, [tripId, token, navigate]);
 
   /* =========================================================
      CHARGEMENT DES ÉTAPES
@@ -134,9 +132,21 @@ function Steps() {
       const result: StepsResponse = await response.json();
 
       if (response.status === 401) {
-        logout();
+        const manualLogout = sessionStorage.getItem("manualLogout") === "true";
 
-        navigate("/login");
+        if (!manualLogout) {
+          const errorMessage = "error" in result ? result.error : undefined;
+
+          if (errorMessage === "Token expired") {
+            toast.error("Session expirée. Veuillez vous reconnecter.");
+          } else {
+            toast.error("Veuillez vous connecter pour accéder à ce voyage.");
+          }
+        }
+
+        navigate("/login", {
+          replace: true,
+        });
 
         return;
       }
@@ -177,7 +187,7 @@ function Steps() {
     } finally {
       setLoadingSteps(false);
     }
-  }, [tripId, token, logout, navigate]);
+  }, [tripId, token, navigate]);
 
   /* =========================================================
    CHARGEMENT INITIAL

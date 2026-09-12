@@ -99,14 +99,19 @@ function Trip() {
         ====================================================== */
 
         if (tripResponse.status === 401) {
+          const manualLogout =
+            sessionStorage.getItem("manualLogout") === "true";
+
           localStorage.removeItem("token");
 
-          const message =
-            tripData?.error === "Token expired"
-              ? "Session expirée. Veuillez vous reconnecter."
-              : "Veuillez vous connecter pour accéder à ce voyage.";
+          if (!manualLogout) {
+            const message =
+              tripData?.error === "Token expired"
+                ? "Session expirée. Veuillez vous reconnecter."
+                : "Veuillez vous connecter pour accéder à ce voyage.";
 
-          toast.error(message);
+            toast.error(message);
+          }
 
           navigate("/login", {
             replace: true,
@@ -195,14 +200,19 @@ function Trip() {
         ====================================================== */
 
         if (stepsResponse.status === 401) {
+          const manualLogout =
+            sessionStorage.getItem("manualLogout") === "true";
+
           localStorage.removeItem("token");
 
-          const message =
-            stepsData?.error === "Token expired"
-              ? "Session expirée. Veuillez vous reconnecter."
-              : "Veuillez vous connecter pour accéder à ce voyage.";
+          if (!manualLogout) {
+            const message =
+              stepsData?.error === "Token expired"
+                ? "Session expirée. Veuillez vous reconnecter."
+                : "Veuillez vous connecter pour accéder à ce voyage.";
 
-          toast.error(message);
+            toast.error(message);
+          }
 
           navigate("/login", {
             replace: true,
