@@ -36,7 +36,19 @@ function Trip() {
 
   useEffect(() => {
     if (!token) {
-      toast.error("Veuillez vous connecter");
+      const manualLogout = sessionStorage.getItem("manualLogout") === "true";
+
+      if (manualLogout) {
+        sessionStorage.removeItem("manualLogout");
+
+        navigate("/login", {
+          replace: true,
+        });
+
+        return;
+      }
+
+      toast.error("Veuillez vous connecter pour accéder à ce voyage.");
 
       navigate("/login", {
         replace: true,
@@ -261,9 +273,7 @@ function Trip() {
 
         console.error("Erreur chargement voyage :", error);
 
-        toast.error(
-          "Une erreur est survenue lors du chargement du voyage.",
-        );
+        toast.error("Une erreur est survenue lors du chargement du voyage.");
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -288,9 +298,7 @@ function Trip() {
     setSteps((previousSteps) =>
       previousSteps
         .filter(
-          (step) =>
-            step.is_initial ||
-            step.country === updatedTrip.country,
+          (step) => step.is_initial || step.country === updatedTrip.country,
         )
         .map((step) =>
           step.is_initial
@@ -312,9 +320,7 @@ function Trip() {
      PROGRESSION DES ÉTAPES
   ========================================================= */
 
-  const validatedSteps = steps.filter(
-    (step) => step.status === "validated",
-  );
+  const validatedSteps = steps.filter((step) => step.status === "validated");
 
   const totalSteps = steps.length;
 

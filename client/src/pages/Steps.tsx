@@ -192,9 +192,31 @@ function Steps() {
       return;
     }
 
+    if (!token) {
+      const manualLogout = sessionStorage.getItem("manualLogout") === "true";
+
+      if (manualLogout) {
+        sessionStorage.removeItem("manualLogout");
+
+        navigate("/login", {
+          replace: true,
+        });
+
+        return;
+      }
+
+      toast.error("Veuillez vous connecter pour accéder à ce voyage.");
+
+      navigate("/login", {
+        replace: true,
+      });
+
+      return;
+    }
+
     void fetchTrip();
     void fetchSteps();
-  }, [id, tripId, fetchTrip, fetchSteps, navigate]);
+  }, [id, tripId, token, fetchTrip, fetchSteps, navigate]);
 
   /* =========================================================
      SCROLL DEPUIS LES NOTIFICATIONS
@@ -277,7 +299,6 @@ function Steps() {
       {!loading && trip && <TripInfos trip={trip} onTripUpdated={setTrip} />}
 
       <main className="page-membre steps-page">
-
         {!loading && trip && (
           <>
             <section className="steps-page-heading">
