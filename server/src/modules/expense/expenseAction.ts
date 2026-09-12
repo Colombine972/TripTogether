@@ -197,18 +197,15 @@ const add: RequestHandler = async (req, res, next) => {
       }
 
       const exactTotal = participants.reduce(
-        (sum, participant) =>
-          sum + Number(participant.share_amount || 0),
+        (sum, participant) => sum + Number(participant.share_amount || 0),
         0,
       );
 
       if (
-        Number(exactTotal.toFixed(2)) !==
-        Number(convertedAmount.toFixed(2))
+        Number(exactTotal.toFixed(2)) !== Number(convertedAmount.toFixed(2))
       ) {
         res.status(400).json({
-          error:
-            "La somme des montants exacts doit correspondre à la dépense",
+          error: "La somme des montants exacts doit correspondre à la dépense",
         });
 
         return;
@@ -230,16 +227,11 @@ const add: RequestHandler = async (req, res, next) => {
          RÉPARTITION ÉGALE
       ====================================================== */
 
-      const hasInvalidParticipant = participants.some(
-        (participant) => {
-          const participantUserId = Number(participant.user_id);
+      const hasInvalidParticipant = participants.some((participant) => {
+        const participantUserId = Number(participant.user_id);
 
-          return (
-            !Number.isInteger(participantUserId) ||
-            participantUserId <= 0
-          );
-        },
-      );
+        return !Number.isInteger(participantUserId) || participantUserId <= 0;
+      });
 
       if (hasInvalidParticipant) {
         res.status(400).json({
@@ -253,16 +245,12 @@ const add: RequestHandler = async (req, res, next) => {
 
       const participantCount = participants.length;
 
-      const baseShareInCents = Math.floor(
-        totalInCents / participantCount,
-      );
+      const baseShareInCents = Math.floor(totalInCents / participantCount);
 
-      const remainderInCents =
-        totalInCents % participantCount;
+      const remainderInCents = totalInCents % participantCount;
 
       const payerIndex = participants.findIndex(
-        (participant) =>
-          Number(participant.user_id) === paidBy,
+        (participant) => Number(participant.user_id) === paidBy,
       );
 
       /*
@@ -273,22 +261,16 @@ const add: RequestHandler = async (req, res, next) => {
        * le reliquat.
        */
 
-      const priorityIndex =
-        payerIndex >= 0 ? payerIndex : 0;
+      const priorityIndex = payerIndex >= 0 ? payerIndex : 0;
 
       const remainderIndexes = Array.from(
         {
           length: remainderInCents,
         },
-        (_, offset) =>
-          (priorityIndex + offset) % participantCount,
+        (_, offset) => (priorityIndex + offset) % participantCount,
       );
 
-      for (
-        let index = 0;
-        index < participants.length;
-        index += 1
-      ) {
+      for (let index = 0; index < participants.length; index += 1) {
         const participant = participants[index];
 
         let shareInCents = baseShareInCents;
@@ -396,8 +378,7 @@ const update: RequestHandler = async (req, res, next) => {
        DÉPENSE EXISTANTE
     ====================================================== */
 
-    const existingExpense =
-      await expenseRepository.findById(expenseId);
+    const existingExpense = await expenseRepository.findById(expenseId);
 
     if (!existingExpense) {
       res.status(404).json({
@@ -431,9 +412,7 @@ const update: RequestHandler = async (req, res, next) => {
     ====================================================== */
 
     const isLocked =
-      await reimbursementRepository.isExpenseLockedByReimbursement(
-        expenseId,
-      );
+      await reimbursementRepository.isExpenseLockedByReimbursement(expenseId);
 
     if (isLocked) {
       res.status(409).json({
@@ -535,8 +514,7 @@ const update: RequestHandler = async (req, res, next) => {
     ====================================================== */
 
     const hasExactSplit = participants.some(
-      (participant) =>
-        participant.split_type === "exact",
+      (participant) => participant.split_type === "exact",
     );
 
     /* =====================================================
@@ -544,11 +522,9 @@ const update: RequestHandler = async (req, res, next) => {
     ====================================================== */
 
     if (hasExactSplit) {
-      const allParticipantsAreExact =
-        participants.every(
-          (participant) =>
-            participant.split_type === "exact",
-        );
+      const allParticipantsAreExact = participants.every(
+        (participant) => participant.split_type === "exact",
+      );
 
       if (!allParticipantsAreExact) {
         res.status(400).json({
@@ -559,22 +535,18 @@ const update: RequestHandler = async (req, res, next) => {
         return;
       }
 
-      const hasInvalidShare = participants.some(
-        (participant) => {
-          const userId = Number(participant.user_id);
+      const hasInvalidShare = participants.some((participant) => {
+        const userId = Number(participant.user_id);
 
-          const shareAmount = Number(
-            participant.share_amount,
-          );
+        const shareAmount = Number(participant.share_amount);
 
-          return (
-            !Number.isInteger(userId) ||
-            userId <= 0 ||
-            !Number.isFinite(shareAmount) ||
-            shareAmount < 0
-          );
-        },
-      );
+        return (
+          !Number.isInteger(userId) ||
+          userId <= 0 ||
+          !Number.isFinite(shareAmount) ||
+          shareAmount < 0
+        );
+      });
 
       if (hasInvalidShare) {
         res.status(400).json({
@@ -585,32 +557,25 @@ const update: RequestHandler = async (req, res, next) => {
       }
 
       const exactTotal = participants.reduce(
-        (sum, participant) =>
-          sum + Number(participant.share_amount),
+        (sum, participant) => sum + Number(participant.share_amount),
         0,
       );
 
       if (
-        Number(exactTotal.toFixed(2)) !==
-        Number(convertedAmount.toFixed(2))
+        Number(exactTotal.toFixed(2)) !== Number(convertedAmount.toFixed(2))
       ) {
         res.status(400).json({
-          error:
-            "La somme des montants exacts doit correspondre à la dépense",
+          error: "La somme des montants exacts doit correspondre à la dépense",
         });
 
         return;
       }
     } else {
-      const hasInvalidParticipant =
-        participants.some((participant) => {
-          const userId = Number(participant.user_id);
+      const hasInvalidParticipant = participants.some((participant) => {
+        const userId = Number(participant.user_id);
 
-          return (
-            !Number.isInteger(userId) ||
-            userId <= 0
-          );
-        });
+        return !Number.isInteger(userId) || userId <= 0;
+      });
 
       if (hasInvalidParticipant) {
         res.status(400).json({
@@ -625,32 +590,29 @@ const update: RequestHandler = async (req, res, next) => {
        MISE À JOUR DE LA DÉPENSE
     ====================================================== */
 
-    const affectedRows =
-      await expenseRepository.update({
-        expenseId,
+    const affectedRows = await expenseRepository.update({
+      expenseId,
 
-        title: cleanTitle,
+      title: cleanTitle,
 
-        emoji,
+      emoji,
 
-        originalAmount,
+      originalAmount,
 
-        originalCurrency:
-          String(original_currency).toUpperCase(),
+      originalCurrency: String(original_currency).toUpperCase(),
 
-        convertedAmount,
+      convertedAmount,
 
-        convertedCurrency:
-          String(converted_currency).toUpperCase(),
+      convertedCurrency: String(converted_currency).toUpperCase(),
 
-        exchangeRate,
+      exchangeRate,
 
-        paidBy,
+      paidBy,
 
-        categoryId,
+      categoryId,
 
-        date,
-      });
+      date,
+    });
 
     if (affectedRows === 0) {
       res.status(404).json({
@@ -664,9 +626,7 @@ const update: RequestHandler = async (req, res, next) => {
        SUPPRESSION DES ANCIENNES RÉPARTITIONS
     ====================================================== */
 
-    await expenseShareRepository.deleteByExpense(
-      expenseId,
-    );
+    await expenseShareRepository.deleteByExpense(expenseId);
 
     /* =====================================================
        NOUVELLE RÉPARTITION EXACTE
@@ -689,54 +649,33 @@ const update: RequestHandler = async (req, res, next) => {
          NOUVELLE RÉPARTITION ÉGALE
       ====================================================== */
 
-      const totalInCents =
-        Math.round(convertedAmount * 100);
+      const totalInCents = Math.round(convertedAmount * 100);
 
-      const participantCount =
-        participants.length;
+      const participantCount = participants.length;
 
-      const baseShareInCents =
-        Math.floor(
-          totalInCents / participantCount,
-        );
+      const baseShareInCents = Math.floor(totalInCents / participantCount);
 
-      const remainderInCents =
-        totalInCents % participantCount;
+      const remainderInCents = totalInCents % participantCount;
 
-      const payerIndex =
-        participants.findIndex(
-          (participant) =>
-            Number(participant.user_id) ===
-            paidBy,
-        );
+      const payerIndex = participants.findIndex(
+        (participant) => Number(participant.user_id) === paidBy,
+      );
 
-      const priorityIndex =
-        payerIndex >= 0 ? payerIndex : 0;
+      const priorityIndex = payerIndex >= 0 ? payerIndex : 0;
 
-      const remainderIndexes =
-        Array.from(
-          {
-            length: remainderInCents,
-          },
-          (_, offset) =>
-            (priorityIndex + offset) %
-            participantCount,
-        );
+      const remainderIndexes = Array.from(
+        {
+          length: remainderInCents,
+        },
+        (_, offset) => (priorityIndex + offset) % participantCount,
+      );
 
-      for (
-        let index = 0;
-        index < participants.length;
-        index += 1
-      ) {
-        const participant =
-          participants[index];
+      for (let index = 0; index < participants.length; index += 1) {
+        const participant = participants[index];
 
-        let shareInCents =
-          baseShareInCents;
+        let shareInCents = baseShareInCents;
 
-        if (
-          remainderIndexes.includes(index)
-        ) {
+        if (remainderIndexes.includes(index)) {
           shareInCents += 1;
         }
 
@@ -785,8 +724,7 @@ const update: RequestHandler = async (req, res, next) => {
     res.status(200).json({
       id: expenseId,
 
-      message:
-        "Dépense modifiée avec succès",
+      message: "Dépense modifiée avec succès",
     });
   } catch (err) {
     next(err);
@@ -797,11 +735,7 @@ const update: RequestHandler = async (req, res, next) => {
    RÉCUPÉRER LES DÉPENSES DU VOYAGE
 ========================================================= */
 
-const getExpensesByTrip: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const getExpensesByTrip: RequestHandler = async (req, res, next) => {
   try {
     const tripId = Number(req.params.id);
 
@@ -813,10 +747,7 @@ const getExpensesByTrip: RequestHandler = async (
       return;
     }
 
-    const expenses =
-      await expenseRepository.findByTrip(
-        tripId,
-      );
+    const expenses = await expenseRepository.findByTrip(tripId);
 
     res.json(expenses);
   } catch (err) {
@@ -828,20 +759,13 @@ const getExpensesByTrip: RequestHandler = async (
    RÉSUMÉ DU BUDGET
 ========================================================= */
 
-const getSummary: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const getSummary: RequestHandler = async (req, res, next) => {
   try {
     const tripId = Number(req.params.id);
 
     const userId = Number(req.auth?.sub);
 
-    if (
-      Number.isNaN(tripId) ||
-      Number.isNaN(userId)
-    ) {
+    if (Number.isNaN(tripId) || Number.isNaN(userId)) {
       res.status(400).json({
         error: "Paramètres invalides",
       });
@@ -849,31 +773,27 @@ const getSummary: RequestHandler = async (
       return;
     }
 
-    const total =
-      await expenseRepository.sumTotalByTrip(
-        tripId,
-      );
+    const total = await expenseRepository.sumTotalByTrip(tripId);
 
-    const paid =
-      await expenseRepository.sumPaidByUser(
-        tripId,
-        userId,
-      );
+    const paid = await expenseRepository.sumPaidByUser(tripId, userId);
 
-    const owed =
-      await expenseShareRepository.sumSharesByUser(
-        tripId,
-        userId,
-      );
+    const owed = await expenseShareRepository.sumSharesByUser(tripId, userId);
+
+    const confirmedReimbursements =
+      await reimbursementRepository.sumConfirmedByUser(tripId, userId);
+
+    const rawBalance = paid - owed;
+
+    const balance =
+      rawBalance +
+      confirmedReimbursements.sent -
+      confirmedReimbursements.received;
 
     res.json({
       total,
-
       paid,
-
       owed,
-
-      balance: paid - owed,
+      balance: Number(balance.toFixed(2)),
     });
   } catch (err) {
     next(err);
@@ -884,11 +804,7 @@ const getSummary: RequestHandler = async (
    SUPPRIMER UNE DÉPENSE
 ========================================================= */
 
-const remove: RequestHandler = async (
-  req,
-  res,
-  next,
-) => {
+const remove: RequestHandler = async (req, res, next) => {
   try {
     const expenseId = Number(req.params.expenseId);
 
@@ -898,10 +814,7 @@ const remove: RequestHandler = async (
        UTILISATEUR AUTHENTIFIÉ
     ====================================================== */
 
-    if (
-      !Number.isInteger(actorUserId) ||
-      actorUserId <= 0
-    ) {
+    if (!Number.isInteger(actorUserId) || actorUserId <= 0) {
       res.status(401).json({
         error: "Utilisateur non authentifié",
       });
@@ -913,10 +826,7 @@ const remove: RequestHandler = async (
        ID DE LA DÉPENSE
     ====================================================== */
 
-    if (
-      !Number.isInteger(expenseId) ||
-      expenseId <= 0
-    ) {
+    if (!Number.isInteger(expenseId) || expenseId <= 0) {
       res.status(400).json({
         error: "ID de la dépense invalide",
       });
@@ -928,10 +838,7 @@ const remove: RequestHandler = async (
        VÉRIFIER QUE LA DÉPENSE EXISTE
     ====================================================== */
 
-    const existingExpense =
-      await expenseRepository.findById(
-        expenseId,
-      );
+    const existingExpense = await expenseRepository.findById(expenseId);
 
     if (!existingExpense) {
       res.status(404).json({
@@ -947,9 +854,7 @@ const remove: RequestHandler = async (
     ====================================================== */
 
     const isLocked =
-      await reimbursementRepository.isExpenseLockedByReimbursement(
-        expenseId,
-      );
+      await reimbursementRepository.isExpenseLockedByReimbursement(expenseId);
 
     if (isLocked) {
       res.status(409).json({
@@ -966,9 +871,7 @@ const remove: RequestHandler = async (
        SUPPRESSION
     ====================================================== */
 
-    await expenseRepository.delete(
-      expenseId,
-    );
+    await expenseRepository.delete(expenseId);
 
     res.sendStatus(204);
   } catch (err) {

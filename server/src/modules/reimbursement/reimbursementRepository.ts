@@ -319,6 +319,59 @@ class ReimbursementRepository {
   }
 
   /* =========================================================
+     TOTAL DES REMBOURSEMENTS CONFIRMÉS D'UN UTILISATEUR
+  ========================================================= */
+
+  async sumConfirmedByUser(
+    tripId: number,
+    userId: number,
+  ): Promise<{
+    sent: number;
+    received: number;
+  }> {
+    const [rows] = await databaseClient.query<Rows>(
+      `
+        SELECT
+          COALESCE(
+            SUM(
+              CASE
+                WHEN from_user_id = ? THEN amount
+                ELSE 0
+              END
+            ),
+            0
+          ) AS sent,
+
+          COALESCE(
+            SUM(
+              CASE
+                WHEN to_user_id = ? THEN amount
+                ELSE 0
+              END
+            ),
+            0
+          ) AS received
+
+        FROM reimbursement
+
+        WHERE
+          trip_id = ?
+          AND status = 'confirmed'
+          AND (
+            from_user_id = ?
+            OR to_user_id = ?
+          )
+      `,
+      [userId, userId, tripId, userId, userId],
+    );
+
+    return {
+      sent: Number(rows[0]?.sent || 0),
+      received: Number(rows[0]?.received || 0),
+    };
+  }
+
+  /* =========================================================
      DÉPENSES CONCERNÉES PAR UN REMBOURSEMENT
   ========================================================= */
 
