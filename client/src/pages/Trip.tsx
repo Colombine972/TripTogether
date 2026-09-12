@@ -38,17 +38,9 @@ function Trip() {
     if (!token) {
       const manualLogout = sessionStorage.getItem("manualLogout") === "true";
 
-      if (manualLogout) {
-        sessionStorage.removeItem("manualLogout");
-
-        navigate("/login", {
-          replace: true,
-        });
-
-        return;
+      if (!manualLogout) {
+        toast.error("Veuillez vous connecter pour accéder à ce voyage.");
       }
-
-      toast.error("Veuillez vous connecter pour accéder à ce voyage.");
 
       navigate("/login", {
         replace: true,

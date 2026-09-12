@@ -1,9 +1,4 @@
-import {
-  type ReactNode,
-  createContext,
-  useContext,
-  useState,
-} from "react";
+import { type ReactNode, createContext, useContext, useState } from "react";
 
 import type { UserType } from "../types/userType";
 
@@ -18,8 +13,7 @@ type AuthContextType = {
   logout: () => void;
 };
 
-const AuthContext =
-  createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({
   children,
@@ -27,12 +21,9 @@ export const AuthProvider = ({
   children: ReactNode;
 }) => {
   const [auth, setAuth] = useState<Auth | null>(() => {
-    const savedAuth =
-      localStorage.getItem("auth");
+    const savedAuth = localStorage.getItem("auth");
 
-    return savedAuth
-      ? JSON.parse(savedAuth)
-      : null;
+    return savedAuth ? JSON.parse(savedAuth) : null;
   });
 
   const logout = () => {
@@ -44,10 +35,7 @@ export const AuthProvider = ({
        - une déconnexion volontaire
     ====================================================== */
 
-    sessionStorage.setItem(
-      "manualLogout",
-      "true",
-    );
+    sessionStorage.setItem("manualLogout", "true");
 
     /* =====================================================
        NETTOYAGE AUTHENTIFICATION
@@ -57,6 +45,17 @@ export const AuthProvider = ({
     localStorage.removeItem("auth");
 
     setAuth(null);
+
+    /* =====================================================
+       NETTOYAGE DU FLAG DE DÉCONNEXION VOLONTAIRE
+
+       On laisse le temps aux pages protégées de détecter
+       qu'il s'agit d'une déconnexion volontaire.
+    ====================================================== */
+
+    window.setTimeout(() => {
+      sessionStorage.removeItem("manualLogout");
+    }, 1000);
   };
 
   return (
@@ -73,13 +72,10 @@ export const AuthProvider = ({
 };
 
 export const useAuth = () => {
-  const context =
-    useContext(AuthContext);
+  const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error(
-      "useAuth must be used within an AuthProvider",
-    );
+    throw new Error("useAuth must be used within an AuthProvider");
   }
 
   return context;
