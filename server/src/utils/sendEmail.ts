@@ -47,7 +47,7 @@ const sendEmail = async (
   });
 
   const { data, error } = await resend.emails.send({
-    from: "TripTogether <onboarding@resend.dev>",
+    from: "TripTogether <noreply@trip-together.fr>",
     to: [to],
     subject,
     text,
