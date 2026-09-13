@@ -34,22 +34,15 @@ const sendTripInvitationEmail = async ({
   placeId,
 }: SendTripInvitationEmailParams): Promise<void> => {
   const organizerName =
-    `${organizerFirstname} ${
-      organizerLastname ?? ""
-    }`.trim();
+    `${organizerFirstname} ${organizerLastname ?? ""}`.trim();
 
-  const subject =
-    `${organizerFirstname} vous invite à rejoindre son voyage à ${city}`;
+  const subject = `${organizerFirstname} vous invite à rejoindre son voyage à ${city}`;
 
   const text = `${organizerName} vous invite à rejoindre le voyage "${tripTitle}".
 
 Destination : ${city}, ${country}
 
-${
-  message?.trim()
-    ? `Message : ${message.trim()}\n\n`
-    : ""
-}Voir l'invitation :
+${message?.trim() ? `Message : ${message.trim()}\n\n` : ""}Voir l'invitation :
 ${invitationLink}`;
 
   /* =====================================================
@@ -57,26 +50,22 @@ ${invitationLink}`;
   ====================================================== */
 
   let imageBuffer: Buffer | null = null;
+  let imageContentType = "image/jpeg";
 
   if (placeId) {
     try {
-      const photoUrl =
-        await getPlacePhotoUrl(
-          placeId,
-        );
+      const photoUrl = await getPlacePhotoUrl(placeId);
 
       if (photoUrl) {
-        const photoResponse =
-          await fetch(photoUrl);
+        const photoResponse = await fetch(photoUrl);
 
         if (photoResponse.ok) {
-          const arrayBuffer =
-            await photoResponse.arrayBuffer();
+          const arrayBuffer = await photoResponse.arrayBuffer();
 
-          imageBuffer =
-            Buffer.from(
-              arrayBuffer,
-            );
+          imageBuffer = Buffer.from(arrayBuffer);
+
+          imageContentType =
+            photoResponse.headers.get("content-type") || "image/jpeg";
         } else {
           console.error(
             "Erreur récupération photo invitation :",
@@ -96,27 +85,19 @@ ${invitationLink}`;
      CONSTRUCTION DU TEMPLATE HTML
   ====================================================== */
 
-  const html =
-    buildTripInvitationTemplate({
-      invitedFirstname,
-      organizerFirstname,
-      organizerLastname,
-      tripTitle,
-      city,
-      country,
-      startAt,
-      endAt,
-
-      invitationUrl:
-        invitationLink,
-
-      message,
-
-      tripImageUrl:
-        imageBuffer
-          ? "cid:trip-destination"
-          : null,
-    });
+  const html = buildTripInvitationTemplate({
+    invitedFirstname,
+    organizerFirstname,
+    organizerLastname,
+    tripTitle,
+    city,
+    country,
+    startAt,
+    endAt,
+    invitationUrl: invitationLink,
+    message,
+    tripImageUrl: imageBuffer ? "cid:trip-destination" : null,
+  });
 
   /* =====================================================
      ENVOI DE L'EMAIL
@@ -127,21 +108,13 @@ ${invitationLink}`;
     subject,
     text,
     html,
-
     imageBuffer
       ? [
           {
-            filename:
-              "trip-destination.jpg",
-
-            content:
-              imageBuffer,
-
-            cid:
-              "trip-destination",
-
-            contentType:
-              "image/jpeg",
+            filename: "trip-destination.jpg",
+            content: imageBuffer,
+            cid: "trip-destination",
+            contentType: imageContentType,
           },
         ]
       : undefined,

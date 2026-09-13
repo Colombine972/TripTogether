@@ -27,16 +27,22 @@ const sendEmail = async (
   attachments?: EmailAttachment[],
 ) => {
   const resendAttachments = attachments?.map((attachment) => {
+    const baseAttachment = {
+      filename: attachment.filename,
+      contentId: attachment.cid,
+      contentType: attachment.contentType,
+    };
+
     if (attachment.content) {
       return {
-        filename: attachment.filename,
+        ...baseAttachment,
         content: attachment.content,
       };
     }
 
     if (attachment.path) {
       return {
-        filename: attachment.filename,
+        ...baseAttachment,
         content: fs.readFileSync(attachment.path),
       };
     }
