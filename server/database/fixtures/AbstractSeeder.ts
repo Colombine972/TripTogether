@@ -1,10 +1,7 @@
-// Import Faker library for generating fake data
 import { faker } from "@faker-js/faker";
-
 import type { Faker } from "@faker-js/faker";
 
 import database from "../client";
-
 import type { Result } from "../client";
 
 type Ref = object & { insertId: number };
@@ -30,13 +27,9 @@ abstract class AbstractSeeder implements SeederOptions {
     dependencies = [] as (typeof AbstractSeeder)[],
   }: SeederOptions) {
     this.table = table;
-
     this.truncate = truncate;
-
     this.dependencies = dependencies;
-
     this.promises = [];
-
     this.faker = faker;
   }
 
@@ -48,14 +41,17 @@ abstract class AbstractSeeder implements SeederOptions {
       .fill("?")
       .join(",");
 
-    const sql = `insert into ${this.table}(${fields}) values (${placeholders})`;
+    const sql = `INSERT INTO ${this.table} (${fields}) VALUES (${placeholders})`;
 
     const [result] = await database.query<Result>(sql, Object.values(values));
 
     if (refName != null) {
       const { insertId } = result;
 
-      refs[refName] = { ...values, insertId };
+      refs[refName] = {
+        ...values,
+        insertId,
+      };
     }
   }
 
