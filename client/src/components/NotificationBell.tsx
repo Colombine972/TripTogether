@@ -51,7 +51,7 @@ export default function NotificationBell() {
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const token = auth?.token || localStorage.getItem("token") || "";
+  const token = auth?.token;
 
   const fetchUnreadCount = useCallback(async () => {
     if (!token) {

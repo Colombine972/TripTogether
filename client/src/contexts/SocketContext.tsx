@@ -1,6 +1,6 @@
 import {
-  createContext,
   type ReactNode,
+  createContext,
   useContext,
   useEffect,
   useState,
@@ -8,10 +8,7 @@ import {
 
 import type { Socket } from "socket.io-client";
 
-import {
-  connectSocket,
-  disconnectSocket,
-} from "../services/socket";
+import { connectSocket, disconnectSocket } from "../services/socket";
 
 import { useAuth } from "./AuthContext";
 
@@ -20,25 +17,18 @@ type SocketContextType = {
   isConnected: boolean;
 };
 
-const SocketContext =
-  createContext<SocketContextType | undefined>(
-    undefined,
-  );
+const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
 type SocketProviderProps = {
   children: ReactNode;
 };
 
-export const SocketProvider = ({
-  children,
-}: SocketProviderProps) => {
+export const SocketProvider = ({ children }: SocketProviderProps) => {
   const { auth } = useAuth();
 
-  const [socket, setSocket] =
-    useState<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
-  const [isConnected, setIsConnected] =
-    useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     if (!auth?.token) {
@@ -50,8 +40,7 @@ export const SocketProvider = ({
       return;
     }
 
-    const currentSocket =
-      connectSocket(auth.token);
+    const currentSocket = connectSocket(auth.token);
 
     setSocket(currentSocket);
 
@@ -63,30 +52,19 @@ export const SocketProvider = ({
       setIsConnected(false);
     };
 
-    currentSocket.on(
-      "connect",
-      handleConnect,
-    );
+    currentSocket.on("connect", handleConnect);
 
-    currentSocket.on(
-      "disconnect",
-      handleDisconnect,
-    );
+    currentSocket.on("disconnect", handleDisconnect);
 
     if (currentSocket.connected) {
       setIsConnected(true);
     }
 
     return () => {
-      currentSocket.off(
-        "connect",
-        handleConnect,
-      );
+      currentSocket.off("connect", handleConnect);
 
-      currentSocket.off(
-        "disconnect",
-        handleDisconnect,
-      );
+      currentSocket.off("disconnect", handleDisconnect);
+      disconnectSocket();
     };
   }, [auth?.token]);
 
@@ -103,13 +81,10 @@ export const SocketProvider = ({
 };
 
 export const useSocket = () => {
-  const context =
-    useContext(SocketContext);
+  const context = useContext(SocketContext);
 
   if (!context) {
-    throw new Error(
-      "useSocket must be used within a SocketProvider",
-    );
+    throw new Error("useSocket must be used within a SocketProvider");
   }
 
   return context;

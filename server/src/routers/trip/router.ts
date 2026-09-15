@@ -4,10 +4,9 @@ import { verifyToken } from "../../modules/auth/authActions";
 import invitationActions from "../../modules/invitation/invitationActions";
 import stepActions from "../../modules/step/stepActions";
 import tripActions from "../../modules/trip/tripActions";
-import userPaymentPreferenceActions from "../../modules/userPaymentPreference/userPaymentPreferenceActions";
 import verifyTripMember from "../../modules/trip/verifyTripMember";
 import verifyTripOwner from "../../modules/trip/verifyTripOwner";
-
+import userPaymentPreferenceActions from "../../modules/userPaymentPreference/userPaymentPreferenceActions";
 
 const router = express.Router();
 
@@ -15,21 +14,13 @@ const router = express.Router();
    STATISTIQUE PUBLIQUE
 ========================================================= */
 
-router.get(
-  "/count",
-  tripActions.count,
-);
+router.get("/count", tripActions.count);
 
 /* =========================================================
    INFORMATIONS D'UN VOYAGE
 ========================================================= */
 
-router.get(
-  "/info/:id",
-  verifyToken,
-  verifyTripMember,
-  tripActions.read,
-);
+router.get("/info/:id", verifyToken, verifyTripMember, tripActions.read);
 
 /* =========================================================
    MEMBRES DU VOYAGE
@@ -57,44 +48,27 @@ router.get(
    LECTURE DU VOYAGE
 ========================================================= */
 
-router.get(
-  "/:id",
-  verifyToken,
-  verifyTripMember,
-  tripActions.browseMyTrip,
-);
+router.get("/:id", verifyToken, verifyTripMember, tripActions.browseMyTrip);
 
 /* =========================================================
    CRÉATION
 ========================================================= */
 
-router.post(
-  "/",
-  verifyToken,
-  tripActions.add,
-);
+router.post("/", verifyToken, tripActions.add);
 
 /* =========================================================
    MODIFICATION
    Contrôle propriétaire dans tripActions.edit
 ========================================================= */
 
-router.put(
-  "/:id",
-  verifyToken,
-  tripActions.edit,
-);
+router.put("/:id", verifyToken, verifyTripOwner, tripActions.edit);
 
 /* =========================================================
    SUPPRESSION
    Contrôle propriétaire dans tripActions.delate
 ========================================================= */
 
-router.delete(
-  "/:id",
-  verifyToken,
-  tripActions.delate,
-);
+router.delete("/:id", verifyToken, verifyTripOwner, tripActions.delate);
 
 /* =========================================================
    INVITATIONS DU VOYAGE
@@ -135,7 +109,7 @@ router.post(
 router.delete(
   "/:tripId/steps/:stepId",
   verifyToken,
-  verifyTripMember,
+  verifyTripOwner,
   stepActions.deleteStep,
 );
 
