@@ -694,31 +694,45 @@ function HomePage() {
       </section>
 
       {/* =====================================================
-          TARIFS
-      ====================================================== */}
+    TARIFS
+====================================================== */}
 
       <section className="home-pricing" id="tarifs">
         <header className="home-pricing-header">
           <h2>
             Des tarifs <span>simples et transparents</span>
           </h2>
+
+          <p>
+            Commencez gratuitement et passez au Premium uniquement si vous
+            souhaitezz aller plus loin dans la préparation de votre voyage.
+          </p>
         </header>
 
         <div className="pricing-grid">
-          {/* FREE */}
+          {/* =================================================
+        FREE
+    ================================================== */}
 
           <article className="pricing-card pricing-free">
-            <h3>TripTogether Free</h3>
+            <div className="pricing-card-heading">
+              <h3>TripTogether Free</h3>
+
+              <span className="pricing-free-badge">GRATUIT</span>
+            </div>
 
             <div className="pricing-price">
               <strong>0 €</strong>
             </div>
 
-            <p>Pour organiser votre premier voyage</p>
+            <p className="pricing-description">
+              Tout ce qu'il faut pour organiser un voyage avec vos proches.
+            </p>
 
-            <ul>
+            <ul className="pricing-features">
               <li>
-                <Check size={18} />1 voyage actif
+                <Check size={18} />
+                Création et gestion de vos voyages
               </li>
 
               <li>
@@ -733,6 +747,11 @@ function HomePage() {
 
               <li>
                 <Check size={18} />
+                Budget partagé
+              </li>
+
+              <li>
+                <Check size={18} />
                 Dépenses et remboursements
               </li>
 
@@ -743,38 +762,43 @@ function HomePage() {
             </ul>
 
             <Link to="/create-trip" className="pricing-free-btn">
-              Commencer gratuitement
+              Créer mon voyage gratuitement
             </Link>
           </article>
 
-          {/* PREMIUM */}
+          {/* =================================================
+        PREMIUM
+    ================================================== */}
 
           <article className="pricing-card pricing-premium">
-            <span className="pricing-recommended">BIENTÔT DISPONIBLE</span>
+            <div className="pricing-coming-soon">
+              <Crown size={14} />
+              BIENTÔT DISPONIBLE
+            </div>
 
-            <h3>Voyage Premium</h3>
+            <div className="pricing-card-heading pricing-premium-heading">
+              <h3>Voyage Premium</h3>
 
-            <div className="pricing-price premium">
+              <span className="pricing-premium-badge">
+                <Crown size={14} />
+                PREMIUM
+              </span>
+            </div>
+
+            <div className="pricing-price pricing-premium-price">
               <strong>5,99 €</strong>
               <span>/ voyage</span>
             </div>
 
-            <p>Un seul paiement pour tout le groupe</p>
+            <p className="pricing-description">
+              Un seul paiement par l'organisateur pour débloquer les outils
+              Premium du voyage.
+            </p>
 
-            <ul>
+            <ul className="pricing-features">
               <li>
                 <Check size={18} />
-                Tout le Free
-              </li>
-
-              <li>
-                <Check size={18} />
-                Suggestions intelligentes
-              </li>
-
-              <li>
-                <Check size={18} />
-                Checklist collaborative
+                Toutes les fonctionnalités Free
               </li>
 
               <li>
@@ -784,25 +808,37 @@ function HomePage() {
 
               <li>
                 <Check size={18} />
-                Export du voyage
+                Checklist collaborative
               </li>
 
-              <li className="pricing-soon">
-                <span>•••</span>
-                Planning détaillé et carte interactive
+              <li>
+                <Check size={18} />
+                Planning détaillé
+              </li>
+
+              <li>
+                <Check size={18} />
+                Informations pratiques
+              </li>
+
+              <li>
+                <Check size={18} />
+                Export du voyage
               </li>
             </ul>
 
-            <button type="button" className="pricing-premium-btn">
+            <button type="button" className="pricing-premium-btn" disabled>
               <Crown size={18} />
               Premium bientôt disponible
             </button>
           </article>
         </div>
 
-        <p className="pricing-note">
-          Sans abonnement · Accès Premium conservé pour ce voyage
-        </p>
+        <div className="pricing-bottom-note">
+          <span>✓ Sans abonnement</span>
+          <span>✓ Paiement unique par voyage</span>
+          <span>✓ Premium pour tout le groupe</span>
+        </div>
       </section>
 
       {/* =====================================================
