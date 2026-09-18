@@ -1,8 +1,15 @@
 import {
   Bell,
+  Check,
+  ChevronDown,
   CircleDollarSign,
+  ClipboardCheck,
+  Crown,
+  FileDown,
   FileText,
   MapPin,
+  PiggyBank,
+  Sparkles,
   Users,
   WalletCards,
 } from "lucide-react";
@@ -481,6 +488,370 @@ function HomePage() {
               </button>
             </div>
           </article>
+        </div>
+      </section>
+      {/* =====================================================
+          PREMIUM
+      ====================================================== */}
+
+      <section className="home-premium">
+        <header className="home-premium-header">
+          <h2>
+            Passez à la <span>préparation complète</span> de votre voyage
+          </h2>
+
+          <p>
+            Un seul paiement débloque les outils Premium pour tout le groupe.
+          </p>
+        </header>
+
+        <div className="premium-features-grid">
+          {/* =================================================
+              SUGGESTIONS INTELLIGENTES
+          ================================================== */}
+
+          <article className="premium-feature-card">
+            <div className="premium-card-top">
+              <div className="premium-feature-icon">
+                <Sparkles />
+              </div>
+
+              <span className="premium-badge">
+                <Crown size={14} />
+                PREMIUM
+              </span>
+            </div>
+
+            <h3>Suggestions intelligentes</h3>
+
+            <p>
+              Découvrez des idées de destinations et d'activités adaptées à
+              votre groupe.
+            </p>
+
+            <div className="premium-demo premium-suggestion-demo">
+              <div className="premium-destination-photo">
+                <img src="lisbonne.png" alt="Lisbonne" />
+              </div>
+
+              <div className="premium-destination-label">
+                <MapPin size={16} />
+
+                <div>
+                  <strong>Destinations suggérées</strong>
+                  <span>5 lieux pour votre groupe</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          {/* =================================================
+              CHECKLIST
+          ================================================== */}
+
+          <article className="premium-feature-card">
+            <div className="premium-card-top">
+              <div className="premium-feature-icon">
+                <ClipboardCheck />
+              </div>
+
+              <span className="premium-badge">
+                <Crown size={14} />
+                PREMIUM
+              </span>
+            </div>
+
+            <h3>Checklist collaborative</h3>
+
+            <p>
+              Préparez votre voyage ensemble avec des listes personnalisées.
+            </p>
+
+            <div className="premium-demo premium-checklist-demo">
+              <div className="premium-check-row checked">
+                <span className="premium-checkbox">
+                  <Check size={14} />
+                </span>
+                Réserver l'hébergement
+              </div>
+
+              <div className="premium-check-row">
+                <span className="premium-checkbox" />
+                Vérifier les passeports
+              </div>
+
+              <div className="premium-check-row">
+                <span className="premium-checkbox" />
+                Prévoir l'assurance voyage
+              </div>
+
+              <div className="premium-check-row">
+                <span className="premium-checkbox" />
+                Faire la valise
+              </div>
+            </div>
+          </article>
+
+          {/* =================================================
+              BUDGET PRÉVISIONNEL
+          ================================================== */}
+
+          <article className="premium-feature-card">
+            <div className="premium-card-top">
+              <div className="premium-feature-icon">
+                <PiggyBank />
+              </div>
+
+              <span className="premium-badge">
+                <Crown size={14} />
+                PREMIUM
+              </span>
+            </div>
+
+            <h3>Budget prévisionnel</h3>
+
+            <p>Estimez et planifiez les dépenses avant même votre départ.</p>
+
+            <div className="premium-demo premium-budget-demo">
+              <span>Budget estimé</span>
+              <strong>1 500,00 €</strong>
+
+              <div className="premium-budget-row">
+                <span>Logement</span>
+                <div>
+                  <i style={{ width: "72%" }} />
+                </div>
+                <small>40%</small>
+              </div>
+
+              <div className="premium-budget-row">
+                <span>Transports</span>
+                <div>
+                  <i style={{ width: "50%" }} />
+                </div>
+                <small>25%</small>
+              </div>
+
+              <div className="premium-budget-row">
+                <span>Activités</span>
+                <div>
+                  <i style={{ width: "38%" }} />
+                </div>
+                <small>20%</small>
+              </div>
+
+              <div className="premium-budget-row">
+                <span>Repas</span>
+                <div>
+                  <i style={{ width: "28%" }} />
+                </div>
+                <small>15%</small>
+              </div>
+            </div>
+          </article>
+
+          {/* =================================================
+              EXPORT
+          ================================================== */}
+
+          <article className="premium-feature-card">
+            <div className="premium-card-top">
+              <div className="premium-feature-icon">
+                <FileDown />
+              </div>
+
+              <span className="premium-badge">
+                <Crown size={14} />
+                PREMIUM
+              </span>
+            </div>
+
+            <h3>Export du voyage</h3>
+
+            <p>
+              Générez un carnet de voyage complet à partager avec tout le
+              groupe.
+            </p>
+
+            <div className="premium-demo premium-export-demo">
+              <div className="premium-export-document">
+                <div className="premium-export-logo">
+                  <Crown size={17} />
+                  TripTogether
+                </div>
+
+                <strong>Road trip Portugal</strong>
+
+                <div className="premium-export-image">
+                  <img src="portugal.png" alt="Portugal" />
+                </div>
+
+                <span>Votre voyage en un seul document</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      {/* =====================================================
+          TARIFS
+      ====================================================== */}
+
+      <section className="home-pricing" id="tarifs">
+        <header className="home-pricing-header">
+          <h2>
+            Des tarifs <span>simples et transparents</span>
+          </h2>
+        </header>
+
+        <div className="pricing-grid">
+          {/* FREE */}
+
+          <article className="pricing-card pricing-free">
+            <h3>TripTogether Free</h3>
+
+            <div className="pricing-price">
+              <strong>0 €</strong>
+            </div>
+
+            <p>Pour organiser votre premier voyage</p>
+
+            <ul>
+              <li>
+                <Check size={18} />1 voyage actif
+              </li>
+
+              <li>
+                <Check size={18} />
+                Invitations et participants
+              </li>
+
+              <li>
+                <Check size={18} />
+                Étapes et votes
+              </li>
+
+              <li>
+                <Check size={18} />
+                Dépenses et remboursements
+              </li>
+
+              <li>
+                <Check size={18} />
+                Récapitulatif du voyage
+              </li>
+            </ul>
+
+            <Link to="/create-trip" className="pricing-free-btn">
+              Commencer gratuitement
+            </Link>
+          </article>
+
+          {/* PREMIUM */}
+
+          <article className="pricing-card pricing-premium">
+            <span className="pricing-recommended">BIENTÔT DISPONIBLE</span>
+
+            <h3>Voyage Premium</h3>
+
+            <div className="pricing-price premium">
+              <strong>5,99 €</strong>
+              <span>/ voyage</span>
+            </div>
+
+            <p>Un seul paiement pour tout le groupe</p>
+
+            <ul>
+              <li>
+                <Check size={18} />
+                Tout le Free
+              </li>
+
+              <li>
+                <Check size={18} />
+                Suggestions intelligentes
+              </li>
+
+              <li>
+                <Check size={18} />
+                Checklist collaborative
+              </li>
+
+              <li>
+                <Check size={18} />
+                Budget prévisionnel
+              </li>
+
+              <li>
+                <Check size={18} />
+                Export du voyage
+              </li>
+
+              <li className="pricing-soon">
+                <span>•••</span>
+                Planning détaillé et carte interactive
+              </li>
+            </ul>
+
+            <button type="button" className="pricing-premium-btn">
+              <Crown size={18} />
+              Premium bientôt disponible
+            </button>
+          </article>
+        </div>
+
+        <p className="pricing-note">
+          Sans abonnement · Accès Premium conservé pour ce voyage
+        </p>
+      </section>
+
+      {/* =====================================================
+          FAQ
+      ====================================================== */}
+
+      <section className="home-faq" id="faq">
+        <header className="home-faq-header">
+          <h2>
+            Questions <span>fréquentes</span>
+          </h2>
+        </header>
+
+        <div className="faq-list">
+          <details className="faq-item">
+            <summary>
+              <span>TripTogether est-il vraiment gratuit ?</span>
+              <ChevronDown size={20} />
+            </summary>
+
+            <p>
+              Oui. Vous pouvez créer votre voyage, inviter vos proches, proposer
+              des étapes, voter et gérer les dépenses gratuitement.
+            </p>
+          </details>
+
+          <details className="faq-item">
+            <summary>
+              <span>Comment fonctionnera le paiement du Premium ?</span>
+              <ChevronDown size={20} />
+            </summary>
+
+            <p>
+              Le Premium sera proposé avec un paiement unique par voyage, sans
+              abonnement mensuel.
+            </p>
+          </details>
+
+          <details className="faq-item">
+            <summary>
+              <span>Tout le groupe devra-t-il payer ?</span>
+              <ChevronDown size={20} />
+            </summary>
+
+            <p>
+              Non. Un seul paiement effectué par l'organisateur débloquera les
+              fonctionnalités Premium pour le voyage concerné.
+            </p>
+          </details>
         </div>
       </section>
     </main>
