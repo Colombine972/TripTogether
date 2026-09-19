@@ -1,8 +1,11 @@
 import {
   ArrowRight,
   CalendarDays,
+  ClipboardCheck,
   Coins,
+  Crown,
   Flag,
+  Info,
   MapPin,
   Pencil,
   Plus,
@@ -22,6 +25,7 @@ import BudgetRecapCard from "./BudgetRecapCard";
 import Modal from "./Modal";
 import NavTabs from "./NavTabs";
 import NextStepCard from "./NextStepCard";
+import PremiumComingSoonModal from "./PremiumComingSoonModal";
 import RecentActivitiesCard from "./RecentActivitiesCard";
 
 import "../pages/styles/TripInfos.css";
@@ -90,6 +94,19 @@ function TripInfos({
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+
+  const [premiumFeatureName, setPremiumFeatureName] = useState("");
+
+  const openPremiumModal = (featureName: string) => {
+    setPremiumFeatureName(featureName);
+    setIsPremiumModalOpen(true);
+  };
+
+  const closePremiumModal = () => {
+    setIsPremiumModalOpen(false);
+    setPremiumFeatureName("");
+  };
   /* =======================================================
      MEMBRES
   ======================================================= */
@@ -115,58 +132,51 @@ function TripInfos({
   ======================================================= */
 
   useEffect(() => {
-  if (!trip?.id) {
-    return;
-  }
-
-  const token =
-    auth?.token ||
-    localStorage.getItem("token");
-
-  if (!token) {
-    return;
-  }
-
-  const fetchMembers = async () => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/trips/${trip.id}/members`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(
-          data?.error ||
-            data?.message ||
-            "Impossible de récupérer les membres",
-        );
-      }
-
-      const tripMembers = Array.isArray(data)
-        ? data
-        : data?.members ?? [];
-
-      setMembers(tripMembers);
-    } catch (error) {
-      console.error(
-        "Erreur récupération membres :",
-        error,
-      );
-
-      setMembers([]);
+    if (!trip?.id) {
+      return;
     }
-  };
 
-  void fetchMembers();
-}, [trip?.id, auth?.token]);
+    const token = auth?.token || localStorage.getItem("token");
+
+    if (!token) {
+      return;
+    }
+
+    const fetchMembers = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/trips/${trip.id}/members`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error ||
+              data?.message ||
+              "Impossible de récupérer les membres",
+          );
+        }
+
+        const tripMembers = Array.isArray(data) ? data : (data?.members ?? []);
+
+        setMembers(tripMembers);
+      } catch (error) {
+        console.error("Erreur récupération membres :", error);
+
+        setMembers([]);
+      }
+    };
+
+    void fetchMembers();
+  }, [trip?.id, auth?.token]);
 
   /* =======================================================
      CHARGEMENT DU RÉSUMÉ BUDGET
@@ -433,7 +443,6 @@ function TripInfos({
                   onClick={() => setIsEditModalOpen(true)}
                 >
                   <Pencil size={16} />
-
                   Modifier le voyage
                 </button>
               )}
@@ -515,7 +524,6 @@ function TripInfos({
                     onClick={() => setIsEditModalOpen(true)}
                   >
                     <Pencil size={17} />
-
                     Modifier
                   </button>
                 )}
@@ -552,9 +560,7 @@ function TripInfos({
                   <div className="trip-overview-detail">
                     <Coins size={19} />
 
-                    <span className="trip-detail-label">
-                      Devise du voyage
-                    </span>
+                    <span className="trip-detail-label">Devise du voyage</span>
 
                     <strong>
                       {trip.local_currency || trip.base_currency || "EUR"}
@@ -577,6 +583,39 @@ function TripInfos({
                 </div>
               </div>
             </article>
+
+            {/* ===============================================
+    INFORMATIONS PRATIQUES PREMIUM
+================================================ */}
+
+            <button
+              type="button"
+              className="trip-premium-card"
+              onClick={() => openPremiumModal("Informations pratiques")}
+            >
+              <div className="trip-premium-card-icon">
+                <Info size={22} />
+              </div>
+
+              <div className="trip-premium-card-content">
+                <div className="trip-premium-card-heading">
+                  <h2>Informations pratiques</h2>
+
+                  <span className="trip-premium-card-badge">
+                    <Crown size={13} />
+                    PREMIUM
+                  </span>
+                </div>
+
+                <p>
+                  Retrouvez les informations essentielles de votre destination :
+                  formalités, monnaie, prises, numéros utiles et conseils
+                  pratiques.
+                </p>
+              </div>
+
+              <span className="trip-premium-card-action">Découvrir →</span>
+            </button>
 
             {/* ===============================================
                 BUDGET
@@ -622,7 +661,6 @@ function TripInfos({
                   className="trip-members-see-all"
                 >
                   Voir tous
-
                   <ArrowRight size={16} />
                 </Link>
               </div>
@@ -692,7 +730,6 @@ function TripInfos({
                   className="trip-progress-link"
                 >
                   Voir toutes
-
                   <ArrowRight size={16} />
                 </Link>
               </div>
@@ -714,6 +751,38 @@ function TripInfos({
                 <strong>{stepsProgress}%</strong>
               </div>
             </article>
+
+            {/* ===============================================
+    CHECKLIST COLLABORATIVE PREMIUM
+================================================ */}
+
+            <button
+              type="button"
+              className="trip-premium-card"
+              onClick={() => openPremiumModal("Checklist collaborative")}
+            >
+              <div className="trip-premium-card-icon">
+                <ClipboardCheck size={22} />
+              </div>
+
+              <div className="trip-premium-card-content">
+                <div className="trip-premium-card-heading">
+                  <h2>Checklist collaborative</h2>
+
+                  <span className="trip-premium-card-badge">
+                    <Crown size={13} />
+                    PREMIUM
+                  </span>
+                </div>
+
+                <p>
+                  Préparez ensemble tout ce qu'il faut avant le départ :
+                  documents, réservations, valises et tâches à ne pas oublier.
+                </p>
+              </div>
+
+              <span className="trip-premium-card-action">Découvrir →</span>
+            </button>
 
             {/* ===============================================
                 PROCHAINE ÉTAPE
@@ -767,6 +836,11 @@ function TripInfos({
           />
         </Modal>
       )}
+      <PremiumComingSoonModal
+        isOpen={isPremiumModalOpen}
+        onClose={closePremiumModal}
+        featureName={premiumFeatureName}
+      />
     </>
   );
 }

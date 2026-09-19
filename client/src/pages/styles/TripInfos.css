@@ -805,6 +805,146 @@
 }
 
 /* =========================================================
+   CARTES PREMIUM DU RÉCAPITULATIF
+========================================================= */
+
+.trip-premium-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+
+  gap: 0.9rem;
+
+  width: 100%;
+
+  padding: 1.15rem;
+
+  text-align: left;
+
+  font-family: inherit;
+  color: inherit;
+
+  background: linear-gradient(
+    135deg,
+    rgba(239, 248, 240, 0.95),
+    rgba(255, 255, 255, 1)
+  );
+
+  border: 1px solid #dce9dd;
+  border-radius: 16px;
+
+  box-shadow: 0 8px 24px rgba(39, 117, 50, 0.06);
+
+  cursor: pointer;
+
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms
+    ease;
+}
+
+.trip-premium-card:hover {
+  transform: translateY(-2px);
+
+  border-color: #b9d5bc;
+
+  box-shadow: 0 12px 30px rgba(39, 117, 50, 0.1);
+}
+
+.trip-premium-card:focus-visible {
+  outline: 3px solid rgba(39, 117, 50, 0.2);
+  outline-offset: 3px;
+}
+
+.trip-premium-card-icon {
+  display: grid;
+  place-items: center;
+
+  width: 46px;
+  height: 46px;
+
+  color: #277532;
+  background: #e7f3e8;
+
+  border-radius: 50%;
+}
+
+.trip-premium-card-content {
+  min-width: 0;
+}
+
+.trip-premium-card-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  gap: 0.55rem;
+}
+
+.trip-premium-card-heading h2 {
+  margin: 0;
+
+  color: #172033;
+
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.trip-premium-card-badge {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.25rem;
+
+  padding: 0.25rem 0.5rem;
+
+  color: #b97908;
+  background: #fff3ce;
+
+  border-radius: 999px;
+
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.trip-premium-card-content p {
+  margin: 0.4rem 0 0;
+
+  color: #687069;
+
+  font-size: 0.83rem;
+  line-height: 1.5;
+}
+
+.trip-premium-card-action {
+  grid-column: 2;
+
+  margin-top: -0.15rem;
+
+  color: #277532;
+
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+  .trip-premium-card {
+    padding: 1rem;
+  }
+
+  .trip-premium-card-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .trip-premium-card-heading {
+    align-items: flex-start;
+  }
+}
+
+/* =========================================================
    RESPONSIVE
 ========================================================= */
 
@@ -1255,7 +1395,6 @@
     margin-left: 0.45rem;
   }
 }
-
 
 /* =========================================================
    TRÈS PETIT MOBILE
