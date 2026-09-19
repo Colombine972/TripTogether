@@ -21,7 +21,6 @@
   border-radius: 12px;
 }
 
-
 /* =========================================================
    ONGLET
    ========================================================= */
@@ -49,13 +48,9 @@
   border: 1px solid transparent;
   border-radius: 8px;
 
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease,
     border-color 0.2s ease;
 }
-
 
 /* =========================================================
    SURVOL
@@ -69,7 +64,6 @@
   border-color: var(--button-hover);
 }
 
-
 /* =========================================================
    ONGLET ACTIF
    ========================================================= */
@@ -81,11 +75,8 @@
 
   border-color: var(--primary-button);
 
-  box-shadow:
-    0 2px 6px
-    rgba(16, 185, 129, 0.25);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
 }
-
 
 /* =========================================================
    ICÔNES
@@ -101,7 +92,6 @@
   fill: currentColor;
 }
 
-
 /* =========================================================
    TEXTE DES ONGLETS
    ========================================================= */
@@ -109,7 +99,6 @@
 .tab-label {
   white-space: nowrap;
 }
-
 
 /* =========================================================
    ONGLETS À VENIR
@@ -124,6 +113,33 @@
   pointer-events: none;
 }
 
+/* =========================================================
+   ONGLET PREMIUM
+========================================================= */
+
+.tab-premium {
+  position: relative;
+
+  appearance: none;
+  font-family: inherit;
+
+  cursor: pointer;
+}
+
+.tab-premium-crown {
+  margin-left: 0.25rem;
+
+  color: #c88708;
+}
+
+.tab-premium:hover {
+  color: #277532;
+}
+
+.tab-premium:focus-visible {
+  outline: 2px solid rgba(39, 117, 50, 0.3);
+  outline-offset: 3px;
+}
 
 /* =========================================================
    TABLETTE
@@ -152,7 +168,6 @@
     font-size: 13px;
   }
 }
-
 
 /* =========================================================
    MOBILE
