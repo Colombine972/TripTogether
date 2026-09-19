@@ -24,6 +24,9 @@ const premiumFeatureDescriptions: Record<string, string> = {
 
   "TripTogether Premium":
     "Profitez bientôt de nouveaux outils pour préparer votre voyage plus facilement : budget prévisionnel, checklist collaborative, planning, informations pratiques et export.",
+
+  "Assistant IA":
+    "Obtenez de l'aide pour préparer votre voyage, trouver des idées, organiser votre planning et obtenir des suggestions adaptées à votre séjour.",
 };
 
 function PremiumComingSoonModal({

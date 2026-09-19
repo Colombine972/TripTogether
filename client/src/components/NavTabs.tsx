@@ -12,7 +12,7 @@ const NavTabs = () => {
 
   const location = useLocation();
 
-  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [premiumFeatureName, setPremiumFeatureName] = useState("");
 
   /* =========================================================
      VÉRIFIER SI UN ONGLET EST ACTIF
@@ -122,7 +122,7 @@ const NavTabs = () => {
         <button
           type="button"
           className="tab tab-premium"
-          onClick={() => setIsPremiumModalOpen(true)}
+          onClick={() => setPremiumFeatureName("Carte interactive")}
           aria-label="Carte interactive Premium bientôt disponible"
         >
           <svg viewBox="0 0 24 24" fill="currentColor" className="tab-icon">
@@ -137,23 +137,30 @@ const NavTabs = () => {
         </button>
 
         {/* =====================================================
-          CHAT - À VENIR
-          ===================================================== */}
+    ASSISTANT IA PREMIUM
+===================================================== */}
 
-        <div className="tab inactive">
+        <button
+          type="button"
+          className="tab tab-premium"
+          onClick={() => setPremiumFeatureName("Assistant IA")}
+          aria-label="Assistant IA Premium bientôt disponible"
+        >
           <svg viewBox="0 0 24 24" fill="currentColor" className="tab-icon">
-            <title>Disponible prochainement</title>
+            <title>Assistant IA Premium</title>
 
-            <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+            <path d="M12 2a2 2 0 0 1 2 2v1.05A7.002 7.002 0 0 1 19 12v4a3 3 0 0 1-3 3h-1.5l-1.6 2.13a1.13 1.13 0 0 1-1.8 0L9.5 19H8a3 3 0 0 1-3-3v-4a7.002 7.002 0 0 1 5-6.95V4a2 2 0 0 1 2-2Zm-3 9a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-6 4.5a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5H9Z" />
           </svg>
 
-          <span className="tab-label">Chat</span>
-        </div>
+          <span className="tab-label">Assistant IA</span>
+
+          <Crown size={13} className="tab-premium-crown" aria-hidden="true" />
+        </button>
       </section>
       <PremiumComingSoonModal
-        isOpen={isPremiumModalOpen}
-        onClose={() => setIsPremiumModalOpen(false)}
-        featureName="Carte interactive"
+        isOpen={premiumFeatureName !== ""}
+        onClose={() => setPremiumFeatureName("")}
+        featureName={premiumFeatureName}
       />
     </>
   );
