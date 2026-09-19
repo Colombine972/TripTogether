@@ -33,7 +33,6 @@
   gap: 0.75rem;
 }
 
-
 /* =========================================================
    2. BOUTONS DU HEADER
    ========================================================= */
@@ -58,7 +57,6 @@
     opacity 180ms ease,
     transform 180ms ease;
 }
-
 
 /* Export PDF */
 
@@ -92,9 +90,7 @@
   transform: none;
 }
 
-
 /* Ajouter une dépense */
-
 .add-expense-btn {
   flex-shrink: 0;
 
@@ -116,7 +112,6 @@
   outline: 3px solid rgba(59, 130, 246, 0.3);
   outline-offset: 2px;
 }
-
 
 /* =========================================================
    3. ÉTAT VIDE
@@ -143,7 +138,6 @@
 
   color: #6b7280;
 }
-
 
 /* =========================================================
    4. REGROUPEMENT DES DÉPENSES PAR DATE
@@ -184,7 +178,6 @@
   gap: 1rem;
 }
 
-
 /* =========================================================
    5. CARTE D'UNE DÉPENSE
    ========================================================= */
@@ -216,7 +209,6 @@
 
   min-width: 0;
 }
-
 
 /* Partie gauche */
 
@@ -276,7 +268,6 @@
   color: #76685f;
 }
 
-
 /* Partie droite */
 
 .expense-right {
@@ -304,7 +295,6 @@
 
   white-space: nowrap;
 }
-
 
 /* =========================================================
    6. ACTIONS MODIFIER / SUPPRIMER
@@ -335,15 +325,12 @@
   cursor: pointer;
 }
 
-
 /* Modifier */
 
 .edit-expense-btn {
   color: #64748b;
 
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .edit-expense-btn:hover {
@@ -368,7 +355,6 @@
   height: 18px;
 }
 
-
 /* Supprimer */
 
 .delete-expense-btn:focus-visible {
@@ -382,9 +368,7 @@
 
   color: #c0392b;
 
-  transition:
-    transform 0.2s ease,
-    opacity 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .delete-expense-btn:hover .trash-icon {
@@ -422,7 +406,6 @@
   transform: none;
 }
 
-
 /* =========================================================
    SUPPRESSION D'UNE DÉPENSE VERROUILLÉE
 ========================================================= */
@@ -451,7 +434,6 @@
   opacity: 1;
   transform: none;
 }
-
 
 /* =========================================================
    7. PARTICIPANTS ET INFOBULLE
@@ -510,10 +492,7 @@
 
   transform: translateY(4px);
 
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease,
-    visibility 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
 }
 
 .expense-participants-wrapper:hover .expense-participants-tooltip,
@@ -523,7 +502,6 @@
 
   transform: translateY(0);
 }
-
 
 /* =========================================================
    8. RÉPARTITION ET DETTES
@@ -582,7 +560,6 @@
   line-height: 1.35;
 }
 
-
 /* =========================================================
    9. REMBOURSEMENTS À CONFIRMER
    ========================================================= */
@@ -593,11 +570,7 @@
   margin-top: 1.5rem;
   padding: 1.35rem;
 
-  background: linear-gradient(
-    135deg,
-    #fffaf0 0%,
-    #fffdf8 100%
-  );
+  background: linear-gradient(135deg, #fffaf0 0%, #fffdf8 100%);
 
   border: 1px solid #f1d697;
   border-radius: 18px;
@@ -606,7 +579,6 @@
 
   box-sizing: border-box;
 }
-
 
 /* En-tête */
 
@@ -652,7 +624,6 @@
   line-height: 1.45;
 }
 
-
 /* Liste */
 
 .pending-reimbursements-list {
@@ -660,7 +631,6 @@
   flex-direction: column;
   gap: 0.85rem;
 }
-
 
 /* Carte */
 
@@ -748,7 +718,6 @@
   white-space: nowrap;
 }
 
-
 /* Actions */
 
 .pending-reimbursement-actions {
@@ -835,7 +804,6 @@
   transform: none;
 }
 
-
 /* =========================================================
    10. RÉSUMÉ DES REMBOURSEMENTS
    ========================================================= */
@@ -878,7 +846,6 @@
 
   line-height: 1.5;
 }
-
 
 /* Totaux */
 
@@ -924,7 +891,6 @@
   border-left: 1px solid #e4dfe7;
 }
 
-
 /* Liste */
 
 .reimbursement-summary-list {
@@ -959,7 +925,6 @@
 .reimbursement-summary-card.balance-negative {
   border-left: 4px solid #dc493f;
 }
-
 
 /* Participant */
 
@@ -1005,7 +970,6 @@
   font-size: 0.9rem;
 }
 
-
 /* Solde */
 
 .participant-net-balance {
@@ -1041,7 +1005,6 @@
   color: #d23b31;
 }
 
-
 /* État vide */
 
 .reimbursement-summary-empty {
@@ -1057,7 +1020,6 @@
 .reimbursement-summary-empty p {
   margin: 0;
 }
-
 
 /* =========================================================
    11. BOUTON REMBOURSER
@@ -1084,10 +1046,7 @@
 
   cursor: pointer;
 
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
 .participant-reimburse-btn:hover {
@@ -1101,7 +1060,6 @@
   outline: 3px solid rgba(45, 119, 56, 0.25);
   outline-offset: 2px;
 }
-
 
 /* =========================================================
    12. MODALE MOYENS DE REMBOURSEMENT
@@ -1145,13 +1103,11 @@
   border: none;
   border-radius: 22px;
 
-  box-shadow:
-    0 24px 65px rgba(15, 23, 42, 0.32),
-    0 8px 24px rgba(15, 23, 42, 0.16);
+  box-shadow: 0 24px 65px rgba(15, 23, 42, 0.32), 0 8px 24px
+    rgba(15, 23, 42, 0.16);
 
   box-sizing: border-box;
 }
-
 
 /* Scrollbar */
 
@@ -1168,7 +1124,6 @@
 
   border-radius: 999px;
 }
-
 
 /* =========================================================
    13. MODALE — BOUTON FERMER SUPÉRIEUR
@@ -1196,9 +1151,7 @@
 
   cursor: pointer;
 
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .payment-modal-close:hover {
@@ -1211,7 +1164,6 @@
   outline: 3px solid rgba(45, 119, 56, 0.25);
   outline-offset: 2px;
 }
-
 
 /* =========================================================
    14. MODALE — EN-TÊTE
@@ -1268,7 +1220,6 @@
 
   white-space: nowrap;
 }
-
 
 /* =========================================================
    15. MODALE — INSTRUCTIONS
@@ -1333,7 +1284,6 @@
   display: none;
 }
 
-
 /* =========================================================
    16. MODALE — CHARGEMENT ET ÉTAT VIDE
    ========================================================= */
@@ -1354,7 +1304,6 @@
 .payment-method-empty p {
   margin: 0;
 }
-
 
 /* =========================================================
    17. MODALE — MOYENS DE REMBOURSEMENT
@@ -1434,7 +1383,6 @@
   font-weight: 700;
 }
 
-
 /* =========================================================
    18. MODALE — WERO
    ========================================================= */
@@ -1455,7 +1403,6 @@
 
   letter-spacing: 0.02em;
 }
-
 
 /* =========================================================
    19. MODALE — SÉPARATEUR
@@ -1483,7 +1430,6 @@
 
   background: #dedce0;
 }
-
 
 /* =========================================================
    20. MODALE — VIREMENT / IBAN
@@ -1521,7 +1467,6 @@
   overflow-wrap: anywhere;
 }
 
-
 /* =========================================================
    21. MODALE — BOUTONS COPIER / AFFICHER
    ========================================================= */
@@ -1553,10 +1498,7 @@
 
   cursor: pointer;
 
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .payment-copy-btn {
@@ -1591,7 +1533,6 @@
   outline: 3px solid rgba(45, 119, 56, 0.2);
   outline-offset: 2px;
 }
-
 
 /* =========================================================
    22. MODALE — DÉCLARATION DU REMBOURSEMENT
@@ -1668,9 +1609,7 @@
 
   cursor: pointer;
 
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .payment-declaration-btn:hover {
@@ -1691,7 +1630,6 @@
 
   transform: none;
 }
-
 
 /* =========================================================
    23. MODALE — AVERTISSEMENT
@@ -1727,7 +1665,6 @@
   color: #343035;
 }
 
-
 /* =========================================================
    24. MODALE — BOUTON FERMER INFÉRIEUR
    ========================================================= */
@@ -1751,9 +1688,7 @@
 
   cursor: pointer;
 
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .payment-modal-close-bottom:hover {
@@ -1761,7 +1696,6 @@
 
   border-color: #7d787e;
 }
-
 
 /* =========================================================
    25. MODALE DE SUPPRESSION D'UNE DÉPENSE
@@ -1816,9 +1750,8 @@
   border: none;
   border-radius: 18px;
 
-  box-shadow:
-    0 24px 60px rgba(15, 23, 42, 0.3),
-    0 8px 20px rgba(15, 23, 42, 0.15);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3), 0 8px 20px
+    rgba(15, 23, 42, 0.15);
 }
 
 .expense-delete-dialog::before {
@@ -1831,8 +1764,7 @@
 
   margin-bottom: 1rem;
 
-  background:
-    #fee2e2
+  background: #fee2e2
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23dc2626'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z'/%3E%3C/svg%3E")
     center / 26px no-repeat;
 
@@ -1881,10 +1813,8 @@
 
   cursor: pointer;
 
-  transition:
-    transform 0.15s ease,
-    opacity 0.15s ease,
-    background-color 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s
+    ease;
 }
 
 .expense-delete-cancel {
@@ -1930,7 +1860,6 @@
   transform: none;
 }
 
-
 /* =========================================================
    26. CIBLAGE DEPUIS UNE NOTIFICATION
    ========================================================= */
@@ -1940,45 +1869,190 @@
 
   z-index: 2;
 
-  animation:
-    notification-target-highlight-animation
-    2.5s ease;
+  animation: notification-target-highlight-animation 2.5s ease;
 }
 
 @keyframes notification-target-highlight-animation {
   0% {
     background-color: #eaf3ea;
 
-    box-shadow:
-      0 0 0 4px
-      rgba(47, 93, 47, 0.28);
+    box-shadow: 0 0 0 4px rgba(47, 93, 47, 0.28);
   }
 
   30% {
     background-color: #f1f7f1;
 
-    box-shadow:
-      0 0 0 5px
-      rgba(47, 93, 47, 0.18);
+    box-shadow: 0 0 0 5px rgba(47, 93, 47, 0.18);
   }
 
   70% {
     background-color: #f7faf7;
 
-    box-shadow:
-      0 0 0 3px
-      rgba(47, 93, 47, 0.1);
+    box-shadow: 0 0 0 3px rgba(47, 93, 47, 0.1);
   }
 
   100% {
     background-color: transparent;
 
-    box-shadow:
-      0 0 0 0
-      rgba(47, 93, 47, 0);
+    box-shadow: 0 0 0 0 rgba(47, 93, 47, 0);
   }
 }
 
+/* =========================================================
+   BUDGET PREVISIONNEL PREMIUM
+========================================================= */
+
+.premium-budget-preview-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+
+  gap: 1rem;
+
+  width: 100%;
+
+  margin-bottom: 1.5rem;
+  padding: 1.2rem 1.3rem;
+
+  text-align: left;
+
+  font-family: inherit;
+
+  color: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(239, 248, 240, 0.95),
+    rgba(255, 255, 255, 1)
+  );
+
+  border: 1px solid #dce9dd;
+  border-radius: 16px;
+
+  box-shadow: 0 8px 24px rgba(39, 117, 50, 0.06);
+
+  cursor: pointer;
+
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms
+    ease;
+}
+
+.premium-budget-preview-card:hover {
+  transform: translateY(-2px);
+
+  border-color: #b9d5bc;
+
+  box-shadow: 0 12px 30px rgba(39, 117, 50, 0.1);
+}
+
+.premium-budget-preview-icon {
+  display: grid;
+  place-items: center;
+
+  width: 50px;
+  height: 50px;
+
+  color: #277532;
+  background: #e7f3e8;
+
+  border-radius: 50%;
+}
+
+.premium-budget-preview-content {
+  min-width: 0;
+}
+
+.premium-budget-preview-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  gap: 0.65rem;
+}
+
+.premium-budget-preview-heading h2 {
+  margin: 0;
+
+  color: #172033;
+
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.premium-budget-preview-badge {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.3rem;
+
+  padding: 0.3rem 0.55rem;
+
+  color: #b97908;
+  background: #fff3ce;
+
+  border-radius: 999px;
+
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.premium-budget-preview-content p {
+  margin: 0.35rem 0 0;
+
+  color: #687069;
+
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.premium-budget-preview-action {
+  color: #277532;
+
+  font-size: 0.8rem;
+  font-weight: 750;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   EXPORT PREMIUM
+========================================================= */
+
+.export-budget-premium-btn {
+  position: relative;
+
+  gap: 0.4rem;
+}
+
+.export-premium-label {
+  padding: 0.2rem 0.4rem;
+
+  color: #a86d05;
+  background: #fff3ce;
+
+  border-radius: 999px;
+
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+  .premium-budget-preview-card {
+    grid-template-columns: auto 1fr;
+
+    padding: 1rem;
+  }
+
+  .premium-budget-preview-action {
+    grid-column: 2;
+
+    margin-top: 0.2rem;
+  }
+}
 
 /* =========================================================
    27. RESPONSIVE — PETIT ORDINATEUR / GRANDE TABLETTE
@@ -2022,7 +2096,6 @@
   }
 }
 
-
 /* =========================================================
    28. RESPONSIVE — TABLETTE
    ========================================================= */
@@ -2045,7 +2118,6 @@
     width: 100%;
   }
 
-
   /* Remboursements à confirmer */
 
   .pending-reimbursements {
@@ -2065,7 +2137,6 @@
   .reimbursement-confirm-btn {
     flex: 1;
   }
-
 
   /* Résumé remboursements */
 
@@ -2138,7 +2209,6 @@
     font-size: 0.8rem;
   }
 
-
   /* Modale paiement */
 
   .payment-modal-backdrop {
@@ -2172,7 +2242,6 @@
   }
 }
 
-
 /* =========================================================
    29. RESPONSIVE — MOBILE
    ========================================================= */
@@ -2185,7 +2254,6 @@
   .expenses-header-actions button {
     width: 100%;
   }
-
 
   /* Dépenses */
 
@@ -2217,7 +2285,6 @@
   .expense-participants-tooltip {
     display: none;
   }
-
 
   /* Remboursements à confirmer */
 
@@ -2277,7 +2344,6 @@
     width: 100%;
     min-height: 42px;
   }
-
 
   /* Résumé remboursements */
 
@@ -2352,7 +2418,6 @@
 
     margin-top: 0.25rem;
   }
-
 
   /* Modale paiement */
 
@@ -2469,7 +2534,6 @@
   }
 }
 
-
 /* =========================================================
    30. RESPONSIVE — MOBILE 480 PX
    ========================================================= */
@@ -2491,7 +2555,6 @@
     height: 17px;
   }
 }
-
 
 /* =========================================================
    31. RESPONSIVE — PETIT MOBILE
@@ -2536,7 +2599,6 @@
     justify-content: flex-start;
   }
 
-
   /* Suppression */
 
   .expense-delete-actions {
@@ -2547,7 +2609,6 @@
   .expense-delete-confirm {
     width: 100%;
   }
-
 
   /* Résumé remboursements */
 
@@ -2606,7 +2667,6 @@
 
     border: 0;
   }
-
 
   /* Modale paiement */
 

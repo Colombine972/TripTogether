@@ -1,4 +1,4 @@
-import { Download, Pencil } from "lucide-react";
+import { Crown, Download, Pencil, PiggyBank } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 import { toast } from "react-toastify";
@@ -7,13 +7,13 @@ import BudgetSummary from "../components/BudgetSummary";
 import Modal from "../components/Modal";
 import PaymentDetailsModal from "../components/PaymentDetailsModal";
 import PendingReimbursements from "../components/PendingReimbursements";
+import PremiumComingSoonModal from "../components/PremiumComingSoonModal";
 import RemboursementSummary from "../components/RemboursementSummary";
 import TripInfos from "../components/TripInfos";
 import { useAuth } from "../contexts/AuthContext";
 import type { ParticipantBalance } from "../types/participantBalance";
 import type { Reimbursement } from "../types/reimbursement";
 import type { TheTrip } from "../types/tripType";
-import { exportBudgetToPdf } from "../utils/exportBudgetToPdf";
 import "./styles/TripBugdetPage.css";
 
 type BudgetSummaryData = {
@@ -112,6 +112,18 @@ function TripBudgetPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [premiumFeatureName, setPremiumFeatureName] = useState("");
+
+  const openPremiumModal = (featureName: string) => {
+    setPremiumFeatureName(featureName);
+    setIsPremiumModalOpen(true);
+  };
+
+  const closePremiumModal = () => {
+    setIsPremiumModalOpen(false);
+    setPremiumFeatureName("");
+  };
 
   const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
 
@@ -737,59 +749,6 @@ function TripBudgetPage() {
     );
   }, [balancesByParticipant]);
 
-  const handleExportBudgetPdf = async () => {
-    if (!trip) {
-      toast.error("Impossible d'exporter le budget : voyage introuvable.");
-
-      return;
-    }
-
-    if (expenses.length === 0) {
-      toast.info("Aucune dépense à exporter.");
-
-      return;
-    }
-
-    try {
-      await exportBudgetToPdf({
-        tripTitle: trip.title || "Voyage TripTogether",
-
-        destination:
-          [trip.city, trip.country].filter(Boolean).join(", ") || null,
-
-        startAt: trip.start_at || null,
-
-        endAt: trip.end_at || null,
-
-        currency: displayCurrency,
-
-        total: summary.total,
-
-        paid: summary.paid,
-
-        balance: updatedBalance,
-
-        expenses,
-
-        balances: balancesByParticipant,
-
-        reimbursements,
-
-        members,
-
-        tripImageUrl: trip.place_id
-          ? `${import.meta.env.VITE_API_URL}/api/places/photo/${trip.place_id}`
-          : null,
-      });
-
-      toast.success("Le PDF du budget a été généré.");
-    } catch (error) {
-      console.error("Erreur export PDF :", error);
-
-      toast.error("Impossible de générer le PDF du budget.");
-    }
-  };
-
   const handleEditExpense = (expense: Expense) => {
     setExpenseToEdit(expense);
     setIsModalOpen(true);
@@ -872,6 +831,36 @@ function TripBudgetPage() {
           <p className="loading-text">Chargement du budget...</p>
         ) : (
           <>
+            {/* =====================================================
+          BUDGET PRÉVISIONNEL PREMIUM
+      ====================================================== */}
+            <button
+              type="button"
+              className="premium-budget-preview-card"
+              onClick={() => openPremiumModal("Budget prévisionnel")}
+            >
+              <div className="premium-budget-preview-icon">
+                <PiggyBank size={24} />
+              </div>
+
+              <div className="premium-budget-preview-content">
+                <div className="premium-budget-preview-heading">
+                  <h2>Budget prévisionnel</h2>
+
+                  <span className="premium-budget-preview-badge">
+                    <Crown size={14} />
+                    PREMIUM
+                  </span>
+                </div>
+
+                <p>
+                  Estimez les dépenses de votre voyage avant le départ et
+                  répartissez votre budget par catégorie.
+                </p>
+              </div>
+
+              <span className="premium-budget-preview-action">Découvrir →</span>
+            </button>
             <BudgetSummary
               total={summary.total}
               paid={summary.paid}
@@ -903,12 +892,13 @@ function TripBudgetPage() {
                 <div className="expenses-header-actions">
                   <button
                     type="button"
-                    className="export-budget-btn"
-                    onClick={handleExportBudgetPdf}
-                    disabled={expenses.length === 0}
+                    className="export-budget-btn export-budget-premium-btn"
+                    onClick={() => openPremiumModal("Export du voyage")}
                   >
+                    <Crown size={16} aria-hidden="true" />
                     <Download size={18} aria-hidden="true" />
                     Exporter en PDF
+                    <span className="export-premium-label">Premium</span>
                   </button>
 
                   <button
@@ -1249,6 +1239,12 @@ function TripBudgetPage() {
             onReimbursementDeclared={refreshBudget}
           />
         )}
+
+        <PremiumComingSoonModal
+          isOpen={isPremiumModalOpen}
+          onClose={closePremiumModal}
+          featureName={premiumFeatureName}
+        />
       </main>
     </>
   );
