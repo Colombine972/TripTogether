@@ -63,47 +63,6 @@
   line-height: 1.6;
 }
 
-.premium-coming-soon-features {
-  display: grid;
-
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-
-  gap: 0.7rem;
-
-  margin: 1.5rem 0;
-
-  text-align: left;
-}
-
-.premium-coming-soon-features span {
-  position: relative;
-
-  padding: 0.65rem 0.8rem 0.65rem 2rem;
-
-  color: #465047;
-  background: #f7faf7;
-
-  border: 1px solid #e5ece6;
-  border-radius: 10px;
-
-  font-size: 0.82rem;
-}
-
-.premium-coming-soon-features span::before {
-  position: absolute;
-
-  top: 50%;
-  left: 0.75rem;
-
-  content: "✓";
-
-  color: #277532;
-
-  font-weight: 800;
-
-  transform: translateY(-50%);
-}
-
 .premium-coming-soon-message {
   margin: 0;
 
