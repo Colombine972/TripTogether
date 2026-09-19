@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
   Bell,
   Check,
@@ -15,9 +17,23 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 
+import PremiumComingSoonModal from "../components/PremiumComingSoonModal";
+
 import "./styles/Home.css";
 
 function HomePage() {
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [premiumFeatureName, setPremiumFeatureName] = useState("");
+
+  const openPremiumModal = (featureName: string) => {
+    setPremiumFeatureName(featureName);
+    setIsPremiumModalOpen(true);
+  };
+
+  const closePremiumModal = () => {
+    setIsPremiumModalOpen(false);
+    setPremiumFeatureName("");
+  };
   return (
     <main className="home-page">
       {/* =====================================================
@@ -510,7 +526,11 @@ function HomePage() {
               SUGGESTIONS INTELLIGENTES
           ================================================== */}
 
-          <article className="premium-feature-card">
+          <button
+            type="button"
+            className="premium-feature-card premium-feature-card-clickable"
+            onClick={() => openPremiumModal("Budget prévisionnel")}
+          >
             <div className="premium-card-top">
               <div className="premium-feature-icon">
                 <Sparkles />
@@ -543,13 +563,17 @@ function HomePage() {
                 </div>
               </div>
             </div>
-          </article>
+          </button>
 
           {/* =================================================
               CHECKLIST
           ================================================== */}
 
-          <article className="premium-feature-card">
+          <button
+            type="button"
+            className="premium-feature-card premium-feature-card-clickable"
+            onClick={() => openPremiumModal("Budget prévisionnel")}
+          >
             <div className="premium-card-top">
               <div className="premium-feature-icon">
                 <ClipboardCheck />
@@ -590,13 +614,17 @@ function HomePage() {
                 Faire la valise
               </div>
             </div>
-          </article>
+          </button>
 
           {/* =================================================
               BUDGET PRÉVISIONNEL
           ================================================== */}
 
-          <article className="premium-feature-card">
+          <button
+            type="button"
+            className="premium-feature-card premium-feature-card-clickable"
+            onClick={() => openPremiumModal("Budget prévisionnel")}
+          >
             <div className="premium-card-top">
               <div className="premium-feature-icon">
                 <PiggyBank />
@@ -648,13 +676,17 @@ function HomePage() {
                 <small>15%</small>
               </div>
             </div>
-          </article>
+          </button>
 
           {/* =================================================
               EXPORT
           ================================================== */}
 
-          <article className="premium-feature-card">
+          <button
+            type="button"
+            className="premium-feature-card premium-feature-card-clickable"
+            onClick={() => openPremiumModal("Budget prévisionnel")}
+          >
             <div className="premium-card-top">
               <div className="premium-feature-icon">
                 <FileDown />
@@ -689,7 +721,7 @@ function HomePage() {
                 <span>Votre voyage en un seul document</span>
               </div>
             </div>
-          </article>
+          </button>
         </div>
       </section>
 
@@ -827,7 +859,11 @@ function HomePage() {
               </li>
             </ul>
 
-            <button type="button" className="pricing-premium-btn" disabled>
+            <button
+              type="button"
+              className="pricing-premium-btn"
+              onClick={() => openPremiumModal("TripTogether Premium")}
+            >
               <Crown size={18} />
               Premium bientôt disponible
             </button>
@@ -890,6 +926,11 @@ function HomePage() {
           </details>
         </div>
       </section>
+      <PremiumComingSoonModal
+        isOpen={isPremiumModalOpen}
+        onClose={closePremiumModal}
+        featureName={premiumFeatureName}
+      />
     </main>
   );
 }

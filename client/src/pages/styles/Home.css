@@ -1425,6 +1425,19 @@
   font-size: 0.53rem;
 }
 
+.premium-feature-card-clickable {
+  cursor: pointer;
+}
+
+.premium-feature-card-clickable:focus-visible {
+  outline: 3px solid rgba(39, 117, 50, 0.28);
+  outline-offset: 4px;
+}
+
+.premium-feature-card-clickable:hover {
+  transform: translateY(-5px);
+}
+
 /* =========================================================
    TARIFS
 ========================================================= */
