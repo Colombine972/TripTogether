@@ -773,7 +773,7 @@ function HomePage() {
           <article className="pricing-card pricing-premium">
             <div className="pricing-coming-soon">
               <Crown size={14} />
-              BIENTÔT DISPONIBLE
+              PREMIUM BIENTÔT DISPONIBLE
             </div>
 
             <div className="pricing-card-heading pricing-premium-heading">
