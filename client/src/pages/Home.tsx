@@ -704,8 +704,8 @@ function HomePage() {
           </h2>
 
           <p>
-            Commencez gratuitement et passez au Premium uniquement si vous
-            souhaitezz aller plus loin dans la préparation de votre voyage.
+            Commencez gratuitement et passez au Premium pour aller plus loin
+            dans la préparation de votre voyage.
           </p>
         </header>
 
