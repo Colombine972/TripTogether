@@ -529,7 +529,7 @@ function HomePage() {
           <button
             type="button"
             className="premium-feature-card premium-feature-card-clickable"
-            onClick={() => openPremiumModal("Budget prévisionnel")}
+            onClick={() => openPremiumModal("Suggestions intelligente")}
           >
             <div className="premium-card-top">
               <div className="premium-feature-icon">
@@ -572,7 +572,7 @@ function HomePage() {
           <button
             type="button"
             className="premium-feature-card premium-feature-card-clickable"
-            onClick={() => openPremiumModal("Budget prévisionnel")}
+            onClick={() => openPremiumModal("Checklist collaborative")}
           >
             <div className="premium-card-top">
               <div className="premium-feature-icon">
@@ -685,7 +685,7 @@ function HomePage() {
           <button
             type="button"
             className="premium-feature-card premium-feature-card-clickable"
-            onClick={() => openPremiumModal("Budget prévisionnel")}
+            onClick={() => openPremiumModal("Export du voyage")}
           >
             <div className="premium-card-top">
               <div className="premium-feature-icon">
