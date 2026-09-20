@@ -13,6 +13,10 @@
   overflow: hidden;
 }
 
+/* =========================================================
+   TITRE
+========================================================= */
+
 .home-showcase-heading {
   max-width: 760px;
 
@@ -45,12 +49,12 @@
 }
 
 /* =========================================================
-   TABS
+   NAVIGATION DU CARROUSEL
 ========================================================= */
 
 .showcase-tabs {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 
   max-width: 1120px;
 
@@ -103,6 +107,7 @@
 
 .showcase-tab:focus-visible {
   position: relative;
+
   z-index: 2;
 
   outline: 3px solid rgba(39, 117, 50, 0.18);
@@ -110,23 +115,25 @@
 }
 
 /* =========================================================
-   RÉGLAGES SPÉCIFIQUES : VOYAGE EN GROUPE
+   SLIDE
 ========================================================= */
 
+.showcase-slide {
+  position: relative;
+
+  width: 100%;
+
+  margin-top: 1rem;
+}
+
 /* =========================================================
-   SLIDE VOYAGE EN GROUPE
+   IMAGE COMPLETE
 ========================================================= */
 
 .showcase-full-image {
-  position: absolute;
-  top: -0.5rem;
-  left: 50%;
+  width: min(94%, 1200px);
 
-  width: min(92%, 1200px);
-
-  transform: translateX(-50%);
-
-  z-index: 3;
+  margin: 0 auto;
 }
 
 .showcase-full-image img {
@@ -139,180 +146,10 @@
 }
 
 /* =========================================================
-   COLLAGE
+   ANIMATION DU CHANGEMENT DE SLIDE
 ========================================================= */
 
-.showcase-collage {
-  position: relative;
-
-  min-height: 570px;
-
-  margin-top: 1rem;
-}
-
-.showcase-background-shape {
-  position: absolute;
-
-  inset: 8% 7% 4%;
-  top: -0, 5rem;
-
-  background: radial-gradient(
-    circle at center,
-    rgba(225, 242, 228, 0.9),
-    rgba(244, 249, 245, 0.15) 68%
-  );
-
-  border-radius: 50%;
-
-  filter: blur(4px);
-
-  z-index: 0;
-}
-
-/* =========================================================
-   CAPTURE CENTRALE
-========================================================= */
-
-.showcase-main-screen {
-  position: absolute;
-
-  z-index: 3;
-
-  top: 2rem;
-  left: 50%;
-
-  width: min(68%, 850px);
-
-  transform: translateX(-50%) rotate(-0.7deg);
-
-  filter: drop-shadow(0 22px 30px rgba(28, 51, 35, 0.13));
-}
-
-.showcase-main-screen img {
-  display: block;
-
-  width: 100%;
-  height: auto;
-
-  border-radius: 19px;
-}
-
-/* =========================================================
-   POLAROID GAUCHE
-========================================================= */
-
-.showcase-polaroid {
-  position: absolute;
-
-  z-index: 4;
-
-  top: 8rem;
-  left: 1%;
-
-  width: min(26%, 305px);
-
-  padding: 0.7rem 0.7rem 1.1rem;
-
-  background: white;
-
-  border-radius: 7px;
-
-  box-shadow: 0 16px 35px rgba(22, 34, 28, 0.16);
-
-  transform: rotate(-6deg);
-}
-
-.showcase-polaroid img {
-  display: block;
-
-  width: 100%;
-  aspect-ratio: 4 / 4.4;
-
-  object-fit: cover;
-
-  border-radius: 3px;
-}
-
-.showcase-polaroid p {
-  margin: 0.8rem 0 0;
-
-  color: #172748;
-
-  font-size: 0.88rem;
-  font-style: italic;
-  font-weight: 600;
-  line-height: 1.35;
-
-  text-align: center;
-}
-
-/* =========================================================
-   PETITE CARTE DROITE
-========================================================= */
-
-.showcase-side-card {
-  position: absolute;
-
-  z-index: 5;
-
-  top: 10rem;
-  right: 0;
-
-  width: min(27%, 320px);
-
-  transform: rotate(5deg);
-
-  filter: drop-shadow(0 16px 26px rgba(24, 43, 29, 0.15));
-}
-
-.showcase-side-card img {
-  display: block;
-
-  width: 100%;
-  height: auto;
-
-  border-radius: 17px;
-}
-
-/* =========================================================
-   ANNOTATION
-========================================================= */
-
-.showcase-handwritten-right {
-  position: absolute;
-
-  z-index: 6;
-
-  top: 4.5rem;
-  right: 1rem;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  color: #172748;
-
-  font-size: 0.92rem;
-  font-style: italic;
-  font-weight: 650;
-
-  transform: rotate(-5deg);
-}
-
-.showcase-doodle-arrow {
-  margin-top: 0.15rem;
-
-  font-size: 2rem;
-  font-weight: 400;
-
-  transform: rotate(-15deg);
-}
-
-/* =========================================================
-   ANIMATION
-========================================================= */
-
-.showcase-collage-enter {
+.showcase-slide-enter {
   animation: showcase-enter 450ms ease both;
 }
 
@@ -333,16 +170,15 @@
 ========================================================= */
 
 .showcase-controls {
-  position: relative;
-  z-index: 10;
-
   display: flex;
   align-items: center;
   justify-content: center;
 
   gap: 1.15rem;
 
-  margin-top: 1.8rem;
+  width: 100%;
+
+  margin-top: 1.5rem;
 }
 
 .showcase-arrow {
@@ -351,6 +187,8 @@
 
   width: 46px;
   height: 46px;
+
+  flex: 0 0 auto;
 
   color: #172748;
   background: white;
@@ -370,6 +208,15 @@
 
   transform: translateY(-2px);
 }
+
+.showcase-arrow:focus-visible {
+  outline: 3px solid rgba(39, 117, 50, 0.2);
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   POINTS
+========================================================= */
 
 .showcase-dots {
   display: flex;
@@ -402,27 +249,73 @@
   border-radius: 999px;
 }
 
-.showcase-collage {
-  position: relative;
-  margin-top: 1rem;
-  overflow: visible;
-}
-
 /* =========================================================
    TABLETTE
 ========================================================= */
 
-@media (max-width: 950px) {
+@media (max-width: 900px) {
   .home-showcase {
-    padding-inline: 1.25rem;
+    padding: 4rem 1.25rem;
   }
+
+  .showcase-tabs {
+    margin-bottom: 1.5rem;
+  }
+
+  .showcase-full-image {
+    width: 100%;
+  }
+
+  .showcase-controls {
+    margin-top: 1.25rem;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+  .home-showcase {
+    padding: 3rem 1rem;
+
+    overflow: visible;
+  }
+
+  /* TITRE */
+
+  .home-showcase-heading {
+    margin-bottom: 1.5rem;
+    padding-inline: 0.35rem;
+  }
+
+  .home-showcase-heading h2 {
+    font-size: clamp(2rem, 9vw, 2.7rem);
+    line-height: 1.05;
+  }
+
+  .home-showcase-heading p {
+    margin-top: 0.9rem;
+
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  /* NAVIGATION */
 
   .showcase-tabs {
     display: flex;
 
+    width: 100%;
+
+    margin: 0 auto 1.5rem;
+
     overflow-x: auto;
 
+    border-radius: 14px;
+
     scrollbar-width: none;
+    scroll-snap-type: x mandatory;
   }
 
   .showcase-tabs::-webkit-scrollbar {
@@ -432,127 +325,85 @@
   .showcase-tab {
     flex: 0 0 auto;
 
-    min-width: 170px;
+    min-width: 155px;
+    min-height: 56px;
+
+    padding: 0.8rem 0.9rem;
+
+    font-size: 0.78rem;
+
+    scroll-snap-align: center;
   }
 
-  .showcase-collage {
-    min-height: 500px;
+  .showcase-tab svg {
+    width: 18px;
+    height: 18px;
   }
 
-  .showcase-main-screen {
-    width: 76%;
+  /* IMAGE */
+
+  .showcase-slide {
+    width: 100%;
+
+    margin-top: 0;
   }
 
-  .showcase-polaroid {
-    width: 25%;
+  .showcase-full-image {
+    width: 100%;
+
+    margin: 0 auto;
   }
 
-  .showcase-side-card {
-    width: 27%;
+  .showcase-full-image img {
+    width: 100%;
+    height: auto;
+
+    object-fit: contain;
+  }
+
+  /* CONTRÔLES */
+
+  .showcase-controls {
+    gap: 1rem;
+
+    margin-top: 1.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .showcase-arrow {
+    width: 44px;
+    height: 44px;
+  }
+
+  .showcase-dots {
+    gap: 0.45rem;
+  }
+
+  .showcase-dot {
+    width: 9px;
+    height: 9px;
+  }
+
+  .showcase-dot-active {
+    width: 24px;
   }
 }
 
 /* =========================================================
-   MOBILE
+   PETITS MOBILES
 ========================================================= */
 
-@media (max-width: 650px) {
+@media (max-width: 430px) {
   .home-showcase {
-    padding: 3.5rem 1rem;
-  }
-
-  .home-showcase-heading {
-    margin-bottom: 1.5rem;
-  }
-
-  .home-showcase-heading h2 {
-    font-size: 2.2rem;
-  }
-
-  .home-showcase-heading p {
-    font-size: 0.92rem;
-  }
-
-  .showcase-tabs {
-    justify-content: flex-start;
-
-    margin-bottom: 0.8rem;
-
-    border-radius: 14px;
+    padding-inline: 0.7rem;
   }
 
   .showcase-tab {
-    min-width: 150px;
-    min-height: 56px;
-
-    font-size: 0.78rem;
-  }
-
-  .showcase-collage {
-    min-height: auto;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    gap: 1rem;
-
-    padding: 1.2rem 0 0;
-  }
-
-  .showcase-background-shape {
-    inset: 3rem 0 2rem;
-  }
-
-  .showcase-main-screen,
-  .showcase-polaroid,
-  .showcase-side-card,
-  .showcase-handwritten-right {
-    position: relative;
-
-    inset: auto;
-  }
-
-  .showcase-main-screen {
-    order: 1;
-
-    width: 100%;
-
-    transform: rotate(-0.5deg);
-  }
-
-  .showcase-polaroid {
-    order: 2;
-
-    align-self: flex-start;
-
-    width: 52%;
-    max-width: 230px;
-
-    margin-top: -1.5rem;
-
-    transform: rotate(-5deg);
-  }
-
-  .showcase-side-card {
-    order: 3;
-
-    align-self: flex-end;
-
-    width: 58%;
-    max-width: 250px;
-
-    margin-top: -7rem;
-
-    transform: rotate(4deg);
-  }
-
-  .showcase-handwritten-right {
-    display: none;
+    min-width: 145px;
   }
 
   .showcase-controls {
-    margin-top: 1.5rem;
+    margin-top: 1.25rem;
   }
 
   .showcase-arrow {
