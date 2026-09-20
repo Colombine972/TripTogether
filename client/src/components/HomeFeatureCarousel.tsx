@@ -6,7 +6,7 @@ import {
   Users,
   WalletCards,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../pages/styles/HomeFeatureCarousel.css";
 
 type FeatureSlide = {
@@ -59,6 +59,22 @@ function getSlideIcon(id: string) {
 
 function HomeFeatureCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  useEffect(() => {
+    for (const slide of slides) {
+      const image = new Image();
+      image.src = slide.fullImage;
+    }
+  }, []);
+
+  useEffect(() => {
+    tabRefs.current[activeIndex]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [activeIndex]);
 
   const activeSlide = slides[activeIndex];
 
@@ -96,6 +112,9 @@ function HomeFeatureCarousel() {
         {slides.map((slide, index) => (
           <button
             key={slide.id}
+            ref={(element) => {
+              tabRefs.current[index] = element;
+            }}
             type="button"
             role="tab"
             aria-selected={activeIndex === index}

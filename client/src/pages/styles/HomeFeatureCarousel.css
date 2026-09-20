@@ -120,9 +120,8 @@
 
 .showcase-slide {
   position: relative;
-
   width: 100%;
-
+  aspect-ratio: 3 / 2;
   margin-top: 1rem;
 }
 
@@ -132,16 +131,14 @@
 
 .showcase-full-image {
   width: min(94%, 1200px);
-
+  height: 100%;
   margin: 0 auto;
 }
 
 .showcase-full-image img {
   display: block;
-
   width: 100%;
-  height: auto;
-
+  height: 100%;
   object-fit: contain;
 }
 
@@ -150,18 +147,16 @@
 ========================================================= */
 
 .showcase-slide-enter {
-  animation: showcase-enter 450ms ease both;
+  animation: showcase-fade 280ms ease-out both;
 }
 
-@keyframes showcase-enter {
+@keyframes showcase-fade {
   from {
-    opacity: 0;
-    transform: translateX(18px);
+    opacity: 0.25;
   }
 
   to {
     opacity: 1;
-    transform: translateX(0);
   }
 }
 
@@ -305,17 +300,16 @@
 
   .showcase-tabs {
     display: flex;
-
     width: 100%;
+    overflow-x: auto;
 
     margin: 0 auto 1.5rem;
 
-    overflow-x: auto;
-
     border-radius: 14px;
 
-    scrollbar-width: none;
+    scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
+    scrollbar-width: none;
   }
 
   .showcase-tabs::-webkit-scrollbar {
@@ -323,42 +317,39 @@
   }
 
   .showcase-tab {
-    flex: 0 0 auto;
-
-    min-width: 155px;
+    flex: 0 0 42%;
+    min-width: 125px;
     min-height: 56px;
 
-    padding: 0.8rem 0.9rem;
+    padding: 0.75rem 0.6rem;
 
-    font-size: 0.78rem;
+    font-size: 0.76rem;
 
     scroll-snap-align: center;
+    white-space: nowrap;
   }
 
   .showcase-tab svg {
     width: 18px;
     height: 18px;
+    flex-shrink: 0;
   }
 
   /* IMAGE */
 
   .showcase-slide {
     width: 100%;
-
+    aspect-ratio: 3 / 2;
     margin-top: 0;
   }
 
   .showcase-full-image {
     width: 100%;
-
-    margin: 0 auto;
+    height: 100%;
   }
 
-  .showcase-full-image img {
-    width: 100%;
-    height: auto;
-
-    object-fit: contain;
+  .showcase-controls {
+    margin-top: 1rem;
   }
 
   /* CONTRÔLES */
@@ -399,7 +390,12 @@
   }
 
   .showcase-tab {
-    min-width: 145px;
+    flex: 0 0 46%;
+    min-width: 120px;
+
+    padding-inline: 0.5rem;
+
+    font-size: 0.72rem;
   }
 
   .showcase-controls {
