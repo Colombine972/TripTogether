@@ -25,7 +25,7 @@ const slides: FeatureSlide[] = [
   {
     id: "group",
     label: "Voyage en groupe",
-    fullImage: "/images/carrousel/groupe-main3.png",
+    fullImage: "/images/carrousel/groupe-main.png",
     mainImage: "",
     leftImage: "",
     sideImage: "",
