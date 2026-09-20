@@ -129,14 +129,14 @@
 
 .showcase-slide-group .showcase-polaroid {
   top: 11rem;
-  left: 3.5%;
+  left: -0.5%;
   width: min(25%, 300px);
   z-index: 4;
 }
 
 .showcase-slide-group .showcase-side-card {
-  top: 12.5rem;
-  right: 2%;
+  top: 9.5rem;
+  right: 3.5%;
   width: min(22%, 250px);
   z-index: 4;
 }
