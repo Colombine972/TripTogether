@@ -123,7 +123,7 @@
 
 .showcase-slide-group .showcase-main-screen {
   top: 1.5rem;
-  width: min(64%, 820px);
+  width: min(70%, 820px);
   z-index: 3;
 }
 
@@ -135,9 +135,9 @@
 }
 
 .showcase-slide-group .showcase-side-card {
-  top: 9.5rem;
-  right: 3.5%;
-  width: min(22%, 250px);
+  top: 8.5rem;
+  right: 1.5%;
+  width: min(27%, 500px);
   z-index: 4;
 }
 
