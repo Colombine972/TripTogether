@@ -45,11 +45,12 @@ const slides: FeatureSlide[] = [
   {
     id: "budget",
     label: "Budget",
-    mainImage: "/images/carrousel/budget-main.png",
-    leftImage: "/images/carrousel/budget-photo.png",
-    sideImage: "/images/carrousel/budget-side.png",
-    handwrittenLeft: "Les meilleurs souvenirs se vivent ensemble ♡",
-    handwrittenRight: "Des dépenses claires entre amis",
+    fullImage: "/images/carrousel/budget-main.png",
+    mainImage: "",
+    leftImage: "",
+    sideImage: "",
+    handwrittenLeft: "",
+    handwrittenRight: "",
   },
   {
     id: "reimbursements",
