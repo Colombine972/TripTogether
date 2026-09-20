@@ -143,7 +143,7 @@ function HomeFeatureCarousel() {
 
       <div
         key={activeSlide.id}
-        className="showcase-collage showcase-collage-enter"
+        className={`showcase-collage showcase-collage-enter showcase-slide-${activeSlide.id}`}
       >
         <div className="showcase-background-shape" />
 
