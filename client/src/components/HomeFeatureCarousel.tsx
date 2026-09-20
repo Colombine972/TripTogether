@@ -13,6 +13,7 @@ import "../pages/styles/HomeFeatureCarousel.css";
 type FeatureSlide = {
   id: string;
   label: string;
+  fullImage?: string;
   mainImage: string;
   leftImage?: string;
   sideImage?: string;
@@ -24,11 +25,12 @@ const slides: FeatureSlide[] = [
   {
     id: "group",
     label: "Voyage en groupe",
-    mainImage: "/images/carrousel/groupe-main2.png",
-    leftImage: "/images/carrousel/groupe-photo.png",
-    sideImage: "/images/carrousel/groupe-side.png",
-    handwrittenLeft: "Des souvenirs encore plus beaux ensemble ♡",
-    handwrittenRight: "Invitez vos proches",
+    fullImage: "/images/carrousel/groupe-main3.png",
+    mainImage: "",
+    leftImage: "",
+    sideImage: "",
+    handwrittenLeft: "",
+    handwrittenRight: "",
   },
   {
     id: "destinations",
@@ -147,34 +149,47 @@ function HomeFeatureCarousel() {
       >
         <div className="showcase-background-shape" />
 
-        {activeSlide.leftImage && (
-          <div className="showcase-polaroid">
-            <img src={activeSlide.leftImage} alt="" aria-hidden="true" />
+        {activeSlide.fullImage ? (
+          <div className="showcase-full-image">
+            <img
+              src={activeSlide.fullImage}
+              alt={`Aperçu de la fonctionnalité ${activeSlide.label} de TripTogether`}
+            />
+          </div>
+        ) : (
+          <>
+            {activeSlide.leftImage && (
+              <div className="showcase-polaroid">
+                <img src={activeSlide.leftImage} alt="" aria-hidden="true" />
 
-            {activeSlide.handwrittenLeft && (
-              <p>{activeSlide.handwrittenLeft}</p>
+                {activeSlide.handwrittenLeft && (
+                  <p>{activeSlide.handwrittenLeft}</p>
+                )}
+              </div>
             )}
-          </div>
-        )}
 
-        <div className="showcase-main-screen">
-          <img
-            src={activeSlide.mainImage}
-            alt={`Aperçu de la fonctionnalité ${activeSlide.label} de TripTogether`}
-          />
-        </div>
+            {activeSlide.mainImage && (
+              <div className="showcase-main-screen">
+                <img
+                  src={activeSlide.mainImage}
+                  alt={`Aperçu de la fonctionnalité ${activeSlide.label} de TripTogether`}
+                />
+              </div>
+            )}
 
-        {activeSlide.sideImage && (
-          <div className="showcase-side-card">
-            <img src={activeSlide.sideImage} alt="" aria-hidden="true" />
-          </div>
-        )}
+            {activeSlide.sideImage && (
+              <div className="showcase-side-card">
+                <img src={activeSlide.sideImage} alt="" aria-hidden="true" />
+              </div>
+            )}
 
-        {activeSlide.handwrittenRight && (
-          <div className="showcase-handwritten-right">
-            <span>{activeSlide.handwrittenRight}</span>
-            <span className="showcase-doodle-arrow">↙</span>
-          </div>
+            {activeSlide.handwrittenRight && (
+              <div className="showcase-handwritten-right">
+                <span>{activeSlide.handwrittenRight}</span>
+                <span className="showcase-doodle-arrow">↙</span>
+              </div>
+            )}
+          </>
         )}
       </div>
 

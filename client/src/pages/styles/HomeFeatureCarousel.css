@@ -117,34 +117,25 @@
    SLIDE VOYAGE EN GROUPE
 ========================================================= */
 
-.showcase-slide-group {
-  min-height: 640px;
-}
+.showcase-full-image {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
 
-.showcase-slide-group .showcase-main-screen {
-  top: 1.5rem;
-  width: min(70%, 820px);
+  width: min(92%, 1200px);
+
+  transform: translateX(-50%);
+
   z-index: 3;
 }
 
-.showcase-slide-group .showcase-polaroid {
-  top: 11rem;
-  left: -0.5%;
-  width: min(25%, 300px);
-  z-index: 4;
-}
+.showcase-full-image img {
+  display: block;
 
-.showcase-slide-group .showcase-side-card {
-  top: 8.5rem;
-  right: 1.5%;
-  width: min(27%, 500px);
-  z-index: 4;
-}
+  width: 100%;
+  height: auto;
 
-.showcase-slide-group .showcase-handwritten-right {
-  top: 8.6rem;
-  right: 3.5%;
-  z-index: 5;
+  object-fit: contain;
 }
 
 /* =========================================================
