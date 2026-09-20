@@ -27,6 +27,9 @@ const premiumFeatureDescriptions: Record<string, string> = {
 
   "Assistant IA":
     "Obtenez de l'aide pour préparer votre voyage, trouver des idées, organiser votre planning et obtenir des suggestions adaptées à votre séjour.",
+
+  "Carte interactive":
+    "Visualisez les étapes de votre voyage sur une carte interactive et retrouvez facilement les lieux, activités et points d'intérêt de votre séjour.",
 };
 
 function PremiumComingSoonModal({

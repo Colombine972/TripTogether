@@ -1,14 +1,12 @@
 import { useState } from "react";
 
 import {
-  Bell,
   Check,
   ChevronDown,
   CircleDollarSign,
   ClipboardCheck,
   Crown,
   FileDown,
-  FileText,
   MapPin,
   PiggyBank,
   Sparkles,
@@ -17,8 +15,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 
+import HomeFeatureCarousel from "../components/HomeFeatureCarousel";
 import PremiumComingSoonModal from "../components/PremiumComingSoonModal";
-
 import "./styles/Home.css";
 
 function HomePage() {
@@ -129,383 +127,11 @@ function HomePage() {
       </section>
 
       {/* =====================================================
-          FEATURES
+          CARROUSEL DES FONCTIONNALITÉS
       ====================================================== */}
 
-      <section className="home-features">
-        <header className="home-features-header">
-          <h2>
-            Tout ce dont <span>vous avez besoin</span>
-          </h2>
+      <HomeFeatureCarousel />
 
-          <p>
-            TripTogether simplifie l'organisation de vos voyages en groupe avec
-            des outils puissants et intuitifs.
-          </p>
-        </header>
-
-        <div className="home-features-grid">
-          {/* =================================================
-              VOYAGE EN GROUPE
-          ================================================== */}
-
-          <article className="feature-card">
-            <div className="feature-icon">
-              <Users />
-            </div>
-
-            <h3>Voyage en groupe</h3>
-
-            <p>
-              Invitez facilement vos proches et organisez votre prochain voyage
-              ensemble.
-            </p>
-
-            <div className="feature-demo feature-participants-demo">
-              <div className="participant-avatar">
-                <img src="avatar1.png" alt="Cindy" />
-              </div>
-
-              <div className="participant-avatar">
-                <img src="avatar2.png" alt="Anthony" />
-              </div>
-
-              <div className="participant-avatar">
-                <img src="avatar3.png" alt="Marie" />
-              </div>
-
-              <div className="participant-avatar">
-                <img src="avatar4.png" alt="Thomas" />
-              </div>
-
-              <div
-                className="participant-add"
-                aria-label="Inviter un participant"
-              >
-                +
-              </div>
-            </div>
-          </article>
-
-          {/* =================================================
-              DESTINATIONS
-          ================================================== */}
-
-          <article className="feature-card">
-            <div className="feature-icon">
-              <MapPin />
-            </div>
-
-            <h3>Destinations</h3>
-
-            <p>Proposez des lieux et votez ensemble pour décider où aller.</p>
-
-            <div className="feature-demo destination-demo">
-              <div className="destination-row destination-selected">
-                <img
-                  src="lisbonne.png"
-                  alt="Lisbonne"
-                  className="destination-thumbnail"
-                />
-
-                <div className="destination-content">
-                  <strong>Lisbonne</strong>
-                  <div className="destination-participants">
-                    <img src="avatar1.png" alt="" />
-                    <img src="avatar2.png" alt="" />
-                    <img src="avatar3.png" alt="" />
-                    <img src="avatar4.png" alt="" />
-                  </div>
-                </div>
-
-                <span className="destination-votes active">8</span>
-              </div>
-
-              <div className="destination-row">
-                <img
-                  src="bali.png"
-                  alt="Bali"
-                  className="destination-thumbnail"
-                />
-
-                <div className="destination-content">
-                  <strong>Bali</strong>
-                  <div className="destination-participants">
-                    <img src="avatar3.png" alt="" />
-                    <img src="avatar1.png" alt="" />
-                  </div>
-                </div>
-
-                <span className="destination-votes">5</span>
-              </div>
-
-              <div className="destination-row">
-                <img
-                  src="rome.png"
-                  alt="Rome"
-                  className="destination-thumbnail"
-                />
-
-                <div className="destination-content">
-                  <strong>Rome</strong>
-                  <div className="destination-participants">
-                    <img src="avatar4.png" alt="" />
-                    <img src="avatar2.png" alt="" />
-                    <img src="avatar1.png" alt="" />
-                  </div>
-                </div>
-
-                <span className="destination-votes">3</span>
-              </div>
-            </div>
-          </article>
-
-          {/* =================================================
-              BUDGET PARTAGÉ
-          ================================================== */}
-
-          <article className="feature-card">
-            <div className="feature-icon">
-              <WalletCards />
-            </div>
-
-            <h3>Budget partagé</h3>
-
-            <p>
-              Ajoutez les dépenses et suivez le budget du voyage en temps réel.
-            </p>
-
-            <div className="feature-demo budget-demo">
-              <div className="budget-demo-header">
-                <span>Budget total</span>
-                <strong>1 248,00 €</strong>
-              </div>
-
-              <div className="budget-visuals">
-                <div className="budget-line-chart">
-                  <svg
-                    viewBox="0 0 180 85"
-                    role="img"
-                    aria-label="Évolution du budget"
-                  >
-                    <defs>
-                      <linearGradient
-                        id="budgetAreaGradient"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="0%"
-                          stopColor="#dcefdc"
-                          stopOpacity="0.8"
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor="#dcefdc"
-                          stopOpacity="0.15"
-                        />
-                      </linearGradient>
-                    </defs>
-
-                    <path
-                      className="budget-chart-area"
-                      d="M5 65
-             L28 45
-             L52 56
-             L78 43
-             L105 56
-             L135 39
-             L175 20
-             L175 80
-             L5 80 Z"
-                    />
-
-                    <path
-                      className="budget-chart-line"
-                      d="M5 65
-             L28 45
-             L52 56
-             L78 43
-             L105 56
-             L135 39
-             L175 20"
-                    />
-                  </svg>
-                </div>
-
-                <div className="budget-category-chart">
-                  <div className="budget-donut" />
-
-                  <div className="budget-categories">
-                    <span>
-                      <i className="category-dot logement" />
-                      Logement
-                    </span>
-
-                    <span>
-                      <i className="category-dot transport" />
-                      Transport
-                    </span>
-
-                    <span>
-                      <i className="category-dot activities" />
-                      Activités
-                    </span>
-
-                    <span>
-                      <i className="category-dot others" />
-                      Autres
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          {/* =================================================
-              REMBOURSEMENTS
-          ================================================== */}
-
-          <article className="feature-card">
-            <div className="feature-icon">
-              <CircleDollarSign />
-            </div>
-
-            <h3>Remboursements</h3>
-
-            <p>
-              Sachez immédiatement qui doit quoi et simplifiez les
-              remboursements.
-            </p>
-
-            <div className="feature-demo reimbursement-demo">
-              <div className="reimbursement-row">
-                <img
-                  src="avatar2.png"
-                  alt="Anthony"
-                  className="reimbursement-avatar"
-                />
-
-                <span className="reimbursement-text">Anthony doit à Cindy</span>
-
-                <strong className="amount-positive">+42,50 €</strong>
-              </div>
-
-              <div className="reimbursement-row">
-                <img
-                  src="avatar1.png"
-                  alt="Cindy"
-                  className="reimbursement-avatar"
-                />
-
-                <span className="reimbursement-text">Cindy doit à Marie</span>
-
-                <strong className="amount-negative">-18,20 €</strong>
-              </div>
-
-              <div className="reimbursement-row">
-                <img
-                  src="avatar4.png"
-                  alt="Thomas"
-                  className="reimbursement-avatar"
-                />
-
-                <span className="reimbursement-text">
-                  Thomas doit à Anthony
-                </span>
-
-                <strong className="amount-positive">+60,70 €</strong>
-              </div>
-            </div>
-          </article>
-
-          {/* =================================================
-              NOTIFICATIONS
-          ================================================== */}
-
-          <article className="feature-card">
-            <div className="feature-icon">
-              <Bell />
-            </div>
-
-            <h3>Notifications</h3>
-
-            <p>Ne manquez aucune activité importante du voyage.</p>
-
-            <div className="feature-demo notifications-demo">
-              <div className="notification-demo-row">
-                <span className="notification-demo-icon">
-                  <WalletCards size={20} />
-                </span>
-
-                <div>
-                  <strong>Anthony a ajouté une dépense</strong>
-                  <span>Il y a 2 min</span>
-                </div>
-              </div>
-
-              <div className="notification-demo-row">
-                <span className="notification-demo-icon destination">
-                  <MapPin size={20} />
-                </span>
-
-                <div>
-                  <strong>Marie a proposé une destination</strong>
-                  <span>Il y a 1 h</span>
-                </div>
-              </div>
-
-              <div className="notification-demo-row">
-                <span className="notification-demo-icon repayment">
-                  <CircleDollarSign size={20} />
-                </span>
-
-                <div>
-                  <strong>Thomas a confirmé un remboursement</strong>
-                  <span>Il y a 3 h</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          {/* =================================================
-              RÉCAPITULATIF
-          ================================================== */}
-
-          <article className="feature-card">
-            <div className="feature-icon">
-              <FileText />
-            </div>
-
-            <h3>Récapitulatif</h3>
-
-            <p>
-              Retrouvez toutes les dépenses et exportez le budget en un clic.
-            </p>
-
-            <div className="feature-demo recap-demo">
-              <div className="recap-trip-title">
-                <strong>Road trip Portugal</strong>
-                <img
-                  src="portugal.png"
-                  alt="Drapeau du Portugal"
-                  className="recap-country-flag"
-                />
-              </div>
-              <span>17 – 22 août 2026</span>
-
-              <span>👥 5 participants</span>
-
-              <button type="button">
-                <FileText size={16} />
-                Exporter en PDF
-              </button>
-            </div>
-          </article>
-        </div>
-      </section>
       {/* =====================================================
           PREMIUM
       ====================================================== */}
@@ -529,7 +155,7 @@ function HomePage() {
           <button
             type="button"
             className="premium-feature-card premium-feature-card-clickable"
-            onClick={() => openPremiumModal("Suggestions intelligente")}
+            onClick={() => openPremiumModal("Suggestions intelligentes")}
           >
             <div className="premium-card-top">
               <div className="premium-feature-icon">

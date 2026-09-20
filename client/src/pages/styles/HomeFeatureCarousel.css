@@ -1,0 +1,523 @@
+/* =========================================================
+   HOME FEATURE SHOWCASE
+========================================================= */
+
+.home-showcase {
+  position: relative;
+
+  max-width: 1280px;
+
+  margin: 0 auto;
+  padding: 5rem 2rem;
+
+  overflow: hidden;
+}
+
+.home-showcase-heading {
+  max-width: 760px;
+
+  margin: 0 auto 2rem;
+
+  text-align: center;
+}
+
+.home-showcase-heading h2 {
+  margin: 0;
+
+  color: #101b35;
+
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  font-weight: 850;
+  line-height: 1.1;
+}
+
+.home-showcase-heading h2 span {
+  color: #277532;
+}
+
+.home-showcase-heading p {
+  margin: 1rem 0 0;
+
+  color: #697386;
+
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   TABS
+========================================================= */
+
+.showcase-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+
+  max-width: 1120px;
+
+  margin: 0 auto 2rem;
+
+  background: rgba(255, 255, 255, 0.92);
+
+  border: 1px solid #e5e9e5;
+  border-radius: 17px;
+
+  box-shadow: 0 7px 28px rgba(35, 57, 39, 0.05);
+
+  overflow: hidden;
+}
+
+.showcase-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.55rem;
+
+  min-height: 64px;
+
+  padding: 0.8rem 1rem;
+
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 650;
+
+  color: #617087;
+  background: transparent;
+
+  border: 0;
+
+  cursor: pointer;
+
+  transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.showcase-tab:hover {
+  color: #277532;
+  background: #f7fbf7;
+}
+
+.showcase-tab-active {
+  color: #176c2a;
+  background: #eaf6eb;
+}
+
+.showcase-tab:focus-visible {
+  position: relative;
+  z-index: 2;
+
+  outline: 3px solid rgba(39, 117, 50, 0.18);
+  outline-offset: -3px;
+}
+
+/* =========================================================
+   COLLAGE
+========================================================= */
+
+.showcase-collage {
+  position: relative;
+
+  min-height: 570px;
+
+  margin-top: 1rem;
+}
+
+.showcase-background-shape {
+  position: absolute;
+
+  inset: 8% 7% 4%;
+
+  background: radial-gradient(
+    circle at center,
+    rgba(225, 242, 228, 0.9),
+    rgba(244, 249, 245, 0.15) 68%
+  );
+
+  border-radius: 50%;
+
+  filter: blur(4px);
+
+  z-index: 0;
+}
+
+/* =========================================================
+   CAPTURE CENTRALE
+========================================================= */
+
+.showcase-main-screen {
+  position: absolute;
+
+  z-index: 3;
+
+  top: 2rem;
+  left: 50%;
+
+  width: min(68%, 850px);
+
+  transform: translateX(-50%) rotate(-0.7deg);
+
+  filter: drop-shadow(0 22px 30px rgba(28, 51, 35, 0.13));
+}
+
+.showcase-main-screen img {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  border-radius: 19px;
+}
+
+/* =========================================================
+   POLAROID GAUCHE
+========================================================= */
+
+.showcase-polaroid {
+  position: absolute;
+
+  z-index: 4;
+
+  top: 8rem;
+  left: 1%;
+
+  width: min(26%, 305px);
+
+  padding: 0.7rem 0.7rem 1.1rem;
+
+  background: white;
+
+  border-radius: 7px;
+
+  box-shadow: 0 16px 35px rgba(22, 34, 28, 0.16);
+
+  transform: rotate(-6deg);
+}
+
+.showcase-polaroid img {
+  display: block;
+
+  width: 100%;
+  aspect-ratio: 4 / 4.4;
+
+  object-fit: cover;
+
+  border-radius: 3px;
+}
+
+.showcase-polaroid p {
+  margin: 0.8rem 0 0;
+
+  color: #172748;
+
+  font-size: 0.88rem;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.35;
+
+  text-align: center;
+}
+
+/* =========================================================
+   PETITE CARTE DROITE
+========================================================= */
+
+.showcase-side-card {
+  position: absolute;
+
+  z-index: 5;
+
+  top: 10rem;
+  right: 0;
+
+  width: min(27%, 320px);
+
+  transform: rotate(5deg);
+
+  filter: drop-shadow(0 16px 26px rgba(24, 43, 29, 0.15));
+}
+
+.showcase-side-card img {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  border-radius: 17px;
+}
+
+/* =========================================================
+   ANNOTATION
+========================================================= */
+
+.showcase-handwritten-right {
+  position: absolute;
+
+  z-index: 6;
+
+  top: 4.5rem;
+  right: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  color: #172748;
+
+  font-size: 0.92rem;
+  font-style: italic;
+  font-weight: 650;
+
+  transform: rotate(-5deg);
+}
+
+.showcase-doodle-arrow {
+  margin-top: 0.15rem;
+
+  font-size: 2rem;
+  font-weight: 400;
+
+  transform: rotate(-15deg);
+}
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+.showcase-collage-enter {
+  animation: showcase-enter 450ms ease both;
+}
+
+@keyframes showcase-enter {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* =========================================================
+   CONTRÔLES
+========================================================= */
+
+.showcase-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 1.15rem;
+
+  margin-top: 0.5rem;
+}
+
+.showcase-arrow {
+  display: grid;
+  place-items: center;
+
+  width: 46px;
+  height: 46px;
+
+  color: #172748;
+  background: white;
+
+  border: 1px solid #dde5de;
+  border-radius: 50%;
+
+  box-shadow: 0 5px 15px rgba(30, 55, 38, 0.06);
+
+  cursor: pointer;
+
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.showcase-arrow:hover {
+  background: #eff8f0;
+
+  transform: translateY(-2px);
+}
+
+.showcase-dots {
+  display: flex;
+  align-items: center;
+
+  gap: 0.55rem;
+}
+
+.showcase-dot {
+  width: 10px;
+  height: 10px;
+
+  padding: 0;
+
+  background: #dce2de;
+
+  border: 0;
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  transition: width 180ms ease, background 180ms ease;
+}
+
+.showcase-dot-active {
+  width: 25px;
+
+  background: #27813a;
+
+  border-radius: 999px;
+}
+
+/* =========================================================
+   TABLETTE
+========================================================= */
+
+@media (max-width: 950px) {
+  .home-showcase {
+    padding-inline: 1.25rem;
+  }
+
+  .showcase-tabs {
+    display: flex;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+  }
+
+  .showcase-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .showcase-tab {
+    flex: 0 0 auto;
+
+    min-width: 170px;
+  }
+
+  .showcase-collage {
+    min-height: 500px;
+  }
+
+  .showcase-main-screen {
+    width: 76%;
+  }
+
+  .showcase-polaroid {
+    width: 25%;
+  }
+
+  .showcase-side-card {
+    width: 27%;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+  .home-showcase {
+    padding: 3.5rem 1rem;
+  }
+
+  .home-showcase-heading {
+    margin-bottom: 1.5rem;
+  }
+
+  .home-showcase-heading h2 {
+    font-size: 2.2rem;
+  }
+
+  .home-showcase-heading p {
+    font-size: 0.92rem;
+  }
+
+  .showcase-tabs {
+    justify-content: flex-start;
+
+    margin-bottom: 1.2rem;
+
+    border-radius: 14px;
+  }
+
+  .showcase-tab {
+    min-width: 150px;
+    min-height: 56px;
+
+    font-size: 0.78rem;
+  }
+
+  .showcase-collage {
+    min-height: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 1rem;
+
+    padding: 1.2rem 0 0;
+  }
+
+  .showcase-background-shape {
+    inset: 3rem 0 2rem;
+  }
+
+  .showcase-main-screen,
+  .showcase-polaroid,
+  .showcase-side-card,
+  .showcase-handwritten-right {
+    position: relative;
+
+    inset: auto;
+  }
+
+  .showcase-main-screen {
+    order: 1;
+
+    width: 100%;
+
+    transform: rotate(-0.5deg);
+  }
+
+  .showcase-polaroid {
+    order: 2;
+
+    align-self: flex-start;
+
+    width: 52%;
+    max-width: 230px;
+
+    margin-top: -1.5rem;
+
+    transform: rotate(-5deg);
+  }
+
+  .showcase-side-card {
+    order: 3;
+
+    align-self: flex-end;
+
+    width: 58%;
+    max-width: 250px;
+
+    margin-top: -7rem;
+
+    transform: rotate(4deg);
+  }
+
+  .showcase-handwritten-right {
+    display: none;
+  }
+
+  .showcase-controls {
+    margin-top: 1.5rem;
+  }
+
+  .showcase-arrow {
+    width: 42px;
+    height: 42px;
+  }
+}
