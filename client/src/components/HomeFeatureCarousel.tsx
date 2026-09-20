@@ -63,10 +63,11 @@ const slides: FeatureSlide[] = [
   {
     id: "notifications",
     label: "Notifications",
-    mainImage: "/images/carrousel/notifications-main.png",
-    sideImage: "/images/carrousel/notifications-side.png",
-    handwrittenLeft: "Des voyages encore plus mémorables ♡",
-    handwrittenRight: "Toujours au courant !",
+    fullImage: "/images/carrousel/notifications-main.png",
+    mainImage: "",
+    sideImage: "",
+    handwrittenLeft: "",
+    handwrittenRight: "",
   },
 ];
 
