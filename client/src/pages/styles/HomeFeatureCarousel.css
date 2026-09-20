@@ -113,37 +113,37 @@
    RÉGLAGES SPÉCIFIQUES : VOYAGE EN GROUPE
 ========================================================= */
 
+/* =========================================================
+   SLIDE VOYAGE EN GROUPE
+========================================================= */
+
 .showcase-slide-group {
-  min-height: 760px;
+  min-height: 640px;
 }
 
 .showcase-slide-group .showcase-main-screen {
-  top: 4.2rem;
+  top: 1.5rem;
   width: min(64%, 820px);
   z-index: 3;
 }
 
-.showcase-slide-group .showcase-main-screen img {
-  border-radius: 22px;
-}
-
 .showcase-slide-group .showcase-polaroid {
-  top: 14rem;
-  left: 2%;
+  top: 11rem;
+  left: 1.5%;
   width: min(25%, 300px);
   z-index: 4;
 }
 
 .showcase-slide-group .showcase-side-card {
-  top: 13rem;
-  right: 1.5%;
-  width: min(24%, 285px);
+  top: 12.5rem;
+  right: 2%;
+  width: min(22%, 250px);
   z-index: 4;
 }
 
 .showcase-slide-group .showcase-handwritten-right {
-  top: 9.5rem;
-  right: 2.5%;
+  top: 8.6rem;
+  right: 3.5%;
   z-index: 5;
 }
 
