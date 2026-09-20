@@ -34,7 +34,7 @@ const slides: FeatureSlide[] = [
     id: "destinations",
     label: "Destinations",
     mainImage: "/images/carrousel/destinations-main.png",
-    leftImage: "/images/carrousel/destinations-photo.jpg",
+    leftImage: "/images/carrousel/destinations-photo.png",
     sideImage: "/images/carrousel/destinations-side.png",
     handwrittenLeft: "Le monde est plus beau à plusieurs ♡",
     handwrittenRight: "Proposez vos coups de cœur !",
