@@ -644,6 +644,7 @@ export const COUNTRY_CURRENCY_MAP: Record<string, CurrencyCode> = {
   YT: "EUR", // Mayotte
 
   // Asie de l'Est
+  JP: "JPY", // Japon
   TW: "TWD", // Taïwan
   MO: "MOP", // Macao
   MN: "MNT", // Mongolie
