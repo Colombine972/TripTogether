@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
+import databaseClient from "../database/client";
 import apiRouter from "./routers/api/router";
 
 const app = express();
@@ -23,6 +24,23 @@ app.use(
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
+// Vérification de disponibilité du backend et de MySQL
+app.get("/api/health", async (_req, res) => {
+  try {
+    await databaseClient.query("SELECT 1");
+
+    res.status(200).json({
+      status: "ok",
+    });
+  } catch (error) {
+    console.error("Healthcheck MySQL échoué :", error);
+
+    res.status(503).json({
+      status: "unavailable",
+    });
+  }
+});
 
 app.use("/api", apiRouter);
 
