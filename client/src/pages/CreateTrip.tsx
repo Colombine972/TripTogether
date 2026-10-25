@@ -1,6 +1,6 @@
 import { useJsApiLoader } from "@react-google-maps/api";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { COUNTRY_CURRENCY_MAP } from "../constants/currencies";
 import { GOOGLE_MAPS_LIBRARIES } from "../constants/maps";
@@ -8,16 +8,42 @@ import { useAuth } from "../contexts/AuthContext";
 import "./styles/CreateTrip.css";
 import "./styles/mobile.css";
 
+type PlannerDraft = {
+  destination: string;
+  dateDebut: string;
+  dateFin: string;
+  envies: string;
+  budget: string;
+  devise: string;
+  participants: string;
+  etapes: string[];
+};
+
+type CreateTripLocationState = {
+  source?: string;
+  planner?: PlannerDraft;
+};
+
 export default function CreateTrip() {
   const { auth } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const navigationState = location.state as CreateTripLocationState | null;
+
+  const fromPlanner = navigationState?.source === "etsy-planner";
+
+  const planner = fromPlanner ? navigationState?.planner : undefined;
   const token = localStorage.getItem("token") || auth?.token;
 
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
   const [placeId, setPlaceId] = useState("");
-  const [endOfTrip, setEndOfTrip] = useState({ end_at: "" });
-  const [startDate, setStartDate] = useState("");
+  const [endOfTrip, setEndOfTrip] = useState({
+    end_at: planner?.dateFin ?? "",
+  });
+
+  const [startDate, setStartDate] = useState(planner?.dateDebut ?? "");
   const [countryCode, setCountryCode] = useState("");
   const [localCurrency, setLocalCurrency] = useState("");
 
@@ -140,9 +166,7 @@ export default function CreateTrip() {
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
   };
 
-  const submitCreateTrip = async (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const submitCreateTrip = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const token = localStorage.getItem("token") || auth?.token;
@@ -226,8 +250,26 @@ export default function CreateTrip() {
         return;
       }
 
+      /* =====================================================
+         VOYAGE CRÉÉ AVEC SUCCÈS
+      ====================================================== */
+
       toast.success("Voyage créé avec succès !");
-      navigate(`/trip/${result.insertId}`);
+
+      /* =====================================================
+         REDIRECTION SELON LE PARCOURS
+      ====================================================== */
+
+      if (fromPlanner) {
+        navigate(`/trip/${result.insertId}`, {
+          replace: true,
+          state: {
+            openInvitation: true,
+          },
+        });
+      } else {
+        navigate(`/trip/${result.insertId}`);
+      }
     } catch (error) {
       console.error(error);
       toast.error("Impossible de créer le voyage.");
@@ -268,6 +310,9 @@ export default function CreateTrip() {
               id="trip-name"
               ref={titleRef}
               placeholder="Entrez le nom du voyage"
+              defaultValue={
+                planner?.destination ? `Voyage au ${planner.destination}` : ""
+              }
               required
             />
           </div>
@@ -280,13 +325,19 @@ export default function CreateTrip() {
               id="description"
               ref={descriptionRef}
               placeholder="Entrez la description"
+              defaultValue={planner?.envies ?? ""}
               required
             />
           </div>
 
           <div className="create-trip-form-group">
             <span className="create-trip-form-label">Lieu *</span>
-
+            {planner?.destination && (
+              <p className="currency-info">
+                Destination du carnet : <strong>{planner.destination}</strong>.
+                Sélectionnez le lieu correspondant ci-dessous.
+              </p>
+            )}
             <div
               ref={inputRef}
               className="create-trip-place-container"
@@ -374,10 +425,7 @@ export default function CreateTrip() {
               Annuler
             </button>
 
-            <button
-              type="submit"
-              className="create-trip-submit-button"
-            >
+            <button type="submit" className="create-trip-submit-button">
               Créer le voyage
             </button>
           </div>

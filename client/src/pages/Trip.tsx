@@ -168,6 +168,11 @@ function Trip() {
 
         if (cancelled) return;
 
+        console.log("Dates reçues du backend :", {
+          start_at: tripData.start_at,
+          end_at: tripData.end_at,
+        });
+
         setMyTrip(tripData);
 
         /* =====================================================

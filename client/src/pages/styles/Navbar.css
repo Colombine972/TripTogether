@@ -15,7 +15,6 @@
   border-bottom: 1px solid #e8e8e8;
 }
 
-
 /* =========================================================
    NAVBAR - STRUCTURE GÉNÉRALE
    ========================================================= */
@@ -32,7 +31,6 @@
 
   gap: 1rem;
 }
-
 
 /* =========================================================
    NAVBAR - PARTIE GAUCHE
@@ -67,7 +65,6 @@
 
   white-space: nowrap;
 }
-
 
 /* =========================================================
    NAVBAR - PARTIE CENTRALE
@@ -107,9 +104,7 @@
 
   text-decoration: none;
 
-  transition:
-    color 180ms ease,
-    transform 180ms ease;
+  transition: color 180ms ease, transform 180ms ease;
 }
 
 .navbar-back-to-trips:hover {
@@ -117,7 +112,6 @@
 
   transform: translateX(-2px);
 }
-
 
 /* =========================================================
    NAVBAR - PARTIE DROITE
@@ -131,7 +125,6 @@
 
   gap: 1rem;
 }
-
 
 /* =========================================================
    BOUTON "CRÉE TON VOYAGE"
@@ -159,9 +152,7 @@
 
   cursor: pointer;
 
-  transition:
-    filter 180ms ease,
-    transform 180ms ease;
+  transition: filter 180ms ease, transform 180ms ease;
 }
 
 .navbar-cta:hover {
@@ -177,7 +168,6 @@
   outline-offset: 3px;
 }
 
-
 /* =========================================================
    PROFIL - CONTENEUR
    ========================================================= */
@@ -189,7 +179,6 @@
   align-items: center;
   justify-content: center;
 }
-
 
 /* =========================================================
    PROFIL - BOUTON AVATAR
@@ -215,11 +204,8 @@
 
   cursor: pointer;
 
-  transition:
-    transform 220ms ease,
-    border-radius 220ms ease,
-    background-color 220ms ease,
-    box-shadow 220ms ease;
+  transition: transform 220ms ease, border-radius 220ms ease, background-color
+    220ms ease, box-shadow 220ms ease;
 }
 
 .navbar-profile-button:hover {
@@ -241,7 +227,6 @@
   outline-offset: 2px;
 }
 
-
 /* =========================================================
    PROFIL - IMAGE AVATAR
    ========================================================= */
@@ -256,7 +241,6 @@
 
   border-radius: 50%;
 }
-
 
 /* =========================================================
    PROFIL - PANNEAU
@@ -303,7 +287,6 @@
   }
 }
 
-
 /* =========================================================
    PROFIL - MESSAGE BONJOUR / BONSOIR
    ========================================================= */
@@ -321,7 +304,6 @@
   font-size: var(--font-size-S);
   font-weight: 600;
 }
-
 
 /* =========================================================
    PROFIL - LIENS DU MENU
@@ -353,9 +335,7 @@
 
   cursor: pointer;
 
-  transition:
-    background-color 180ms ease,
-    color 180ms ease;
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
 .navbar-menu-link:hover,
@@ -370,7 +350,6 @@
 .navbar-logout-btn:hover {
   color: #b13a3a;
 }
-
 
 /* =========================================================
    UTILISATEUR NON CONNECTÉ
@@ -394,15 +373,12 @@
 
   white-space: nowrap;
 
-  transition:
-    color 180ms ease,
-    opacity 180ms ease;
+  transition: color 180ms ease, opacity 180ms ease;
 }
 
 .navbar-auth-link:hover {
   color: #2f5d2f;
 }
-
 
 /* =========================================================
    BOUTON CRÉER UN COMPTE
@@ -422,7 +398,6 @@
 
   opacity: 0.9;
 }
-
 
 /* =========================================================
    PETIT DESKTOP / LAPTOP
@@ -484,7 +459,6 @@
     height: 2.8rem;
   }
 }
-
 
 /* =========================================================
    TABLETTE
@@ -555,9 +529,7 @@
   }
 
   .navbar-cta:active {
-    transform:
-      translateX(-50%)
-      translateY(1px);
+    transform: translateX(-50%) translateY(1px);
   }
 
   /* ================= PROFIL ================= */
@@ -595,7 +567,6 @@
     padding: 0.55rem 0.8rem;
   }
 }
-
 
 /* =========================================================
    MOBILE
@@ -662,7 +633,6 @@
   }
 }
 
-
 /* =========================================================
    TRÈS PETIT MOBILE
 ========================================================= */
@@ -695,5 +665,27 @@
   .user-icon {
     width: 2.15rem;
     height: 2.15rem;
+  }
+}
+
+/* Navbar simplifiée pour la page PDF Etsy */
+
+.navbar-start .navbar-container {
+  justify-content: center;
+}
+
+.navbar-start .navbar-left {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.navbar-start .navbar-center {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .navbar-start .navbar-container {
+    justify-content: center;
   }
 }

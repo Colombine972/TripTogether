@@ -36,7 +36,7 @@ import "../pages/styles/TripInfos.css";
 
 type TripInfosProps = {
   trip: TheTrip | null;
-
+  participantCountOverride?: number;
   onTripUpdated?: (updatedTrip: TheTrip) => void;
 
   totalSteps?: number;
@@ -74,6 +74,7 @@ type BudgetRecapData = {
 
 function TripInfos({
   trip,
+  participantCountOverride,
   onTripUpdated,
   totalSteps = 0,
   validatedStepsCount = 0,
@@ -275,7 +276,32 @@ function TripInfos({
 
   const canManageTrip = canEdit && isOrganizer;
 
-  const participantCount = members.length || trip.participants || 0;
+  /* =====================================================
+   OUVERTURE AUTOMATIQUE DES INVITATIONS
+   APRÈS CRÉATION DEPUIS LE PDF ETSY
+===================================================== */
+
+  useEffect(() => {
+    const navigationState = location.state as {
+      openInvitation?: boolean;
+    } | null;
+
+    if (!navigationState?.openInvitation || !canManageTrip) {
+      return;
+    }
+
+    setIsInviteModalOpen(true);
+
+    // Supprimer l'instruction pour éviter de rouvrir
+    // la modale lors des navigations suivantes.
+    navigate(location.pathname, {
+      replace: true,
+      state: null,
+    });
+  }, [location.state, location.pathname, canManageTrip, navigate]);
+
+  const participantCount =
+    participantCountOverride ?? (members.length || trip.participants || 0);
 
   /* =======================================================
      PROGRESSION DES ÉTAPES

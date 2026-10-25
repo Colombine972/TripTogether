@@ -5,7 +5,7 @@ export type Step = {
   city: string;
   country: string;
   trip_id: number;
-  status?: "pending" | "validated" | "rejected";
+  status: "pending" | "validated" | "rejected" | "no_decision";
   creator_name: string;
   is_initial: boolean;
   place_id?: string | null;

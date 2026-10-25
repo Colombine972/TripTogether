@@ -112,82 +112,89 @@ function Steps() {
      CHARGEMENT DES ÉTAPES
   ========================================================= */
 
-  const fetchSteps = useCallback(async () => {
-    try {
-      setLoadingSteps(true);
+  const fetchSteps = useCallback(
+    async (showLoading = true) => {
+      try {
+        if (showLoading) {
+          setLoadingSteps(true);
+        }
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/steps`,
+          {
+            method: "GET",
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/trips/${tripId}/steps`,
-        {
-          method: "GET",
+            headers: {
+              "Content-Type": "application/json",
 
-          headers: {
-            "Content-Type": "application/json",
-
-            Authorization: token ? `Bearer ${token}` : "",
+              Authorization: token ? `Bearer ${token}` : "",
+            },
           },
-        },
-      );
+        );
 
-      const result: StepsResponse = await response.json();
+        const result: StepsResponse = await response.json();
 
-      if (response.status === 401) {
-        const manualLogout = sessionStorage.getItem("manualLogout") === "true";
+        if (response.status === 401) {
+          const manualLogout =
+            sessionStorage.getItem("manualLogout") === "true";
 
-        if (!manualLogout) {
-          const errorMessage = "error" in result ? result.error : undefined;
+          if (!manualLogout) {
+            const errorMessage = "error" in result ? result.error : undefined;
 
-          if (errorMessage === "Token expired") {
-            toast.error("Session expirée. Veuillez vous reconnecter.");
-          } else {
-            toast.error("Veuillez vous connecter pour accéder à ce voyage.");
+            if (errorMessage === "Token expired") {
+              toast.error("Session expirée. Veuillez vous reconnecter.");
+            } else {
+              toast.error("Veuillez vous connecter pour accéder à ce voyage.");
+            }
           }
+
+          navigate("/login", {
+            replace: true,
+          });
+
+          return;
         }
 
-        navigate("/login", {
-          replace: true,
-        });
+        if (response.status === 400) {
+          toast.error("Requête invalide");
 
-        return;
+          navigate("/");
+
+          return;
+        }
+
+        if (response.status === 403) {
+          toast.error("Accès non autorisé");
+
+          navigate("/");
+
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("Erreur chargement étapes");
+        }
+
+        if (!("steps" in result)) {
+          toast.error("Données d'étapes invalides");
+
+          return;
+        }
+
+        setSteps(result.steps);
+
+        setMemberCount(result.trip.memberCount);
+      } catch (error) {
+        console.error("Erreur fetchSteps :", error);
+
+        toast.error("Impossible de charger les étapes");
+      } finally {
+        if (showLoading) {
+          setLoadingSteps(false);
+        }
       }
-
-      if (response.status === 400) {
-        toast.error("Requête invalide");
-
-        navigate("/");
-
-        return;
-      }
-
-      if (response.status === 403) {
-        toast.error("Accès non autorisé");
-
-        navigate("/");
-
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error("Erreur chargement étapes");
-      }
-
-      if (!("steps" in result)) {
-        toast.error("Données d'étapes invalides");
-
-        return;
-      }
-
-      setSteps(result.steps);
-
-      setMemberCount(result.trip.memberCount);
-    } catch (error) {
-      console.error("Erreur fetchSteps :", error);
-
-      toast.error("Impossible de charger les étapes");
-    } finally {
-      setLoadingSteps(false);
-    }
-  }, [tripId, token, navigate]);
+    },
+    [tripId, token, navigate],
+  );
 
   /* =========================================================
    CHARGEMENT INITIAL
@@ -281,6 +288,7 @@ function Steps() {
   const validatedSteps = steps.filter((step) => step.status === "validated");
 
   const rejectedSteps = steps.filter((step) => step.status === "rejected");
+  const noDecisionSteps = steps.filter((step) => step.status === "no_decision");
 
   /* =========================================================
      AJOUT RÉUSSI
@@ -355,8 +363,9 @@ function Steps() {
                   <p className="section-subtitle">
                     Votez pour les destinations ci-dessous.
                     <br />
-                    Pour valider une étape, tous les membres doivent avoir voté,
-                    avec une majorité de OUI.
+                    Vous pouvez modifier votre vote jusqu'à la veille du départ
+                    à 23h59. Les résultats seront déterminés à la clôture, selon
+                    la majorité des votes exprimés.
                   </p>
 
                   <div className="steps-container">
@@ -370,7 +379,8 @@ function Steps() {
                           currentUserId={currentUserId}
                           tripId={tripId}
                           memberCount={memberCount}
-                          onVoteSuccess={fetchSteps}
+                          tripStartAt={trip?.start_at}
+                          onVoteSuccess={() => fetchSteps(false)}
                         />
                       </div>
                     ))}
@@ -399,7 +409,8 @@ function Steps() {
                           currentUserId={currentUserId}
                           tripId={tripId}
                           memberCount={memberCount}
-                          onVoteSuccess={fetchSteps}
+                          tripStartAt={trip?.start_at}
+                          onVoteSuccess={() => fetchSteps(false)}
                         />
                       </div>
                     ))}
@@ -428,7 +439,43 @@ function Steps() {
                           currentUserId={currentUserId}
                           tripId={tripId}
                           memberCount={memberCount}
-                          onVoteSuccess={fetchSteps}
+                          tripStartAt={trip?.start_at}
+                          onVoteSuccess={() => fetchSteps(false)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ===============================================
+    DESTINATIONS SANS DÉCISION
+=============================================== */}
+
+              {noDecisionSteps.length > 0 && (
+                <div className="steps-section">
+                  <h2 className="section-title">
+                    Destinations sans décision ({noDecisionSteps.length})
+                  </h2>
+
+                  <p className="section-subtitle">
+                    Aucun vote n'a été exprimé avant la clôture. Ces
+                    destinations n'ont pas été validées.
+                  </p>
+
+                  <div className="steps-container">
+                    {noDecisionSteps.map((step) => (
+                      <div
+                        key={step.id}
+                        data-notification-ref={`step-${step.id}`}
+                      >
+                        <StepCard
+                          step={step}
+                          currentUserId={currentUserId}
+                          tripId={tripId}
+                          memberCount={memberCount}
+                          tripStartAt={trip?.start_at}
+                          onVoteSuccess={() => fetchSteps(false)}
                         />
                       </div>
                     ))}

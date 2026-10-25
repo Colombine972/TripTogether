@@ -1,6 +1,7 @@
 import databaseClient from "../../../database/client";
 
 import type { Result, Rows } from "../../../database/client";
+import { finalizeStepWithinTransaction } from "../step/stepVoteFinalizationService";
 
 type User = {
   id: number;
@@ -280,6 +281,202 @@ class UserRepository {
 
     try {
       await connection.beginTransaction();
+
+      /* =====================================================
+   VERROUILLER LES VOYAGES CONCERNÉS PAR LE COMPTE
+
+   Évite qu'un vote ou une finalisation se produise
+   simultanément à la suppression des invitations.
+===================================================== */
+
+      const [affectedTrips] = await connection.query<Rows>(
+        `
+    SELECT DISTINCT t.id
+    FROM trip t
+    LEFT JOIN invitation i ON i.trip_id = t.id
+    WHERE t.user_id = ?
+       OR i.user_id = ?
+       OR i.email = ?
+    ORDER BY t.id
+  `,
+        [userId, userId, currentEmail],
+      );
+
+      for (const trip of affectedTrips) {
+        await connection.query<Rows>(
+          `
+      SELECT id
+      FROM trip
+      WHERE id = ?
+      FOR UPDATE
+    `,
+          [Number(trip.id)],
+        );
+      }
+
+      /* =====================================================
+   FINALISER LES VOTES CLÔTURÉS AVANT SUPPRESSION
+   Les voyages concernés sont déjà verrouillés.
+===================================================== */
+
+      const dateParts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/Paris",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).formatToParts(new Date());
+
+      const getDatePart = (type: string) =>
+        dateParts.find((part) => part.type === type)?.value ?? "";
+
+      const todayInParis = `${getDatePart("year")}-${getDatePart("month")}-${getDatePart("day")}`;
+
+      for (const trip of affectedTrips) {
+        const tripId = Number(trip.id);
+
+        const [pendingSteps] = await connection.query<Rows>(
+          `
+      SELECT s.id
+      FROM step s
+      JOIN trip t ON t.id = s.trip_id
+      WHERE s.trip_id = ?
+        AND s.is_initial = 0
+        AND s.vote_status = 'pending'
+        AND DATE_FORMAT(t.start_at, '%Y-%m-%d') <= ?
+      ORDER BY s.id
+    `,
+          [tripId, todayInParis],
+        );
+
+        for (const step of pendingSteps) {
+          const finalized = await finalizeStepWithinTransaction(
+            connection,
+            Number(step.id),
+            tripId,
+          );
+
+          if (!finalized) {
+            throw new Error(
+              `Impossible de finaliser la destination ${step.id}`,
+            );
+          }
+        }
+      }
+
+      /* =====================================================
+   IDENTIFIER LES NOUVEAUX ORGANISATEURS
+
+   En cas de suppression du compte propriétaire,
+   sélectionner le premier participant accepté.
+===================================================== */
+
+      const ownedTripTransfers: {
+        tripId: number;
+        newOwnerId: number;
+      }[] = [];
+
+      for (const trip of affectedTrips) {
+        const tripId = Number(trip.id);
+
+        const [ownedTrips] = await connection.query<Rows>(
+          `
+      SELECT user_id
+      FROM trip
+      WHERE id = ?
+    `,
+          [tripId],
+        );
+
+        if (Number(ownedTrips[0]?.user_id) !== userId) {
+          continue;
+        }
+
+        const [candidates] = await connection.query<Rows>(
+          `
+      SELECT i.user_id
+      FROM invitation i
+      WHERE i.trip_id = ?
+        AND i.status = 'accepted'
+        AND i.user_id IS NOT NULL
+        AND i.user_id <> ?
+      ORDER BY i.created_at ASC, i.id ASC
+      LIMIT 1
+    `,
+          [tripId, userId],
+        );
+
+        if (candidates.length === 0) {
+          throw new Error(
+            `Suppression du compte impossible : aucun repreneur pour le voyage ${tripId}.`,
+          );
+        }
+
+        ownedTripTransfers.push({
+          tripId,
+          newOwnerId: Number(candidates[0].user_id),
+        });
+      }
+
+      /* =====================================================
+   TRANSFÉRER LES VOYAGES AU NOUVEL ORGANISATEUR
+
+   Les voyages sont déjà verrouillés.
+   Les votes finalisés restent inchangés.
+===================================================== */
+
+      for (const transfer of ownedTripTransfers) {
+        // Transférer la propriété du voyage.
+        const [result] = await connection.query<Result>(
+          `
+      UPDATE trip
+      SET user_id = ?
+      WHERE id = ?
+        AND user_id = ?
+    `,
+          [transfer.newOwnerId, transfer.tripId, userId],
+        );
+
+        if (result.affectedRows !== 1) {
+          throw new Error(
+            `Impossible de transférer le voyage ${transfer.tripId}.`,
+          );
+        }
+
+        // Le nouveau propriétaire n'a plus besoin
+        // de son ancienne invitation acceptée.
+        await connection.query<Result>(
+          `
+      DELETE FROM invitation
+      WHERE trip_id = ?
+        AND user_id = ?
+        AND status = 'accepted'
+    `,
+          [transfer.tripId, transfer.newOwnerId],
+        );
+      }
+
+      /* =====================================================
+   SUPPRIMER LES VOTES NON FINALISÉS DU COMPTE
+
+   Les votes déjà finalisés sont conservés.
+   Les voyages concernés ont été verrouillés.
+===================================================== */
+
+      for (const trip of affectedTrips) {
+        const tripId = Number(trip.id);
+
+        await connection.query<Result>(
+          `
+      DELETE v
+      FROM vote v
+      JOIN step s ON s.id = v.step_id
+      WHERE v.user_id = ?
+        AND s.trip_id = ?
+        AND s.vote_finalized_at IS NULL
+    `,
+          [userId, tripId],
+        );
+      }
 
       /**
        * Suppression des invitations associées au compte.

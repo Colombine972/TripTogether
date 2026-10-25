@@ -1,6 +1,9 @@
 import type { RequestHandler } from "express";
 import Joi from "joi";
 
+import databaseClient from "../../../database/client";
+import type { Result, Rows } from "../../../database/client";
+
 import type { StepWithStatus, VotesStats } from "../../types/voteType";
 
 import activityService from "../activity/activityService";
@@ -124,24 +127,32 @@ const selectStepsByTrip: RequestHandler = async (req, res, next) => {
       }
 
       /* =============================================
-               CALCUL DU STATUT
-            ============================================== */
+         STATUT DE LA DESTINATION PROPOSÉE
+         Les votes restent ouverts jusqu'au départ
+      ============================================== */
 
-      const yesVotes = step.yes_votes;
+      /* =============================================
+         STATUT ET RÉSULTATS DES VOTES
+      ============================================== */
 
-      const totalVotes = step.total_votes;
+      let yesVotes = Number(step.yes_votes);
+      let totalVotes = Number(step.total_votes);
+      let noVotes = totalVotes - yesVotes;
 
-      const memberCount = step.total_members;
+      let status: "pending" | "validated" | "rejected" | "no_decision" =
+        "pending";
 
-      const everyoneVoted = totalVotes === memberCount;
+      // Résultat déjà finalisé et enregistré en MySQL
+      if (step.vote_finalized_at && step.vote_status) {
+        status = step.vote_status as "validated" | "rejected" | "no_decision";
 
-      const majorityYes = yesVotes > memberCount / 2;
-
-      let status: "pending" | "validated" | "rejected" = "pending";
-
-      if (everyoneVoted) {
-        status = majorityYes ? "validated" : "rejected";
+        yesVotes = Number(step.final_yes_votes ?? 0);
+        noVotes = Number(step.final_no_votes ?? 0);
+        totalVotes = yesVotes + noVotes;
       }
+
+      // Dans tous les autres cas, le statut reste pending.
+      // La finalisation sera assurée par le backend.
 
       return {
         id: step.id,
@@ -193,214 +204,340 @@ const selectStepsByTrip: RequestHandler = async (req, res, next) => {
 };
 
 /* =========================================================
-   AJOUTER UN VOTE
+   VÉRIFIER SI LES VOTES SONT ENCORE OUVERTS
+   Fuseau horaire : Europe/Paris
+========================================================= */
+
+const isVoteOpen = (tripStartDate: string | Date): boolean => {
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Paris",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  const toParisDate = (date: Date): string => {
+    const parts = formatter.formatToParts(date);
+
+    const year = parts.find((part) => part.type === "year")?.value;
+    const month = parts.find((part) => part.type === "month")?.value;
+    const day = parts.find((part) => part.type === "day")?.value;
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const startDate =
+    typeof tripStartDate === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(tripStartDate)
+      ? tripStartDate
+      : toParisDate(new Date(tripStartDate));
+
+  const todayInParis = toParisDate(new Date());
+
+  // Les votes ferment dès minuit le jour du départ.
+  return todayInParis < startDate;
+};
+
+/* =========================================================
+   AJOUTER OU MODIFIER UN VOTE
+   TRANSACTION MYSQL
 ========================================================= */
 
 const addVote: RequestHandler = async (req, res, next) => {
+  const stepId = Number(req.params.id);
+
+  if (!Number.isInteger(stepId) || stepId <= 0) {
+    return res.status(400).json({
+      error: "ID d'étape invalide",
+    });
+  }
+
+  const { error, value } = createVoteSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      error: error.details[0].message,
+    });
+  }
+
+  const { vote, comment } = value;
+
+  const authReq = req as RequestWithAuth;
+  const userId = Number(authReq.auth.sub);
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    return res.status(401).json({
+      error: "Non authentifié",
+    });
+  }
+
+  const connection = await databaseClient.getConnection().catch(next);
+
+  if (!connection) return;
+
+  let committedVote: Rows[number] | null = null;
+  let isFirstVote = false;
+  let tripId = 0;
+  let stepCity = "";
+
   try {
-    const stepId = Number(req.params.id);
-
-    if (Number.isNaN(stepId)) {
-      return res.status(400).json({
-        error: "ID d'étape invalide",
-      });
-    }
+    await connection.beginTransaction();
 
     /* =====================================================
-         VALIDATION DU BODY
-      ====================================================== */
+       RETROUVER LE VOYAGE DE L'ÉTAPE
+    ====================================================== */
 
-    const { error, value } = createVoteSchema.validate(req.body);
-
-    if (error) {
-      return res.status(400).json({
-        error: error.details[0].message,
-      });
-    }
-
-    const { vote, comment } = value;
-
-    /* =====================================================
-         UTILISATEUR
-      ====================================================== */
-
-    const authReq = req as RequestWithAuth;
-
-    const userId = Number(authReq.auth.sub);
-
-    if (!userId) {
-      return res.status(403).json({
-        error: "Non authentifié",
-      });
-    }
-
-    /* =====================================================
-         ÉTAPE
-      ====================================================== */
-
-    const step = await stepRepository.getStepWithTrip(stepId);
-
-    if (!step) {
-      return res.status(404).json({
-        error: "Etape non trouvée",
-      });
-    }
-
-    /* =====================================================
-         MEMBRE DU VOYAGE
-      ====================================================== */
-
-    const isMemberOfTrip = await tripRepository.isUserMemberOfTrip(
-      step.trip_id,
-      userId,
+    const [stepLookup] = await connection.query<Rows>(
+      `
+        SELECT trip_id
+        FROM step
+        WHERE id = ?
+      `,
+      [stepId],
     );
 
-    if (!isMemberOfTrip) {
+    if (stepLookup.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({
+        error: "Étape introuvable",
+      });
+    }
+
+    tripId = Number(stepLookup[0].trip_id);
+
+    /* =====================================================
+       VERROUILLER LE VOYAGE
+    ====================================================== */
+
+    const [trips] = await connection.query<Rows>(
+      `
+        SELECT
+          id,
+          user_id,
+          DATE_FORMAT(start_at, '%Y-%m-%d') AS start_date
+        FROM trip
+        WHERE id = ?
+        FOR UPDATE
+      `,
+      [tripId],
+    );
+
+    if (trips.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({
+        error: "Voyage introuvable",
+      });
+    }
+
+    /* =====================================================
+       VERROUILLER LA DESTINATION
+    ====================================================== */
+
+    const [steps] = await connection.query<Rows>(
+      `
+        SELECT
+          id,
+          trip_id,
+          city,
+          is_initial,
+          vote_status
+        FROM step
+        WHERE id = ?
+          AND trip_id = ?
+        FOR UPDATE
+      `,
+      [stepId, tripId],
+    );
+
+    if (steps.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({
+        error: "Destination introuvable",
+      });
+    }
+
+    const step = steps[0];
+    stepCity = String(step.city);
+
+    if (Number(step.is_initial) !== 0) {
+      await connection.rollback();
+      return res.status(403).json({
+        error: "La destination principale est automatiquement validée.",
+      });
+    }
+
+    /* =====================================================
+       VÉRIFIER LE STATUT DE LA DESTINATION
+    ====================================================== */
+
+    // NULL : ancienne destination non encore migrée.
+    // Ce cas devra être traité lors de l'initialisation
+    // des données existantes.
+
+    if (step.vote_status !== "pending") {
+      await connection.rollback();
+      return res.status(403).json({
+        error: "Le vote de cette destination est terminé.",
+      });
+    }
+
+    /* =====================================================
+       VÉRIFIER L'APPARTENANCE AU VOYAGE
+    ====================================================== */
+
+    const [members] = await connection.query<Rows>(
+      `
+        SELECT
+          (
+            EXISTS (
+              SELECT 1
+              FROM trip t
+              WHERE t.id = ?
+                AND t.user_id = ?
+            )
+            OR EXISTS (
+              SELECT 1
+              FROM invitation i
+              WHERE i.trip_id = ?
+                AND i.user_id = ?
+                AND i.status = 'accepted'
+            )
+          ) AS is_member
+      `,
+      [tripId, userId, tripId, userId],
+    );
+
+    if (Number(members[0]?.is_member) !== 1) {
+      await connection.rollback();
       return res.status(403).json({
         error: "Vous devez être membre du voyage pour voter",
       });
     }
 
     /* =====================================================
-         VOTE DÉJÀ EFFECTUÉ
-      ====================================================== */
+       VÉRIFIER LA DATE LIMITE
+       EUROPE/PARIS
+    ====================================================== */
 
-    const hasVoted = await stepRepository.hasUserVoted(userId, stepId);
+    const tripStartDate = String(trips[0].start_date);
 
-    if (hasVoted) {
-      return res.status(409).json({
-        error: "Vous avez déjà voté pour cette étape",
+    if (!isVoteOpen(tripStartDate)) {
+      await connection.rollback();
+      return res.status(403).json({
+        error: "Les votes sont clôturés pour ce voyage.",
       });
     }
 
     /* =====================================================
-         ENREGISTREMENT DU VOTE
-      ====================================================== */
+       RECHERCHER LE VOTE DE L'UTILISATEUR
+    ====================================================== */
 
-    const voteId = await stepRepository.create(
-      userId,
-      stepId,
-      vote,
-      comment || null,
+    const [existingVotes] = await connection.query<Rows>(
+      `
+        SELECT id
+        FROM vote
+        WHERE user_id = ?
+          AND step_id = ?
+        FOR UPDATE
+      `,
+      [userId, stepId],
     );
 
-    const createdVote = await stepRepository.selectByIdWithUser(voteId);
+    let voteId: number;
 
-    /* =====================================================
-         NOTIFICATION DU VOTE
-      ====================================================== */
+    if (existingVotes.length > 0) {
+      voteId = Number(existingVotes[0].id);
 
-    await notificationService.notifyVoteCreated(
-      step.trip_id,
-      userId,
-      stepId,
-      step.city,
-    );
+      await connection.query<Result>(
+        `
+          UPDATE vote
+          SET
+            vote = ?,
+            comment = ?
+          WHERE id = ?
+        `,
+        [vote ? 1 : 0, comment || null, voteId],
+      );
+    } else {
+      const [result] = await connection.query<Result>(
+        `
+          INSERT INTO vote
+            (user_id, step_id, vote, comment)
+          VALUES (?, ?, ?, ?)
+        `,
+        [userId, stepId, vote ? 1 : 0, comment || null],
+      );
 
-    /* =====================================================
-         ACTIVITÉ DU VOTE
-      ====================================================== */
-
-    await activityService.createActivity({
-      tripId: step.trip_id,
-
-      userId,
-
-      type: "vote_created",
-
-      title: "Nouveau vote",
-
-      message: vote
-        ? `a voté Oui pour l'étape ${step.city}.`
-        : `a voté Non pour l'étape ${step.city}.`,
-
-      referenceType: "step",
-
-      referenceId: stepId,
-    });
-
-    /* =====================================================
-         VÉRIFIER SI LE VOTE TERMINE LE SCRUTIN
-      ====================================================== */
-
-    const updatedSteps = await stepRepository.getStepsWithVotes(step.trip_id);
-
-    const updatedStep = updatedSteps.find(
-      (currentStep) => Number(currentStep.id) === stepId,
-    );
-
-    if (updatedStep && !updatedStep.is_initial) {
-      const yesVotes = Number(updatedStep.yes_votes);
-
-      const totalVotes = Number(updatedStep.total_votes);
-
-      const memberCount = Number(updatedStep.total_members);
-
-      /*
-       * L'activité de décision n'est créée
-       * que lorsque tous les membres ont voté.
-       *
-       * Comme un utilisateur ne peut voter
-       * qu'une seule fois, ce bloc ne peut
-       * s'exécuter qu'une seule fois pour
-       * cette étape.
-       */
-      const everyoneVoted = memberCount > 0 && totalVotes === memberCount;
-
-      if (everyoneVoted) {
-        const majorityYes = yesVotes > memberCount / 2;
-
-        /* ===============================================
-             ÉTAPE VALIDÉE
-          ================================================ */
-
-        if (majorityYes) {
-          await activityService.createActivity({
-            tripId: step.trip_id,
-
-            /*
-             * Pas d'utilisateur :
-             * c'est une décision collective.
-             */
-            userId: null,
-
-            type: "step_validated",
-
-            title: "Étape validée",
-
-            message: `L'étape « ${step.city} » a été validée.`,
-
-            referenceType: "step",
-
-            referenceId: stepId,
-          });
-        } else {
-          /* ===============================================
-             ÉTAPE REJETÉE
-          ================================================ */
-          await activityService.createActivity({
-            tripId: step.trip_id,
-
-            userId: null,
-
-            type: "step_rejected",
-
-            title: "Étape rejetée",
-
-            message: `L'étape « ${step.city} » a été rejetée.`,
-
-            referenceType: "step",
-
-            referenceId: stepId,
-          });
-        }
-      }
+      voteId = result.insertId;
+      isFirstVote = true;
     }
 
-    return res.status(201).json(createdVote);
+    /* =====================================================
+       RÉCUPÉRER LE VOTE ENREGISTRÉ
+    ====================================================== */
+
+    const [savedVotes] = await connection.query<Rows>(
+      `
+        SELECT
+          v.*,
+          u.firstname AS user_name
+        FROM vote v
+        JOIN user u
+          ON u.id = v.user_id
+        WHERE v.id = ?
+      `,
+      [voteId],
+    );
+
+    committedVote = savedVotes[0] ?? null;
+
+    await connection.commit();
   } catch (err) {
-    next(err);
+    try {
+      await connection.rollback();
+    } catch (rollbackError) {
+      console.error("Erreur rollback du vote :", rollbackError);
+    }
+
+    return next(err);
+  } finally {
+    connection.release();
   }
+
+  /* =====================================================
+     NOTIFICATION UNIQUEMENT AU PREMIER VOTE
+     APRÈS VALIDATION DE LA TRANSACTION
+  ====================================================== */
+
+  if (isFirstVote) {
+    try {
+      await notificationService.notifyVoteCreated(
+        tripId,
+        userId,
+        stepId,
+        stepCity,
+      );
+
+      await activityService.createActivity({
+        tripId,
+        userId,
+        type: "vote_created",
+        title: "Nouveau vote",
+        message: vote
+          ? `a voté Oui pour l'étape ${stepCity}.`
+          : `a voté Non pour l'étape ${stepCity}.`,
+        referenceType: "step",
+        referenceId: stepId,
+      });
+    } catch (notificationError) {
+      console.error(
+        "Vote enregistré, mais erreur de notification :",
+        notificationError,
+      );
+    }
+  }
+
+  return res.status(isFirstVote ? 201 : 200).json(committedVote);
 };
 
 /* =========================================================
@@ -448,21 +585,23 @@ const browseVote: RequestHandler = async (req, res, next) => {
 
     const allVotes = await stepRepository.selectByStep(stepId);
 
-    const yes = allVotes.filter((currentVote) => currentVote.vote).length;
+    const isFinalized = step.vote_finalized_at != null;
 
-    const no = allVotes.filter((currentVote) => !currentVote.vote).length;
+    const yes = isFinalized
+      ? Number(step.final_yes_votes ?? 0)
+      : allVotes.filter((currentVote) => Number(currentVote.vote) === 1).length;
+
+    const no = isFinalized
+      ? Number(step.final_no_votes ?? 0)
+      : allVotes.filter((currentVote) => Number(currentVote.vote) === 0).length;
 
     const showVoteStats: VotesStats = {
       step_id: stepId,
-
       allVotes,
-
       summary: {
         yes,
-
         no,
-
-        total: allVotes.length,
+        total: yes + no,
       },
     };
 

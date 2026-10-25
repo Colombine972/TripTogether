@@ -44,6 +44,10 @@ class StepRepository {
     place_id: string | null;
     start_at: string | null;
     end_at: string | null;
+    is_initial: boolean | number;
+    vote_finalized_at: string | Date | null;
+    final_yes_votes: number | null;
+    final_no_votes: number | null;
   } | null> {
     const [rows] = await databaseClient.query<Rows>(
       `
@@ -54,7 +58,11 @@ class StepRepository {
           country,
           place_id,
           start_at,
-          end_at
+          end_at,
+          is_initial
+          vote_finalized_at,
+          final_yes_votes,
+          final_no_votes
         FROM step
         WHERE id = ?
       `,
@@ -70,14 +78,15 @@ class StepRepository {
           place_id: string | null;
           start_at: string | null;
           end_at: string | null;
+          is_initial: boolean | number;
+          vote_finalized_at: string | Date | null;
+          final_yes_votes: number | null;
+          final_no_votes: number | null;
         })
       : null;
   }
 
-  async hasUserVoted(
-    userId: number,
-    stepId: number,
-  ): Promise<boolean> {
+  async hasUserVoted(userId: number, stepId: number): Promise<boolean> {
     const [rows] = await databaseClient.query<Rows>(
       "SELECT id FROM vote WHERE user_id = ? AND step_id = ?",
       [userId, stepId],
@@ -104,9 +113,32 @@ class StepRepository {
     return result.insertId;
   }
 
-  async selectByIdWithUser(
-    voteId: number,
-  ): Promise<VoteWithUser | null> {
+  /* =========================================================
+     MODIFIER UN VOTE EXISTANT
+  ========================================================= */
+
+  async updateVote(
+    userId: number,
+    stepId: number,
+    vote: boolean,
+    comment: string | null,
+  ): Promise<number> {
+    const [result] = await databaseClient.query<Result>(
+      `
+        UPDATE vote
+        SET
+          vote = ?,
+          comment = ?
+        WHERE user_id = ?
+          AND step_id = ?
+      `,
+      [vote ? 1 : 0, comment, userId, stepId],
+    );
+
+    return result.affectedRows;
+  }
+
+  async selectByIdWithUser(voteId: number): Promise<VoteWithUser | null> {
     const [rows] = await databaseClient.query<Rows>(
       `
         SELECT
@@ -120,30 +152,46 @@ class StepRepository {
       [voteId],
     );
 
-    return rows.length > 0
-      ? (rows[0] as VoteWithUser)
-      : null;
+    return rows.length > 0 ? (rows[0] as VoteWithUser) : null;
   }
 
-  async selectByStep(
-    stepId: number,
-  ): Promise<VoteWithUser[]> {
+  /* =========================================================
+     RÉCUPÉRER LES VOTES DES MEMBRES ACTUELS
+  ========================================================= */
+
+  async selectByStep(stepId: number): Promise<VoteWithUser[]> {
     const [rows] = await databaseClient.query<Rows>(
       `
-        SELECT
-          v.id,
-          v.created_at,
-          v.user_id,
-          v.step_id,
-          v.vote,
-          v.comment,
-          u.firstname AS user_name
-        FROM vote v
-        JOIN user u
-          ON u.id = v.user_id
-        WHERE v.step_id = ?
-        ORDER BY v.created_at DESC
-      `,
+      SELECT
+        v.id,
+        v.created_at,
+        v.user_id,
+        v.step_id,
+        v.vote,
+        v.comment,
+        u.firstname AS user_name
+      FROM vote v
+      JOIN user u ON u.id = v.user_id
+      JOIN step s ON s.id = v.step_id
+      WHERE v.step_id = ?
+        AND (
+          s.vote_finalized_at IS NOT NULL
+          OR EXISTS (
+            SELECT 1
+            FROM trip t
+            WHERE t.id = s.trip_id
+              AND t.user_id = v.user_id
+          )
+          OR EXISTS (
+            SELECT 1
+            FROM invitation i
+            WHERE i.trip_id = s.trip_id
+              AND i.user_id = v.user_id
+              AND i.status = 'accepted'
+          )
+        )
+      ORDER BY v.created_at DESC
+    `,
       [stepId],
     );
 
@@ -159,9 +207,7 @@ class StepRepository {
     return result.affectedRows;
   }
 
-  async getStepsWithVotes(
-    tripId: number,
-  ): Promise<Rows> {
+  async getStepsWithVotes(tripId: number): Promise<Rows> {
     const [rows] = await databaseClient.query<Rows>(
       `
         SELECT
@@ -174,21 +220,24 @@ class StepRepository {
           u.firstname AS creator_name,
           s.is_initial AS is_initial,
           s.place_id AS place_id,
+          s.vote_status AS vote_status,
+          s.vote_finalized_at AS vote_finalized_at,
+          s.final_yes_votes AS final_yes_votes,
+          s.final_no_votes AS final_no_votes,
 
           (
-            SELECT COUNT(*)
+            SELECT COUNT(DISTINCT member_id)
             FROM (
-              SELECT user_id
-              FROM invitation
-              WHERE
-                trip_id = s.trip_id
-                AND status = 'accepted'
+              SELECT i.user_id AS member_id
+              FROM invitation i
+              WHERE i.trip_id = ?
+                AND i.status = 'accepted'
 
               UNION
 
-              SELECT t.user_id
+              SELECT t.user_id AS member_id
               FROM trip t
-              WHERE t.id = s.trip_id
+              WHERE t.id = ?
             ) AS members
           ) AS total_members,
 
@@ -196,14 +245,43 @@ class StepRepository {
             SELECT COUNT(*)
             FROM vote v
             WHERE v.step_id = s.id
+              AND (
+                EXISTS (
+                  SELECT 1
+                  FROM trip t
+                  WHERE t.id = s.trip_id
+                    AND t.user_id = v.user_id
+                )
+                OR EXISTS (
+                  SELECT 1
+                  FROM invitation i
+                  WHERE i.trip_id = s.trip_id
+                    AND i.user_id = v.user_id
+                    AND i.status = 'accepted'
+                )
+              )
           ) AS total_votes,
 
           (
             SELECT COUNT(*)
             FROM vote v
-            WHERE
-              v.step_id = s.id
+            WHERE v.step_id = s.id
               AND v.vote = 1
+              AND (
+                EXISTS (
+                  SELECT 1
+                  FROM trip t
+                  WHERE t.id = s.trip_id
+                    AND t.user_id = v.user_id
+                )
+                OR EXISTS (
+                  SELECT 1
+                  FROM invitation i
+                  WHERE i.trip_id = s.trip_id
+                    AND i.user_id = v.user_id
+                    AND i.status = 'accepted'
+                )
+              )
           ) AS yes_votes
 
         FROM step s
@@ -221,10 +299,70 @@ class StepRepository {
           s.start_at ASC,
           s.id ASC
       `,
-      [tripId],
+      [tripId, tripId, tripId],
     );
 
     return rows;
+  }
+
+  /* =========================================================
+     RÉCUPÉRER LES DESTINATIONS À FINALISER
+  ========================================================= */
+
+  async getStepsToFinalize(todayInParis: string): Promise<Rows> {
+    const [rows] = await databaseClient.query<Rows>(
+      `
+        SELECT
+          s.id,
+          s.trip_id,
+          s.city,
+          s.vote_status,
+          t.start_at AS trip_start_at
+
+        FROM step s
+
+        JOIN trip t
+          ON t.id = s.trip_id
+
+        WHERE s.is_initial = 0
+          AND s.vote_status = 'pending'
+          AND DATE_FORMAT(t.start_at, '%Y-%m-%d') <= ?
+
+        ORDER BY t.start_at ASC, s.id ASC
+      `,
+      [todayInParis],
+    );
+
+    return rows;
+  }
+
+  /* =========================================================
+     ENREGISTRER LE RÉSULTAT DÉFINITIF D'UNE DESTINATION
+  ========================================================= */
+
+  async finalizeStepVote(
+    stepId: number,
+    status: "validated" | "rejected" | "no_decision",
+    yesVotes: number,
+    noVotes: number,
+  ): Promise<boolean> {
+    const [result] = await databaseClient.query<Result>(
+      `
+        UPDATE step
+        SET
+          vote_status = ?,
+          vote_finalized_at = UTC_TIMESTAMP(),
+          final_yes_votes = ?,
+          final_no_votes = ?
+
+        WHERE id = ?
+          AND is_initial = 0
+          AND vote_status = 'pending'
+      `,
+      [status, yesVotes, noVotes, stepId],
+    );
+
+    return result.affectedRows === 1;
   }
 
   async createStepCity(step: CreateStep) {
@@ -238,9 +376,10 @@ class StepRepository {
             end_at,
             trip_id,
             place_id,
-            user_id
+            user_id,
+            vote_status
           )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
       `,
       [
         step.city,

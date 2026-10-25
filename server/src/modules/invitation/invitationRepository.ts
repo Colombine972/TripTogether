@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 
 import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
+import { finalizeStepWithinTransaction } from "../step/stepVoteFinalizationService";
 
 type Invitation = {
   id: number;
@@ -254,27 +255,80 @@ class InvitationRepository {
   }
 
   /* =========================================================
-     MODIFIER LE STATUT
+     MODIFIER LE STATUT D'UNE INVITATION
+     TRANSACTION MYSQL
   ========================================================= */
 
   async updateStatus(
     id: number,
     status: "accepted" | "refused",
   ): Promise<boolean> {
-    const [result] = await databaseClient.query<Result>(
-      `
-          UPDATE invitation
+    const connection = await databaseClient.getConnection();
 
+    try {
+      await connection.beginTransaction();
+
+      // Identifier le voyage correspondant à l'invitation.
+      const [invitations] = await connection.query<Rows>(
+        `
+          SELECT trip_id
+          FROM invitation
+          WHERE id = ?
+        `,
+        [id],
+      );
+
+      if (invitations.length === 0) {
+        await connection.rollback();
+        return false;
+      }
+
+      const tripId = Number(invitations[0].trip_id);
+
+      // Verrouiller le voyage, comme pour les votes.
+      const [trips] = await connection.query<Rows>(
+        `
+          SELECT id
+          FROM trip
+          WHERE id = ?
+          FOR UPDATE
+        `,
+        [tripId],
+      );
+
+      if (trips.length === 0) {
+        await connection.rollback();
+        return false;
+      }
+
+      // Mettre à jour uniquement une invitation en attente.
+      const [result] = await connection.query<Result>(
+        `
+          UPDATE invitation
           SET
             status = ?,
             updated_at = CURRENT_TIMESTAMP
-
           WHERE id = ?
+            AND trip_id = ?
+            AND status = 'pending'
         `,
-      [status, id],
-    );
+        [status, id, tripId],
+      );
 
-    return result.affectedRows === 1;
+      if (result.affectedRows !== 1) {
+        await connection.rollback();
+        return false;
+      }
+
+      await connection.commit();
+
+      return true;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   /* =========================================================
@@ -399,46 +453,126 @@ class InvitationRepository {
   }
 
   /* =========================================================
-     SUPPRIMER UN PARTICIPANT / INVITATION ACCEPTÉE
+     SUPPRIMER UN PARTICIPANT ET SES VOTES
+     TRANSACTION MYSQL
   ========================================================= */
 
   async deleteInvitation(tripId: number, userId: number): Promise<boolean> {
-    /* =====================================================
-       SUPPRESSION DES VOTES DU PARTICIPANT
-       SUR CE VOYAGE
-    ====================================================== */
+    const connection = await databaseClient.getConnection();
 
-    await databaseClient.query(
-      `
-        DELETE v
+    try {
+      await connection.beginTransaction();
 
-        FROM vote v
+      /* =====================================================
+         VERROUILLER LE VOYAGE
+         Synchronisation avec les votes et leur finalisation
+      ====================================================== */
 
-        JOIN step s
-          ON v.step_id = s.id
+      const [trips] = await connection.query<Rows>(
+        `
+          SELECT id
+          FROM trip
+          WHERE id = ?
+          FOR UPDATE
+        `,
+        [tripId],
+      );
 
-        WHERE v.user_id = ?
-          AND s.trip_id = ?
-      `,
-      [userId, tripId],
-    );
+      if (trips.length === 0) {
+        await connection.rollback();
+        return false;
+      }
 
-    /* =====================================================
-       SUPPRESSION DE L'INVITATION ACCEPTÉE
-    ====================================================== */
+      /* =====================================================
+   PROTECTION DES VOTES CLÔTURÉS
+   Ne pas retirer un participant avant finalisation
+===================================================== */
 
-    const [result] = await databaseClient.query<Result>(
-      `
+      /* =====================================================
+   FINALISER LES VOTES CLÔTURÉS AVANT LE RETRAIT
+   Le voyage est déjà verrouillé avec FOR UPDATE.
+===================================================== */
+
+      const dateParts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/Paris",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).formatToParts(new Date());
+
+      const getDatePart = (type: string) =>
+        dateParts.find((part) => part.type === type)?.value ?? "";
+
+      const todayInParis = `${getDatePart("year")}-${getDatePart("month")}-${getDatePart("day")}`;
+
+      // Rechercher les destinations dont les votes sont clôturés.
+      const [stepsToFinalize] = await connection.query<Rows>(
+        `
+    SELECT s.id
+    FROM step s
+    JOIN trip t ON t.id = s.trip_id
+    WHERE s.trip_id = ?
+      AND s.is_initial = 0
+      AND s.vote_status = 'pending'
+      AND DATE_FORMAT(t.start_at, '%Y-%m-%d') <= ?
+    ORDER BY s.id
+  `,
+        [tripId, todayInParis],
+      );
+
+      // Finaliser chaque destination dans la transaction existante.
+      for (const step of stepsToFinalize) {
+        const finalized = await finalizeStepWithinTransaction(
+          connection,
+          Number(step.id),
+          tripId,
+        );
+
+        if (!finalized) {
+          throw new Error(`Impossible de finaliser la destination ${step.id}`);
+        }
+      }
+
+      // Supprimer l'invitation acceptée
+      const [result] = await connection.query<Result>(
+        `
           DELETE FROM invitation
-
           WHERE trip_id = ?
             AND user_id = ?
             AND status = 'accepted'
         `,
-      [tripId, userId],
-    );
+        [tripId, userId],
+      );
 
-    return result.affectedRows === 1;
+      if (result.affectedRows === 0) {
+        await connection.rollback();
+        return false;
+      }
+
+      // Supprimer les votes du participant
+      // uniquement pour ce voyage
+
+      await connection.query(
+        `
+    DELETE v
+    FROM vote v
+    JOIN step s ON s.id = v.step_id
+    WHERE v.user_id = ?
+      AND s.trip_id = ?
+      AND s.vote_finalized_at IS NULL
+  `,
+        [userId, tripId],
+      );
+
+      await connection.commit();
+
+      return true;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   /* =========================================================

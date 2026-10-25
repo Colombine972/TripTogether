@@ -63,6 +63,30 @@ function formatStepPeriod(startAt?: string | null, endAt?: string | null) {
 }
 
 /* =========================================================
+   VÉRIFIER SI LES VOTES SONT OUVERTS
+   Fuseau horaire : Europe/Paris
+========================================================= */
+
+function isVotingOpen(tripStartAt?: string): boolean {
+  if (!tripStartAt) return false;
+
+  const dateMatch = tripStartAt.match(/^(\d{4}-\d{2}-\d{2})/);
+
+  if (!dateMatch) return false;
+
+  const departureDate = dateMatch[1];
+
+  const todayInParis = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Paris",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+
+  return todayInParis < departureDate;
+}
+
+/* =========================================================
    COMPOSANT
 ========================================================= */
 
@@ -72,7 +96,8 @@ function StepCard({
   tripId,
   memberCount,
   onVoteSuccess,
-}: StepCardProps) {
+  tripStartAt,
+}: StepCardProps & { tripStartAt?: string }) {
   /* =======================================================
      STATES
   ======================================================= */
@@ -104,6 +129,12 @@ function StepCard({
   const stepImage = getPlaceImageUrl(step.place_id);
 
   const status = step.status ?? (step.is_initial ? "validated" : "pending");
+  const voteIsOpen = status === "pending" && isVotingOpen(tripStartAt);
+  const voteIsFinalized =
+    !step.is_initial &&
+    (status === "validated" ||
+      status === "rejected" ||
+      status === "no_decision");
 
   const stepPeriod = formatStepPeriod(step.start_at, step.end_at);
 
@@ -194,7 +225,7 @@ function StepCard({
   ======================================================= */
 
   const handleVote = async (voteValue: boolean) => {
-    if (!token || alreadyVoted) {
+    if (!token || alreadyVoted || !voteIsOpen) {
       return;
     }
 
@@ -360,6 +391,15 @@ function StepCard({
       );
     }
 
+    if (status === "no_decision") {
+      return (
+        <span className="step-status-badge step-status-pending">
+          <Clock3 size={15} />
+          Aucune décision
+        </span>
+      );
+    }
+
     return (
       <span className="step-status-badge step-status-pending">
         <Clock3 size={15} />
@@ -466,29 +506,37 @@ function StepCard({
               <div className="step-vote-summary-header">
                 <div>
                   <span className="step-vote-summary-label">
-                    Progression du vote
+                    {voteIsFinalized
+                      ? "Vote clôturé"
+                      : voteIsOpen
+                        ? "Progression du vote"
+                        : "Vote clôturé — résultat en attente"}
                   </span>
 
                   <strong>
-                    {totalVotes}
-                    {" / "}
-                    {safeMemberCount} votes
+                    {voteIsOpen
+                      ? `${totalVotes} / ${safeMemberCount} votes`
+                      : `${totalVotes} vote${totalVotes > 1 ? "s" : ""} exprimé${totalVotes > 1 ? "s" : ""}`}
                   </strong>
                 </div>
 
-                <span className="step-vote-percentage">
-                  {Math.round(voteProgress)}%
-                </span>
+                {voteIsOpen && (
+                  <span className="step-vote-percentage">
+                    {Math.round(voteProgress)}%
+                  </span>
+                )}
               </div>
 
-              <div className="step-vote-progress-bar">
-                <div
-                  className="step-vote-progress-value"
-                  style={{
-                    width: `${voteProgress}%`,
-                  }}
-                />
-              </div>
+              {voteIsOpen && (
+                <div className="step-vote-progress-bar">
+                  <div
+                    className="step-vote-progress-value"
+                    style={{
+                      width: `${voteProgress}%`,
+                    }}
+                  />
+                </div>
+              )}
 
               <div className="step-vote-results">
                 <span className="step-vote-result step-vote-result-yes">
@@ -535,8 +583,7 @@ function StepCard({
                 >
                   <span>
                     Voir les votes ({allVotes.length}
-                    {" / "}
-                    {safeMemberCount})
+                    {voteIsOpen ? ` / ${safeMemberCount}` : ""})
                   </span>
 
                   <ChevronDown
@@ -579,7 +626,15 @@ function StepCard({
             ) : (
               <div className="step-no-votes">
                 <Clock3 size={17} />
-                En attente des premiers votes
+                {loading
+                  ? "Chargement des votes..."
+                  : error
+                    ? "Liste des votes indisponible"
+                    : voteIsFinalized
+                      ? "Aucun vote exprimé"
+                      : voteIsOpen
+                        ? "En attente des premiers votes"
+                        : "Aucun vote à afficher"}
               </div>
             )}
 
@@ -590,67 +645,81 @@ function StepCard({
             {error && <p className="step-vote-error">{error}</p>}
 
             {/* ===============================================
-                VOTE UTILISATEUR
-            =============================================== */}
+    VOTE UTILISATEUR
+=============================================== */}
 
             {status === "pending" &&
-              (loading ? (
-                <div className="step-vote-loading">Chargement des votes...</div>
-              ) : !hasVoted ? (
-                <div className="step-vote-form">
-                  <p className="step-vote-question">
-                    Souhaitez-vous ajouter cette étape au voyage ?
-                  </p>
-
-                  <div className="step-vote-buttons">
-                    <button
-                      type="button"
-                      className="step-vote-button step-vote-button-yes"
-                      onClick={() => void handleVote(true)}
-                      disabled={alreadyVoted}
-                    >
-                      {thumbsUpLogo}
-
-                      {alreadyVoted ? "Envoi..." : "Oui"}
-                    </button>
-
-                    <button
-                      type="button"
-                      className="step-vote-button step-vote-button-no"
-                      onClick={() => void handleVote(false)}
-                      disabled={alreadyVoted}
-                    >
-                      {thumbsDownLogo}
-
-                      {alreadyVoted ? "Envoi..." : "Non"}
-                    </button>
+              (voteIsOpen ? (
+                loading ? (
+                  <div className="step-vote-loading">
+                    Chargement des votes...
                   </div>
+                ) : (
+                  <div className="step-vote-form">
+                    {hasVoted && (
+                      <div
+                        className={`step-my-vote ${
+                          userVote?.vote ? "is-yes" : "is-no"
+                        }`}
+                      >
+                        <span>Votre vote actuel</span>
+                        <strong>{userVote?.vote ? "👍 Oui" : "👎 Non"}</strong>
+                      </div>
+                    )}
 
-                  <div className="step-comment-field">
-                    <textarea
-                      value={comment}
-                      onChange={(event) => setComment(event.target.value)}
-                      placeholder="Ajouter un commentaire (optionnel)"
-                      maxLength={500}
-                      disabled={alreadyVoted}
-                      rows={2}
-                    />
+                    <p className="step-vote-question">
+                      {hasVoted
+                        ? "Vous pouvez modifier votre vote :"
+                        : "Souhaitez-vous ajouter cette étape au voyage ?"}
+                    </p>
 
+                    <div className="step-vote-buttons">
+                      <button
+                        type="button"
+                        className="step-vote-button step-vote-button-yes"
+                        onClick={() => void handleVote(true)}
+                        disabled={alreadyVoted || userVote?.vote === true}
+                        aria-pressed={userVote?.vote === true}
+                      >
+                        {thumbsUpLogo}
+                        {alreadyVoted ? "Envoi..." : "Oui"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="step-vote-button step-vote-button-no"
+                        onClick={() => void handleVote(false)}
+                        disabled={alreadyVoted || userVote?.vote === false}
+                        aria-pressed={userVote?.vote === false}
+                      >
+                        {thumbsDownLogo}
+                        {alreadyVoted ? "Envoi..." : "Non"}
+                      </button>
+                    </div>
+
+                    <div className="step-comment-field">
+                      <textarea
+                        value={comment}
+                        onChange={(event) => setComment(event.target.value)}
+                        placeholder="Ajouter un commentaire (optionnel)"
+                        maxLength={500}
+                        disabled={alreadyVoted}
+                        rows={2}
+                      />
+                      <span>{comment.length}/500</span>
+                    </div>
+                  </div>
+                )
+              ) : (
+                <div className="step-final-status">
+                  <Clock3 size={20} />
+                  <div>
+                    <strong>Votes clôturés</strong>
                     <span>
-                      {comment.length}
-                      /500
+                      Les votes sont fermés depuis le début du jour du départ.
+                      Le résultat définitif sera affiché après finalisation.
                     </span>
                   </div>
-                </div>
-              ) : (
-                <div
-                  className={`step-my-vote ${
-                    userVote?.vote ? "is-yes" : "is-no"
-                  }`}
-                >
-                  <span>Votre vote</span>
-
-                  <strong>{userVote?.vote ? "👍 Oui" : "👎 Non"}</strong>
                 </div>
               ))}
 
@@ -678,6 +747,20 @@ function StepCard({
                   <strong>Étape rejetée</strong>
 
                   <span>Cette proposition n'a pas obtenu la majorité.</span>
+                </div>
+              </div>
+            )}
+
+            {status === "no_decision" && (
+              <div className="step-final-status step-final-status-no-decision">
+                <Clock3 size={20} />
+
+                <div>
+                  <strong>Aucune décision</strong>
+                  <span>
+                    Aucun participant n'a voté avant la clôture. Cette
+                    destination n'a donc pas été validée.
+                  </span>
                 </div>
               </div>
             )}

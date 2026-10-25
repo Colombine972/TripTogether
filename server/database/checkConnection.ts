@@ -1,17 +1,25 @@
 import client from "./client";
+import type { Rows } from "./client";
 
 client
   .getConnection()
-  .then((connection) => {
-    console.info(`Using database ${process.env.DB_NAME}`);
+  .then(async (connection) => {
+    try {
+      const [rows] = await connection.query<Rows>(
+        `
+          SELECT
+            DATABASE() AS database_name,
+            @@hostname AS mysql_server,
+            @@port AS mysql_port,
+            @@version AS mysql_version
+        `,
+      );
 
-    connection.release();
+      console.info("Connexion MySQL :", rows[0]);
+    } finally {
+      connection.release();
+    }
   })
   .catch((error: Error) => {
-    console.warn(
-      "Warning:",
-      "Failed to establish a database connection.",
-      "Please check your database credentials in the .env file if you need a database access.",
-    );
-    console.warn(error.message);
+    console.warn("Connexion MySQL impossible :", error.message);
   });

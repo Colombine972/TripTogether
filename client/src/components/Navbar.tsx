@@ -2,13 +2,14 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { useAuth } from "../contexts/AuthContext";
 import NotificationBell from "../components/NotificationBell";
+import { useAuth } from "../contexts/AuthContext";
 import "../pages/styles/Navbar.css";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const isStartPage = location.pathname === "/start";
   const { auth, logout } = useAuth();
 
   const profileRef = useRef<HTMLDivElement>(null);
@@ -102,7 +103,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar ${isStartPage ? "navbar-start" : ""}`}>
       <div className="navbar-container">
         {/* =========================
             GAUCHE
@@ -145,87 +146,89 @@ export default function Navbar() {
             DROITE
         ========================== */}
 
-        <div className="navbar-right">
-          {auth && (
-            <>
-              <button
-                type="button"
-                className="navbar-cta"
-                onClick={navigateToCreateTrip}
-              >
-                Crée ton voyage !
-              </button>
-
-              <NotificationBell />
-            </>
-          )}
-
-          {/* =========================
-              PROFIL
-          ========================== */}
-
-          <div ref={profileRef} className="navbar-profile">
-            {auth ? (
+        {!isStartPage && (
+          <div className="navbar-right">
+            {auth && (
               <>
                 <button
                   type="button"
-                  className={`navbar-profile-button ${
-                    openNavBar ? "is-active" : ""
-                  }`}
-                  aria-label="Ouvrir le menu profil"
-                  aria-expanded={openNavBar}
-                  onClick={toggleMenu}
+                  className="navbar-cta"
+                  onClick={navigateToCreateTrip}
                 >
-                  <img
-                    src={auth.user.avatar_url || "/images/utilisateur.png"}
-                    className="user-icon"
-                    alt="Avatar utilisateur"
-                  />
+                  Crée ton voyage !
                 </button>
 
-                <div
-                  className={`navbar-menu ${openNavBar ? "is-open" : ""}`}
-                  role="menu"
-                >
-                  <p className="navbar-greeting">
-                    {getGreeting()} {auth.user.firstname}
-                  </p>
-
-                  <div className="navbar-menu-links">
-                    <Link
-                      className="navbar-menu-link"
-                      to="/account"
-                      onClick={closeMenu}
-                    >
-                      Mon compte
-                    </Link>
-
-                    <button
-                      type="button"
-                      className="navbar-logout-btn"
-                      onClick={handleLogout}
-                    >
-                      Se déconnecter
-                    </button>
-                  </div>
-                </div>
+                <NotificationBell />
               </>
-            ) : (
-              <div className="navbar-auth-links">
-                <Link to="/login" className="navbar-auth-link">
-                  Se connecter
-                </Link>
-
-                <Link
-                  to="/register"
-                  className="navbar-auth-link navbar-auth-register"
-                >
-                  Créer un compte
-                </Link>
-              </div>
             )}
+
+            {/* =========================
+              PROFIL
+          ========================== */}
+
+            <div ref={profileRef} className="navbar-profile">
+              {auth ? (
+                <>
+                  <button
+                    type="button"
+                    className={`navbar-profile-button ${
+                      openNavBar ? "is-active" : ""
+                    }`}
+                    aria-label="Ouvrir le menu profil"
+                    aria-expanded={openNavBar}
+                    onClick={toggleMenu}
+                  >
+                    <img
+                      src={auth.user.avatar_url || "/images/utilisateur.png"}
+                      className="user-icon"
+                      alt="Avatar utilisateur"
+                    />
+                  </button>
+
+                  <div
+                    className={`navbar-menu ${openNavBar ? "is-open" : ""}`}
+                    role="menu"
+                  >
+                    <p className="navbar-greeting">
+                      {getGreeting()} {auth.user.firstname}
+                    </p>
+
+                    <div className="navbar-menu-links">
+                      <Link
+                        className="navbar-menu-link"
+                        to="/account"
+                        onClick={closeMenu}
+                      >
+                        Mon compte
+                      </Link>
+
+                      <button
+                        type="button"
+                        className="navbar-logout-btn"
+                        onClick={handleLogout}
+                      >
+                        Se déconnecter
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="navbar-auth-links">
+                  <Link to="/login" className="navbar-auth-link">
+                    Se connecter
+                  </Link>
+
+                  <Link
+                    to="/register"
+                    className="navbar-auth-link navbar-auth-register"
+                  >
+                    Créer un compte
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </nav>
   );

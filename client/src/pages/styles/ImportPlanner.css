@@ -1,0 +1,288 @@
+/* =====================================================
+   IMPORT PLANNER — PAGE PRINCIPALE
+===================================================== */
+
+.planner-import-page {
+  min-height: 75vh;
+  background: #faf9f5;
+  color: #18382e;
+  padding: 40px 20px 70px;
+}
+
+.planner-import-container {
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+/* =====================================================
+   NAVIGATION — RETOUR
+===================================================== */
+
+.planner-back {
+  color: #4f735f;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* =====================================================
+   EN-TÊTE DE LA PAGE
+===================================================== */
+
+.planner-import-heading {
+  text-align: center;
+  margin: 35px auto;
+}
+
+.planner-import-heading svg {
+  color: #4f735f;
+}
+
+.planner-import-heading h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin: 15px 0;
+}
+
+.planner-import-heading p {
+  max-width: 620px;
+  margin: 0 auto;
+  line-height: 1.6;
+  color: #59665f;
+}
+
+/* =====================================================
+   ZONE D'IMPORT DU PDF
+===================================================== */
+
+.planner-upload {
+  text-align: center;
+  padding: 35px 20px;
+  background: #eaf2ec;
+  border-radius: 20px;
+}
+
+.planner-upload-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 17px 28px;
+  margin-bottom: 18px;
+  background: #4f735f;
+  color: white;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.planner-upload-label:hover {
+  background: #385744;
+}
+
+.planner-upload p {
+  color: #59665f;
+  line-height: 1.5;
+}
+
+/* =====================================================
+   SÉLECTEUR DE FICHIER NATIF MASQUÉ
+===================================================== */
+
+.planner-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.planner-upload:focus-within .planner-upload-label {
+  outline: 3px solid #a8cbb5;
+  outline-offset: 3px;
+}
+
+/* =====================================================
+   MESSAGES — ERREUR ET SUCCÈS
+===================================================== */
+
+.planner-error {
+  color: #a12828;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.planner-success {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #e1f0e4;
+  padding: 16px;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+  margin-bottom: 24px;
+}
+
+/* =====================================================
+   RÉCAPITULATIF DU CARNET
+===================================================== */
+
+.planner-results {
+  margin-top: 35px;
+}
+
+.planner-results > p {
+  color: #59665f;
+  line-height: 1.5;
+}
+
+.planner-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 28px;
+}
+
+/* =====================================================
+   CARTES — INFORMATIONS, BUDGET, ITINÉRAIRE
+===================================================== */
+
+.planner-section {
+  background: #ffffff;
+  border: 1px solid #e1e8e1;
+  border-radius: 18px;
+  padding: 28px;
+}
+
+.planner-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #4f735f;
+}
+
+.planner-section-heading h3 {
+  margin: 0 0 5px;
+  font-size: 1.3rem;
+  color: #18382e;
+}
+
+.planner-section-heading p {
+  margin: 0;
+  color: #69776e;
+  font-size: 0.9rem;
+}
+
+/* =====================================================
+   FORMULAIRES — GRILLE ET CHAMPS
+===================================================== */
+
+.planner-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 25px;
+}
+
+.planner-section .planner-fields {
+  margin-top: 24px;
+}
+
+.planner-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+  min-width: 0;
+}
+
+.planner-fields input,
+.planner-fields textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #cad7ce;
+  border-radius: 9px;
+  font: inherit;
+  background: #ffffff;
+  color: #18382e;
+}
+
+.planner-full-width {
+  grid-column: 1 / -1;
+}
+
+/* =====================================================
+   MESSAGE — PROCHAINE ÉTAPE
+===================================================== */
+
+.planner-next-info {
+  margin-top: 30px;
+  text-align: center;
+}
+
+/* =====================================================
+   BOUTON — CONTINUER VERS LA CRÉATION
+===================================================== */
+
+.planner-create-button {
+  display: block;
+  width: 100%;
+  margin-top: 30px;
+  padding: 18px 24px;
+  border: none;
+  border-radius: 12px;
+  background: #4f735f;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.planner-create-button:hover {
+  background: #385744;
+}
+
+.planner-create-button:focus-visible {
+  outline: 3px solid #a8cbb5;
+  outline-offset: 3px;
+}
+
+/* =====================================================
+   RESPONSIVE — MOBILE (600px ET MOINS)
+===================================================== */
+
+@media (max-width: 600px) {
+  /* Page principale */
+
+  .planner-import-page {
+    padding: 25px 16px 50px;
+  }
+
+  /* Zone d'import */
+
+  .planner-upload-label {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Cartes du récapitulatif */
+
+  .planner-section {
+    padding: 20px 16px;
+  }
+
+  .planner-section-heading h3 {
+    font-size: 1.1rem;
+  }
+
+  /* Champs du formulaire */
+
+  .planner-fields {
+    grid-template-columns: 1fr;
+  }
+}

@@ -600,7 +600,13 @@ function Invitations() {
 
   return (
     <>
-      {!loading && trip && <TripInfos trip={trip} onTripUpdated={setTrip} />}
+      {!loading && trip && (
+        <TripInfos
+          trip={trip}
+          onTripUpdated={setTrip}
+          participantCountOverride={attendees.length}
+        />
+      )}
 
       <div className="page-membre">
         <section id="member-list">
@@ -668,61 +674,51 @@ function Invitations() {
           </div>
         )}
         {pendingInvitationToDelete && (
-  <div className="participant-delete-backdrop">
-    <dialog
-      open
-      className="participant-delete-dialog"
-      aria-labelledby="delete-pending-invitation-title"
-    >
-      <div
-        className="participant-delete-icon"
-        aria-hidden="true"
-      >
-        !
-      </div>
+          <div className="participant-delete-backdrop">
+            <dialog
+              open
+              className="participant-delete-dialog"
+              aria-labelledby="delete-pending-invitation-title"
+            >
+              <div className="participant-delete-icon" aria-hidden="true">
+                !
+              </div>
 
-      <h4 id="delete-pending-invitation-title">
-        Annuler cette invitation ?
-      </h4>
+              <h4 id="delete-pending-invitation-title">
+                Annuler cette invitation ?
+              </h4>
 
-      <p>
-        Voulez-vous vraiment annuler l'invitation de{" "}
-        <strong>
-          {pendingInvitationToDelete.name}
-        </strong>
-        ?
-      </p>
+              <p>
+                Voulez-vous vraiment annuler l'invitation de{" "}
+                <strong>{pendingInvitationToDelete.name}</strong>?
+              </p>
 
-      <div className="participant-delete-actions">
-        <button
-          type="button"
-          className="participant-delete-cancel"
-          onClick={() =>
-            setPendingInvitationToDelete(null)
-          }
-          disabled={isDeletingPending}
-        >
-          Annuler
-        </button>
+              <div className="participant-delete-actions">
+                <button
+                  type="button"
+                  className="participant-delete-cancel"
+                  onClick={() => setPendingInvitationToDelete(null)}
+                  disabled={isDeletingPending}
+                >
+                  Annuler
+                </button>
 
-        <button
-          type="button"
-          className="participant-delete-confirm"
-          onClick={() =>
-            removePendingInvitation(
-              pendingInvitationToDelete.id,
-            )
-          }
-          disabled={isDeletingPending}
-        >
-          {isDeletingPending
-            ? "Annulation..."
-            : "Confirmer l'annulation"}
-        </button>
-      </div>
-    </dialog>
-  </div>
-)}
+                <button
+                  type="button"
+                  className="participant-delete-confirm"
+                  onClick={() =>
+                    removePendingInvitation(pendingInvitationToDelete.id)
+                  }
+                  disabled={isDeletingPending}
+                >
+                  {isDeletingPending
+                    ? "Annulation..."
+                    : "Confirmer l'annulation"}
+                </button>
+              </div>
+            </dialog>
+          </div>
+        )}
       </div>
     </>
   );

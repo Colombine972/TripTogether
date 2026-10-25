@@ -62,22 +62,32 @@ function TripInvitation({
   ======================================================= */
 
   const formatDate = (dateString: string) => {
-    if (!dateString) {
-      return "";
+    if (!dateString) return "";
+
+    // Date simple au format AAAA-MM-JJ
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      const [year, month, day] = dateString.split("-").map(Number);
+
+      return new Intl.DateTimeFormat("fr-FR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date(year, month - 1, day));
     }
 
-    const datePart = dateString.slice(0, 10);
-    const [year, month, day] = datePart.split("-").map(Number);
+    // Date complète renvoyée par le backend en UTC
+    const date = new Date(dateString);
 
-    if (!year || !month || !day) {
+    if (Number.isNaN(date.getTime())) {
       return dateString;
     }
 
     return new Intl.DateTimeFormat("fr-FR", {
-      day: "2-digit",
+      day: "numeric",
       month: "long",
       year: "numeric",
-    }).format(new Date(year, month - 1, day));
+      timeZone: "Europe/Paris",
+    }).format(date);
   };
 
   /* =======================================================

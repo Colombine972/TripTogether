@@ -8,6 +8,7 @@ import Confidentialite from "./pages/Confidentialite";
 import CreateTrip from "./pages/CreateTrip";
 import ForgotPassword from "./pages/ForgotPassword";
 import Home from "./pages/Home";
+import ImportPlanner from "./pages/ImportPlanner";
 import Invitation from "./pages/Invitation";
 import Invitations from "./pages/Invitations";
 import Login from "./pages/Login";
@@ -15,6 +16,7 @@ import MentionsLegales from "./pages/MentionsLegales";
 import MyTrips from "./pages/MyTrips";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
+import Start from "./pages/Start";
 import Steps from "./pages/Steps";
 import Trip from "./pages/Trip";
 import TripBudgetPage from "./pages/TripBudgetPage";
@@ -27,6 +29,14 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
+      },
+      {
+        path: "start",
+        element: <Start />,
+      },
+      {
+        path: "start/import",
+        element: <ImportPlanner />,
       },
       {
         path: "account",

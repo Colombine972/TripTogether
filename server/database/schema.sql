@@ -25,6 +25,7 @@ CREATE TABLE trip (
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
+
 CREATE TABLE step (
   id INT PRIMARY KEY AUTO_INCREMENT,
   city VARCHAR(255) NOT NULL,
@@ -35,13 +36,28 @@ CREATE TABLE step (
   user_id INT NOT NULL,
   is_initial BOOLEAN DEFAULT false,
   place_id VARCHAR(255),
+
+  -- Finalisation des votes
+  vote_status ENUM(
+    'pending',
+    'validated',
+    'rejected',
+    'no_decision'
+  ) NULL DEFAULT NULL,
+
+  vote_finalized_at DATETIME NULL DEFAULT NULL,
+  final_yes_votes INT UNSIGNED NULL DEFAULT NULL,
+  final_no_votes INT UNSIGNED NULL DEFAULT NULL,
+
   CONSTRAINT fk_step_trip
     FOREIGN KEY (trip_id) REFERENCES trip(id)
     ON DELETE CASCADE,
+
   CONSTRAINT fk_step_user
     FOREIGN KEY (user_id) REFERENCES user(id)
     ON DELETE CASCADE
 );
+
 
 CREATE TABLE category (
   id INT PRIMARY KEY AUTO_INCREMENT,
