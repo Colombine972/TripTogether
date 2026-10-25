@@ -3,43 +3,101 @@ import type { Result, Rows } from "../../../database/client";
 import type { Trip } from "../../types/tripType";
 
 class TripRepository {
-  async create(trip: Omit<Trip, "id">) {
-    const [result] = await databaseClient.query<Result>(
-      `INSERT INTO trip 
-      (title, description, city, country, country_code, local_currency, base_currency, start_at, end_at, user_id, place_id) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        trip.title,
-        trip.description,
-        trip.city,
-        trip.country,
-        trip.country_code ?? null,
-        trip.local_currency ?? null,
-        trip.base_currency ?? "EUR",
-        trip.start_at,
-        trip.end_at,
-        trip.user_id,
-        trip.place_id ?? null,
-      ],
-    );
+  async create(trip: Omit<Trip, "id">, proposedSteps: string[] = []) {
+    const connection = await databaseClient.getConnection();
 
-    const newTripId = result.insertId;
+    try {
+      await connection.beginTransaction();
 
-    await databaseClient.query<Result>(
-      `INSERT INTO step 
-      (city, country, trip_id, user_id, place_id, is_initial) 
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        trip.city,
-        trip.country,
-        newTripId,
-        trip.user_id,
-        trip.place_id ?? null,
-        true,
-      ],
-    );
+      // Créer le voyage.
+      const [result] = await connection.query<Result>(
+        `
+        INSERT INTO trip
+          (
+            title,
+            description,
+            city,
+            country,
+            country_code,
+            local_currency,
+            base_currency,
+            start_at,
+            end_at,
+            user_id,
+            place_id
+          )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+        [
+          trip.title,
+          trip.description,
+          trip.city,
+          trip.country,
+          trip.country_code ?? null,
+          trip.local_currency ?? null,
+          trip.base_currency ?? "EUR",
+          trip.start_at,
+          trip.end_at,
+          trip.user_id,
+          trip.place_id ?? null,
+        ],
+      );
 
-    return newTripId;
+      const newTripId = result.insertId;
+
+      // La destination principale reste automatiquement validée
+      // grâce à is_initial = true.
+      await connection.query<Result>(
+        `
+        INSERT INTO step
+          (
+            city,
+            country,
+            trip_id,
+            user_id,
+            place_id,
+            is_initial
+          )
+        VALUES (?, ?, ?, ?, ?, true)
+      `,
+        [
+          trip.city,
+          trip.country,
+          newTripId,
+          trip.user_id,
+          trip.place_id ?? null,
+        ],
+      );
+
+      // Créer les destinations proposées dans le carnet.
+      for (const destination of proposedSteps) {
+        await connection.query<Result>(
+          `
+          INSERT INTO step
+            (
+              city,
+              country,
+              trip_id,
+              user_id,
+              place_id,
+              is_initial,
+              vote_status
+            )
+          VALUES (?, ?, ?, ?, NULL, false, 'pending')
+        `,
+          [destination, trip.country, newTripId, trip.user_id],
+        );
+      }
+
+      await connection.commit();
+
+      return newTripId;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   async readTripInfo(id: number): Promise<Trip | null> {

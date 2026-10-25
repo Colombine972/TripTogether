@@ -228,6 +228,9 @@ export default function CreateTrip() {
       local_currency: localCurrency || null,
       base_currency: "EUR",
       place_id: placeId,
+      proposed_steps: (planner?.etapes ?? [])
+        .map((destination) => destination.trim())
+        .filter((destination) => destination !== ""),
     };
 
     try {

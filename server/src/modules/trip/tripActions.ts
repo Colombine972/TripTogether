@@ -509,6 +509,32 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    const rawProposedSteps: unknown = req.body.proposed_steps ?? [];
+
+    if (
+      !Array.isArray(rawProposedSteps) ||
+      rawProposedSteps.length > 3 ||
+      !rawProposedSteps.every(
+        (destination: unknown) =>
+          typeof destination === "string" &&
+          destination.trim().length > 0 &&
+          destination.trim().length <= 255,
+      )
+    ) {
+      res.status(400).json({
+        error:
+          "Les destinations proposées doivent contenir au maximum 3 noms de 255 caractères.",
+      });
+
+      return;
+    }
+
+    const proposedSteps = [
+      ...new Set(
+        (rawProposedSteps as string[]).map((destination) => destination.trim()),
+      ),
+    ];
+
     const newTrip: Trip = {
       title,
 
@@ -533,7 +559,7 @@ const add: RequestHandler = async (req, res, next) => {
       place_id: place_id || null,
     };
 
-    const insertId = await tripRepository.create(newTrip);
+    const insertId = await tripRepository.create(newTrip, proposedSteps);
 
     res.status(201).json({
       insertId,
