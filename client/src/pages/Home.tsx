@@ -504,6 +504,49 @@ function HomePage() {
       </section>
 
       {/* =====================================================
+    CARNET DE VOYAGE ETSY
+====================================================== */}
+
+      <section className="home-carnet">
+        <div className="home-carnet-container">
+          <div className="home-carnet-image">
+            <img
+              src="/etsy/carnet-1.png"
+              alt="Carnet de voyage interactif TripTogether"
+              loading="lazy"
+            />
+          </div>
+
+          <div className="home-carnet-content">
+            <span className="home-carnet-label">
+              LE CARNET DE VOYAGE TRIPTOGETHER
+            </span>
+
+            <h2>
+              Préparez votre voyage
+              <span> autrement.</span>
+            </h2>
+
+            <p>
+              Découvrez notre carnet de voyage numérique interactif de 20 pages.
+              Préparez votre itinéraire, notez vos envies, organisez vos
+              activités et centralisez vos informations.
+            </p>
+
+            <p>
+              Et pour aller plus loin, importez votre carnet dans TripTogether
+              afin d'organiser votre voyage avec vos proches.
+            </p>
+
+            <Link to="/carnet-de-voyage" className="home-carnet-btn">
+              Découvrir notre carnet de voyage
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================
           FAQ
       ====================================================== */}
 

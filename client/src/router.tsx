@@ -4,6 +4,7 @@ import App from "./App";
 import Account from "./components/Account";
 import TripAccessGuard from "./components/TripAccessGuard";
 import CGU from "./pages/CGU";
+import CarnetDeVoyage from "./pages/CarnetDeVoyage";
 import Confidentialite from "./pages/Confidentialite";
 import CreateTrip from "./pages/CreateTrip";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -29,6 +30,10 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
+      },
+      {
+        path: "carnet-de-voyage",
+        element: <CarnetDeVoyage />,
       },
       {
         path: "start",

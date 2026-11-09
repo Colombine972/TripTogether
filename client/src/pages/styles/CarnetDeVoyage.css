@@ -1,0 +1,372 @@
+/* =====================================================
+   TRIPTOGETHER — PAGE COMMERCIALE CARNET DE VOYAGE
+   Styles de base, puis responsive du plus grand au plus petit.
+===================================================== */
+
+/* 1. STRUCTURE ET TYPOGRAPHIE */
+.carnet-page {
+  width: 100%;
+  overflow-x: hidden;
+  color: #172033;
+  background: #ffffff;
+}
+
+.carnet-page *,
+.carnet-page *::before,
+.carnet-page *::after {
+  box-sizing: border-box;
+}
+
+.carnet-container {
+  width: min(1200px, calc(100% - 3rem));
+  margin: 0 auto;
+}
+
+.carnet-eyebrow {
+  display: inline-block;
+  color: #277532;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.carnet-page h1 span,
+.carnet-page h2 span {
+  color: #277532;
+}
+
+.carnet-hero-text > p,
+.carnet-section-heading p,
+.carnet-app p,
+.carnet-final p {
+  color: #687069;
+  font-size: 1.1rem;
+  line-height: 1.75;
+}
+
+/* 2. HERO : PRÉSENTATION DU CARNET */
+.carnet-hero {
+  padding: 5rem 0;
+  background: linear-gradient(125deg, #ffffff, #f0f7ef);
+}
+
+.carnet-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  align-items: center;
+  gap: 3rem;
+}
+
+.carnet-hero h1 {
+  margin: 1.25rem 0;
+  font-size: clamp(2.6rem, 4.5vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+}
+
+.carnet-hero-image {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.carnet-hero-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 24px 65px rgba(30, 45, 34, 0.13);
+}
+
+/* 3. BOUTONS ET AVANTAGES */
+.carnet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.carnet-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  min-height: 50px;
+  padding: 0.85rem 1.4rem;
+  border-radius: 11px;
+  font-size: 0.95rem;
+  font-weight: 750;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.carnet-btn:hover {
+  transform: translateY(-2px);
+}
+
+.carnet-btn-primary {
+  color: #ffffff;
+  background: #277532;
+  box-shadow: 0 8px 22px rgba(39, 117, 50, 0.18);
+}
+
+.carnet-btn-outline {
+  color: #277532;
+  background: #ffffff;
+  border: 1.5px solid #277532;
+}
+
+.carnet-link-pending {
+  display: inline-flex;
+  align-items: center;
+  color: #687069;
+  font-size: 0.85rem;
+}
+
+.carnet-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.carnet-highlights span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #59665b;
+  font-size: 0.82rem;
+}
+
+.carnet-highlights svg {
+  color: #277532;
+}
+
+/* 4. GALERIE ETSY */
+.carnet-discovery,
+.carnet-benefits {
+  padding: 5rem 0;
+}
+
+.carnet-discovery {
+  background: #ffffff;
+}
+
+.carnet-section-heading {
+  max-width: 760px;
+  margin: 0 auto 3rem;
+  text-align: center;
+}
+
+.carnet-section-heading h2,
+.carnet-app h2,
+.carnet-final h2 {
+  margin: 0.9rem 0 1rem;
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+}
+
+.carnet-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 400px));
+  justify-content: center;
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.carnet-gallery-card {
+  align-self: start;
+  overflow: hidden;
+  border: 1px solid #e7eee6;
+  border-radius: 16px;
+  background: #fafbf9;
+  box-shadow: 0 12px 30px rgba(30, 45, 34, 0.055);
+}
+
+.carnet-gallery-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* 5. BÉNÉFICES DU CARNET */
+.carnet-benefits {
+  background: #f7faf7;
+}
+
+.carnet-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.carnet-benefit-card {
+  padding: 2rem;
+  border: 1px solid #e4ece5;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(30, 45, 34, 0.04);
+}
+
+.carnet-benefit-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  color: #277532;
+  background: #e9f5e8;
+  border-radius: 15px;
+}
+
+.carnet-benefit-card h3 {
+  margin: 1.3rem 0 0.7rem;
+  font-size: 1.2rem;
+}
+
+.carnet-benefit-card p {
+  margin: 0;
+  color: #687069;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* 6. CONNEXION AVEC TRIPTOGETHER */
+.carnet-app {
+  padding: 5rem 0;
+  background: #f5f5ed;
+}
+
+.carnet-app-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  align-items: center;
+  gap: 4rem;
+}
+
+.carnet-app-icon {
+  display: grid;
+  place-items: center;
+  width: 160px;
+  height: 160px;
+  color: #277532;
+  background: #ffffff;
+  border-radius: 30px;
+  box-shadow: 0 12px 35px rgba(30, 45, 34, 0.08);
+}
+
+.carnet-app .carnet-btn {
+  margin-top: 1.2rem;
+}
+
+/* 7. APPEL À L'ACTION FINAL */
+.carnet-final {
+  padding: 5rem 1.5rem;
+  text-align: center;
+  background: #ffffff;
+}
+
+.carnet-final .carnet-container {
+  max-width: 740px;
+}
+
+.carnet-final .carnet-btn {
+  margin-top: 1.5rem;
+}
+
+/* 8. RESPONSIVE — TABLETTES */
+@media (max-width: 900px) {
+  .carnet-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .carnet-hero-image {
+    max-width: 380px;
+  }
+
+  .carnet-benefits-grid,
+  .carnet-app-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .carnet-app-grid {
+    gap: 2rem;
+  }
+}
+
+/* 9. RESPONSIVE — MOBILES */
+@media (max-width: 600px) {
+  .carnet-container {
+    width: calc(100% - 2rem);
+  }
+
+  .carnet-hero,
+  .carnet-discovery,
+  .carnet-benefits,
+  .carnet-app,
+  .carnet-final {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .carnet-hero h1 {
+    font-size: 2.3rem;
+  }
+
+  .carnet-actions {
+    flex-direction: column;
+  }
+
+  .carnet-btn {
+    width: 100%;
+  }
+
+  .carnet-hero-image {
+    max-width: 320px;
+  }
+
+  .carnet-gallery {
+    grid-template-columns: minmax(0, 360px);
+    max-width: 360px;
+    gap: 1.25rem;
+  }
+
+  .carnet-benefit-card {
+    padding: 1.5rem;
+  }
+
+  .carnet-app-icon {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* 10. RESPONSIVE — PETITS SMARTPHONES */
+@media (max-width: 480px) {
+  .carnet-hero h1 {
+    font-size: clamp(1.9rem, 7vw, 2.3rem);
+    line-height: 1.15;
+  }
+
+  .carnet-hero-text > p,
+  .carnet-section-heading p,
+  .carnet-app p,
+  .carnet-final p {
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .carnet-hero {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .carnet-highlights {
+    gap: 0.7rem;
+  }
+}
